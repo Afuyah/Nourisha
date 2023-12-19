@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naurisha Groceries</title>
+    <!-- Add your CSS stylesheets or external links here -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Naurisha Groceries</h1>
+        <!-- Add navigation links or other header elements here -->
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <!-- Add footer content here -->
+        &copy; 2023 Naurisha Groceries
+    </footer>
+
+    <!-- Add your JavaScript files or external links here -->
+</body>
+</html>
