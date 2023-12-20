@@ -6,12 +6,37 @@
     <title>Naurisha Groceries</title>
     <!-- Add your CSS stylesheets or external links here -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <!-- Add your custom CSS for flashed messages here (optional) -->
+    <style>
+        .flash-messages {
+            margin-top: 20px;
+        }
+
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
     <header>
         <h1>Naurisha Groceries</h1>
         <!-- Add navigation links or other header elements here -->
     </header>
+
+    <!-- Flash messages section -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <div class="flash-message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
     <main>
         {% block content %}{% endblock %}

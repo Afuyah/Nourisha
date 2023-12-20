@@ -1,0 +1,30 @@
+<!-- templates/add_role.html -->
+
+{% extends 'layout.html' %}
+
+{% block content %}
+  <h2>Add Role</h2>
+  <form method="POST" action="{{ url_for('main.add_role') }}">
+    {{ form.hidden_tag() }}
+    {{ form.name.label }} {{ form.name() }}
+    {{ form.submit() }}
+  </form>
+
+  <h2>All Roles</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for role in roles %}
+        <tr>
+          <td>{{ role.id }}</td>
+          <td>{{ role.name }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

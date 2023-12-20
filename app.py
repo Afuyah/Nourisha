@@ -2,21 +2,15 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
+from flask_migrate import Migrate
+from app import create_app, db
 
-app = Flask(__name__)
-app.config.from_object('config.Config')
+# Create the Flask app within the application context
+app = create_app()
 
-# Initialize extensions
-db = SQLAlchemy(app)
-login_manager = LoginManager(app)
-csrf = CSRFProtect(app)
-
-from app import routes
+# Initialize the database
+with app.app_context():
+    db.create_all()
 
 if __name__ == '__main__':
-    app.debug = True
-    app.run(host='0.0.0.0', port=81)
-
-    # Create the database tables
-    with app.app_context():
-        db.create_all()
+    app.run(host='0.0.0.0', port=81, debug=True)

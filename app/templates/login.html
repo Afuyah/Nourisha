@@ -2,20 +2,19 @@
 
 {% block content %}
   <h2>Login</h2>
-  <form method="post" action="{{ url_for('login') }}">
+  <form method="post">
     {{ form.hidden_tag() }}
-
     <div class="form-group">
-      {{ form.email_or_phone.label(class="form-label") }}
-      {{ form.email_or_phone(class="form-control") }}
+      <label for="{{ form.phone.id }}" class="form-label">{{ form.phone.label.text }}</label>
+      {{ form.phone(class="form-control") }}
     </div>
-
     <div class="form-group">
-      {{ form.password.label(class="form-label") }}
+      <label for="{{ form.password.id }}" class="form-label">{{ form.password.label.text }}</label>
       {{ form.password(class="form-control") }}
     </div>
-
-    <button type="submit" class="btn btn-primary">Login</button>
+    {{ form.submit(class="btn btn-primary") }}
   </form>
-  <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+  <p>Don't have an account? <a href="{{ url_for('main.register') }}">Register here</a></p>
 {% endblock %}
+
+

@@ -1,50 +1,29 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
 
 {% block content %}
   <h2>Register</h2>
-  <form method="post" action="{{ url_for('register') }}">
+  <form method="post" action="{{ url_for('main.register') }}">
     {{ form.hidden_tag() }}
-
     <div class="form-group">
-      {{ form.username.label(class="form-label") }}
+      {{ form.name.label }}
+      {{ form.name(class="form-control") }}
+    </div>
+    <div class="form-group">
+      {{ form.username.label }}
       {{ form.username(class="form-control") }}
     </div>
-
     <div class="form-group">
-      {{ form.password.label(class="form-label") }}
-      {{ form.password(class="form-control") }}
-    </div>
-
-    <div class="form-group">
-      {{ form.confirm_password.label(class="form-label") }}
-      {{ form.confirm_password(class="form-control") }}
-    </div>
-
-    <div class="form-group">
-      {{ form.email.label(class="form-label") }}
+      {{ form.email.label }}
       {{ form.email(class="form-control") }}
     </div>
-
     <div class="form-group">
-      {{ form.role.label(class="form-label") }}
-      {{ form.role(class="form-control") }}
+      {{ form.phone.label }}
+      {{ form.phone(class="form-control") }}
     </div>
-
     <div class="form-group">
-      {{ form.first_name.label(class="form-label") }}
-      {{ form.first_name(class="form-control") }}
+      {{ form.password.label }}
+      {{ form.password(class="form-control") }}
     </div>
-
-    <div class="form-group">
-      {{ form.last_name.label(class="form-label") }}
-      {{ form.last_name(class="form-control") }}
-    </div>
-
-    <div class="form-group">
-      {{ form.phone_number.label(class="form-label") }}
-      {{ form.phone_number(class="form-control") }}
-    </div>
-
     <button type="submit" class="btn btn-primary">Register</button>
   </form>
 {% endblock %}

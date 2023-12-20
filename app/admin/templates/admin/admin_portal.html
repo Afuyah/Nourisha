@@ -1,0 +1,49 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <h1>Admin Portal</h1>
+
+  <h2>Users</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.phone }}</td>
+          <td><a href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Roles</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for role in roles %}
+        <tr>
+          <td>{{ role.id }}</td>
+          <td>{{ role.name }}</td>
+          <td><a href="{{ url_for('admin.edit_role', role_id=role.id) }}">Edit</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
