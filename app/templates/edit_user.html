@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h1 class="mb-4">Edit User</h1>
+
+    <form method="post" action="{{ url_for('admin.edit_user', user_id=user.id) }}">
+      {{ form.hidden_tag() }}
+      <div class="form-group">
+        <label for="username">Username</label>
+        {{ form.username(class="form-control", required=true) }}
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        {{ form.email(class="form-control", required=true) }}
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        {# Display phone as read-only field #}
+        <input type="text" class="form-control" value="{{ user.phone }}" readonly>
+      </div>
+
+      <div class="form-group">
+        <label for="name">Name</label>
+        {{ form.name(class="form-control", required=true) }}
+      </div>
+
+      <div class="form-group">
+        <label for="registration_date">Registration Date</label>
+        {# Display registration date as read-only field #}
+        <input type="text" class="form-control" value="{{ user.registration_date }}" readonly>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+  </div>
+{% endblock %}

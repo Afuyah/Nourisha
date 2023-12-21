@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Naurisha Groceries</title>
-    <!-- Add your CSS stylesheets or external links here -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
-    <!-- Add your custom CSS for flashed messages here (optional) -->
+ 
+ <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <!-- Add Bootstrap CSS link -->
+    
+
+    <!-- Add your custom CSS stylesheets or external links here -->
+   
+
     <style>
+   
         .flash-messages {
             margin-top: 20px;
         }
@@ -15,38 +22,65 @@
         .flash-message {
             padding: 10px;
             margin-bottom: 10px;
-            border: 1px solid #ccc;
-            background-color: #f0f0f0;
-            color: #333;
+            border: 1px solid #d6d8db;
+            background-color: #f8d7da;
+            color: #721c24;
+            border-radius: 0.25rem;
         }
     </style>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
 <body>
     <header>
-        <h1>Naurisha Groceries</h1>
-        <!-- Add navigation links or other header elements here -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">Naurisha Groceries</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        {% if current_user.is_authenticated %}
+                            <li class="nav-item"><a class="nav-link"
+                                    href="{{ url_for('main.add_role') }}">Add Roles</a></li>
+                            <li class="nav-item"><a class="nav-link"
+                                    href="{{ url_for('main.logout') }}">Logout</a></li>
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link"
+                                    href="{{ url_for('main.login') }}">Login</a></li>
+                            <li class="nav-item"><a class="nav-link"
+                                    href="{{ url_for('main.register') }}">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
     </header>
-
-    <!-- Flash messages section -->
+<!-- Flash messages section -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <div class="flash-messages">
                 {% for message in messages %}
-                    <div class="flash-message">{{ message }}</div>
+                    <div class="flash-message alert alert-danger">{{ message }}</div>
                 {% endfor %}
             </div>
         {% endif %}
     {% endwith %}
-
-    <main>
+    
+   <main>
         {% block content %}{% endblock %}
     </main>
+    
 
-    <footer>
-        <!-- Add footer content here -->
-        &copy; 2023 Naurisha Groceries
+    <footer class="mt-5">
+        <div class="container">
+            <!-- Add footer content here -->
+            &copy; 2023 Naurisha Groceries
+        </div>
     </footer>
 
-    <!-- Add your JavaScript files or external links here -->
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </body>
+
 </html>
