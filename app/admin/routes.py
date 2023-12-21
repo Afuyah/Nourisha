@@ -15,6 +15,7 @@ def admin_dashboard():
     # Add logic for the admin dashboard here
     admin_data = {
         'total_users': User.query.count(),
+        
         'recent_users': User.query.order_by(User.registration_date.desc()).limit(5).all()
         # Add more data or queries as needed for your admin dashboard
     }
@@ -22,7 +23,6 @@ def admin_dashboard():
     # Example queries to retrieve users and roles
     users = User.query.all()
     roles = Role.query.all()
-
     if request.method == 'POST':
         # Handle the POST request (if needed)
         flash('POST request received.', 'info')
@@ -57,3 +57,19 @@ def edit_role(role_id):
 
     # Render the template with the role data
     return render_template('edit_role.html', role=role)
+
+@admin_bp.route('/product_categories', methods=['GET', 'POST'])
+@login_required
+def product_categories():
+    form = ProductCategoryForm()
+
+    if form.validate_on_submit():
+        category = ProductCategory(name=form.name.data)
+        db.session.add(category)
+        db.session.commit()
+        flash('Product category added successfully', 'success')
+        return redirect(url_for('admin.product_categories'))
+
+    categories = ProductCategory.query.all()
+    return render_template('admin/product_categories.html', form=form, categories=categories)
+

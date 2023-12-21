@@ -1,0 +1,28 @@
+<!-- pdf_template.html -->
+<h1>Suppliers Table</h1>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Contact Person</th>
+            <th>Contact Email</th>
+            <th>Contact Phone</th>
+            <th>Address</th>
+            <th>City</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for supplier in suppliers %}
+            <tr>
+                <td>{{ supplier.supplier_id }}</td>
+                <td>{{ supplier.name }}</td>
+                <td>{{ supplier.contact_person }}</td>
+                <td>{{ supplier.contact_email }}</td>
+                <td>{{ supplier.contact_phone }}</td>
+                <td>{{ supplier.address }}</td>
+                <td>{{ supplier.city }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
