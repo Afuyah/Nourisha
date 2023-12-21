@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, FloatField, IntegerField, TextAreaField, SelectField, DateField, SubmitField
 from wtforms.validators import DataRequired, Email, Length
-from wtforms.validators import DataRequired
+from flask_wtf.file import FileField, FileRequired, DataRequired
+
 from flask_wtf import FlaskForm, CSRFProtect
 from app.main.models import Supplier
 
@@ -61,3 +62,11 @@ class AddProductForm(FlaskForm):
     supplier = SelectField('Supplier', coerce=int, validators=[DataRequired()])
     date_added = DateField('Date Added to Inventory', validators=[DataRequired()])
     submit = SubmitField('Add Product')
+
+class ProductImageForm(FlaskForm):
+    product = SelectField('Product', coerce=int, validators=[DataRequired()])
+    cover_image = FileField('Cover Image', validators=[FileRequired()])
+    image1 = FileField('Image 1', validators=[FileRequired()])
+    image2 = FileField('Image 2', validators=[FileRequired()])
+    image3 = FileField('Image 3', validators=[FileRequired()])
+    submit = SubmitField('Upload Images')

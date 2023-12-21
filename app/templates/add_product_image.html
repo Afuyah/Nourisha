@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h1 class="mb-4">Upload Product Images</h1>
+    <form method="post" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <div class="mb-3">
+        {{ form.product.label(class='form-label') }}
+        {{ form.product(class='form-select', placeholder='Select product') }}
+      </div>
+      <div class="mb-3">
+        {{ form.cover_image.label(class='form-label') }}
+        {{ form.cover_image(class='form-control') }}
+      </div>
+      <div class="mb-3">
+        {{ form.image1.label(class='form-label') }}
+        {{ form.image1(class='form-control') }}
+      </div>
+      <div class="mb-3">
+        {{ form.image2.label(class='form-label') }}
+        {{ form.image2(class='form-control') }}
+      </div>
+      <div class="mb-3">
+        {{ form.image3.label(class='form-label') }}
+        {{ form.image3(class='form-control') }}
+      </div>
+      <div class="mb-3">
+        {{ form.submit(class='btn btn-primary') }}
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% block content %}
+  <div class="container mt-4">
+    <h1 class="mb-4">Product Listing</h1>
+    <div class="row">
+      {% for product in products %}
+        <div class="col-2 mb-4">
+          <div class="card" style="width: 100%; height: 200px;">
+            {% if product.images %}
+              <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top img-fluid" alt="Product Image" style="max-height: 100px; object-fit: contain;">
+            {% else %}
+              <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top img-fluid" alt="Placeholder Image" style="max-height: 100px; object-fit: contain;">
+            {% endif %}
+            <div class="card-body">
+              <h6 class="card-title mt-2">{{ product.name }}</h6>
+              <a href="{{ url_for('main.product_details', product_id=product.id) }}" class="btn btn-primary btn-sm">Details</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

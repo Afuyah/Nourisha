@@ -1,0 +1,74 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h1 class="mb-4">Add Product</h1>
+
+    <form method="POST" action="{{ url_for('main.add_product') }}">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        <div class="mb-3">
+    {{ form.name.label(class='form-label') }}
+    {{ form.name(class='form-control', placeholder='Enter supplier ID Number') }}
+      </div>
+      </div>
+<div class="mb-3">
+         {{ form.category.label(class='form-label') }}
+        {{ form.category(class='form-select', placeholder='Select category') }}
+      </div>
+
+      <div class="mb-3">
+         {{ form.brand.label(class='form-label') }}
+        {{ form.brand(class='form-control', placeholder='Enter brand') }}
+      </div>
+
+      <div class="mb-3">
+         {{ form.unit_price.label(class='form-label') }}
+        {{ form.unit_price(class='form-control', placeholder='Enter unit price') }}
+      </div>
+
+      <div class="mb-3">
+         {{ form.unit_measurement.label(class='form-label') }}
+        {{ form.unit_measurement(class='form-control', placeholder='Enter unit of measurement') }}
+      </div>
+
+      <div class="mb-3">
+         {{ form.quantity_in_stock.label(class='form-label') }}
+        {{ form.quantity_in_stock(class='form-control', placeholder='Enter quantity in stock') }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.discount_percentage.label(class='form-label') }}
+        {{ form.discount_percentage(class='form-control', placeholder='Enter discount percentage') }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.promotional_tag.label(class='form-label') }}
+        {{ form.promotional_tag(class='form-control', placeholder='Enter promotional tag') }}
+      </div>
+
+      <div class="mb-3"> 
+         {{ form.nutritional_information.label(class='form-label') }}
+        {{ form.nutritional_information(class='form-control', placeholder='Enter nutritional information') }}
+      </div>
+
+      <div class="mb-3">
+       {{ form.country_of_origin.label(class='form-label') }}
+        {{ form.country_of_origin(class='form-control', placeholder='Enter country of origin') }}
+      </div>
+
+      <div class="mb-3">
+         {{ form.supplier.label(class='form-label') }}
+        {{ form.supplier(class='form-select', placeholder='Select supplier') }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.date_added.label(class='form-label') }}
+        {{ form.date_added(class='form-control', placeholder='Enter date added to inventory') }}
+      </div>
+
+      <button type="submit" class="btn btn-primary">Add Product</button>
+    </form>
+  </div>
+{% endblock %}

@@ -40,6 +40,9 @@ class ProductCategory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
 
+    # Define the relationship with Product
+    products = db.relationship('Product', back_populates='category')
+
     def __repr__(self):
         return f"<ProductCategory {self.name}>"
 
@@ -52,6 +55,10 @@ class Supplier(db.Model):
     contact_phone = db.Column(db.String(20))
     address = db.Column(db.String(255))
     city = db.Column(db.String(100))
+
+    # Define the relationship with Product
+    products = db.relationship('Product', back_populates='supplier')
+
 
 
 class Product(db.Model):
@@ -68,7 +75,25 @@ class Product(db.Model):
     country_of_origin = db.Column(db.String(50), nullable=True)
     supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False)
     date_added = db.Column(db.Date, nullable=False)
-    
-    # Define relationships with Supplier and ProductCategory
+        # Define relationships with Supplier and ProductCategory and images
     supplier = db.relationship('Supplier', back_populates='products')
     category = db.relationship('ProductCategory', back_populates='products')
+    images = db.relationship('ProductImage', back_populates='product')
+
+
+class ProductImage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    cover_image = db.Column(db.String(255), nullable=False)
+    image1 = db.Column(db.String(255), nullable=True)
+    image2 = db.Column(db.String(255), nullable=True)
+    image3 = db.Column(db.String(255), nullable=True)
+   
+    # Define a relationship with Product
+    product = db.relationship('Product', back_populates='images')
+
+class Cart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)

@@ -1,22 +1,26 @@
 from app import db
-from flask import render_template, flash, redirect, url_for, request, send_file
+from flask import render_template, abort, flash, redirect, url_for, request, send_file
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
 from app.main.forms import RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm
-from app.main.forms import AddProductCategoryForm
-from app.main.models import User, Role
+from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm 
+from app.main.models import User, Role, Cart
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
-from app.main.models import ProductCategory
-from app.main.models import Supplier
+from app.main.models import ProductCategory, Product
+from app.main.models import Supplier, ProductImage
 import pdfcrowd
 from flask import render_template
+from werkzeug.utils import secure_filename
+import os 
+from sqlalchemy.orm.exc import NoResultFound
+
 
 
 
 @bp.route('/')
 def index():
-    return render_template('home.html', title='Home')
+     return render_template('home.html', title='Home', product_listing_url=url_for('main.product_listing'))
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -162,8 +166,9 @@ def generate_pdf():
 @login_required
 def add_product():
     form = AddProductForm()
-
+    image_form = ProductImageForm()
     # Populate choices for select fields
+    image_form.product.choices = [(product.id, product.name) for product in Product.query.all()]
     form.supplier.choices = [(supplier.id, supplier.name) for supplier in Supplier.query.all()]
     form.category.choices = [(category.id, category.name) for category in ProductCategory.query.all()]
 
@@ -194,7 +199,7 @@ def add_product():
     # Fetch all products for display
     products = Product.query.all()
 
-    return render_template('add_product.html', form=form, products=products)
+    return render_template('add_product.html', form=form, products=products,image_form=image_form )
 
 
 # Additional routes for viewing, editing, and deleting products can be added here
@@ -204,3 +209,88 @@ def add_product():
 def view_product(product_id):
     product = Product.query.get_or_404(product_id)
     return render_template('view_product.html', product=product)
+
+@bp.route('/products')
+@login_required
+def products():
+    products = Product.query.all()
+    return render_template('products.html', products=products)
+
+
+@bp.route('/add_product_image', methods=['GET', 'POST'])
+@login_required
+def add_product_image():
+    form = ProductImageForm()
+
+    # Populate the product choices in the form
+    form.product.choices = [(product.id, product.name) for product in Product.query.all()]
+
+    if form.validate_on_submit():
+        # Handle image uploads and save links to the database
+        product_id = form.product.data
+        cover_image = form.cover_image.data
+        image1 = form.image1.data
+        image2 = form.image2.data
+        image3 = form.image3.data
+
+        # Save cover image
+        cover_filename = save_image(cover_image)
+        cover_image_entry = ProductImage(product_id=product_id, cover_image=cover_filename)
+        db.session.add(cover_image_entry)
+
+        # Save additional images
+        for image_data in [image1, image2, image3]:
+            if image_data:
+                filename = save_image(image_data)
+                image_entry = ProductImage(product_id=product_id, cover_image=filename)
+                db.session.add(image_entry)
+
+        db.session.commit()
+        flash('Images uploaded successfully', 'success')
+        return redirect(url_for('main.products'))
+
+    return render_template('add_product_image.html', form=form)
+
+# Helper function to save uploaded image and return the filename
+def save_image(image_data):
+    # Implement your image-saving logic here (e.g., using Flask-Uploads)
+    # This is a basic example assuming you have an 'uploads' folder
+    # and you want to save images with unique filenames
+    filename = generate_unique_filename(image_data.filename)
+    image_data.save(os.path.join('app', 'static', 'uploads', filename))
+    return filename
+
+# Helper function to generate a unique filename
+def generate_unique_filename(original_filename):
+    filename, extension = os.path.splitext(original_filename)
+    timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+    unique_filename = f"{secure_filename(filename)}_{timestamp}{extension}"
+    return unique_filename
+
+@bp.route('/product_details/<int:product_id>')
+def product_details(product_id):
+    try:
+        # Perform a join query to fetch product and associated images
+        product_data = db.session.query(Product, ProductImage).\
+            join(ProductImage, Product.id == ProductImage.product_id).\
+            filter(Product.id == product_id).first()
+
+        if not product_data:
+            # Handle the case where the product with the given ID is not found
+            abort(404)
+
+        product, images = product_data
+
+        return render_template('product_details.html', product=product, images=[images])  # Wrap images in a list
+
+    except NoResultFound:
+        # Handle the case where the product with the given ID is not found
+        abort(404)
+
+@bp.route('/product_listing')
+def product_listing():
+    # Fetch products from the database (adjust the query as needed)
+    products = Product.query.all()
+
+    # Render a template with the product data
+    return render_template('product_listing.html', products=products)
