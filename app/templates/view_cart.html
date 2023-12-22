@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h1 class="mb-4">Shopping Cart</h1>
+    {% if cart_items %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Product</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart_items %}
+            <tr>
+              <td>{{ item.product.name }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>${{ item.product.unit_price * item.quantity }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p>Total Price: ${{ total_price }}</p>
+    <form method="post" action="{{ url_for('cart.checkout') }}">
+
+
+    {% else %}
+      <p>Your cart is empty.</p>
+    {% endif %}
+  </div>
+{% endblock %}

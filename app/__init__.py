@@ -25,9 +25,10 @@ def create_app(config_class=Config):
     app.register_blueprint(main_bp)
 
     from app.admin.routes import admin_bp
-  
     app.register_blueprint(admin_bp)
- 
+   
+    from app.cart.routes import cart_bp
+    app.register_blueprint(cart_bp)
     # Add other blueprints and configurations as needed
 
     # User loader function

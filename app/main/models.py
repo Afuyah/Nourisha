@@ -24,7 +24,8 @@ class User(db.Model, UserMixin):
 
     # Define the relationship with the Role model
     role = db.relationship('Role', backref=db.backref('users', lazy=True))
-
+    orders = db.relationship('Order', backref='customer', lazy='dynamic')
+  
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -79,7 +80,8 @@ class Product(db.Model):
     supplier = db.relationship('Supplier', back_populates='products')
     category = db.relationship('ProductCategory', back_populates='products')
     images = db.relationship('ProductImage', back_populates='product')
-
+    carts = db.relationship('Cart', back_populates='product')
+    #order_items = db.relationship('OrderItem', backref='product', lazy=True)
 
 class ProductImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -97,3 +99,33 @@ class Cart(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
+  
+    product = db.relationship('Product', back_populates='carts')
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    order_date = db.Column(db.DateTime, default=datetime.utcnow)
+    delivery_address = db.Column(db.String(255), nullable=False)
+    total_price = db.Column(db.Float, nullable=False)
+    order_status = db.Column(db.String(50), nullable=False)
+    payment_status = db.Column(db.String(50), nullable=False)
+    payment_method = db.Column(db.String(50), nullable=False)
+    delivery_date_time = db.Column(db.DateTime)
+    notes = db.Column(db.Text)
+
+    # Define relationships if needed
+    items = db.relationship('OrderItem', back_populates='order')
+    user = db.relationship('User', back_populates='orders')
+    
+
+class OrderItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    
+    # Define relationships
+    order = db.relationship('Order', back_populates='items')
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    product = db.relationship('Product', backref='order_item_product', uselist=False)

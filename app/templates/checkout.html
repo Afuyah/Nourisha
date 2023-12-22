@@ -1,0 +1,13 @@
+
+{% block content %}
+  <div class="container mt-4">
+    <h1 class="mb-4">Order Confirmation</h1>
+    <p>Thank you for your purchase! Your order details:</p>
+    <ul>
+      {% for item in order.items %}
+        <li>{{ item.quantity }} x {{ item.product.name }} - ${{ item.product.unit_price * item.quantity }}</li>
+      {% endfor %}
+    </ul>
+    <p>Total Price: ${{ total_price }}</p>
+  </div>
+{% endblock %}

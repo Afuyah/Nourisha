@@ -60,6 +60,11 @@
                                     href="{{ url_for('main.add_product_image') }}">
                                       
                                    Add Product Images</a></li> 
+                   <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('cart.view_cart') }}">
+    <i class="fa fa-shopping-cart"></i>
+</a>
+          </li>   
                         
                        <li class="nav-item"><a class="nav-link"
                                     href="{{ url_for('main.add_supplier') }}">Add Supplier</a></li>
@@ -132,6 +137,18 @@
       // ... (rest of your code)
     });
   });
+$.ajax({
+    type: 'POST',
+    url: '/cart/checkout',
+    data: { /* Your data here */ },
+    success: function(response) {
+        // Handle success
+    },
+    error: function(error) {
+        // Handle error
+    }
+});
+    
 </script>
 </body>
 

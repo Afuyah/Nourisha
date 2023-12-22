@@ -1,19 +1,21 @@
 from app import db
-from flask import render_template, abort, flash, redirect, url_for, request, send_file
+from flask import render_template, abort, Blueprint,flash, redirect, url_for, request, send_file
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
 from app.main.forms import RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm 
-from app.main.models import User, Role, Cart
+from app.main.models import User, Role, Cart, OrderItem
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
-from app.main.models import ProductCategory, Product
+from app.main.models import ProductCategory, Product, Order
 from app.main.models import Supplier, ProductImage
 import pdfcrowd
 from flask import render_template
 from werkzeug.utils import secure_filename
 import os 
 from sqlalchemy.orm.exc import NoResultFound
+from app.cart.routes import cart_bp
+
 
 
 
@@ -291,6 +293,109 @@ def product_details(product_id):
 def product_listing():
     # Fetch products from the database (adjust the query as needed)
     products = Product.query.all()
+    quantity = 10 
+    form = AddProductForm()
+      # Render a template with the product data
+    return render_template('product_listing.html', products=products, quantity=quantity, form=form)
 
-    # Render a template with the product data
-    return render_template('product_listing.html', products=products)
+@cart_bp.route('/add_to_cart/<int:product_id>/<int:quantity>', methods=['POST'])
+@login_required
+def add_to_cart(product_id, quantity):
+    product = Product.query.get_or_404(product_id)
+
+    if quantity <= 0:
+        flash('Quantity must be greater than zero.', 'danger')
+        return redirect(url_for('main.product_details', product_id=product.id))
+
+    if quantity > product.quantity_in_stock:
+        flash('Not enough stock available.', 'danger')
+        return redirect(url_for('main.product_details', product_id=product.id))
+
+    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product.id).first()
+
+    if cart_item:
+        # If item is already in the cart, update quantity
+        cart_item.quantity += quantity
+    else:
+        # Otherwise, add a new item to the cart
+        cart_item = Cart(user_id=current_user.id, product_id=product.id, quantity=quantity)
+        db.session.add(cart_item)
+
+    # Update stock quantity
+    product.quantity_in_stock -= quantity
+
+    db.session.commit()
+    flash('Item added to cart successfully.', 'success')
+    return redirect(url_for('main.product_details', product_id=product.id))
+
+
+@cart_bp.route('/view_cart')
+@login_required
+def view_cart():
+    # Retrieve the user's cart items with product details
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+
+    # Calculate the total price for items in the cart
+    total_price = sum(item.product.unit_price * item.quantity for item in cart_items)
+
+    return render_template('view_cart.html', cart_items=cart_items, total_price=total_price)
+
+
+@cart_bp.route('/checkout', methods=['POST'])
+@login_required
+def checkout():
+    # Get the cart items
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+
+    # Ensure the cart is not empty before creating an order
+    if not cart_items:
+        flash('Your cart is empty.', 'warning')
+        return redirect(url_for('cart.view_cart'))
+
+    # Assuming delivery_address is provided in your checkout function
+    delivery_address = get_delivery_address_from_request()  # Replace with your actual way of getting the delivery address
+
+    # Check if delivery_address is not None before creating the order
+    if delivery_address is not None:
+        # Create the order with the provided delivery_address
+        order = Order(
+            user_id=current_user.id,
+            delivery_address=delivery_address,
+            total_price=calculate_total_price(cart_items),
+            order_status='Pending',
+            payment_status='Pending',
+            payment_method='Card'
+        )
+
+        # Create OrderItem instances for each item in the cart
+        for cart_item in cart_items:
+            order_item = OrderItem(
+                order=order,
+                product=cart_item.product,
+                quantity=cart_item.quantity,
+                price=cart_item.product.unit_price * cart_item.quantity
+            )
+            db.session.add(order_item)
+
+        # Save the order to the database
+        db.session.add(order)
+        db.session.commit()
+
+        # Clear the user's cart
+        Cart.query.filter_by(user_id=current_user.id).delete()
+        db.session.commit()
+
+        # Return a success response
+        flash('Order placed successfully. Thank you!', 'success')
+        return render_template('checkout.html', order=order, total_price=order.total_price)
+
+    else:
+        # Handle the case where delivery_address is None (e.g., return an error response)
+        return jsonify({'error': 'Delivery address is required'}), 400
+
+
+def calculate_total_price(cart_items):
+    total_price = 0
+    for item in cart_items:
+        total_price += item.product.unit_price * item.quantity
+    return total_price
