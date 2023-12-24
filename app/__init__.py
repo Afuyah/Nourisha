@@ -10,7 +10,7 @@ from datetime import timedelta
 db = SQLAlchemy()
 login_manager = LoginManager()
 
-def create_app(config_class=Config):
+def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     app.config['SECRET_KEY'] = 'your_secret_key'
