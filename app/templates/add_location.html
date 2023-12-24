@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Add Location</h2>
+<form method="post">
+    {{ form.hidden_tag() }}
+    {{ form.location_name.label }} {{ form.location_name(size=20) }}<br>
+    {{ form.arealine.label }} {{ form.arealine(size=50) }}<br>
+    {{ form.submit() }}
+</form>
+<h3>All Locations</h3>
+<ul>
+    {% for location in locations %}
+        <li>{{ location.location_name }} - {{ location.arealine }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -8,8 +8,9 @@
       {{ form.hidden_tag() }}
 
       <div class="mb-3">
-        {{ form.label(for='name', class='form-label') }}
-        {{ form.name(class='form-control', placeholder='Enter product name') }}
+        {{ form.name.label(for='name', class='form-label') }}
+
+        {{ form.name(class='form-control', placeholder='Enter product code') }}
       </div>
 
       <div class="mb-3">
@@ -71,3 +72,4 @@
     </form>
   </div>
 {% endblock %}
+supplier

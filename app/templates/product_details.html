@@ -5,7 +5,7 @@
     <div class="row">
       <!-- Product Image Section -->
       <div class="col-md-6">
-        <h1>{{ product.name }} Images</h1>
+        <h2>{{ product.brand }} </h2>
         <div id="product-carousel" class="carousel slide" data-bs-ride="carousel">
           <div class="carousel-inner">
             {% for image in images %}
@@ -27,12 +27,12 @@
 
       <!-- Product Details Section -->
       <div class="col-md-6">
-        <h1 class="mb-4">{{ product.name }} Details</h1>
+        <h3 class="mb-4">{{ product.name }} Details</h3>
         <ul class="list-group">
           <li class="list-group-item">Product ID: {{ product.id }}</li>
           <li class="list-group-item">Name: {{ product.name }}</li>
           <li class="list-group-item">Price: {{ product.unit_price }} /  {{ product.unit_measurement }}</li>
-          <li class="list-group-item">Description: {{ product.description }}</li>
+          <li class="list-group-item">Description: {{ product.nutritional_information }}</li>
         </ul>
       </div>
     </div>

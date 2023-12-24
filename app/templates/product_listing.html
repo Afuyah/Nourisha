@@ -2,27 +2,28 @@
 
 {% block content %}
   <div class="container mt-4">
-    <h1 class="mb-4">Product Listing</h1>
-    <div class="row">
+    <h1 class="mb-4 text-center">Product Listing</h1>
+    <div class="row row-cols-lg-4 row-cols-md-3 row-cols-1">
       {% for product in products %}
-        <div class="col-md-4 mb-4">
-          <div class="card border-light shadow" style="width: 100%;">
-            <div class="product-card">
+        <div class="col mb-4">
+          <div class="card product-card d-flex flex-column h-100">
+            <div class="product-image-container">
               {% if product.images %}
-                <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
+                <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image rounded-top" alt="{{ product.name }}">
               {% else %}
-                <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image" alt="Placeholder Image">
+                <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image rounded-top" alt="Placeholder Image">
               {% endif %}
+            </div>
 
-              <div class="card-body product-details-wrapper">
-                <h5 class="card-title">{{ product.name }}</h5>
-                <p class="card-text">{{ product.description }}</p>
-                <p class="card-text"><strong>Price:</strong> ${{ product.price }}</p>
-                <p class="card-text"><strong>Stock:</strong> {{ product.stock_quantity }}</p>
-                <form action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}" method="post">{{ form.csrf_token }}
-                  <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
-                </form>
-              </div>
+            <div class="card-body product-details-wrapper flex-grow-1">
+              <h5 class="card-title text-primary {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }}">{{ product.brand }}</h5>
+              <p class="card-text {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }}">{{ product.description }}</p>
+              <p class="card-text {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }}"><strong>Price:</strong> Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</p>
+              <p class="card-text {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }}"><strong>Stock:</strong> {{ product.quantity_in_stock }}</p>
+              <form action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}" method="post">
+                {{ form.csrf_token }}
+                <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+              </form>
             </div>
           </div>
         </div>

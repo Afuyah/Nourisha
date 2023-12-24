@@ -1,8 +1,9 @@
 from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import current_user, login_required
-from app.main.forms import EditUserForm
+from app.main.forms import EditUserForm, AddLocationForm
 from app.admin import admin_bp
-from app.main.models import User, Role  # Import the Role model
+from app.main.models import User, Role, Location  
+from app import db
 
 @admin_bp.route('/admin_dashboard', methods=['GET', 'POST'])
 @login_required
@@ -73,3 +74,24 @@ def product_categories():
     categories = ProductCategory.query.all()
     return render_template('admin/product_categories.html', form=form, categories=categories)
 
+
+@admin_bp.route('/add_location', methods=['GET', 'POST'])
+@login_required
+def add_location():
+    form = AddLocationForm()
+
+    if form.validate_on_submit():
+        location = Location(
+            location_name=form.location_name.data,
+            arealine=form.arealine.data
+        )
+
+        db.session.add(location)
+        db.session.commit()
+
+        flash('Location added successfully!', 'success')
+        return redirect(url_for('admin.add_location'))
+
+    locations = Location.query.all()
+
+    return render_template('add_location.html', form=form, locations=locations)

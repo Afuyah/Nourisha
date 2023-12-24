@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from config import Config
 from flask_wtf.csrf import CSRFProtect
+from flask_migrate import Migrate
 from datetime import timedelta
 
 
@@ -36,5 +37,7 @@ def create_app(config_class=Config):
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
-
+    migrate = Migrate(app, db)
+    
     return app
+

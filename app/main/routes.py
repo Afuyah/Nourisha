@@ -2,23 +2,15 @@ from app import db
 from flask import render_template, abort, Blueprint,flash, redirect, url_for, request, send_file
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
-from app.main.forms import RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm
-from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm 
-from app.main.models import User, Role, Cart, OrderItem
+from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm, CustomerLocationForm, LoginForm, AddRoleForm, AddSupplierForm
+from app.main.models import User, Role, Cart, Supplier, ProductImage,  ProductCategory,  Product
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
-from app.main.models import ProductCategory, Product, Order
-from app.main.models import Supplier, ProductImage
 import pdfcrowd
-from flask import render_template
 from werkzeug.utils import secure_filename
 import os 
 from sqlalchemy.orm.exc import NoResultFound
 from app.cart.routes import cart_bp
-
-
-
-
 
 @bp.route('/')
 def index():
@@ -328,74 +320,40 @@ def add_to_cart(product_id, quantity):
     flash('Item added to cart successfully.', 'success')
     return redirect(url_for('main.product_details', product_id=product.id))
 
-
 @cart_bp.route('/view_cart')
 @login_required
 def view_cart():
     # Retrieve the user's cart items with product details
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
 
+    # Fetch product details for the first item in the cart
+    # You might need to adjust this logic based on how you determine the product for the cart
+    product = None
+    if cart_items:
+        product = cart_items[0].product
+
     # Calculate the total price for items in the cart
     total_price = sum(item.product.unit_price * item.quantity for item in cart_items)
 
-    return render_template('view_cart.html', cart_items=cart_items, total_price=total_price)
+    # Create an instance of your form
+    form = AddProductForm()  # Replace with the actual form you're using
+
+    # Render the template with the form
+    return render_template('view_cart.html', cart_items=cart_items, total_price=total_price, form=form)
 
 
-@cart_bp.route('/checkout', methods=['POST'])
-@login_required
-def checkout():
-    # Get the cart items
+
+def calculate_total_amount():
+    # Fetch user's cart items
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
 
-    # Ensure the cart is not empty before creating an order
-    if not cart_items:
-        flash('Your cart is empty.', 'warning')
-        return redirect(url_for('cart.view_cart'))
+    # Calculate total amount
+    total_amount = 0
+    for cart_item in cart_items:
+        total_amount += cart_item.product.unit_price * cart_item.quantity
 
-    # Assuming delivery_address is provided in your checkout function
-    delivery_address = get_delivery_address_from_request()  # Replace with your actual way of getting the delivery address
+    # Add shipping fee (200)
+    total_amount += 200
 
-    # Check if delivery_address is not None before creating the order
-    if delivery_address is not None:
-        # Create the order with the provided delivery_address
-        order = Order(
-            user_id=current_user.id,
-            delivery_address=delivery_address,
-            total_price=calculate_total_price(cart_items),
-            order_status='Pending',
-            payment_status='Pending',
-            payment_method='Card'
-        )
+    return total_amount
 
-        # Create OrderItem instances for each item in the cart
-        for cart_item in cart_items:
-            order_item = OrderItem(
-                order=order,
-                product=cart_item.product,
-                quantity=cart_item.quantity,
-                price=cart_item.product.unit_price * cart_item.quantity
-            )
-            db.session.add(order_item)
-
-        # Save the order to the database
-        db.session.add(order)
-        db.session.commit()
-
-        # Clear the user's cart
-        Cart.query.filter_by(user_id=current_user.id).delete()
-        db.session.commit()
-
-        # Return a success response
-        flash('Order placed successfully. Thank you!', 'success')
-        return render_template('checkout.html', order=order, total_price=order.total_price)
-
-    else:
-        # Handle the case where delivery_address is None (e.g., return an error response)
-        return jsonify({'error': 'Delivery address is required'}), 400
-
-
-def calculate_total_price(cart_items):
-    total_price = 0
-    for item in cart_items:
-        total_price += item.product.unit_price * item.quantity
-    return total_price

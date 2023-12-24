@@ -70,3 +70,29 @@ class ProductImageForm(FlaskForm):
     image2 = FileField('Image 2', validators=[FileRequired()])
     image3 = FileField('Image 3', validators=[FileRequired()])
     submit = SubmitField('Upload Images')
+
+class CheckoutForm(FlaskForm):
+    location = SelectField('Location', validators=[DataRequired()])
+    address_line = TextAreaField('Address', validators=[DataRequired()])
+    additional_info = TextAreaField('Additional Information')
+    payment_method = SelectField('Payment Method', choices=[('pay_on_delivery', 'Pay on Delivery'), ('pay_now', 'Pay Now')], validators=[DataRequired()])
+    submit = SubmitField('Place Order')
+
+
+class AddressLineForm(FlaskForm):
+    line = StringField('Address Line', validators=[DataRequired()])
+    location_id = SelectField('Customer Location', coerce=int, validators=[DataRequired()], choices=[])
+
+    def set_location_choices(self):
+        # Update location choices dynamically
+        self.location_id.choices = [(location.id, location.name) for location in CustomerLocation.query.all()]
+
+class CustomerLocationForm(FlaskForm):
+    name = StringField('Location Name', validators=[DataRequired()])
+
+
+class AddLocationForm(FlaskForm):
+    location_name = StringField('Location Name')
+    arealine = StringField('Arealine')
+    submit = SubmitField('Add Location')
+

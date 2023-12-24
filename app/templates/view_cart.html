@@ -4,30 +4,82 @@
   <div class="container mt-4">
     <h1 class="mb-4">Shopping Cart</h1>
     {% if cart_items %}
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Product</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in cart_items %}
-            <tr>
-              <td>{{ item.product.name }}</td>
-              <td>{{ item.quantity }}</td>
-              <td>${{ item.product.unit_price * item.quantity }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <p>Total Price: ${{ total_price }}</p>
-    <form method="post" action="{{ url_for('cart.checkout') }}">
+      <div class="card">
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Product</th>
+                <th scope="col" style="width: 25%;">Quantity</th>
+                <th scope="col">Price</th>
+                <th scope="col">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in cart_items %}
+                <tr>
+                  <td >
+                    <div class="d-flex align-items-center">
+                      <img src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image) }}" alt="Product Image" class="img-thumbnail" style="max-height: 30px; margin-right: 5px;">
+                      <p class="mb-0">{{ item.product.brand }}</p>
+                    </div>
+                  </td>
+                  <td style="width: 20%;">
+                    <div class="input-group">
+                      <input type="number" id="quantity-{{ item.id }}" class="form-control text-center" value="{{ item.quantity }}" min="1" onchange="updateQuantity('{{ item.id }}', this.value)">
+                    </div>
+                  </td>
+                  <td>${{ item.product.unit_price }}</td>
+                  <td>
+                    $<span id="subtotal-{{ item.id }}" data-unit-price="{{ item.product.unit_price }}">
+                      {{ item.product.unit_price * item.quantity }}
+                    </span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
 
-
+          <!-- Move Proceed To Checkout button inside the table -->
+          <div class="d-flex justify-content-end">
+            <table class="table" style="width: 60%;">
+              <tr>
+                <td></td>
+                <td class="text-end" style="width: 20%;"></td>
+                <td class="text-end">
+                  {% if form %}
+                    <form method="post" action="{{ url_for('cart.view_cart') }}">
+                      {{ form.hidden_tag() }}
+                      <button type="submit" class="btn btn-primary">Proceed To Checkout</button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
     {% else %}
       <p>Your cart is empty.</p>
     {% endif %}
   </div>
+
+  <script>
+    function updateQuantity(itemId, newQuantity) {
+      // Ensure quantity is not less than 1
+      newQuantity = Math.max(newQuantity, 1);
+
+      // Update the input field with the new quantity
+      document.getElementById(`quantity-${itemId}`).value = newQuantity;
+
+      // Recalculate and update the subtotal
+      const subtotalElement = document.getElementById(`subtotal-${itemId}`);
+      const unitPrice = parseFloat(subtotalElement.dataset.unitPrice);
+      const newSubtotal = unitPrice * newQuantity;
+
+      if (!isNaN(newSubtotal)) {
+        subtotalElement.textContent = `${newSubtotal.toFixed(2)}`;
+      }
+    }
+  </script>
 {% endblock %}
