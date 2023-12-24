@@ -375,14 +375,19 @@ def update_cart():
         # Perform database queries to update the cart
         update_cart_in_database(user_id, product_id, action)
 
+        # Fetch updated quantity and total price
+        updated_quantity, total_price = get_updated_cart_info(user_id)
+
         # Example response
         response_data = {
             'status': 'success',
             'message': 'Cart updated successfully',
             'data': {
-                'productId': product_id,
-                'action': action,
-                # Include any other relevant data in the response
+                'cartItems': [
+                    {'productId': item.product_id, 'quantity': item.quantity, 'subtotal': item.product.unit_price * item.quantity}
+                    for item in Cart.query.filter_by(user_id=user_id).all()
+                ],
+                'totalPrice': calculate_total_amount(),
             }
         }
 
@@ -398,6 +403,16 @@ def update_cart():
         }
         return jsonify(response_data), 500
 
+
+def get_updated_cart_info(user_id):
+    # Perform database queries to get updated quantity and total price
+    cart_items = Cart.query.filter_by(user_id=user_id).all()
+
+    # Calculate total price
+    total_price = sum(cart_item.product.unit_price * cart_item.quantity for cart_item in cart_items)
+
+    # Return the updated quantity and total price
+    return sum(cart_item.quantity for cart_item in cart_items), total_price
 
 def update_cart_in_database(user_id, product_id, action):
     # Perform database queries to update the cart
