@@ -3,7 +3,7 @@
 {% block content %}
   <div class="container mt-4">
     <h1 class="mb-4 text-center">Product Listing</h1>
-    <div class="row row-cols-lg-4 row-cols-md-3 row-cols-1">
+    <div class="row row-cols-lg-3 row-cols-md-3 row-cols-1">
       {% for product in products %}
         <div class="col mb-4">
           <div class="card product-card d-flex flex-column h-100">
@@ -17,12 +17,27 @@
 
             <div class="card-body product-details-wrapper flex-grow-1">
               <h5 class="card-title text-primary {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }}">{{ product.brand }}</h5>
-              <p class="card-text {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }}">{{ product.description }}</p>
+              <p class="card-text {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }}">{{ product.description | truncate(120) }}</p>
               <p class="card-text {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }}"><strong>Price:</strong> Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</p>
-              <p class="card-text {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }}"><strong>Stock:</strong> {{ product.quantity_in_stock }}</p>
-              <form action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}" method="post">
+              <p class="card-text {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }} {% if product.quantity_in_stock < 5 %}text-danger{% endif %}"><strong>Stock:</strong> {{ product.quantity_in_stock }}</p>
+
+              <form id="add-to-cart-form-{{ product.id }}" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}" method="post" onsubmit="return showLoadingSpinner('{{ product.id }}')">
                 {{ form.csrf_token }}
-                <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <button class="btn btn-secondary" type="button" onclick="updateCartItem('{{ product.id }}', 'decrement')">-</button>
+                  </div>
+                  <input type="text" class="form-control text-center" id="quantity-input-{{ product.id }}" name="quantity" value="1" readonly style="width: 50px; margin: 0 5px;">
+                  <div class="input-group-append">
+                    <button class="btn btn-secondary" type="button" onclick="updateCartItem('{{ product.id }}', 'increment')">+</button>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-sm" id="add-to-cart-btn-{{ product.id }}">Add to Cart</button>
+                <div class="spinner-border text-primary d-none ml-2" role="status" id="loading-spinner-{{ product.id }}">
+                  <span class="sr-only"></span>
+                </div>
               </form>
             </div>
           </div>
@@ -30,4 +45,60 @@
       {% endfor %}
     </div>
   </div>
+
+  <script>
+    async function getCurrentQuantity(productId) {
+      try {
+        const response = await fetch(`/api/cart/${productId}/quantity`);
+        const data = await response.json();
+        return data.quantity;
+      } catch (error) {
+        console.error('Error fetching quantity:', error);
+        return 1; // Default to 1 if there's an error
+      }
+    }
+
+    async function updateCartItem(productId, action) {
+      const quantityInput = document.getElementById('quantity-input-' + productId);
+      const loadingSpinner = document.getElementById('loading-spinner-' + productId);
+
+      // Show loading spinner
+      loadingSpinner.classList.remove('d-none');
+
+      try {
+        // Fetch the actual quantity in the cart
+        const serverQuantity = await getCurrentQuantity(productId);
+
+        // Update the quantity locally based on the action (increment or decrement)
+        let currentQuantity = parseInt(quantityInput.value);
+        if (action === 'increment') {
+          currentQuantity++;
+        } else if (action === 'decrement' && currentQuantity > 1) {
+          currentQuantity--;
+        }
+
+        // Synchronize the displayed quantity with the actual quantity in the cart
+        quantityInput.value = currentQuantity;
+
+        // If the action is not 'increment' or 'decrement', set the quantity directly
+        if (action !== 'increment' && action !== 'decrement') {
+          quantityInput.value = serverQuantity;
+        }
+      } catch (error) {
+        console.error('Error updating quantity:', error);
+      } finally {
+        // Hide loading spinner
+        loadingSpinner.classList.add('d-none');
+      }
+    }
+
+    // Initial synchronization on page load
+    document.addEventListener('DOMContentLoaded', async () => {
+      {% for product in products %}
+        const productId = '{{ product.id }}';
+        await updateCartItem(productId, 'sync');
+      {% endfor %}
+    });
+  </script>
+
 {% endblock %}

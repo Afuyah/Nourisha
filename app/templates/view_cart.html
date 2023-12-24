@@ -2,84 +2,98 @@
 
 {% block content %}
   <div class="container mt-4">
-    <h1 class="mb-4">Shopping Cart</h1>
-    {% if cart_items %}
-      <div class="card">
-        <div class="card-body">
-          <table class="table">
-            <thead>
-              <tr>
-                <th scope="col">Product</th>
-                <th scope="col" style="width: 25%;">Quantity</th>
-                <th scope="col">Price</th>
-                <th scope="col">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for item in cart_items %}
-                <tr>
-                  <td >
-                    <div class="d-flex align-items-center">
-                      <img src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image) }}" alt="Product Image" class="img-thumbnail" style="max-height: 30px; margin-right: 5px;">
-                      <p class="mb-0">{{ item.product.brand }}</p>
-                    </div>
-                  </td>
-                  <td style="width: 20%;">
-                    <div class="input-group">
-                      <input type="number" id="quantity-{{ item.id }}" class="form-control text-center" value="{{ item.quantity }}" min="1" onchange="updateQuantity('{{ item.id }}', this.value)">
-                    </div>
-                  </td>
-                  <td>${{ item.product.unit_price }}</td>
-                  <td>
-                    $<span id="subtotal-{{ item.id }}" data-unit-price="{{ item.product.unit_price }}">
-                      {{ item.product.unit_price * item.quantity }}
-                    </span>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+    <h1 class="mb-4 text-center">Your Cart</h1>
 
-          <!-- Move Proceed To Checkout button inside the table -->
-          <div class="d-flex justify-content-end">
-            <table class="table" style="width: 60%;">
-              <tr>
-                <td></td>
-                <td class="text-end" style="width: 20%;"></td>
-                <td class="text-end">
-                  {% if form %}
-                    <form method="post" action="{{ url_for('cart.view_cart') }}">
-                      {{ form.hidden_tag() }}
-                      <button type="submit" class="btn btn-primary">Proceed To Checkout</button>
-                    </form>
-                  {% endif %}
-                </td>
-              </tr>
-            </table>
+    {% for item in cart_items %}
+      <div class="col mb-4">
+        <div class="card product-card d-flex flex-column h-100">
+          <div class="card-body product-details-wrapper flex-grow-1">
+            <h5 class="card-title text-primary">{{ item.product.brand }}</h5>
+            <p class="card-text">{{ item.product.description | truncate(120) }}</p>
+            <p class="card-text"><strong>Price:</strong> Ksh {{ item.product.unit_price }} / {{ item.product.unit_measurement }}</p>
+            <p class="card-text">
+  <strong>Quantity:</strong>
+  <span class="quantity-display" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
+  <button class="btn btn-secondary btn-sm decrement-btn" data-product-id="{{ item.product.id }}">-</button>
+  <button class="btn btn-secondary btn-sm increment-btn" data-product-id="{{ item.product.id }}">+</button>
+  <div class="spinner-border text-primary d-none loading-spinner" role="status" data-product-id="{{ item.product.id }}">
+    <span class="sr-only"></span>
+  </div>
+</p>
+            <p class="card-text"><strong>Subtotal:</strong> Ksh<span id="subtotal-{{ item.product.id }}">{{ item.product.unit_price * item.quantity }}</span></p>
           </div>
         </div>
       </div>
-    {% else %}
-      <p>Your cart is empty.</p>
-    {% endif %}
+    {% endfor %}
+
+    <p>Total Price: Ksh<span id="total-price">{{ total_price }}</span></p>
+
+    <div class="spinner-border text-primary d-none" role="status" id="loading-spinner">
+      <span class="sr-only"></span>
+    </div>
   </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.decrement-btn').forEach(function(button) {
+    button.addEventListener('click', function() {
+      const productId = button.getAttribute('data-product-id');
+      const csrfToken = document.querySelector('meta[name=csrf-token]').content;
+      updateCartItem(productId, 'decrement', csrfToken);
+    });
+  });
 
-  <script>
-    function updateQuantity(itemId, newQuantity) {
-      // Ensure quantity is not less than 1
-      newQuantity = Math.max(newQuantity, 1);
+  document.querySelectorAll('.increment-btn').forEach(function(button) {
+    button.addEventListener('click', function() {
+      const productId = button.getAttribute('data-product-id');
+      const csrfToken = document.querySelector('meta[name=csrf-token]').content;
+      updateCartItem(productId, 'increment', csrfToken);
+    });
+  });
+});
 
-      // Update the input field with the new quantity
-      document.getElementById(`quantity-${itemId}`).value = newQuantity;
+async function updateCartItem(productId, action, csrfToken) {
+  const quantityDisplay = document.querySelector('.quantity-display[data-product-id="' + productId + '"]');
+  const subtotalElement = document.getElementById('subtotal-' + productId);
+  const totalPriceElement = document.getElementById('total-price');
+  const loadingSpinner = document.getElementById('loading-spinner');
 
-      // Recalculate and update the subtotal
-      const subtotalElement = document.getElementById(`subtotal-${itemId}`);
-      const unitPrice = parseFloat(subtotalElement.dataset.unitPrice);
-      const newSubtotal = unitPrice * newQuantity;
+  // Show loading spinner
+  loadingSpinner.classList.remove('d-none');
 
-      if (!isNaN(newSubtotal)) {
-        subtotalElement.textContent = `${newSubtotal.toFixed(2)}`;
-      }
+  try {
+    // Send a request to your server to update the cart
+    const response = await fetch(`/main/api/update`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken, // Include the CSRF token in the headers
+      },
+      body: JSON.stringify({ productId, action }),
+    });
+
+    const data = await response.json();
+
+    // Check if the 'data' object has the expected properties
+    if ('quantity' in data && 'subtotal' in data && 'total_price' in data) {
+      // Update quantity, subtotal, and total price
+      quantityDisplay.textContent = data.quantity;
+      subtotalElement.textContent = data.subtotal;
+      totalPriceElement.textContent = data.total_price;
+
+      // Optionally, update other elements like stock or perform additional actions
+    } else {
+      console.error('Invalid data received from the server:', data);
     }
-  </script>
+
+  } catch (error) {
+    console.error('Error updating quantity:', error);
+  } finally {
+    // Hide loading spinner
+    loadingSpinner.classList.add('d-none');
+  }
+}
+
+</script>
+
+
 {% endblock %}

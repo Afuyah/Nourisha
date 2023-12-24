@@ -1,5 +1,5 @@
 from app import db
-from flask import render_template, abort, Blueprint,flash, redirect, url_for, request, send_file
+from flask import render_template, abort, Blueprint,flash, redirect, url_for, request, jsonify, send_file, session,current_app
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm, CustomerLocationForm, LoginForm, AddRoleForm, AddSupplierForm
@@ -300,8 +300,8 @@ def add_to_cart(product_id, quantity):
         return redirect(url_for('main.product_details', product_id=product.id))
 
     if quantity > product.quantity_in_stock:
-        flash('Not enough stock available.', 'danger')
-        return redirect(url_for('main.product_details', product_id=product.id))
+        flash('Sorry !!! Items out of Stock.', 'danger')
+        return redirect(url_for('main.product_listing', product_id=product.id))
 
     cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product.id).first()
 
@@ -318,7 +318,7 @@ def add_to_cart(product_id, quantity):
 
     db.session.commit()
     flash('Item added to cart successfully.', 'success')
-    return redirect(url_for('main.product_details', product_id=product.id))
+    return redirect(url_for('main.product_listing', product_id=product.id))
 
 @cart_bp.route('/view_cart')
 @login_required
@@ -357,3 +357,67 @@ def calculate_total_amount():
 
     return total_amount
 
+
+
+@bp.route('/main/api/update', methods=['POST'])
+def update_cart():
+    try:
+        data = request.get_json()
+        product_id = data.get('productId')
+        action = data.get('action')
+
+        # Authenticate the user and obtain the user_id (replace with your actual authentication logic)
+        user_id = get_authenticated_user_id()
+
+        if user_id is None:
+            raise ValueError('User not authenticated')  # You can customize this error message
+
+        # Perform database queries to update the cart
+        update_cart_in_database(user_id, product_id, action)
+
+        # Example response
+        response_data = {
+            'status': 'success',
+            'message': 'Cart updated successfully',
+            'data': {
+                'productId': product_id,
+                'action': action,
+                # Include any other relevant data in the response
+            }
+        }
+
+        return jsonify(response_data)
+
+    except Exception as e:
+        # Log the exception using the blueprint's logger
+        current_app.logger.error('Error updating cart: %s', str(e))
+
+        response_data = {
+            'status': 'error',
+            'message': 'Internal Server Error: ' + str(e),
+        }
+        return jsonify(response_data), 500
+
+
+def update_cart_in_database(user_id, product_id, action):
+    # Perform database queries to update the cart
+    cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+
+    if cart_item:
+        # If the item is already in the cart, update the quantity
+        if action == 'increment':
+            cart_item.quantity += 1
+        elif action == 'decrement' and cart_item.quantity > 1:
+            cart_item.quantity -= 1
+    else:
+        # If the item is not in the cart, add a new item to the cart
+        cart_item = Cart(user_id=user_id, product_id=product_id, quantity=1)
+        db.session.add(cart_item)
+
+    # Commit changes to the database
+    db.session.commit()
+
+def get_authenticated_user_id():
+    # Replace this with your actual user authentication logic
+    # For now, return a placeholder user_id (you should implement this based on your authentication mechanism)
+    return current_user.get_id()
