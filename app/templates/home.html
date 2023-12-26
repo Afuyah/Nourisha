@@ -4,16 +4,14 @@
     <div class="container mt-5">
         <h1 class="text-center">Welcome to Naurisha Groceries!</h1>
        
-<p>Explore our products:</p>
- <h3> <a
- 
-  href="{{ product_listing_url }}">Products</a></h3>
+        <p>Explore our products:</p>
+        <h3><a href="{{ product_listing_url }}" class="btn btn-primary">View Products</a></h3>
 
         {% if current_user.is_authenticated %}
             <p class="text-center">Hello, {{ current_user.username }}!</p>
         {% endif %}
         
-        <!-- Your existing content goes here -->
-        
+        <!-- Additional styling and interactive elements can be added here -->
+
     </div>
 {% endblock %}

@@ -365,7 +365,7 @@ def calculate_total_amount():
 
 
 
-@bp.route('/main/api/update', methods=['POST'])
+@bp.route('/cart/api/update', methods=['POST'])
 def update_cart():
     try:
         data = request.get_json()
@@ -499,6 +499,7 @@ def clear_cart_in_database(user_id):
     db.session.commit()
 
 
+
 @bp.route('/main/api/get_quantity_in_stock/<int:product_id>', methods=['GET'])
 def get_quantity_in_stock(product_id):
     try:
@@ -589,3 +590,4 @@ def view_orders():
 
     # Render the orders in an HTML template
     return render_template('/view_orders.html', orders=orders)
+

@@ -7,67 +7,79 @@
     <form method="POST" action="{{ url_for('main.add_product') }}">
       {{ form.hidden_tag() }}
 
+      <!-- Product Code -->
       <div class="mb-3">
-        <div class="mb-3">
-    {{ form.name.label(class='form-label') }}
-    {{ form.name(class='form-control', placeholder='Enter Product Code') }}
-      </div>
-      </div>
-<div class="mb-3">
-         {{ form.category.label(class='form-label') }}
-        {{ form.category(class='form-select', placeholder='Select category') }}
+        {{ form.name.label(class='form-label') }}
+        {{ form.name(class='form-control', placeholder='Enter Product Code', required=true) }}
       </div>
 
+      <!-- Category Selection -->
       <div class="mb-3">
-         {{ form.brand.label(class='form-label') }}
-        {{ form.brand(class='form-control', placeholder='Enter Name') }}
+        {{ form.category.label(class='form-label') }}
+        {{ form.category(class='form-select', placeholder='Select category', required=true) }}
       </div>
 
+      <!-- Product Name -->
       <div class="mb-3">
-         {{ form.unit_price.label(class='form-label') }}
-        {{ form.unit_price(class='form-control', placeholder='Enter unit price') }}
+        {{ form.brand.label(class='form-label') }}
+        {{ form.brand(class='form-control', placeholder='Enter Product Name', required=true) }}
       </div>
 
+      <!-- Unit Price -->
       <div class="mb-3">
-         {{ form.unit_measurement.label(class='form-label') }}
-        {{ form.unit_measurement(class='form-control', placeholder='Enter unit of measurement') }}
+        {{ form.unit_price.label(class='form-label') }}
+        {{ form.unit_price(class='form-control', placeholder='Enter unit price', required=true) }}
       </div>
 
+      <!-- Unit of Measurement -->
       <div class="mb-3">
-         {{ form.quantity_in_stock.label(class='form-label') }}
-        {{ form.quantity_in_stock(class='form-control', placeholder='Enter quantity in stock') }}
+        {{ form.unit_measurement.label(class='form-label') }}
+        {{ form.unit_measurement(class='form-control', placeholder='Enter unit of measurement', required=true) }}
       </div>
 
+      <!-- Quantity in Stock -->
+      <div class="mb-3">
+        {{ form.quantity_in_stock.label(class='form-label') }}
+        {{ form.quantity_in_stock(class='form-control', placeholder='Enter quantity in stock', required=true) }}
+      </div>
+
+      <!-- Discount Percentage -->
       <div class="mb-3">
         {{ form.discount_percentage.label(class='form-label') }}
         {{ form.discount_percentage(class='form-control', placeholder='Enter discount percentage') }}
       </div>
 
+      <!-- Promotional Tag -->
       <div class="mb-3">
         {{ form.promotional_tag.label(class='form-label') }}
         {{ form.promotional_tag(class='form-control', placeholder='Enter promotional tag') }}
       </div>
 
+      <!-- Nutritional Information -->
       <div class="mb-3"> 
-         {{ form.nutritional_information.label(class='form-label') }}
+        {{ form.nutritional_information.label(class='form-label') }}
         {{ form.nutritional_information(class='form-control', placeholder='Enter nutritional information') }}
       </div>
 
+      <!-- Country of Origin -->
       <div class="mb-3">
-       {{ form.country_of_origin.label(class='form-label') }}
+        {{ form.country_of_origin.label(class='form-label') }}
         {{ form.country_of_origin(class='form-control', placeholder='Enter country of origin') }}
       </div>
 
+      <!-- Supplier Selection -->
       <div class="mb-3">
         {{ form.supplier.label(class='form-label', for='supplier') }}
-        {{ form.supplier(class='form-select', id='supplier', placeholder='Select supplier') }}
+        {{ form.supplier(class='form-select', id='supplier', placeholder='Select supplier', required=true) }}
       </div>
 
+      <!-- Date Added -->
       <div class="mb-3">
         {{ form.date_added.label(class='form-label') }}
-        {{ form.date_added(class='form-control', placeholder='Enter date added to inventory') }}
+        {{ form.date_added(class='form-control', placeholder='Enter date added to inventory', required=true) }}
       </div>
 
+      <!-- Submit Button -->
       <button type="submit" class="btn btn-primary">Add Product</button>
     </form>
   </div>

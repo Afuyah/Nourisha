@@ -1,29 +1,41 @@
 {% extends "layout.html" %}
 
 {% block content %}
-  <h2>Register</h2>
-  <form method="post" action="{{ url_for('main.register') }}">
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-      {{ form.name.label }}
-      {{ form.name(class="form-control") }}
+  <div class="container mt-4">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <h2 class="mb-4 text-center">Register</h2>
+        <form method="post" action="{{ url_for('main.register') }}">
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            <label for="{{ form.name.id }}" class="form-label">Full Name</label>
+            {{ form.name(class="form-control", placeholder="Enter your full name") }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.username.id }}" class="form-label">Username</label>
+            {{ form.username(class="form-control", placeholder="Choose a username") }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.email.id }}" class="form-label">Email</label>
+            {{ form.email(class="form-control", placeholder="Enter your email address") }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.phone.id }}" class="form-label">Phone</label>
+            {{ form.phone(class="form-control", placeholder="Enter your phone number") }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.password.id }}" class="form-label">Password</label>
+            {{ form.password(class="form-control", placeholder="Choose a secure password") }}
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Register</button>
+        </form>
+      </div>
     </div>
-    <div class="form-group">
-      {{ form.username.label }}
-      {{ form.username(class="form-control") }}
-    </div>
-    <div class="form-group">
-      {{ form.email.label }}
-      {{ form.email(class="form-control") }}
-    </div>
-    <div class="form-group">
-      {{ form.phone.label }}
-      {{ form.phone(class="form-control") }}
-    </div>
-    <div class="form-group">
-      {{ form.password.label }}
-      {{ form.password(class="form-control") }}
-    </div>
-    <button type="submit" class="btn btn-primary">Register</button>
-  </form>
+  </div>
 {% endblock %}

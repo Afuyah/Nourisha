@@ -44,69 +44,69 @@
 
 
   <script>
-    async function getCurrentQuantity(productId) {
-      try {
-        const response = await fetch(`/api/cart/${productId}/quantity`);
-        const data = await response.json();
-        return data.quantity;
-      } catch (error) {
-        console.error('Error fetching quantity:', error);
-        return 1; // Default to 1 if there's an error
-      }
+async function getCurrentQuantity(productId) {
+  try {
+    const response = await fetch(`/api/cart/${productId}/quantity`);
+    const data = await response.json();
+    return data.quantity;
+  } catch (error) {
+    console.error('Error fetching quantity:', error);
+    return 1; // Default to 1 if there's an error
+  }
+}
+
+async function updateCartItem(productId, action) {
+  const quantityInput = document.getElementById('quantity-input-' + productId);
+  const loadingSpinner = document.getElementById('loading-spinner-' + productId);
+
+  // Show loading spinner
+  loadingSpinner.classList.remove('d-none');
+
+  try {
+    // Fetch the actual quantity in the cart
+    const serverQuantity = await getCurrentQuantity(productId);
+
+    // Update the quantity locally based on the action (increment or decrement)
+    let currentQuantity = parseInt(quantityInput.value);
+    if (action === 'increment') {
+      currentQuantity++;
+    } else if (action === 'decrement' && currentQuantity > 1) {
+      currentQuantity--;
     }
 
-    async function updateCartItem(productId, action) {
-      const quantityInput = document.getElementById('quantity-input-' + productId);
-      const loadingSpinner = document.getElementById('loading-spinner-' + productId);
+    // Synchronize the displayed quantity with the actual quantity in the cart
+    quantityInput.value = currentQuantity;
 
-      // Show loading spinner
-      loadingSpinner.classList.remove('d-none');
-
-      try {
-        // Fetch the actual quantity in the cart
-        const serverQuantity = await getCurrentQuantity(productId);
-
-        // Update the quantity locally based on the action (increment or decrement)
-        let currentQuantity = parseInt(quantityInput.value);
-        if (action === 'increment') {
-          currentQuantity++;
-        } else if (action === 'decrement' && currentQuantity > 1) {
-          currentQuantity--;
-        }
-
-        // Synchronize the displayed quantity with the actual quantity in the cart
-        quantityInput.value = currentQuantity;
-
-        // If the action is not 'increment' or 'decrement', set the quantity directly
-        if (action !== 'increment' && action !== 'decrement') {
-          quantityInput.value = serverQuantity;
-        }
-      } catch (error) {
-        console.error('Error updating quantity:', error);
-      } finally {
-        // Hide loading spinner
-        loadingSpinner.classList.add('d-none');
-      }
+    // If the action is not 'increment' or 'decrement', set the quantity directly
+    if (action !== 'increment' && action !== 'decrement') {
+      quantityInput.value = serverQuantity;
     }
+  } catch (error) {
+    console.error('Error updating quantity:', error);
+  } finally {
+    // Hide loading spinner
+    loadingSpinner.classList.add('d-none');
+  }
+}
 
-    // Define the showLoadingSpinner function
-    function showLoadingSpinner(productId) {
-      const loadingSpinner = document.getElementById('loading-spinner-' + productId);
-      // Show loading spinner
-      loadingSpinner.classList.remove('d-none');
-      // You can add additional logic if needed
-      return true; // or false based on your requirements
-    }
+// Define the showLoadingSpinner function
+function showLoadingSpinner(productId) {
+  const loadingSpinner = document.getElementById('loading-spinner-' + productId);
+  // Show loading spinner
+  loadingSpinner.classList.remove('d-none');
+  // You can add additional logic if needed
+  return true; // or false based on your requirements
+}
 
-    // Initial synchronization on page load
-    document.addEventListener('DOMContentLoaded', async () => {
-      {% for product in products %}
-        const productId = '{{ product.id }}';
-        await updateCartItem(productId, 'sync');
-      {% endfor %}
-    });
+// Initial synchronization on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  {% for product in products %}
+    const productId = '{{ product.id }}';
+    await updateCartItem(productId, 'sync');
+  {% endfor %}
+});
   </script>
 
-
+<script src="{{ url_for('static', filename='your_script.js') }}"></script>
 {% endblock %}
 

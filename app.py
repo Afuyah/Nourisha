@@ -5,12 +5,12 @@ from flask_wtf.csrf import CSRFProtect
 from app import create_app,db 
 
 # Create the Flask app within the application context
-application = create_app()
-application.config['STATIC_URL_PATH'] = '/static'
+app = create_app()
+app.config['STATIC_URL_PATH'] = '/static'
 # Initialize the database
-with application.app_context():
+with app.app_context():
     db.create_all()
     
 if __name__ == '__main__':
-    application.run(host='0.0.0.0', port=81, 
+    app.run(host='0.0.0.0', port=81, 
             debug=True)

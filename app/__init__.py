@@ -8,6 +8,7 @@ from datetime import timedelta
 from flask_mail import Mail
 import secrets
 
+
 db = SQLAlchemy()
 login_manager = LoginManager()
 mail = Mail()
@@ -32,12 +33,15 @@ def create_app():
 
     from app.admin.routes import admin_bp
     app.register_blueprint(admin_bp)
+#user Blueprint registration
+    from app.user.routes import user_bp
+    app.register_blueprint(user_bp)
    
     from app.cart.routes import cart_bp
     app.register_blueprint(cart_bp)
-    # Add other blueprints and configurations as needed
+ # Add other blueprints and configurations as needed
 
-    # User loader function
+# User loader function
     from app.main.models import User
     @login_manager.user_loader
     def load_user(user_id):

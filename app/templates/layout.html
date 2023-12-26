@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -33,10 +34,10 @@
             background-color: #f8d7da;
             color: #721c24;
             border-radius: 0.25rem;
-        }* Add this to your CSS file */
+        }
 .product-image {
   height: 150px; /* Set the desired height */
-  object-fit: cover; /* Ensure the image covers the entire container */
+  object-fit: cover; /* Ensure the image covers the entire container 
   border-radius: 8px; /* Add rounded corners */
 }
 
@@ -109,6 +110,8 @@
       border: 1px solid #e0e0e0;
       border-radius: 8px;
       margin-bottom: 10px;
+      align-self: center ;
+      
     }
 
     .total-price {
@@ -182,7 +185,9 @@
         <!-- Add other links accessible to all users here -->
         
         
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('user.profile') }}"><i class="fa fa-shopping-cart"></i>My Account</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('cart.view_cart') }}"><i class="fa fa-shopping-cart"></i>cart</a></li>
+  
         <li class="nav-item"><a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a></li>
     {% else %}
         <li class="nav-item"><a class="nav-link" href="{{ url_for('main.login') }}">Login</a></li>

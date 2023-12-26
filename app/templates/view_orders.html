@@ -12,7 +12,7 @@
             <th>User</th>
             <th>Status</th>
             <th>Order Date</th>
-             <th>Action</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -22,9 +22,9 @@
               <td>{{ order.user.username }}</td>  {# Assuming you have a User model with a 'username' attribute #}
               <td>{{ order.status }}</td>
               <td>{{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>  {# Format the date as needed #}
-             <td>
-            <a href="{{ url_for('admin.view_order_details', order_id=order.id) }}" class="btn btn-primary">View Details</a>
-          </td>
+              <td>
+                <a href="{{ url_for('admin.view_order_details', order_id=order.id) }}" class="btn btn-primary">View Details</a>
+              </td>
             </tr>
           {% endfor %}
         </tbody>

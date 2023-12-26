@@ -5,26 +5,36 @@
     <h1 class="mb-4">Upload Product Images</h1>
     <form method="post" enctype="multipart/form-data">
       {{ form.hidden_tag() }}
+
+      <!-- Product Selection -->
       <div class="mb-3">
         {{ form.product.label(class='form-label') }}
-        {{ form.product(class='form-select', placeholder='Select product') }}
+        {{ form.product(class='form-select', placeholder='Select product', required=true) }}
       </div>
+
+      <!-- Cover Image Upload -->
       <div class="mb-3">
         {{ form.cover_image.label(class='form-label') }}
-        {{ form.cover_image(class='form-control') }}
+        {{ form.cover_image(class='form-control', accept='image/*', required=true) }}
       </div>
+
+      <!-- Additional Image Uploads -->
       <div class="mb-3">
         {{ form.image1.label(class='form-label') }}
-        {{ form.image1(class='form-control') }}
+        {{ form.image1(class='form-control', accept='image/*') }}
       </div>
+
       <div class="mb-3">
         {{ form.image2.label(class='form-label') }}
-        {{ form.image2(class='form-control') }}
+        {{ form.image2(class='form-control', accept='image/*') }}
       </div>
+
       <div class="mb-3">
         {{ form.image3.label(class='form-label') }}
-        {{ form.image3(class='form-control') }}
+        {{ form.image3(class='form-control', accept='image/*') }}
       </div>
+
+      <!-- Submit Button -->
       <div class="mb-3">
         {{ form.submit(class='btn btn-primary') }}
       </div>

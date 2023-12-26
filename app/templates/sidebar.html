@@ -1,0 +1,25 @@
+
+
+{% block content %}
+
+<aside class="sidebar">
+  <div class="user-profile text-center">
+    <img src="{{ url_for('static', filename='images/user-avatar.png') }}" alt="User Avatar" class="img-fluid rounded-circle">
+    <h4>{{ current_user.name }}</h4>
+    <p>{{ current_user.email }}</p>
+    <p>{{ current_user.phone }}</p>
+  </div>
+
+  <nav class="user-nav">
+    <ul class="nav flex-column">
+      <li class="nav-item"><a class="nav-link" href="#">My Profile</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">My Orders</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Delivery Information</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Edit Account</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Change Password</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Order Tracking</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Notifications</a></li>
+    </ul>
+  </nav>
+</aside>
+{% endblock%}
