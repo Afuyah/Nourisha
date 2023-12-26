@@ -14,6 +14,7 @@ login_manager = LoginManager()
 mail = Mail()
 def create_app():
     app = Flask(__name__)
+  
     app.config['SECRET_KEY'] = secrets.token_hex(16)
     app.config.from_object(Config)
     mail.init_app(app)
