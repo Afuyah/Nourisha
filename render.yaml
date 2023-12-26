@@ -1,8 +1,9 @@
 services:
-  - type:web
+  - type: web
     envVars:
-      FLASK_ENV:production
-      FLASK_APP:app: create_app
+      FLASK_ENV: production
+      FLASK_APP: app:create_app
+    startCommand: gunicorn -b 0.0.0.0:$PORT app:create_app
 
 
 
