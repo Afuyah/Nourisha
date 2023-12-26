@@ -5,16 +5,21 @@ from config import Config
 from flask_wtf.csrf import CSRFProtect
 from flask_migrate import Migrate
 from datetime import timedelta
-
+from flask_mail import Mail
+import secrets
 
 db = SQLAlchemy()
 login_manager = LoginManager()
-
+mail = Mail()
 def create_app():
     app = Flask(__name__)
+    app.config['SECRET_KEY'] = secrets.token_hex(16)
     app.config.from_object(Config)
-    app.config['SECRET_KEY'] = 'your_secret_key'
+    mail.init_app(app)
+   # Email configuration
   
+  
+      
     db.init_app(app)
     login_manager.init_app(app)
     

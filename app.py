@@ -10,7 +10,7 @@ application.config['STATIC_URL_PATH'] = '/static'
 # Initialize the database
 with application.app_context():
     db.create_all()
-
+    
 if __name__ == '__main__':
     application.run(host='0.0.0.0', port=81, 
-            debug=False)
+            debug=True)

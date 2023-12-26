@@ -1,50 +1,47 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-  <div class="container mt-4">
-    <h1 class="mb-4 text-center">Product Listing</h1>
-    <div class="row row-cols-lg-3 row-cols-md-3 row-cols-1">
-      {% for product in products %}
-        <div class="col mb-4">
-          <div class="card product-card d-flex flex-column h-100">
-            <div class="product-image-container">
-              {% if product.images %}
-                <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image rounded-top" alt="{{ product.name }}">
-              {% else %}
-                <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image rounded-top" alt="Placeholder Image">
-              {% endif %}
-            </div>
+  <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="text-center" style="max-width: 1000px;">
+      <h1 class="mb-4">Product Listing</h1>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-2">
 
-            <div class="card-body product-details-wrapper flex-grow-1">
-              <h5 class="card-title text-primary {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }}">{{ product.brand }}</h5>
-              <p class="card-text {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }}">{{ product.description | truncate(120) }}</p>
-              <p class="card-text {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }}"><strong>Price:</strong> Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</p>
-              <p class="card-text {{ 'text-sm' if loop.index0 % 2 == 0 else 'text-xs' }} {% if product.quantity_in_stock < 5 %}text-danger{% endif %}"><strong>Stock:</strong> {{ product.quantity_in_stock }}</p>
+        {% for product in products %}
+          <div class="col">
+            <div class="card product-card border-0">
+              <div class="product-image-container text-center mb-3">
+                {% if product.images %}
+                  <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image rounded-top" alt="{{ product.name }}">
+                {% else %}
+                  <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image rounded-top" alt="Placeholder Image">
+                {% endif %}
+              </div>
 
-              <form id="add-to-cart-form-{{ product.id }}" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}" method="post" onsubmit="return showLoadingSpinner('{{ product.id }}')">
-                {{ form.csrf_token }}
+              <div class="card-body text-center">
+                <h5 class="card-title text-primary fs-6">{{ product.brand }}</h5>
+                <p class="card-text text-muted fs-6">{{ product.description | truncate(120) }}</p>
+                <p class="card-text fs-6"><strong>Price:</strong> Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</p>
+                <p class="card-text {% if product.quantity_in_stock < 5 %}text-danger{% endif %} fs-6"><strong>Stock:</strong> {{ product.quantity_in_stock }}</p>
 
-                <div class="input-group mb-3">
-                  <div class="input-group-prepend">
-                    <button class="btn btn-secondary" type="button" onclick="updateCartItem('{{ product.id }}', 'decrement')">-</button>
+                <form id="add-to-cart-form-{{ product.id }}" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}" method="post" onsubmit="return showLoadingSpinner('{{ product.id }}')">
+                  {{ form.csrf_token }}
+                  <input type="hidden" id="quantity-input-{{ product.id }}" name="quantity" value="1">
+
+                  <button type="submit" class="btn btn-primary btn-sm fs-6" id="add-to-cart-btn-{{ product.id }}">Add to Cart</button>
+                  <div class="spinner-border text-primary d-none fs-6" role="status" id="loading-spinner-{{ product.id }}">
+                    <span class="sr-only"></span>
                   </div>
-                  <input type="text" class="form-control text-center" id="quantity-input-{{ product.id }}" name="quantity" value="1" readonly style="width: 50px; margin: 0 5px;">
-                  <div class="input-group-append">
-                    <button class="btn btn-secondary" type="button" onclick="updateCartItem('{{ product.id }}', 'increment')">+</button>
-                  </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-sm" id="add-to-cart-btn-{{ product.id }}">Add to Cart</button>
-                <div class="spinner-border text-primary d-none ml-2" role="status" id="loading-spinner-{{ product.id }}">
-                  <span class="sr-only"></span>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      {% endfor %}
+        {% endfor %}
+
+      </div>
     </div>
   </div>
+
+
 
   <script>
     async function getCurrentQuantity(productId) {
@@ -92,6 +89,15 @@
       }
     }
 
+    // Define the showLoadingSpinner function
+    function showLoadingSpinner(productId) {
+      const loadingSpinner = document.getElementById('loading-spinner-' + productId);
+      // Show loading spinner
+      loadingSpinner.classList.remove('d-none');
+      // You can add additional logic if needed
+      return true; // or false based on your requirements
+    }
+
     // Initial synchronization on page load
     document.addEventListener('DOMContentLoaded', async () => {
       {% for product in products %}
@@ -101,4 +107,6 @@
     });
   </script>
 
+
 {% endblock %}
+

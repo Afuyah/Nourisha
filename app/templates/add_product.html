@@ -10,7 +10,7 @@
       <div class="mb-3">
         <div class="mb-3">
     {{ form.name.label(class='form-label') }}
-    {{ form.name(class='form-control', placeholder='Enter supplier ID Number') }}
+    {{ form.name(class='form-control', placeholder='Enter Product Code') }}
       </div>
       </div>
 <div class="mb-3">
@@ -20,7 +20,7 @@
 
       <div class="mb-3">
          {{ form.brand.label(class='form-label') }}
-        {{ form.brand(class='form-control', placeholder='Enter brand') }}
+        {{ form.brand(class='form-control', placeholder='Enter Name') }}
       </div>
 
       <div class="mb-3">
@@ -59,8 +59,8 @@
       </div>
 
       <div class="mb-3">
-         {{ form.supplier.label(class='form-label') }}
-        {{ form.supplier(class='form-select', placeholder='Select supplier') }}
+        {{ form.supplier.label(class='form-label', for='supplier') }}
+        {{ form.supplier(class='form-select', id='supplier', placeholder='Select supplier') }}
       </div>
 
       <div class="mb-3">

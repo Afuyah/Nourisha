@@ -2,9 +2,11 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, FloatField, IntegerField, TextAreaField, SelectField, DateField, SubmitField
 from wtforms.validators import DataRequired, Email, Length
 from flask_wtf.file import FileField, FileRequired, DataRequired
-
+from flask_babel import lazy_gettext as _
 from flask_wtf import FlaskForm, CSRFProtect
-from app.main.models import Supplier
+from app.main.models import Supplier, Location
+
+
 
 class RegistrationForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
@@ -29,9 +31,7 @@ class EditUserForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone = StringField('Phone', validators=[DataRequired(), Length(min=10, max=15)])
     name = StringField('Name', validators=[DataRequired(), Length(min=2, max=50)])
-    password = StringField('Password')  # You may want to change this to a PasswordField for security
-    # Add more fields as needed
-
+    password = PasswordField('Password', validators=[Length(min=6)])
     submit = SubmitField('Save Changes')
 
 class AddProductCategoryForm(FlaskForm):
@@ -71,13 +71,6 @@ class ProductImageForm(FlaskForm):
     image3 = FileField('Image 3', validators=[FileRequired()])
     submit = SubmitField('Upload Images')
 
-class CheckoutForm(FlaskForm):
-    location = SelectField('Location', validators=[DataRequired()])
-    address_line = TextAreaField('Address', validators=[DataRequired()])
-    additional_info = TextAreaField('Additional Information')
-    payment_method = SelectField('Payment Method', choices=[('pay_on_delivery', 'Pay on Delivery'), ('pay_now', 'Pay Now')], validators=[DataRequired()])
-    submit = SubmitField('Place Order')
-
 
 class AddressLineForm(FlaskForm):
     line = StringField('Address Line', validators=[DataRequired()])
@@ -95,4 +88,12 @@ class AddLocationForm(FlaskForm):
     location_name = StringField('Location Name')
     arealine = StringField('Arealine')
     submit = SubmitField('Add Location')
+
+# Define the CheckoutForm
+class CheckoutForm(FlaskForm):
+    location = SelectField('Location', validators=[DataRequired()])
+    address_line = TextAreaField('Address', validators=[DataRequired()])
+    additional_info = TextAreaField('Additional Information')
+    payment_method = SelectField('Payment Method', choices=[('pay_on_delivery', 'Pay on Delivery'), ('pay_now', 'Pay Now')], validators=[DataRequired()])
+    submit = SubmitField('Place Order')
 

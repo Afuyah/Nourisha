@@ -16,7 +16,7 @@
           {% if admin_data.recent_users %}
             <ul class="list-unstyled">
               {% for user in admin_data.recent_users %}
-                <li>{{ user.username }} - {{ user.registration_date }}</li>
+                <li><b>Name: </b>{{ user.name }}  --Ip:{{ user.last_login_ip }} -- {{ user.registration_date }}</li>
               {% endfor %}
             </ul>
           {% else %}
@@ -24,7 +24,12 @@
           {% endif %}
         </div>
       </section>
+     
 
+  <h3></h3><a href="{{ url_for('admin.view_orders') }}">View All Orders</a></h3
+
+       
+   
       <section class="user-section mb-4">
         <h2>Users</h2>
         {% if users %}
@@ -35,6 +40,7 @@
                 <th>Username</th>
                 <th>Email</th>
                 <th>Phone</th>
+                <th>Confirmed</th> 
                 <th>Actions</th>
               </tr>
             </thead>
@@ -45,6 +51,7 @@
                   <td>{{ user.username }}</td>
                   <td>{{ user.email }}</td>
                   <td>{{ user.phone }}</td>
+                  <td>{{ user.role }}</td>
                   <td>
                     <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-primary btn-sm">Edit</a>
                   </td>

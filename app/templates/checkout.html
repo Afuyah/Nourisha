@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <h1>Checkout</h1>
+
+  {% if cart_items %}
+    <div class="row">
+      <div class="col-md-8">
+        <form method="post" action="{{ url_for('cart.checkout') }}">
+          {{ form.csrf_token }}
+
+          <h2>Order Summary</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in cart_items %}
+                <tr>
+                  <td>{{ item.product.brand }}</td>
+                  <td>
+                    <input type="number" name="quantity_{{ item.product.id }}" value="{{ item.quantity }}" min="1" max="{{ item.product.quantity_in_stock }}">
+                  </td>
+                  <td>Ksh. {{ item.product.unit_price * item.quantity }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <h3>Total Price: Ksh. {{ total_price }}</h3>
+
+          <div class="form-group">
+            {{ form.location.label }}
+            {{ form.location(class="form-control") }}
+          </div>
+
+          <div class="form-group">
+            {{ form.address_line.label }}
+            {{ form.address_line(class="form-control") }}
+          </div>
+
+          <div class="form-group">
+            {{ form.additional_info.label }}
+            {{ form.additional_info(class="form-control") }}
+          </div>
+
+          <div class="form-group">
+            {{ form.payment_method.label }}
+            {{ form.payment_method(class="form-control") }}
+          </div>
+
+          {{ form.submit(class="btn btn-primary") }}
+        </form>
+      </div>
+    </div>
+  {% else %}
+    <p>Your cart is empty. Add items to your cart before checking out.</p>
+  {% endif %}
+{% endblock %}

@@ -1,24 +1,28 @@
-from app import db
+from app import db, mail
 from flask import render_template, abort, Blueprint,flash, redirect, url_for, request, jsonify, send_file, session,current_app
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
+from app.admin import admin_bp
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm, CustomerLocationForm, LoginForm, AddRoleForm, AddSupplierForm
-from app.main.models import User, Role, Cart, Supplier, ProductImage,  ProductCategory,  Product
-from datetime import datetime
+from app.main.models import User, Role, Cart, Supplier, ProductImage,  ProductCategory,  Product, Order, OrderItem, Location, Cart
+from datetime import datetime, timedelta
 from sqlalchemy.exc import IntegrityError
 import pdfcrowd
 from werkzeug.utils import secure_filename
 import os 
 from sqlalchemy.orm.exc import NoResultFound
 from app.cart.routes import cart_bp
-
+from sqlalchemy.exc import IntegrityError
+from .send_email import send_confirmation_email
+from flask_mail import Message
 @bp.route('/')
 def index():
      return render_template('home.html', title='Home', product_listing_url=url_for('main.product_listing'))
 
-@bp.route('/register', methods=['GET', 'POST'])
+@bp.route('/register', methods=['POST', 'GET'])
 def register():
     form = RegistrationForm()
+
     if form.validate_on_submit():
         try:
             user = User(
@@ -29,9 +33,13 @@ def register():
             )
             user.set_password(form.password.data)
             db.session.add(user)
-            db.session.commit()
+            db.session.commit()  # Commit the user to the database
 
-            flash('Registration successful!', 'success')
+            # Now that the user is committed, generate and send confirmation email
+            user.generate_confirmation_token()
+            send_confirmation_email(user)
+
+            flash('Registration successful! A confirmation email has been sent.', 'success')
             return redirect(url_for('main.login'))
 
         except IntegrityError as e:
@@ -40,6 +48,25 @@ def register():
             return redirect(url_for('main.register'))
 
     return render_template('register.html', form=form)
+
+
+
+#def send_confirmation_email(user):
+    #confirm_url = url_for('main.confirm', token=user.confirmation_token, _external=True)
+  #  msg = Message('Confirm Your Account', recipients=[user.email])
+   # msg.html = render_template('confirmation_email.html', user=user, confirm_url=confirm_url)
+   # mail.send(msg)
+
+
+@bp.route('/confirm/<token>')
+def confirm(token):
+    user = User.query.filter_by(confirmation_token=token).first_or_404()
+    if user.confirm(token):
+        flash('Your account has been confirmed. You can now log in.', 'success')
+        return redirect(url_for('main.login'))
+    else:
+        flash('The confirmation link is invalid or has expired.', 'danger')
+        return redirect(url_for('main.index'))
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -133,27 +160,6 @@ def add_supplier():
     suppliers = Supplier.query.all()
 
     return render_template('add_supplier.html', form=form, suppliers=suppliers)
-
-@bp.route('/generate_pdf', methods=['GET'])
-def generate_pdf():
-    # Fetch all suppliers
-    suppliers = Supplier.query.all()
-
-    # Render HTML template to a string
-    html = render_template('pdf_template.html', suppliers=suppliers)
-
-    # Create a pdfcrowd client
-    client = pdfcrowd.HtmlToPdfClient('bha', 'a84c5fe3acd8f81c3baa119f07962071')
-
-    # Convert HTML to PDF
-    pdf = client.convertString(html)
-
-    # Save the PDF to a file
-    with open('suppliers_table.pdf', 'wb') as f:
-        f.write(pdf)
-
-    # Return the PDF file for download
-    return send_file('suppliers_table.pdf', as_attachment=True)
 
 
 @bp.route('/add_product', methods=['GET', 'POST'])
@@ -375,19 +381,16 @@ def update_cart():
         # Perform database queries to update the cart
         update_cart_in_database(user_id, product_id, action)
 
-        # Fetch updated quantity and total price
-        updated_quantity, total_price = get_updated_cart_info(user_id)
+        # Fetch updated cart info
+        updated_cart_info = get_updated_cart_info(user_id)
 
         # Example response
         response_data = {
             'status': 'success',
             'message': 'Cart updated successfully',
             'data': {
-                'cartItems': [
-                    {'productId': item.product_id, 'quantity': item.quantity, 'subtotal': item.product.unit_price * item.quantity}
-                    for item in Cart.query.filter_by(user_id=user_id).all()
-                ],
-                'totalPrice': calculate_total_amount(),
+                'cartItems': updated_cart_info['cartItems'],
+                'totalPrice': updated_cart_info['totalPrice'],
             }
         }
 
@@ -403,16 +406,21 @@ def update_cart():
         }
         return jsonify(response_data), 500
 
-
 def get_updated_cart_info(user_id):
-    # Perform database queries to get updated quantity and total price
+    # Perform database queries to get updated cart info
     cart_items = Cart.query.filter_by(user_id=user_id).all()
 
     # Calculate total price
     total_price = sum(cart_item.product.unit_price * cart_item.quantity for cart_item in cart_items)
 
-    # Return the updated quantity and total price
-    return sum(cart_item.quantity for cart_item in cart_items), total_price
+    # Return the updated cart info
+    return {
+        'cartItems': [
+            {'productId': item.product_id, 'quantity': item.quantity, 'subtotal': item.product.unit_price * item.quantity}
+            for item in cart_items
+        ],
+        'totalPrice': total_price,
+    }
 
 def update_cart_in_database(user_id, product_id, action):
     # Perform database queries to update the cart
@@ -429,6 +437,14 @@ def update_cart_in_database(user_id, product_id, action):
         cart_item = Cart(user_id=user_id, product_id=product_id, quantity=1)
         db.session.add(cart_item)
 
+    # Update quantity in stock for the corresponding product
+    product = Product.query.get(product_id)
+    if product:
+        if action == 'increment' and product.quantity_in_stock > 0:
+            product.quantity_in_stock -= 1
+        elif action == 'decrement':
+            product.quantity_in_stock += 1
+
     # Commit changes to the database
     db.session.commit()
 
@@ -436,3 +452,140 @@ def get_authenticated_user_id():
     # Replace this with your actual user authentication logic
     # For now, return a placeholder user_id (you should implement this based on your authentication mechanism)
     return current_user.get_id()
+  
+@bp.route('/main/cart/clear_cart', methods=['POST'])
+def clear_cart():
+    try:
+        # Authenticate the user and obtain the user_id (replace with your actual authentication logic)
+        user_id = get_authenticated_user_id()
+
+        if user_id is None:
+            raise ValueError('User not authenticated')  # You can customize this error message
+
+        # Fetch cart items for the user
+        cart_items = Cart.query.filter_by(user_id=user_id).all()
+
+        # Iterate over cart items to increase quantity in stock
+        for cart_item in cart_items:
+            product = cart_item.product
+            product.quantity_in_stock += cart_item.quantity
+
+        # Commit changes to the database
+        db.session.commit()
+
+        clear_cart_in_database(user_id)
+
+        response_data = {
+            'status': 'success',
+            'message': 'Cart cleared successfully',
+        }
+
+        return jsonify(response_data)
+
+    except Exception as e:
+        current_app.logger.error('Error clearing cart: %s', str(e))
+
+        response_data = {
+            'status': 'error',
+            'message': 'Internal Server Error: ' + str(e),
+        }
+        return jsonify(response_data), 500
+
+def clear_cart_in_database(user_id):
+    # Clear the user's cart in the database
+    Cart.query.filter_by(user_id=user_id).delete()
+
+    # Commit changes to the database
+    db.session.commit()
+
+
+@bp.route('/main/api/get_quantity_in_stock/<int:product_id>', methods=['GET'])
+def get_quantity_in_stock(product_id):
+    try:
+        # Fetch the product from the database
+        product = Product.query.get(product_id)
+
+        if not product:
+            response_data = {
+                'status': 'error',
+                'message': 'Product not found',
+            }
+            return jsonify(response_data), 404
+
+        # Return the quantity in stock
+        response_data = {
+            'status': 'success',
+            'quantity_in_stock': product.quantity_in_stock,
+        }
+        return jsonify(response_data)
+
+    except Exception as e:
+        current_app.logger.error('Error getting quantity in stock: %s', str(e))
+        response_data = {
+            'status': 'error',
+            'message': 'Internal Server Error: ' + str(e),
+        }
+        return jsonify(response_data), 500
+
+
+@cart_bp.route('/checkout', methods=['GET', 'POST'])
+@login_required
+def checkout():
+    form = CheckoutForm()
+
+    # Fetch user's cart items with product details
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+
+    # Calculate total price
+    total_price = sum(cart_item.product.unit_price * cart_item.quantity for cart_item in cart_items)
+
+    # Set choices for the location field
+    form.location.choices = [(location.id, location.location_name) for location in Location.query.all()]
+
+    if form.validate_on_submit():
+        # Create a new order
+        order = Order(
+            user_id=current_user.id,
+            status='pending',  # Set status to 'pending' by default
+            total_price=total_price,
+            location_id=form.location.data,
+            address_line=form.address_line.data,
+            additional_info=form.additional_info.data,
+            payment_method=form.payment_method.data
+        )
+
+        # Add order items to the order
+        for cart_item in cart_items:
+            order_item = OrderItem(
+                order=order,
+                product_id=cart_item.product.id,
+                quantity=cart_item.quantity,
+                unit_price=cart_item.product.unit_price
+            )
+            db.session.add(order_item)
+
+        # Commit changes to the database
+        db.session.add(order)
+        db.session.commit()
+
+        # Clear the user's cart
+        Cart.query.filter_by(user_id=current_user.id).delete()
+        db.session.commit()
+
+        flash('Order placed successfully!', 'success')
+        return redirect(url_for('main.index'))
+
+    return render_template('checkout.html', form=form, cart_items=cart_items, total_price=total_price)
+
+
+@admin_bp.route('/view_orders', methods=['GET'])
+def view_orders():
+    # Check if the current user is an admin
+    if not current_user.is_authenticated or (current_user.role and current_user.role.name != 'admin'):
+      abort(403)  
+
+   
+    orders = Order.query.all()
+
+    # Render the orders in an HTML template
+    return render_template('/view_orders.html', orders=orders)

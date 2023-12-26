@@ -3,55 +3,73 @@
 {% block content %}
   <div class="container mt-4">
     <h1 class="mb-4 text-center">Your Cart</h1>
+    <button class="btn btn-danger btn-sm clear-cart-btn" onclick="window.location.href='/cart/view_cart'">Clear Cart</button>
 
-    {% for item in cart_items %}
-      <div class="col mb-4">
-        <div class="card product-card d-flex flex-column h-100">
-          <div class="card-body product-details-wrapper flex-grow-1">
-            <h5 class="card-title text-primary">{{ item.product.brand }}</h5>
-            <p class="card-text">{{ item.product.description | truncate(120) }}</p>
-            <p class="card-text"><strong>Price:</strong> Ksh {{ item.product.unit_price }} / {{ item.product.unit_measurement }}</p>
-            <p class="card-text">
-  <strong>Quantity:</strong>
-  <span class="quantity-display" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
-  <button class="btn btn-secondary btn-sm decrement-btn" data-product-id="{{ item.product.id }}">-</button>
-  <button class="btn btn-secondary btn-sm increment-btn" data-product-id="{{ item.product.id }}">+</button>
-  <div class="spinner-border text-primary d-none loading-spinner" role="status" data-product-id="{{ item.product.id }}">
-    <span class="sr-only"></span>
-  </div>
-</p>
-            <p class="card-text"><strong>Subtotal:</strong> Ksh<span id="subtotal-{{ item.product.id }}">{{ item.product.unit_price * item.quantity }}</span></p>
+    <div class="cart-items-container">
+      {% if cart_items %}
+        {% for item in cart_items %}
+          <div class="col mb-4">
+            <div class="card product-card d-flex flex-column h-100">
+              <div class="card-body product-details-wrapper flex-grow-1">
+                <h5 class="card-title text-primary">{{ item.product.brand }}</h5>
+                <p class="card-text">{{ item.product.description | truncate(120) }}</p>
+                <p class="card-text"><strong>Price:</strong> Ksh {{ item.product.unit_price }} / {{ item.product.unit_measurement }}</p>
+                <p class="card-text">
+                  <strong>Quantity:</strong>
+                  <span class="quantity-display" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
+                  <button class="btn btn-secondary btn-sm decrement-btn" data-product-id="{{ item.product.id }}">-</button>
+                  <button class="btn btn-secondary btn-sm increment-btn" data-product-id="{{ item.product.id }}">+</button>
+                  <div class="spinner-border text-primary d-none loading-spinner" role="status" data-product-id="{{ item.product.id }}">
+                    <span class="sr-only"></span>
+                  </div>
+                </p>
+                <p class="card-text"><strong>Subtotal:</strong> Ksh<span id="subtotal-{{ item.product.id }}">{{ item.product.unit_price * item.quantity }}</span></p>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    {% endfor %}
+        {% endfor %}
+      {% else %}
+        <p class="text-center">Your cart is empty.</p>
+      {% endif %}
+    </div>
 
-    <p>Total Price: Ksh<span id="total-price">{{ total_price }}</span></p>
-
+    <p class="total-price">Total Price: Ksh<span id="total-price">{{ total_price }}</span>
+    
+    
+    </p>
+<button class="btn btn-primary btn-sm proceed-to-checkout-btn" onclick="window.location.href='/cart/checkout'">Proceed to Checkout</button>
     <div class="spinner-border text-primary d-none" role="status" id="loading-spinner">
       <span class="sr-only"></span>
     </div>
   </div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.decrement-btn').forEach(function(button) {
-    button.addEventListener('click', function() {
-      const productId = button.getAttribute('data-product-id');
-      const csrfToken = document.querySelector('meta[name=csrf-token]').content;
-      updateCartItem(productId, 'decrement', csrfToken);
-    });
-  });
 
-  document.querySelectorAll('.increment-btn').forEach(function(button) {
-    button.addEventListener('click', function() {
-      const productId = button.getAttribute('data-product-id');
-      const csrfToken = document.querySelector('meta[name=csrf-token]').content;
-      updateCartItem(productId, 'increment', csrfToken);
+  <script>
+   document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.decrement-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+          const productId = button.getAttribute('data-product-id');
+          const csrfToken = document.querySelector('meta[name=csrf-token]').content;
+          updateCartItem(productId, 'decrement', csrfToken);
+        });
+      });
+
+      document.querySelectorAll('.increment-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+          const productId = button.getAttribute('data-product-id');
+          const csrfToken = document.querySelector('meta[name=csrf-token]').content;
+          updateCartItem(productId, 'increment', csrfToken);
+        });
+      });
+
+      document.querySelectorAll('.clear-cart-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+          const csrfToken = document.querySelector('meta[name=csrf-token]').content;
+          clearCart(csrfToken);
+        });
+      });
     });
-  });
-});
-  
- async function updateCartItem(productId, action, csrfToken) {
+
+async function updateCartItem(productId, action, csrfToken) {
   const loadingSpinner = document.getElementById('loading-spinner');
 
   // Show loading spinner
@@ -88,11 +106,13 @@ document.addEventListener('DOMContentLoaded', function() {
         totalPriceElement.textContent = data.data.totalPrice;
       }
 
-      // Optionally, update other elements like stock or perform additional actions
+      // Update quantity in stock
+      updateQuantityInStock();
+
+      // Optionally, update other elements or perform additional actions
     } else {
       console.error('Error updating cart:', data.message);
     }
-
   } catch (error) {
     console.error('Error updating quantity:', error);
   } finally {
@@ -100,5 +120,55 @@ document.addEventListener('DOMContentLoaded', function() {
     loadingSpinner.classList.add('d-none');
   }
 }
-</script>
+
+async function clearCart(csrfToken) {
+    const loadingSpinner = document.getElementById('loading-spinner');
+
+    // Show loading spinner
+    loadingSpinner.classList.remove('d-none');
+
+    try {
+        // Send a request to your server to clear the cart
+        const response = await fetch(`/main/cart/clear_cart`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            // Clear the UI elements
+            const cartItemsContainer = document.querySelector('.cart-items-container');
+            if (cartItemsContainer) {
+                cartItemsContainer.innerHTML = '';  // Clear the cart items container
+            }
+
+            // Update total price
+            const totalPriceElement = document.getElementById('total-price');
+            if (totalPriceElement) {
+                totalPriceElement.textContent = '0';  // Assuming the total price element is a number
+            }
+
+            // Optionally, update other elements or perform additional actions
+        } else {
+            console.error('Error clearing cart:', data.message);
+        }
+    } catch (error) {
+        console.error('Error clearing cart:', error);
+    } finally {
+        // Hide loading spinner
+        loadingSpinner.classList.add('d-none');
+    }
+}
+
+
+    function updateQuantityInStock() {
+      // Implement the logic to update the quantity in stock in the UI
+      // This function should be customized based on your specific requirements
+      console.log('Updating quantity in stock...');
+    }
+  </script>
 {% endblock %}

@@ -1,9 +1,10 @@
-from flask import render_template, redirect, url_for, flash, request, current_app
+from flask import render_template, redirect, url_for, flash, request, current_app,abort
 from flask_login import current_user, login_required
 from app.main.forms import EditUserForm, AddLocationForm
 from app.admin import admin_bp
-from app.main.models import User, Role, Location  
+from app.main.models import User, Role, Location , Order
 from app import db
+from datetime import datetime
 
 @admin_bp.route('/admin_dashboard', methods=['GET', 'POST'])
 @login_required
@@ -95,3 +96,51 @@ def add_location():
     locations = Location.query.all()
 
     return render_template('add_location.html', form=form, locations=locations)
+
+@admin_bp.route('/view_order_details/<int:order_id>')
+def view_order_details(order_id):
+    # Fetch the order details from the database
+    order = Order.query.get_or_404(order_id)
+
+    # Render the order details template with the order data
+    return render_template('view_order_details.html', order=order)
+
+@admin_bp.route('/confirm_order/<int:order_id>', methods=['POST'])
+@login_required
+def confirm_order(order_id):
+    # Check if the current user is an admin
+    if not current_user.is_authenticated or (current_user.role and current_user.role.name != 'admin'):
+        abort(403)   # Forbidden, user is not an admin
+
+    # Fetch the order from the database
+    order = Order.query.get_or_404(order_id)
+
+    # Confirm the order (change status to 'confirmed')
+    order.status = 'confirmed'
+    db.session.commit()
+
+    flash('Order confirmed successfully!', 'success')
+    return redirect(url_for('admin.view_orders'))
+
+@admin_bp.route('/cancel_order/<int:order_id>', methods=['POST'])
+@login_required
+def cancel_order(order_id):
+    # Check if the current user is an admin
+    if not current_user.is_authenticated or (current_user.role and current_user.role.name != 'admin'):
+        abort(403)
+
+    # Fetch the order from the database
+    order = Order.query.get_or_404(order_id)
+
+    # Cancel the order (change status to 'canceled')
+    order.status = 'canceled'
+
+    # Return items to stock
+    for order_item in order.order_items:
+        product = order_item.product
+        product.quantity_in_stock += order_item.quantity
+
+    db.session.commit()
+
+    flash('Order canceled successfully!', 'success')
+    return redirect(url_for('admin.view_orders'))
