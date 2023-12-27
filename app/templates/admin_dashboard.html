@@ -1,12 +1,12 @@
-{% include 'layout.html' %}
+{% extends 'layout.html' %}
 {% block content %}
 
 <div class="container mt-4">
-    <div class="admin-portal">
+    <div class="admin-portal-container p-4 mb-4 border rounded shadow">
         <h1 class="mb-4">Admin Portal</h1>
   
         <!-- Dashboard Stats Section -->
-        <section class="admin-dashboard mb-4">
+        <section class="admin-dashboard mb-4 pb-3 border-bottom">
             <h2 class="mb-3">Welcome to the Admin Dashboard</h2>
             <div class="dashboard-stats">
                 <p class="lead">Total Users: <span class="badge bg-primary">{{ admin_data.total_users }}</span></p>
@@ -14,9 +14,9 @@
                 {% if admin_data.recent_users %}
                 <ul class="list-group">
                     {% for user in admin_data.recent_users %}
-                    <li class="list-group-item">
-                        <b>Name: </b>{{ user.name }} | <b>Last Login IP: </b>{{ user.last_login_ip }} | <b>Registration Date: </b>{{ user.registration_date }}
-                    </li>
+                        <li class="list-group-item">
+                            <b>Name: </b>{{ user.name }} | <b>Last Login IP: </b>{{ user.last_login_ip }} | <b>Registration Date: </b>{{ user.registration_date }}
+                        </li>
                     {% endfor %}
                 </ul>
                 {% else %}
@@ -29,42 +29,53 @@
         <h3><a href="{{ url_for('admin.view_orders') }}" class="btn btn-primary">View All Orders</a></h3>
 
         <!-- Users Section -->
-        <section class="user-section mb-4">
-            <h2>Users</h2>
-            {% if users %}
-            <table class="table table-striped table-bordered table-hover">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Confirmed</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                    <tr>
-                        <td>{{ user.id }}</td>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.phone }}</td>
-                        <td>{{ user.role }}</td>
-                        <td>
-                            <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-primary btn-sm">Edit</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p>No users available.</p>
-            {% endif %}
-        </section>
+<section class="user-section mb-4 pb-3 border-bottom">
+    <h2>Users</h2>
+    {% if users %}
+    <table id="user-table" class="table table-striped table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Confirmed</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.phone }}</td>
+                    <td>{{ user.role }}</td>
+                    <td>
+                        <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-primary btn-sm">Edit</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No users available.</p>
+    {% endif %}
+
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#user-table').DataTable({
+                "pageLength": 5, // Display 5 rows per page by default
+                "lengthMenu": [5, 10, 25, 50], // Options for rows per page
+            });
+        });
+    </script>
+</section>
+
 
         <!-- Roles Section -->
-        <section class="role-section mb-4">
+        <section class="role-section mb-4 pb-3 border-bottom">
             <h2>Roles</h2>
             {% if roles %}
             <table class="table table-striped table-bordered table-hover">
@@ -77,13 +88,13 @@
                 </thead>
                 <tbody>
                     {% for role in roles %}
-                    <tr>
-                        <td>{{ role.id }}</td>
-                        <td>{{ role.name }}</td>
-                        <td>
-                            <a href="{{ url_for('admin.edit_role', role_id=role.id) }}" class="btn btn-primary btn-sm">Edit</a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>{{ role.id }}</td>
+                            <td>{{ role.name }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_role', role_id=role.id) }}" class="btn btn-primary btn-sm">Edit</a>
+                            </td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -92,6 +103,6 @@
             {% endif %}
         </section>
     </div>
-
 </div>
+
 {% endblock %}

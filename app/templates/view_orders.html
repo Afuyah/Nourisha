@@ -5,8 +5,8 @@
     <h1 class="mb-4 text-center">All Orders</h1>
 
     {% if orders %}
-      <table class="table">
-        <thead>
+      <table id="orders-table" class="table table-striped table-bordered table-hover">
+        <thead class="thead-dark">
           <tr>
             <th>Order ID</th>
             <th>User</th>
@@ -19,9 +19,9 @@
           {% for order in orders %}
             <tr>
               <td>{{ order.id }}</td>
-              <td>{{ order.user.username }}</td>  {# Assuming you have a User model with a 'username' attribute #}
+              <td>{{ order.user.username }}</td>
               <td>{{ order.status }}</td>
-              <td>{{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>  {# Format the date as needed #}
+              <td>{{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
               <td>
                 <a href="{{ url_for('admin.view_order_details', order_id=order.id) }}" class="btn btn-primary">View Details</a>
               </td>
@@ -32,5 +32,17 @@
     {% else %}
       <p class="text-center">No orders found.</p>
     {% endif %}
+
+    <script>
+      $(document).ready(function() {
+        // Initialize DataTable
+        $('#orders-table').DataTable({
+          "paging": true,
+          "ordering": true,
+          "info": false,
+        });
+      });
+    </script>
   </div>
 {% endblock %}
+

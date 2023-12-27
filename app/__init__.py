@@ -37,6 +37,9 @@ def create_app():
 #user Blueprint registration
     from app.user.routes import user_bp
     app.register_blueprint(user_bp)
+
+    from app.payments.routes import payment_bp
+    app.register_blueprint(payment_bp)
    
     from app.cart.routes import cart_bp
     app.register_blueprint(cart_bp)

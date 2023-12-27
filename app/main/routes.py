@@ -573,10 +573,17 @@ def checkout():
         Cart.query.filter_by(user_id=current_user.id).delete()
         db.session.commit()
 
-        flash('Order placed successfully!', 'success')
-        return redirect(url_for('main.index'))
+        
+        transaction_id = order.id
+
+        # You can now redirect the user to the payment page, passing the transaction ID
+        # Ensure to implement the redirection logic to the payment page
+        flash('Order placed successfully! Redirecting to payment page...', 'success')
+        return redirect(url_for('payments.mpesa_payment', order_id=order.id))
+
 
     return render_template('checkout.html', form=form, cart_items=cart_items, total_price=total_price)
+
 
 
 @admin_bp.route('/view_orders', methods=['GET'])

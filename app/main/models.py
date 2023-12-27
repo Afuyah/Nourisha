@@ -139,15 +139,18 @@ class Order(db.Model):
     additional_info = db.Column(db.Text)
     payment_method = db.Column(db.String(50), nullable=False)
 
-    # Define the relationship with User
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship('User', back_populates='orders')
+    # Payment details
+    payment_status = db.Column(db.String(50), default='unpaid')  # 'unpaid', 'paid', etc.
+    payment_date = db.Column(db.DateTime)  # Date when payment was made
+    transaction_id = db.Column(db.String(100))  # Unique identifier for the payment transaction
 
+    # Define the relationship with User
+    user = db.relationship('User', back_populates='orders')
 
     # Define the relationship with Location
-    location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
     location = db.relationship('Location', back_populates='orders')
-    user = db.relationship('User', back_populates='orders')
+    
+    # Relationship with OrderItem
     order_items = db.relationship('OrderItem', back_populates='order')
 
 class OrderItem(db.Model):

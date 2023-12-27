@@ -16,12 +16,8 @@
                 <p class="card-text"><strong>Price:</strong> Ksh {{ item.product.unit_price }} / {{ item.product.unit_measurement }}</p>
                 <p class="card-text">
                   <strong>Quantity:</strong>
-
-                  
                   <button class="btn btn-secondary btn-sm decrement-btn" data-product-id="{{ item.product.id }}">-</button>
-
-<span class="quantity-display" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
-                  
+                  <span class="quantity-display" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
                   <button class="btn btn-secondary btn-sm increment-btn" data-product-id="{{ item.product.id }}">+</button>
                   <div class="spinner-border text-primary d-none loading-spinner" role="status" data-product-id="{{ item.product.id }}">
                     <span class="sr-only"></span>
@@ -47,7 +43,7 @@
   </div>
 
   <script>
-   document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('.decrement-btn').forEach(function (button) {
         button.addEventListener('click', function () {
           const productId = button.getAttribute('data-product-id');
@@ -72,101 +68,100 @@
       });
     });
 
-async function updateCartItem(productId, action, csrfToken) {
-  const loadingSpinner = document.getElementById('loading-spinner');
+    async function updateCartItem(productId, action, csrfToken) {
+      const loadingSpinner = document.getElementById('loading-spinner');
 
-  // Show loading spinner
-  loadingSpinner.classList.remove('d-none');
+      // Show loading spinner
+      loadingSpinner.classList.remove('d-none');
 
-  try {
-    const response = await fetch(`/cart/api/update`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken,
-      },
-      body: JSON.stringify({ productId, action }),
-    });
-
-    const data = await response.json();
-
-    if (data.status === 'success') {
-      // Update each cart item in the UI
-      data.data.cartItems.forEach(cartItem => {
-        const quantityDisplay = document.querySelector(`.quantity-display[data-product-id="${cartItem.productId}"]`);
-        const subtotalElement = document.getElementById(`subtotal-${cartItem.productId}`);
-
-        // Update quantity and subtotal for each item
-        if (quantityDisplay && subtotalElement) {
-          quantityDisplay.textContent = cartItem.quantity;
-          subtotalElement.textContent = cartItem.subtotal;
-        }
-      });
-
-      // Update total price
-      const totalPriceElement = document.getElementById('total-price');
-      if (totalPriceElement) {
-        totalPriceElement.textContent = data.data.totalPrice;
-      }
-
-      // Update quantity in stock
-      updateQuantityInStock();
-
-      // Optionally, update other elements or perform additional actions
-    } else {
-      console.error('Error updating cart:', data.message);
-    }
-  } catch (error) {
-    console.error('Error updating quantity:', error);
-  } finally {
-    // Hide loading spinner
-    loadingSpinner.classList.add('d-none');
-  }
-}
-
-async function clearCart(csrfToken) {
-    const loadingSpinner = document.getElementById('loading-spinner');
-
-    // Show loading spinner
-    loadingSpinner.classList.remove('d-none');
-
-    try {
-        // Send a request to your server to clear the cart
-        const response = await fetch(`/main/cart/clear_cart`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,
-            },
+      try {
+        const response = await fetch(`/cart/api/update`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          },
+          body: JSON.stringify({ productId, action }),
         });
 
         const data = await response.json();
 
         if (data.status === 'success') {
-            // Clear the UI elements
-            const cartItemsContainer = document.querySelector('.cart-items-container');
-            if (cartItemsContainer) {
-                cartItemsContainer.innerHTML = '';  // Clear the cart items container
-            }
+          // Update each cart item in the UI
+          data.data.cartItems.forEach(cartItem => {
+            const quantityDisplay = document.querySelector(`.quantity-display[data-product-id="${cartItem.productId}"]`);
+            const subtotalElement = document.getElementById(`subtotal-${cartItem.productId}`);
 
-            // Update total price
-            const totalPriceElement = document.getElementById('total-price');
-            if (totalPriceElement) {
-                totalPriceElement.textContent = '0';  // Assuming the total price element is a number
+            // Update quantity and subtotal for each item
+            if (quantityDisplay && subtotalElement) {
+              quantityDisplay.textContent = cartItem.quantity;
+              subtotalElement.textContent = cartItem.subtotal;
             }
+          });
 
-            // Optionally, update other elements or perform additional actions
+          // Update total price
+          const totalPriceElement = document.getElementById('total-price');
+          if (totalPriceElement) {
+            totalPriceElement.textContent = data.data.totalPrice;
+          }
+
+          // Update quantity in stock
+          updateQuantityInStock();
+
+          // Optionally, update other elements or perform additional actions
         } else {
-            console.error('Error clearing cart:', data.message);
+          console.error('Error updating cart:', data.message);
         }
-    } catch (error) {
-        console.error('Error clearing cart:', error);
-    } finally {
+      } catch (error) {
+        console.error('Error updating quantity:', error);
+      } finally {
         // Hide loading spinner
         loadingSpinner.classList.add('d-none');
+      }
     }
-}
 
+    async function clearCart(csrfToken) {
+      const loadingSpinner = document.getElementById('loading-spinner');
+
+      // Show loading spinner
+      loadingSpinner.classList.remove('d-none');
+
+      try {
+        // Send a request to your server to clear the cart
+        const response = await fetch(`/main/cart/clear_cart`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          // Clear the UI elements
+          const cartItemsContainer = document.querySelector('.cart-items-container');
+          if (cartItemsContainer) {
+            cartItemsContainer.innerHTML = '';  // Clear the cart items container
+          }
+
+          // Update total price
+          const totalPriceElement = document.getElementById('total-price');
+          if (totalPriceElement) {
+            totalPriceElement.textContent = '0';  // Assuming the total price element is a number
+          }
+
+          // Optionally, update other elements or perform additional actions
+        } else {
+          console.error('Error clearing cart:', data.message);
+        }
+      } catch (error) {
+        console.error('Error clearing cart:', error);
+      } finally {
+        // Hide loading spinner
+        loadingSpinner.classList.add('d-none');
+      }
+    }
 
     function updateQuantityInStock() {
       // Implement the logic to update the quantity in stock in the UI

@@ -1,0 +1,38 @@
+
+
+{% extends 'layout.html' %}
+
+{% block content %}
+  <div class="container">
+    <h2>M-Pesa Payment</h2>
+
+    <div class="row">
+      <div class="col-md-6">
+        <h3>Order Details</h3>
+        <p><strong>Order ID:#</strong> {{ order.id }}</p>
+        <p><strong>Total Price:</strong> Ksh. {{ order.total_price }}</p>
+        <!-- Add more order details as needed -->
+
+        <!-- Payment Form -->
+        <form action="{{ url_for('payments.mpesa_callback') }}" method="post">
+          <!-- Include any additional hidden fields or form elements as needed -->
+
+          <button type="submit" class="btn btn-primary">Pay with M-Pesa</button>
+        </form>
+      </div>
+
+      <!-- You can include additional information or payment instructions in the second column -->
+      <div class="col-md-6">
+        <h3>Payment Instructions</h3>
+        <p>Follow the instructions below to complete your payment with M-Pesa:</p>
+        <ol>
+          <li>Dial *XXX# on your mobile phone</li>
+          <li>Select 'Pay Bill'</li>
+          <li>Enter the business number: XXXXX</li>
+          <li>Enter Account Number: {{order.id}}</li>
+          <li>Enter the amount: Ksh. {{ order.total_price }}</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+{% endblock %}
