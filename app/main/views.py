@@ -6,22 +6,7 @@ from app.admin import admin_bp
 from app.main.models import User, Role
 from app.main.forms import RegistrationForm, LoginForm
 
-@bp.route('/register', methods=['GET', 'POST'])
-def register():
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        user = User(
-            name=form.name.data,
-            username=form.username.data,
-            email=form.email.data,
-            phone=form.phone.data,
-            password=form.password.data
-        )
-        db.session.add(user)
-        db.session.commit()
-        flash('Registration successful! You can now log in.', 'success')
-        return redirect(url_for('main.login'))
-    return render_template('register.html', form=form)
+
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():

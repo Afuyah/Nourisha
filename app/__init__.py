@@ -21,7 +21,25 @@ def create_app():
     app.config.from_object(Config)
     mail.init_app(app)
    # Email configuration
-  
+    #app.config['MAIL_SERVER'] = 'smtp.live.com'
+   # app.config['MAIL_PORT'] = 587  # or your mail server's port
+   #app.config['MAIL_USE_TLS'] = True
+    #app.config['MAIL_USE_SSL'] = False
+    #app.config['MAIL_USERNAME'] = 'henryafuya@hotmail.com'
+    #app.config['MAIL_PASSWORD'] = 'H3nr1X@54'
+    #app.config['MAIL_DEFAULT_SENDER'] = 'henryafuya@hotmail.com'
+    #app.config['MAIL_DEBUG'] = True
+    app.config['MAIL_SERVER']='sandbox.smtp.mailtrap.io'
+    app.config['MAIL_PORT'] = 2525
+    app.config['MAIL_USERNAME'] = '1ad3be1d9fa9c4'
+    app.config['MAIL_PASSWORD'] = '6d4968f39bca9e'
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
+
+
+# Create the Mail object
+   
+
   
       
     db.init_app(app)
@@ -55,4 +73,3 @@ def create_app():
     migrate = Migrate(app, db)
     
     return app
-

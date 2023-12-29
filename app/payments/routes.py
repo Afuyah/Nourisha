@@ -2,6 +2,9 @@ from flask import render_template, abort, Blueprint,flash, redirect, url_for, re
 from flask_login import current_user, login_user, logout_user, login_required
 from app.payments import payment_bp
 from app.main.models import Order
+from app.payments.safaricom import lipa_na_mpesa_online
+
+from app.main.forms import CheckoutForm
 # Route for handling M-Pesa payment
 @payment_bp.route('/mpesa_payment/<int:order_id>', methods=['GET'])
 @login_required
@@ -13,9 +16,13 @@ def mpesa_payment(order_id):
     if order.user_id != current_user.id:
         flash('You do not have permission to access this page.', 'danger')
         return redirect(url_for('main.index'))
-
+    
     # Render the payment page with order details
-    return render_template('mpesa_payment.html', order=order)
+    form = CheckoutForm()
+
+    # Render the payment page with order details and the form
+    return render_template('mpesa_payment.html', order=order, form=form)
+
 
 
 @payment_bp.route('/mpesa_callback', methods=['POST'])
@@ -53,3 +60,6 @@ def mpesa_callback():
     else:
         # Handle the case where the order with the given order_id is not found
         return {'status': 'error', 'message': 'Order not found'}, 404
+
+
+

@@ -13,3 +13,10 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///naurish_a_g_stores.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+
+    SAFARICOM_API_KEY = 'your_api_key'
+    SAFARICOM_API_SECRET = 'your_api_secret'
+    SAFARICOM_LNM_PASSKEY = 'your_lnm_passkey'
+    SAFARICOM_SHORTCODE = 'your_shortcode'
+    SAFARICOM_LNM_CALLBACK_URL = 'your_callback_url'
+  

@@ -7,7 +7,6 @@ from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageF
 from app.main.models import User, Role, Cart, Supplier, ProductImage,  ProductCategory,  Product, Order, OrderItem, Location, Cart
 from datetime import datetime, timedelta
 from sqlalchemy.exc import IntegrityError
-import pdfcrowd
 from werkzeug.utils import secure_filename
 import os 
 from sqlalchemy.orm.exc import NoResultFound
@@ -15,6 +14,10 @@ from app.cart.routes import cart_bp
 from sqlalchemy.exc import IntegrityError
 from .send_email import send_confirmation_email
 from flask_mail import Message
+import logging
+import time
+
+
 @bp.route('/')
 def index():
      return render_template('home.html', title='Home', product_listing_url=url_for('main.product_listing'))
@@ -35,38 +38,70 @@ def register():
             db.session.add(user)
             db.session.commit()  # Commit the user to the database
 
-            # Now that the user is committed, generate and send confirmation email
+            # Now that the user is committed, generate the confirmation token
             user.generate_confirmation_token()
+
+            # Send confirmation email
             send_confirmation_email(user)
 
-            flash('Registration successful! A confirmation email has been sent.', 'success')
+            flash('Registration successful! Please check your email for confirmation.', 'success')
             return redirect(url_for('main.login'))
 
-        except IntegrityError as e:
+        except IntegrityError:
             db.session.rollback()
             flash('Email address is already registered. Please use Sign In.', 'danger')
             return redirect(url_for('main.register'))
 
     return render_template('register.html', form=form)
 
+def send_confirmation_email(user):
+    token = user.confirmation_token  # Use the confirmation_token directly
+    confirm_url = url_for('main.confirm_email', token=token, _external=True)
+
+    subject = 'Confirm Your Email Address'
+    body = f"Thank you for registering with MyApp! Please click the following link to confirm your email address: {confirm_url}"
+
+ 
+def confirm(self, token):
+    s = Serializer(current_app.config['SECRET_KEY'])
+    try:
+        data = s.loads(token)
+    except:
+        return False
+
+    if 'exp' in data and data['exp'] < time.time():
+        # Token has expired
+        return False
+
+    if data.get('confirm') != self.id:
+        return False
+
+    self.confirmed = True
+    db.session.add(self)
+    db.session.commit()
+    return True
 
 
-#def send_confirmation_email(user):
-    #confirm_url = url_for('main.confirm', token=user.confirmation_token, _external=True)
-  #  msg = Message('Confirm Your Account', recipients=[user.email])
-   # msg.html = render_template('confirmation_email.html', user=user, confirm_url=confirm_url)
-   # mail.send(msg)
+@bp.route('/confirm_email/<token>', methods=['GET'])
+def confirm_email(token):
+    try:
+        s = Serializer(current_app.config['SECRET_KEY'])
+        data = s.loads(token)
 
+        user_id = data.get('confirm')
+        user = User.query.get(user_id)
 
-@bp.route('/confirm/<token>')
-def confirm(token):
-    user = User.query.filter_by(confirmation_token=token).first_or_404()
-    if user.confirm(token):
-        flash('Your account has been confirmed. You can now log in.', 'success')
-        return redirect(url_for('main.login'))
-    else:
-        flash('The confirmation link is invalid or has expired.', 'danger')
-        return redirect(url_for('main.index'))
+        if user:
+            user.confirmed = True
+            db.session.commit()
+            flash('Email confirmation successful! You can now log in.', 'success')
+        else:
+            flash('Invalid confirmation link. Please contact support.', 'danger')
+
+    except Exception as e:
+        flash('Error confirming your email. Please try again.', 'danger')
+
+    return redirect(url_for('main.login'))  # Adjust the endpoint based on your login route
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -528,6 +563,9 @@ def get_quantity_in_stock(product_id):
         }
         return jsonify(response_data), 500
 
+import logging  # Import the logging module
+
+from flask import render_template, flash, redirect, url_for
 
 @cart_bp.route('/checkout', methods=['GET', 'POST'])
 @login_required
@@ -543,7 +581,10 @@ def checkout():
     # Set choices for the location field
     form.location.choices = [(location.id, location.location_name) for location in Location.query.all()]
 
+    form.location.choices = [(location.id, location.location_name) for location in Location.query.all()]
+
     if form.validate_on_submit():
+        
         # Create a new order
         order = Order(
             user_id=current_user.id,
@@ -573,7 +614,6 @@ def checkout():
         Cart.query.filter_by(user_id=current_user.id).delete()
         db.session.commit()
 
-        
         transaction_id = order.id
 
         # You can now redirect the user to the payment page, passing the transaction ID
@@ -581,9 +621,7 @@ def checkout():
         flash('Order placed successfully! Redirecting to payment page...', 'success')
         return redirect(url_for('payments.mpesa_payment', order_id=order.id))
 
-
     return render_template('checkout.html', form=form, cart_items=cart_items, total_price=total_price)
-
 
 
 @admin_bp.route('/view_orders', methods=['GET'])

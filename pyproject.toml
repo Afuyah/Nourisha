@@ -13,6 +13,7 @@ flask = "^3.0.0"
 flask-login = "^0.6.3"
 flask-migrate = "^4.0.5"
 flask-mail = "^0.9.1"
+flask-ngrok = "^0.0.25"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md

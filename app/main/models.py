@@ -1,9 +1,11 @@
+from time import time
 from datetime import datetime
+from flask import request, current_app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import request,current_app
-from app import db
 from itsdangerous import URLSafeTimedSerializer as Serializer
+from app import db
+
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
@@ -27,7 +29,7 @@ class User(db.Model, UserMixin):
     # Define the relationship with the Role model
     role = db.relationship('Role', backref=db.backref('users', lazy=True))
     orders = db.relationship('Order', back_populates='user')
-  
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -36,24 +38,31 @@ class User(db.Model, UserMixin):
 
     def set_last_login_info(self):
         self.last_login_date = datetime.utcnow()
-        self.last_login_ip = request.remote_addr
-      
+        self.last_login_ip = request.remote_addr if request else None
+
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'])
-        self.confirmation_token = s.dumps({'confirm': int(self.id)})
-      
+        self.confirmation_token = s.dumps({'confirm': int(self.id), 'exp': int(time() + expiration)})
+
     def confirm(self, token):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
         except:
             return False
+
+        if 'exp' in data and data['exp'] < time():
+            # Token has expired
+            return False
+
         if data.get('confirm') != self.id:
             return False
+
         self.confirmed = True
         db.session.add(self)
         db.session.commit()
         return True
+
 
 class ProductCategory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -144,6 +153,9 @@ class Order(db.Model):
     payment_date = db.Column(db.DateTime)  # Date when payment was made
     transaction_id = db.Column(db.String(100))  # Unique identifier for the payment transaction
 
+    # Phone number used for payment
+    phone_number = db.Column(db.String(20), nullable=True)
+
     # Define the relationship with User
     user = db.relationship('User', back_populates='orders')
 
@@ -152,6 +164,7 @@ class Order(db.Model):
     
     # Relationship with OrderItem
     order_items = db.relationship('OrderItem', back_populates='order')
+
 
 class OrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)

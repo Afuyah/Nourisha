@@ -1,5 +1,3 @@
-
-
 {% extends 'layout.html' %}
 
 {% block content %}
@@ -15,10 +13,11 @@
 
         <!-- Payment Form -->
         <form action="{{ url_for('payments.mpesa_callback') }}" method="post">
-          <!-- Include any additional hidden fields or form elements as needed -->
+  {{ form.hidden_tag() }}
+  <!-- Include any additional hidden fields or form elements as needed -->
 
-          <button type="submit" class="btn btn-primary">Pay with M-Pesa</button>
-        </form>
+  <button type="submit" class="btn btn-primary">Pay with M-Pesa</button>
+</form>
       </div>
 
       <!-- You can include additional information or payment instructions in the second column -->
