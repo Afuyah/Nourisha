@@ -5,7 +5,8 @@ from flask_wtf.csrf import CSRFProtect
 from app import create_app,db 
 from flask_migrate import Migrate
 
-# Create the Flask app within the application context
+
+config_file = 'gunicorn_config.py'
 app = create_app()
 migrate = Migrate(app, db)
 
@@ -16,4 +17,4 @@ with app.app_context():
 
 
 if __name__ == '__main__':
-    app.run( host='0.0.0.0', port=81, debug=True)
+    app.run()
