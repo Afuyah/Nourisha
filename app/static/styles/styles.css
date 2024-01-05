@@ -1,0 +1,117 @@
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+      }
+
+      #sidebar {
+        height: 100%;
+        width: 250px;
+        position: fixed;
+        top: 0;
+        left: -250px;
+        background-color: #5cb85c;
+        padding-top: 56px;
+        transition: 0.5s;
+      }
+
+      #sidebar ul {
+        padding: 0;
+        margin: 0;
+        list-style-type: none;
+      }
+
+      #sidebar ul li {
+        padding: 8px;
+        color: #fff;
+        font-size: 18px;
+        border-bottom: 1px solid #4cae4c;
+        transition: 0.3s;
+      }
+
+      #sidebar ul li:hover {
+        background-color: #4cae4c;
+      }
+
+      #sidebar .sidebar-heading {
+        padding: 20px;
+        color: #fff;
+        font-size: 24px;
+      }
+
+      #content {
+        transition: margin-left 0.5s;
+        padding: 16px;
+      }
+
+      @media (max-width: 768px) {
+        #sidebar {
+          left: 0;
+        }
+
+        #content {
+          margin-left: 250px;
+        }
+      }
+
+      .card {
+        border: none;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-header {
+        background-color: #5bc0de;
+        color: #fff;
+        font-weight: bold;
+      }
+
+      .card-body {
+        background-color: #fff;
+      }
+
+      .dropdown-item {
+        color: #000;
+      }
+
+      .dropdown-item:hover {
+        background-color: #5bc0de;
+        color: #fff;
+      }
+
+      .navbar {
+        background-color: #5bc0de;
+      }
+
+      .navbar-brand,
+      .navbar-nav .nav-link {
+        color: #fff;
+      }
+
+      .navbar-brand:hover,
+      .navbar-nav .nav-link:hover {
+        color: #fff;
+      }
+
+      .product-icon,
+      .order-icon,
+      .customer-icon {
+        font-size: 24px;
+        margin-right: 8px;
+      }
+
+      canvas {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .table th,
+      .table td {
+        text-align: center;
+      }
+
+      .progress {
+        height: 20px;
+        margin-bottom: 20px;
+      }

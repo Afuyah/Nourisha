@@ -3,7 +3,7 @@
 {% block content %}
   <div class="container mt-4">
     <h1 class="mb-4 text-center">Your Cart</h1>
-    <button class="btn btn-danger btn-sm clear-cart-btn" onclick="window.location.href='/cart/view_cart'">Clear Cart</button>
+    <button class="btn btn-danger btn-sm clear-cart-btn" onclick="clearCart('{{ csrf_token() }}')">Clear Cart</button>
 
     <div class="cart-items-container">
       {% if cart_items %}
@@ -30,6 +30,9 @@
         {% endfor %}
       {% else %}
         <p class="text-center">Your cart is empty.</p>
+        <div class="text-center">
+           <a href =" {{url_for('main.product_listing')}}">SHOP NOW </a> 
+        </div>
       {% endif %}
     </div>
 
@@ -43,6 +46,13 @@
   </div>
 
   <script>
+    
+ function confirmClearCart(csrfToken) {
+    if (confirm('Are you sure you want to clear your cart?')) {
+      clearCart(csrfToken);
+    }
+  }
+    
     document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('.decrement-btn').forEach(function (button) {
         button.addEventListener('click', function () {
@@ -154,9 +164,11 @@
           // Optionally, update other elements or perform additional actions
         } else {
           console.error('Error clearing cart:', data.message);
+          // Optionally, show a user-friendly error message or perform other error handling
         }
       } catch (error) {
-        console.error('Error clearing cart:', error);
+        console.error('Fetch error:', error);
+        // Handle the error (e.g., show a user-friendly message)
       } finally {
         // Hide loading spinner
         loadingSpinner.classList.add('d-none');
@@ -168,5 +180,7 @@
       // This function should be customized based on your specific requirements
       console.log('Updating quantity in stock...');
     }
+
+    
   </script>
 {% endblock %}

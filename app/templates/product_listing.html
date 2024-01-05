@@ -4,10 +4,10 @@
   <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div class="text-center" style="max-width: 1000px;">
       <h1 class="mb-4">Product Listing</h1>
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-2">
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
         {% for product in products %}
           <div class="col">
-            <div class="card product-card border-0">
+            <div class="card product-card border-0 shadow-sm h-100"> <!-- Added 'h-100' class for equal height -->
               <div class="product-image-container text-center mb-3">
                 {% if product.images %}
                   <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image rounded-top" alt="{{ product.name }}">
@@ -17,7 +17,7 @@
               </div>
 
               <div class="card-body text-center">
-                <h5 class="card-title text-primary fs-6">{{ product.brand }}</h5>
+                <h5 class="card-title text-primary fs-5">{{ product.brand }}</h5>
                 <p class="card-text text-muted fs-6">{{ product.description | truncate(120) }}</p>
                 <p class="card-text fs-6"><strong>Price:</strong> Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</p>
                 <p class="card-text {% if product.quantity_in_stock < 5 %}text-danger{% endif %} fs-6"><strong>Stock:</strong> {{ product.quantity_in_stock }}</p>
@@ -38,57 +38,88 @@
     </div>
   </div>
 
+
   <script>
-    async function getCurrentQuantity(productId) {
-      try {
+     async function getCurrentQuantity(productId) {
+    try {
         const response = await fetch(`/api/cart/${productId}/quantity`);
         const data = await response.json();
         return data.quantity;
-      } catch (error) {
+    } catch (error) {
         console.error('Error fetching quantity:', error);
         return 1; // Default to 1 if there's an error
-      }
     }
+}
 
-    async function updateCartItem(productId, action) {
-      const quantityInput = document.getElementById('quantity-input-' + productId);
-      const loadingSpinner = document.getElementById('loading-spinner-' + productId);
+async function updateCartItem(productId, action) {
+    const quantityInput = document.getElementById('quantity-input-' + productId);
+    const loadingSpinner = document.getElementById('loading-spinner-' + productId);
 
-      loadingSpinner.classList.remove('d-none');
+    loadingSpinner.classList.remove('d-none');
 
-      try {
+    try {
         const serverQuantity = await getCurrentQuantity(productId);
         let currentQuantity = parseInt(quantityInput.value);
 
         if (action === 'increment') {
-          currentQuantity++;
+            currentQuantity++;
         } else if (action === 'decrement' && currentQuantity > 1) {
-          currentQuantity--;
+            currentQuantity--;
         }
 
         quantityInput.value = currentQuantity;
 
         if (action !== 'increment' && action !== 'decrement') {
-          quantityInput.value = serverQuantity;
+            quantityInput.value = serverQuantity;
         }
-      } catch (error) {
+    } catch (error) {
         console.error('Error updating quantity:', error);
-      } finally {
+    } finally {
         loadingSpinner.classList.add('d-none');
-      }
     }
+}
 
-    function showLoadingSpinner(productId) {
-      const loadingSpinner = document.getElementById('loading-spinner-' + productId);
-      loadingSpinner.classList.remove('d-none');
-      return true; // or false based on your requirements
-    }
+function showLoadingSpinner(productId) {
+    const loadingSpinner = document.getElementById('loading-spinner-' + productId);
+    loadingSpinner.classList.remove('d-none');
+    return true; // or false based on your requirements
+}
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      {% for product in products %}
-        const productId = '{{ product.id }}';
+document.addEventListener('DOMContentLoaded', async () => {
+    // Update cart items on page load
+    const productIds = {% for product in products %}['{{ product.id }}',]{% endfor %};
+
+    for (const productId of productIds) {
         await updateCartItem(productId, 'sync');
-      {% endfor %}
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const floatingCart = document.getElementById("floating-cart");
+
+    floatingCart.addEventListener("dragstart", function (event) {
+        event.dataTransfer.setData("text/plain", "dummy");  // Required for Firefox
+        floatingCart.style.opacity = "0.5";
     });
+
+    floatingCart.addEventListener("dragend", function () {
+        floatingCart.style.opacity = "1";
+    });
+
+    // Example: Update the cart count every second (replace with actual event)
+    let cartItemCount = 0;
+    setInterval(function () {
+        cartItemCount++;
+        updateCartCount(cartItemCount);
+    }, 1000);
+
+    // Function to update the cart count
+    function updateCartCount(count) {
+        const cartCountElement = document.getElementById("cart-count");
+        cartCountElement.textContent = count;
+    }
+});
+
   </script>
+  
 {% endblock %}

@@ -1,17 +1,121 @@
 {% extends 'layout.html' %}
 
 {% block content %}
+    <!-- Header Section -->
     <div class="container mt-5">
-        <h1 class="text-center">Welcome to Naurisha Groceries!</h1>
        
-        <p>Explore our products:</p>
-        <h3><a href="{{ product_listing_url }}" class="btn btn-primary">View Products</a></h3>
-
-        {% if current_user.is_authenticated %}
-            <p class="text-center">Hello, {{ current_user.username }}!</p>
-        {% endif %}
         
-        <!-- Additional styling and interactive elements can be added here -->
+        <!-- Small Images/Advertisements -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <img src="https://images.unsplash.com/flagged/photo-1587302164675-820fe61bbd55?q=80&w=1160&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Advertisement 1" class="img-fluid">
+            </div>
+            <div class="col-md-4">
+                <img src="https://images.unsplash.com/photo-1504472685735-9bd4075b3779?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="img-fluid">
+            </div>
+            <div class="col-md-4">
+                <img src="https://media.istockphoto.com/id/165835384/photo/wire-shopping-basket-filled-with-groceries-and-vegetables.jpg?s=1024x1024&w=is&k=20&c=2U4t_28vojmpuMwsity7Ln8ZeWr7rpnD1VpQXpcZ56k=" alt="Advertisement 3" class="img-fluid">
+            </div>
+        </div>
 
+        
+    </div>
+
+
+    <!-- Featured Products Section -->
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Featured Products</h2>
+        <div class="row">
+            <!-- Featured Product Cards -->
+            {% for product in products %}
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <!-- Product Image, Title, Description, etc. -->
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">{{ product.description }}</p>
+                            <a href="{{ url_for('product_details', product_id=product.id) }}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Link to Product Listing -->
+        <div class="text-center">
+            <a href="#" class="btn btn-primary">View All Products</a>
+        </div>
+    </div>
+    <!-- Advertisements Section -->
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Special Offers</h2>
+        <div class="row">
+            <!-- Advertisements -->
+            <div class="col-md-6">
+                <img src="" alt="Special Offer 1" class="img-fluid">
+            </div>
+            <div class="col-md-6">
+                <img src="path/to/special_offer2.jpg" alt="Special Offer 2" class="img-fluid">
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Us Section -->
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Contact Us</h2>
+    <div class="row">
+        <!-- Contact Form -->
+        <div class="col-md-6">
+            <form action="{{ url_for('main.products') }}" method="post">
+                <!-- Contact Form Fields -->
+                <div class="mb-3">
+                    <label for="name" class="form-label">Your Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Your Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="message" class="form-label">Message</label>
+                    <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+        <!-- Contact Information -->
+        <div class="col-md-6">
+            <p>Address: Your Address</p>
+            <p>Email: your@email.com</p>
+            <p>Phone: +123456789</p>
+        </div>
+    </div>
+</div>
+
+
+    <!-- Testimonials Section -->
+    <div class="container mt-5 mb-4">
+        <h2 class="text-center mb-4">What Our Customers Say</h2>
+        <div class="row">
+            <!-- Testimonials -->
+            <div class="col-md-4">
+                <blockquote class="blockquote">
+                    <p class="mb-0">"Great service and high-quality products!"</p>
+                    <footer class="blockquote-footer">Customer 1</footer>
+                </blockquote>
+            </div>
+            <div class="col-md-4">
+                <blockquote class="blockquote">
+                    <p class="mb-0">"Always on time and fresh groceries."</p>
+                    <footer class="blockquote-footer">Customer 2</footer>
+                </blockquote>
+            </div>
+            <div class="col-md-4">
+                <blockquote class="blockquote">
+                    <p class="mb-0">"Love the variety of products available."</p>
+                    <footer class="blockquote-footer">Customer 3</footer>
+                </blockquote>
+            </div>
+        </div>
     </div>
 {% endblock %}

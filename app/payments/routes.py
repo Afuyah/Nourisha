@@ -6,6 +6,7 @@ from app.payments.safaricom import lipa_na_mpesa_online
 
 from app.main.forms import CheckoutForm
 # Route for handling M-Pesa payment
+
 @payment_bp.route('/mpesa_payment/<int:order_id>', methods=['GET'])
 @login_required
 def mpesa_payment(order_id):
@@ -60,6 +61,3 @@ def mpesa_callback():
     else:
         # Handle the case where the order with the given order_id is not found
         return {'status': 'error', 'message': 'Order not found'}, 404
-
-
-

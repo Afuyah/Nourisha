@@ -5,6 +5,9 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer as Serializer
 from app import db
+from sqlalchemy.sql import func
+from datetime import date
+from sqlalchemy import func
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -36,9 +39,10 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    
     def set_last_login_info(self):
         self.last_login_date = datetime.utcnow()
-        self.last_login_ip = request.remote_addr if request else None
+        self.last_login_ip = request.remote_addr if request and request.remote_addr else None  
 
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'])
@@ -97,6 +101,7 @@ class Product(db.Model):
     unit_price = db.Column(db.Float, nullable=False)
     unit_measurement = db.Column(db.String(20), nullable=True)
     quantity_in_stock = db.Column(db.Integer, nullable=False)
+    quantity_sold = db.Column(db.Integer, default=0)
     discount_percentage = db.Column(db.Float, nullable=True)
     promotional_tag = db.Column(db.String(50), nullable=True)
     nutritional_information = db.Column(db.Text, nullable=True)
@@ -141,6 +146,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     status = db.Column(db.String(50), default='pending')  # Status can be 'pending', 'confirmed', etc.
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
+   
     expected_delivery_date = db.Column(db.Date)
     total_price = db.Column(db.Float, nullable=False)
     location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
@@ -177,3 +183,10 @@ class OrderItem(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
     order = db.relationship('Order', back_populates='order_items')
     product = db.relationship('Product', back_populates='order_items')
+
+    def update_product_quantity_sold(self):
+        # Update the quantity_sold field for the associated product
+        self.product.quantity_sold += self.quantity
+        db.session.commit()
+
+
