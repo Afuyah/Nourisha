@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-  <div class="container mt-4">
+  <div class="container mt-4 mb-5 p-2">
     <h1 class="mb-4 text-center">Your Cart</h1>
     <button class="btn btn-danger btn-sm clear-cart-btn" onclick="clearCart('{{ csrf_token() }}')">Clear Cart</button>
 

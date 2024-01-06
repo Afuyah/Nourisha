@@ -28,7 +28,9 @@ def send_email(to, subject, body):
 
 @bp.route('/')
 def index():
-     return render_template('home.html', title='Home', product_listing_url=url_for('main.product_listing'))
+    user_authenticated = current_user.is_authenticated
+    return render_template('home.html', title='Home', product_listing_url=url_for('main.product_listing'), user_authenticated=user_authenticated)
+
 
 @bp.route('/register', methods=['POST', 'GET'])
 def register():

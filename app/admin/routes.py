@@ -1,8 +1,8 @@
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import current_user, login_required
 from app.admin import admin_bp
-from app.main.models import User, Role, Order, OrderItem
-from app.main.models import Product
+from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm, CustomerLocationForm, LoginForm, AddLocationForm, AddRoleForm, AddSupplierForm
+from app.main.models import User, Role, Cart, Supplier, ProductImage,  ProductCategory,  Product, Order, OrderItem, Location, Cart
 from app import db
 from sqlalchemy import cast, Date, func
 from sqlalchemy.exc import SQLAlchemyError
@@ -10,6 +10,10 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.dates import DateFormatter
+
 
 def handle_db_error_and_redirect(route):
     try:
@@ -135,7 +139,7 @@ def edit_role(role_id):
 @login_required
 def product_categories():
     def route():
-        form = ProductCategoryForm()
+        form = AddProductCategoryForm()
 
         if form.validate_on_submit():
             category = ProductCategory(name=form.name.data)
@@ -145,7 +149,7 @@ def product_categories():
 
         categories = ProductCategory.query.all()
 
-        return render_template('admin/product_categories.html', form=form, categories=categories)
+        return render_template('add_product_category.html', form=form, categories=categories)
 
     return handle_db_error_and_redirect(route)
 
