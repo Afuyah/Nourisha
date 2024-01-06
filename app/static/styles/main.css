@@ -205,5 +205,15 @@ h1,h2,h3,h4,h5,h6{
     background-color: #17a2b8;
     color: #fff;
 }
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 /* ... (previous styles) ... */

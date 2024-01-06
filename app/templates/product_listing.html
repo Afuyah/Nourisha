@@ -40,6 +40,24 @@
 
 
   <script>
+
+    document.addEventListener('DOMContentLoaded', async () => {
+    // Update cart items on page load
+    const productIds = {% for product in products %}['{{ product.id }}',]{% endfor %};
+
+    for (const productId of productIds) {
+        await updateCartItem(productId, 'sync');
+    }
+
+    // Add fade-in animation to product cards
+    const productCards = document.querySelectorAll('.product-card');
+    productCards.forEach((card, index) => {
+        card.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s`;
+    });
+});
+
+
+    
      async function getCurrentQuantity(productId) {
     try {
         const response = await fetch(`/api/cart/${productId}/quantity`);
@@ -120,6 +138,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+
+    
   </script>
   
 {% endblock %}

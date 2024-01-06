@@ -13,6 +13,12 @@ import base64
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.dates import DateFormatter
+import matplotlib
+
+
+matplotlib.use('agg')  # Use the 'agg' backend for a non-interactive environment
+
+
 
 
 def handle_db_error_and_redirect(route):
@@ -23,6 +29,42 @@ def handle_db_error_and_redirect(route):
         flash(f'Database error: {str(e)}', 'danger')
         return redirect(url_for('main.index'))
 
+def fetch_sales_data():
+    # Fetch and process sales data from the database
+    
+    sales_data = db.session.query(
+        func.date(Order.order_date).label('order_date'),
+        func.sum(Order.total_price).label('total_sales')
+    ).group_by(func.date(Order.order_date)).order_by(func.date(Order.order_date)).all()
+
+    return sales_data
+
+def create_sales_chart(labels, data):
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    date_objects = [datetime.strptime(label, '%Y-%m-%d') for label in labels]
+    ax.plot(date_objects, data, marker='o', linestyle='-', color='b')
+
+    ax.set_title('Sales Overview')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Total Sales ($)')
+    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
+    ax.tick_params(axis='x', rotation=45)
+
+    return fig
+
+def generate_chart_image(chart):
+    image_stream = BytesIO()
+    chart.savefig(image_stream, format='png')
+    image_stream.seek(0)
+    chart_image = base64.b64encode(image_stream.getvalue()).decode('utf-8')
+    plt.close(chart)  # Close the provided chart, not 'fig'
+
+    return f"data:image/png;base64,{chart_image}"
+
+
+
+
 @admin_bp.route('/admin_dashboard', methods=['GET', 'POST'])
 @login_required
 def admin_dashboard():
@@ -31,18 +73,14 @@ def admin_dashboard():
             flash('You do not have permission to access the admin dashboard.', 'danger')
             return redirect(url_for('main.index'))
 
-        # Fetching sales overview data from the database
-        sales_data = db.session.query(
-            func.date(Order.order_date).label('order_date'),
-            func.sum(Order.total_price).label('total_sales')
-        ).group_by(func.date(Order.order_date)).order_by(func.date(Order.order_date)).all()
-
+        # Fetch sales data
+        sales_data = fetch_sales_data()
         labels = [datetime.strptime(data.order_date, '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
         data = [float(data.total_sales) for data in sales_data]
 
-        # Create a line chart for sales overview
+        # Create sales chart
         sales_chart = create_sales_chart(labels, data)
-        sales_chart_image = get_image_data(sales_chart)
+        sales_chart_image = generate_chart_image(sales_chart)
 
         # Call the function to get top-selling products
         top_selling_products = db.session.query(
@@ -50,6 +88,7 @@ def admin_dashboard():
             db.func.sum(OrderItem.quantity).label('total_quantity_sold'),
             db.func.sum(OrderItem.unit_price * OrderItem.quantity).label('total_revenue')
         ).join(OrderItem, Product.id == OrderItem.product_id).group_by(Product).order_by(db.desc('total_quantity_sold')).limit(3).all()
+
        
 
         admin_data = {
@@ -77,29 +116,7 @@ def admin_dashboard():
 
     return handle_db_error_and_redirect(route)
 
-def create_sales_chart(labels, data):
-    plt.figure(figsize=(10, 6))
-    
-    # Convert date strings to datetime objects
-    date_objects = [datetime.strptime(label, '%Y-%m-%d') for label in labels]
-    
-    plt.plot(date_objects, data, marker='o', linestyle='-', color='b')
-    plt.title('Sales Overview')
-    plt.xlabel('Date')
-    plt.ylabel('Total Sales ($)')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
 
-    return plt
-
-def get_image_data(chart):
-    image_stream = BytesIO()
-    chart.savefig(image_stream, format='png')
-    image_stream.seek(0)
-    chart_image = base64.b64encode(image_stream.getvalue()).decode('utf-8')
-    plt.close()
-
-    return f"data:image/png;base64,{chart_image}"
 
 def get_top_selling_products():
     # Fetch top-selling products based on quantity sold

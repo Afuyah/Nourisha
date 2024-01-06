@@ -1,16 +1,29 @@
 {% extends "base.html" %}
+
 {% block content %}
-<h2>Add Location</h2>
-<form method="post">
-    {{ form.hidden_tag() }}
-    {{ form.location_name.label }} {{ form.location_name(size=20) }}<br>
-    {{ form.arealine.label }} {{ form.arealine(size=50) }}<br>
-    {{ form.submit() }}
-</form>
-<h3>All Locations</h3>
-<ul>
-    {% for location in locations %}
-        <li>{{ location.location_name }} - {{ location.arealine }}</li>
-    {% endfor %}
-</ul>
+  <div class="container mt-5">
+    <h2>Add Location</h2>
+    <form method="post">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        <label for="locationName" class="form-label">Location Name</label>
+        {{ form.location_name(class="form-control", id="locationName") }}
+      </div>
+
+      <div class="mb-3">
+        <label for="areaLine" class="form-label">Area Line</label>
+        {{ form.arealine(class="form-control", id="areaLine") }}
+      </div>
+
+      {{ form.submit(class="btn btn-primary") }}
+    </form>
+
+    <h3 class="mt-4">All Locations</h3>
+    <ul class="list-group">
+      {% for location in locations %}
+        <li class="list-group-item">{{ location.location_name }} - {{ location.arealine }}</li>
+      {% endfor %}
+    </ul>
+  </div>
 {% endblock %}

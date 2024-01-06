@@ -1,71 +1,84 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-  <div class="container mt-5">
-    <h1 class="mb-4">Checkout</h1>
+  <div class="container mt-3 mb-5">
+    <h3 class="mb-2">Checkout</h3>
 
     {% if cart_items %}
       <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-10">
           <form method="post" action="{{ url_for('cart.checkout') }}" class="mb-4">
             {{ form.csrf_token }}
 
-            <h2>Order Summary</h2>
-            <table class="table table-bordered">
-              <thead class="table-dark">
-                <tr>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for item in cart_items %}
+            <div class="mb-4">
+              <h2>Your Grocery Cart</h2>
+              <table class="table table-bordered">
+                <thead class="table-success">
                   <tr>
-                    <td>{{ item.product.brand }}</td>
-                    <td>
-                      <input type="number" name="quantity_{{ item.product.id }}" value="{{ item.quantity }}" min="1" max="{{ item.product.quantity_in_stock }}" readonly class="form-control">
-                    </td>
-                    <td>Ksh. {{ item.product.unit_price * item.quantity }}</td>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
                   </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-
-            <h3 class="mb-4">Total Price: Ksh. {{ total_price }}</h3>
-
-             <div class="form-group">
-            {{ form.location.label }}
-            {{ form.location(class="form-control") }}
-          </div>
-
-            <div class="mb-3">
-              <label for="address_line" class="form-label">Address</label>
-              {{ form.address_line(class="form-control") }}
+                </thead>
+                <tbody>
+                  {% for item in cart_items %}
+                    <tr>
+                      <td>{{ item.product.brand }}</td>
+                      <td>
+                        <input type="number" name="quantity_{{ item.product.id }}" value="{{ item.quantity }}" min="1" max="{{ item.product.quantity_in_stock }}" readonly class="form-control">
+                      </td>
+                      <td>Ksh. {{ item.product.unit_price * item.quantity }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
 
-            <div class="mb-3">
-              <label for="additional_info" class="form-label">Additional Information</label>
-              {{ form.additional_info(class="form-control") }}
+            <div class="mb-4">
+              <h3>Total Amount: Ksh. {{ total_price }}</h3>
             </div>
 
-            <div class="mb-3">
-              <label for="payment_method" class="form-label">Payment Method</label>
-              {{ form.payment_method(class="form-control") }}
+            <div class="mb-4">
+              <h2>Delivery Details</h2>
+              <div class="form-group">
+                {{ form.location.label }}
+                {{ form.location(class="form-control") }}
+              </div>
+
+              <div class="mb-3">
+                <label for="address_line" class="form-label">Delivery Address</label>
+                {{ form.address_line(class="form-control") }}
+              </div>
             </div>
 
-            {{ form.submit(class="btn btn-primary") }}
+            <div class="mb-4">
+              <h2>Additional Information</h2>
+              <div class="mb-3">
+                <label for="additional_info" class="form-label">Special Instructions</label>
+                {{ form.additional_info(class="form-control") }}
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <h2>Payment Method</h2>
+              <div class="mb-3">
+                {{ form.payment_method.label }}
+                {{ form.payment_method(class="form-control") }}
+              </div>
+            </div>
+
+            {{ form.submit(class="btn btn-success") }}
           </form>
         </div>
       </div>
     {% else %}
-      <p class="lead">Your cart is empty. Add items to your cart before checking out.</p>
+      <div class="alert alert-info" role="alert">
+        Your grocery cart is empty. Explore our store and add items before checking out.
+      </div>
     {% endif %}
   </div>
   <script>
     // Add any additional JavaScript if needed
-    document.getElementById('locateBtn').addEventListener('click', function() {
-      // Implement logic to use the user's location if needed
-    });
+    // ...
   </script>
 {% endblock %}

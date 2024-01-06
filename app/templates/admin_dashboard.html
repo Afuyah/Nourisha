@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-      <div class="container-fluid">
+      <div class="container-fluid mt-2">
         <div class="row">
           <div class="col-lg-4">
             <div class="card">
@@ -87,98 +87,50 @@
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-lg-6">
-            <div class="card">
-              <div class="card-header">Customer Growth</div>
-              <div class="card-body">
-                <canvas id="customerGrowthChart"></canvas>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="card">
-              <div class="card-header">Product Categories</div>
-              <div class="card-body">
-                <canvas id="productCategoriesChart"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="card">
-              <div class="card-header">Order Progress</div>
-              <div class="card-body">
-                <div class="progress">
-                  <div
-                    class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                    style="width: 60%"
-                  >
-                    60%
-                  </div>
-                </div>
-                <p>Processing Orders: 60%</p>
-                <p>Completed Orders: 40%</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
+         <div class="row">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">Customer Growth</div>
+      <div class="card-body">
+        <canvas id="customerGrowthChart"></canvas>
       </div>
-   
-  
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">Product Categories</div>
+      <div class="card-body">
+        <canvas id="productCategoriesChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <script>
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card">
+      <div class="card-header">Order Progress</div>
+      <div class="card-body">
+        <div class="progress">
+          <div
+            class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+            style="width: 60%"
+          >
+            60%
+          </div>
+        </div>
+        <p>Processing Orders: 60%</p>
+        <p>Completed Orders: 40%</p>
+      </div>
+    </div>
+  </div>
+</div>
 
- // Chart.js
-      var salesCtx = document.getElementById("salesChart").getContext("2d");
-      var salesChart = new Chart(salesCtx, {
-        type: "line",
-        data: {
-          labels: [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-          ],
-          datasets: [
-            {
-              label: "Monthly Sales",
-              data: [
-                2500, 2200, 2800, 2300, 3000, 2600, 3200, 2700, 3400, 2900,
-                3600, 3100,
-              ],
-              borderColor: "#5bc0de",
-              borderWidth: 2,
-              pointRadius: 5,
-              pointBackgroundColor: "#5bc0de",
-              fill: false,
-            },
-          ],
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true,
-            },
-          },
-        },
-      });
 
-      var customerGrowthCtx = document
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  var customerGrowthCtx = document
         .getElementById("customerGrowthChart")
         .getContext("2d");
       var customerGrowthChart = new Chart(customerGrowthCtx, {
@@ -248,7 +200,5 @@
           ],
         },
       });
- 
 </script>
-   
- {% endblock %}
+{% endblock%}
