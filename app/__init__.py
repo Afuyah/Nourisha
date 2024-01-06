@@ -16,7 +16,7 @@ mail = Mail()
 migrate = Migrate()
 CORS(resources={r"/*": {"origins": "*"}})
 
-def create_app(test_config=None):    
+def create_app():    
     app = Flask(__name__)   
     app.config.from_object(Config)
   
