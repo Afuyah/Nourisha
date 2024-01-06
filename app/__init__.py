@@ -16,7 +16,7 @@ mail = Mail()
 migrate = Migrate()
 CORS(resources={r"/*": {"origins": "*"}})
 
-def create_app():    
+def create_app(test_config=None):    
     app = Flask(__name__)   
     app.config.from_object(Config)
   
@@ -35,10 +35,14 @@ def create_app():
     # Initialize migrate within the app context
     with app.app_context():
         migrate.init_app(app, db)
+        db.create_all()
+        from flask_migrate import upgrade
+        upgrade()
 
     csrf = CSRFProtect(app)
     app.config['WTF_CSRF_TIME_LIMIT'] = None
 
+    # Blueprints registration
     # Blueprints registration
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
