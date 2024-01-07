@@ -291,7 +291,7 @@ def add_product_image():
 
         db.session.commit()
         flash('Images uploaded successfully', 'success')
-        return redirect(url_for('main.products'))
+        return redirect(url_for('main.add_product_image'))
 
     return render_template('add_product_image.html', form=form)
 

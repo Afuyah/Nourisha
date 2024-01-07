@@ -1,19 +1,22 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-  <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="text-center" style="max-width: 1000px;">
+  <div class="container d-flex justify-content-center align-items-center">
+    <div class="text-center" style="max-width: 980px;">
       <h1 class="mb-4">Product Listing</h1>
       <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
         {% for product in products %}
           <div class="col">
-            <div class="card product-card border-0 shadow-sm h-100"> <!-- Added 'h-100' class for equal height -->
-              <div class="product-image-container text-center mb-3">
+            <div class="card product-card border-0 shadow-sm">
+              <div class="product-image-container">
                 {% if product.images %}
-                  <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image rounded-top" alt="{{ product.name }}">
+                  <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
                 {% else %}
-                  <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image rounded-top" alt="Placeholder Image">
+                  <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image" alt="Placeholder Image">
                 {% endif %}
+                <div class="magnifier">
+                  <div class="magnifier-glass"></div>
+                </div>
               </div>
 
               <div class="card-body text-center">
@@ -38,8 +41,22 @@
     </div>
   </div>
 
-
   <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Update cart items on page load
+        const productIds = {% for product in products %}['{{ product.id }}',]{% endfor %};
+
+        for (const productId of productIds) {
+            await updateCartItem(productId, 'sync');
+        }
+
+        // Add fade-in animation to product cards
+        const productCards = document.querySelectorAll('.product-card');
+        productCards.forEach((card, index) => {
+            card.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s`;
+        });
+    });
+  
 
     document.addEventListener('DOMContentLoaded', async () => {
     // Update cart items on page load

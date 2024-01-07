@@ -1,5 +1,3 @@
-# app/__init__.py
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -10,16 +8,19 @@ from config import Config
 from datetime import timedelta
 from flask_cors import CORS
 
+
 db = SQLAlchemy()
 login_manager = LoginManager()
 mail = Mail()
 migrate = Migrate()
 CORS(resources={r"/*": {"origins": "*"}})
 
-def create_app(test_config=None):    
+
+def create_app():    
     app = Flask(__name__)   
     app.config.from_object(Config)
   
+
     # Set the session timeout to 7 days
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
     app.config['SESSION_COOKIE_NAME'] = 'myapp_session'
@@ -31,18 +32,11 @@ def create_app(test_config=None):
     db.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
-
-    # Initialize migrate within the app context
-    with app.app_context():
-        migrate.init_app(app, db)
-        db.create_all()
-        from flask_migrate import upgrade
-        upgrade()
+    migrate.init_app(app, db)
 
     csrf = CSRFProtect(app)
     app.config['WTF_CSRF_TIME_LIMIT'] = None
 
-    # Blueprints registration
     # Blueprints registration
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base.html'%}
 {% block content %}
       <div class="container-fluid mt-2">
         <div class="row">
@@ -49,12 +49,12 @@
           </div>
         </div>
 
-        <div class="row">
+           <div class="row">
           <div class="col-lg-6">
     <div class="card">
         <div class="card-header">Sales Overview</div>
         <div class="card-body">
-            <img src="{{ sales_chart_image }}" alt="Sales Overview Chart" class="img-fluid">
+           <canvas id="salesChart" width="400" height="200"></canvas>
         </div>
     </div>
     </div>
@@ -86,38 +86,21 @@
             </div>
           </div>
         </div>
-
-         <div class="row">
-  <div class="col-lg-6">
-    <div class="card">
-      <div class="card-header">Customer Growth</div>
-      <div class="card-body">
-        <canvas id="customerGrowthChart"></canvas>
-      </div>
-    </div>
-  </div>
-  <div class="col-lg-6">
-    <div class="card">
-      <div class="card-header">Product Categories</div>
-      <div class="card-body">
-        <canvas id="productCategoriesChart"></canvas>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="row">
-  <div class="col-lg-12">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">User Growth</div>
+      <div class="card-body">
+        <canvas id="userGrowthChart"></canvas>
+      </div>
+    </div>
+  </div>
+ <div class="col-lg-6">
     <div class="card">
       <div class="card-header">Order Progress</div>
       <div class="card-body">
         <div class="progress">
-          <div
-            class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-            style="width: 60%"
-          >
-            60%
-          </div>
+          <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 60%">60%</div>
         </div>
         <p>Processing Orders: 60%</p>
         <p>Completed Orders: 40%</p>
@@ -127,78 +110,69 @@
 </div>
 
 
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  var customerGrowthCtx = document
-        .getElementById("customerGrowthChart")
-        .getContext("2d");
-      var customerGrowthChart = new Chart(customerGrowthCtx, {
-        type: "line",
-        data: {
-          labels: [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-          ],
-          datasets: [
-            {
-              label: "Customer Growth",
-              data: [
-                800, 820, 840, 870, 900, 950, 980, 1010, 1050, 1100, 1150, 1200,
-              ],
-              borderColor: "#d9534f",
-              borderWidth: 2,
-              pointRadius: 5,
-              pointBackgroundColor: "#d9534f",
-              fill: false,
-            },
-          ],
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true,
-            },
-          },
-        },
-      });
+  // Customer Growth Chart
+  var userGrowthCtx = document.getElementById("userGrowthChart").getContext("2d");
+  var userGrowthChart = new Chart(userGrowthCtx, {
+    type: "line",
+    data: {
+      labels: {{ admin_data.user_growth_data.labels|tojson|safe }},
+      datasets: [{
+        label: "User Growth",
+        data: {{ admin_data.user_growth_data.data|tojson|safe }},
+        borderColor: "#5bc0de",  // Adjust color as needed
+        borderWidth: 2,
+        pointRadius: 5,
+        pointBackgroundColor: "#5bc0de",  // Adjust color as needed
+        fill: false,
+      }],
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true },
+      },
+    },
+  });
+document.addEventListener('DOMContentLoaded', function () {
+    // Wait for the DOM content to be fully loaded
 
-      var productCategoriesCtx = document
-        .getElementById("productCategoriesChart")
-        .getContext("2d");
-      var productCategoriesChart = new Chart(productCategoriesCtx, {
-        type: "doughnut",
-        data: {
-          labels: [
-            "Groceries",
-            "Fresh Produce",
-            "Beverages",
-            "Snacks",
-            "Frozen Foods",
-          ],
-          datasets: [
-            {
-              data: [30, 20, 15, 10, 25],
-              backgroundColor: [
-                "#5cb85c",
-                "#f0ad4e",
-                "#5bc0de",
-                "#d9534f",
-                "#428bca",
-              ],
-            },
-          ],
-        },
-      });
+    // Fetch sales chart data from the server
+    fetch('/admin/get_sales_chart_data')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Extract labels and data from the received JSON data
+            const labels = data.labels;
+            const salesData = data.data;
+
+            // Update or create the sales chart using a chart library (not provided here)
+            // You need to have a chart library (e.g., Chart.js) initialized on your page
+
+            // Example using Chart.js:
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            const salesChart = new Chart(ctx, {
+                type: 'bar', // Use the appropriate chart type (e.g., 'line', 'bar', etc.)
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Sales',
+                        data: salesData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                    }],
+                },
+            });
+        })
+        .catch(error => console.error('Error fetching sales chart data:', error));
+});
 </script>
+
 {% endblock%}

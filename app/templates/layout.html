@@ -66,6 +66,81 @@
   float: right;
   /* You can customize other styles as needed */
 }
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+}
+
+.container {
+    padding-top: 20px;
+}
+
+.product-card {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.product-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-image-container {
+    position: relative;
+}
+
+.product-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px 10px 0 0;
+}
+
+.magnifier {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border: 1px solid #28a745;
+    border-radius: 50%;
+    display: none;
+}
+
+.magnifier-glass {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(40, 167, 69, 0.5);
+    border-radius: 50%;
+    position: absolute;
+}
+
+.product-card:hover .magnifier {
+    display: block;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.btn-primary {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-primary:hover {
+    background-color: #218838;
+    border-color: #218838;
+}
+
+.spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+/* Add more styles based on your design preferences */
+
 
 </style>
   <body>

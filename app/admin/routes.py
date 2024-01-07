@@ -4,19 +4,20 @@ from app.admin import admin_bp
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm, CustomerLocationForm, LoginForm, AddLocationForm, AddRoleForm, AddSupplierForm
 from app.main.models import User, Role, Cart, Supplier, ProductImage,  ProductCategory,  Product, Order, OrderItem, Location, Cart
 from app import db
+from flask import jsonify
 from sqlalchemy import cast, Date, func
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
-import matplotlib.pyplot as plt
-from io import BytesIO
-import base64
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.dates import DateFormatter
-import matplotlib
+#import matplotlib.pyplot as plt
+#from io import BytesIO
+#import base64
+#from matplotlib.figure import Figure
+#from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+#from matplotlib.dates import DateFormatter
+#import matplotlib
 
 
-matplotlib.use('agg')  # Use the 'agg' backend for a non-interactive environment
+#matplotlib.use('agg')  # Use the 'agg' backend for a non-interactive environment
 
 
 
@@ -39,28 +40,38 @@ def fetch_sales_data():
 
     return sales_data
 
-def create_sales_chart(labels, data):
-    fig, ax = plt.subplots(figsize=(10, 6))
 
-    date_objects = [datetime.strptime(label, '%Y-%m-%d') for label in labels]
-    ax.plot(date_objects, data, marker='o', linestyle='-', color='b')
+def create_sales_chart_data(labels, data):
+    sales_chart_data = {
+        'labels': labels,
+        'datasets': [{
+            'label': 'Total Sales',
+            'data': data,
+            'backgroundColor': 'rgba(75, 192, 192, 0.2)',
+            'borderColor': 'rgba(75, 192, 192, 1)',
+            'borderWidth': 1,
+        }],
+    }
 
-    ax.set_title('Sales Overview')
-    ax.set_xlabel('Date')
-    ax.set_ylabel('Total Sales ($)')
-    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
-    ax.tick_params(axis='x', rotation=45)
+    return sales_chart_data
 
-    return fig
+@admin_bp.route('/get_sales_chart_data', methods=['GET'])
+@login_required
+def get_sales_chart_data():
+    if current_user.role.name != 'admin':
+        return jsonify({'error': 'Permission denied'}), 403
 
-def generate_chart_image(chart):
-    image_stream = BytesIO()
-    chart.savefig(image_stream, format='png')
-    image_stream.seek(0)
-    chart_image = base64.b64encode(image_stream.getvalue()).decode('utf-8')
-    plt.close(chart)  # Close the provided chart, not 'fig'
+    sales_data = fetch_sales_data()
+    labels = [datetime.strptime(data.order_date, '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
+    data = [float(data.total_sales) for data in sales_data]
 
-    return f"data:image/png;base64,{chart_image}"
+    sales_chart_data = {
+        'labels': labels,
+        'data': data,
+    }
+
+    return jsonify(sales_chart_data)
+
 
 
 
@@ -77,10 +88,27 @@ def admin_dashboard():
         sales_data = fetch_sales_data()
         labels = [datetime.strptime(data.order_date, '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
         data = [float(data.total_sales) for data in sales_data]
+        
+        # Fetch user registrations for user growth chart
+        user_registrations = User.query.with_entities(User.registration_date).all()
 
-        # Create sales chart
-        sales_chart = create_sales_chart(labels, data)
-        sales_chart_image = generate_chart_image(sales_chart)
+        # Process the data to get counts per month
+        registrations_by_month = {}
+        for user_registration in user_registrations:
+            registration_date = user_registration.registration_date
+
+            # Ensure registration_date is a datetime object
+            if isinstance(registration_date, datetime):
+                month_year = registration_date.strftime('%b %Y')
+                registrations_by_month[month_year] = registrations_by_month.get(month_year, 0) + 1
+
+        # Create lists for chart labels and data
+        chart_labels = list(registrations_by_month.keys())
+        chart_data = list(registrations_by_month.values())
+
+        # Create user growth chart
+        user_growth_chart = create_user_growth_chart(chart_labels, chart_data)
+        user_growth_chart_image = generate_chart_image(user_growth_chart)
 
         # Call the function to get top-selling products
         top_selling_products = db.session.query(
@@ -88,8 +116,6 @@ def admin_dashboard():
             db.func.sum(OrderItem.quantity).label('total_quantity_sold'),
             db.func.sum(OrderItem.unit_price * OrderItem.quantity).label('total_revenue')
         ).join(OrderItem, Product.id == OrderItem.product_id).group_by(Product).order_by(db.desc('total_quantity_sold')).limit(3).all()
-
-       
 
         admin_data = {
             'total_users': User.query.count(),
@@ -102,8 +128,8 @@ def admin_dashboard():
             'total_customers': User.query.count(),
             'new_customers_last_7_days': User.query.filter(User.registration_date >= (datetime.utcnow() - timedelta(days=7))).count(),
             'returning_customers': User.query.filter(User.registration_date < (datetime.utcnow() - timedelta(days=7))).count(),
-             'top_selling_products': top_selling_products
-
+            'top_selling_products': top_selling_products,
+            'user_growth_data': {'labels': chart_labels, 'data': chart_data},
         }
 
         users = User.query.all()
@@ -112,11 +138,41 @@ def admin_dashboard():
         if request.method == 'POST':
             flash('POST request received.', 'info')
 
-        return render_template('admin_dashboard.html', users=users, roles=roles, admin_data=admin_data, sales_chart_image=sales_chart_image)
+        return render_template('admin_dashboard.html', users=users, roles=roles, admin_data=admin_data, user_growth_chart_image=user_growth_chart_image)
 
     return handle_db_error_and_redirect(route)
 
 
+
+def create_user_growth_chart(labels, data):
+    # Create a user growth chart using Chart.js
+    user_growth_chart = {
+        'type': 'line',
+        'data': {
+            'labels': labels,
+            'datasets': [{
+                'label': 'User Growth',
+                'data': data,
+                'borderColor': '#5bc0de',  # Adjust color as needed
+                'borderWidth': 2,
+                'pointRadius': 5,
+                'pointBackgroundColor': '#5bc0de',  # Adjust color as needed
+                'fill': False,
+            }],
+        },
+        'options': {
+            'scales': {
+                'y': {'beginAtZero': True},
+            },
+        },
+    }
+
+    return user_growth_chart
+def generate_chart_image(chart_data):
+    # Generate chart image using the appropriate method (e.g., Chart.js image generation library)
+    # Implement the logic based on your chosen method
+    # Return the image URL or data
+    pass
 
 def get_top_selling_products():
     # Fetch top-selling products based on quantity sold
@@ -278,5 +334,7 @@ def fetch_daily_sales_data():
         current_app.logger.error(f"Error fetching daily sales data: {str(e)}")
         # Return an empty dictionary or None, depending on your preference
         return {'labels': [], 'data': []}
+
+
 
 

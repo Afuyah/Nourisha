@@ -1,4 +1,3 @@
-
 from app import create_app, db
 from app.main.models import User, Role
 
@@ -31,4 +30,3 @@ def create_admin_user():
 if __name__ == '__main__':
     create_admin_user()
     print('Admin user created successfully.')
-
