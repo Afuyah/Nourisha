@@ -16,11 +16,10 @@ migrate = Migrate()
 CORS(resources={r"/*": {"origins": "*"}})
 
 
-def create_app():    
+def create_app(environ=None, start_response=None):
     app = Flask(__name__)   
     app.config.from_object(Config)
   
-
     # Set the session timeout to 7 days
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
     app.config['SESSION_COOKIE_NAME'] = 'myapp_session'
