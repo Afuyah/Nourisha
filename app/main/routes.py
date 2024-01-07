@@ -349,4 +349,5 @@ def product_listing():
     form = AddProductForm()
     # Render a template with the product data
     return render_template('product_listing.html', products=products, total_products=total_products,
-                           active_products=active_products, out_of_stock=out_of_stock, quantity=quantity, form=form)
+                       active_products=active_products, out_of_stock=out_of_stock, quantity=quantity)
+
