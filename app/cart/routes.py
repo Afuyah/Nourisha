@@ -259,8 +259,6 @@ def checkout():
     # Set choices for the location field
     form.location.choices = [(location.id, location.location_name) for location in Location.query.all()]
 
-    form.location.choices = [(location.id, location.location_name) for location in Location.query.all()]
-
     if form.validate_on_submit():
         
         # Create a new order
@@ -288,6 +286,9 @@ def checkout():
         db.session.add(order)
         db.session.commit()
 
+        # Update the day_of_week for the order
+        order.update_order_day_of_week()
+
         # Clear the user's cart
         Cart.query.filter_by(user_id=current_user.id).delete()
         db.session.commit()
@@ -303,6 +304,7 @@ def checkout():
         return redirect(url_for('payments.mpesa_payment', order_id=order.id))
 
     return render_template('checkout.html', form=form, cart_items=cart_items, total_price=total_price)
+
 
 
 def send_order_confirmation_email(user_email, admin_email, order):

@@ -72,9 +72,29 @@ def get_sales_chart_data():
 
     return jsonify(sales_chart_data)
 
+@admin_bp.route('/get_average_order_value_by_day')
+@login_required
+def get_average_order_value_by_day():
+    # Calculate average order value by day of the week
+    average_order_values = db.session.query(func.extract('dow', Order.order_date), func.avg(Order.total_price)).group_by(func.extract('dow', Order.order_date)).all()
+
+    # Convert the result to a dictionary for easier JSON serialization
+    result = {int(day): avg_value for day, avg_value in average_order_values}
+
+    return jsonify(result)
 
 
+def fetch_user_activity_timeline():
+    # Fetch user activity data based on your application's logic
+    # Example: Assuming you have a 'UserActivity' model with 'timestamp' and 'activity_type' fields
+    user_activity_data = (
+        db.session.query(UserActivity.timestamp, UserActivity.activity_type)
+        .order_by(UserActivity.timestamp.desc())
+        .limit(10)  # Adjust the limit as needed
+        .all()
+    )
 
+    return user_activity_data
 
 @admin_bp.route('/admin_dashboard', methods=['GET', 'POST'])
 @login_required

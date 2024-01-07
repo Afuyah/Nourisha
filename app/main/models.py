@@ -8,6 +8,7 @@ from app import db
 from sqlalchemy.sql import func
 from datetime import date
 from sqlalchemy import func
+from sqlalchemy import extract
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -146,7 +147,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     status = db.Column(db.String(50), default='pending')  # Status can be 'pending', 'confirmed', etc.
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
-   
+    day_of_week = db.Column(db.Integer)
     expected_delivery_date = db.Column(db.Date)
     total_price = db.Column(db.Float, nullable=False)
     location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
@@ -170,6 +171,11 @@ class Order(db.Model):
     
     # Relationship with OrderItem
     order_items = db.relationship('OrderItem', back_populates='order')
+    def update_order_day_of_week(self):
+        # Update the day_of_week based on the order_date
+        if self.order_date:
+            self.order_day_of_week = self.order_date.strftime('%A')  # Adjust the format as needed
+            db.session.commit()
 
 
 class OrderItem(db.Model):
