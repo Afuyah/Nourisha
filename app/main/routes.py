@@ -3,7 +3,7 @@ from flask import render_template, abort, Blueprint,flash, redirect, url_for, re
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
 from app.admin import admin_bp
-from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm
+from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm,  LoginForm, AddRoleForm, AddSupplierForm
 from app.main.models import User, Role, Cart, Supplier, ProductImage,  ProductCategory,  Product, Order, OrderItem, Location, Cart
 from datetime import datetime, timedelta
 
