@@ -14,6 +14,8 @@ flask-login = "^0.6.3"
 flask-migrate = "^4.0.5"
 flask-mail = "^0.9.1"
 flask-ngrok = "^0.0.25"
+config = "^0.5.1"
+flask-cors = "^4.0.0"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
