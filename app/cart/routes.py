@@ -1,8 +1,7 @@
-from flask import render_template, abort, Blueprint,flash, redirect, url_for, request, jsonify, send_file, session,current_app
+from flask import render_template, flash, redirect, url_for, request, jsonify, current_app
 from flask_login import current_user, login_required
-from app.admin import admin_bp
 from app.main.models import User, Location, Order,OrderItem
-from app.main.models import Cart, Product,User, Role, Location , Order
+from app.main.models import Cart, Product, Location , Order
 from app.cart import cart_bp
 from app.main.forms import CheckoutForm, AddProductForm
 from app import db, mail
@@ -239,9 +238,6 @@ def get_quantity_in_stock(product_id):
             'message': 'Internal Server Error: ' + str(e),
         }
         return jsonify(response_data), 500
-
-import logging  # Import the logging module
-
 
 
 

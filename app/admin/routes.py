@@ -1,23 +1,14 @@
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import current_user, login_required
 from app.admin import admin_bp
-from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm, CustomerLocationForm, LoginForm, AddLocationForm, AddRoleForm, AddSupplierForm
+from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm,  LoginForm, AddLocationForm, AddRoleForm, AddSupplierForm
 from app.main.models import User, Role, Cart, Supplier, ProductImage,  ProductCategory,  Product, Order, OrderItem, Location, Cart
 from app import db
 from flask import jsonify
 from sqlalchemy import cast, Date, func
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
-#import matplotlib.pyplot as plt
-#from io import BytesIO
-#import base64
-#from matplotlib.figure import Figure
-#from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-#from matplotlib.dates import DateFormatter
-#import matplotlib
 
-
-#matplotlib.use('agg')  # Use the 'agg' backend for a non-interactive environment
 
 
 
@@ -135,7 +126,7 @@ def admin_dashboard():
             Product,
             db.func.sum(OrderItem.quantity).label('total_quantity_sold'),
             db.func.sum(OrderItem.unit_price * OrderItem.quantity).label('total_revenue')
-        ).join(OrderItem, Product.id == OrderItem.product_id).group_by(Product).order_by(db.desc('total_quantity_sold')).limit(3).all()
+        ).join(OrderItem, Product.id == OrderItem.product_id).group_by(Product).order_by(db.desc('total_quantity_sold')).limit(4).all()
 
         admin_data = {
             'total_users': User.query.count(),
@@ -354,7 +345,3 @@ def fetch_daily_sales_data():
         current_app.logger.error(f"Error fetching daily sales data: {str(e)}")
         # Return an empty dictionary or None, depending on your preference
         return {'labels': [], 'data': []}
-
-
-
-

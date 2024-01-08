@@ -5,10 +5,9 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer as Serializer
 from app import db
-from sqlalchemy.sql import func
-from datetime import date
-from sqlalchemy import func
-from sqlalchemy import extract
+from sqlalchemy import event
+
+
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -116,6 +115,7 @@ class Product(db.Model):
     carts = db.relationship('Cart', back_populates='product')
     #order_items = db.relationship('OrderItem', backref='product', lazy=True)
     order_items = db.relationship('OrderItem', back_populates='product')
+  
 class ProductImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
@@ -174,8 +174,16 @@ class Order(db.Model):
     def update_order_day_of_week(self):
         # Update the day_of_week based on the order_date
         if self.order_date:
-            self.order_day_of_week = self.order_date.strftime('%A')  # Adjust the format as needed
+            self.day_of_week = self.order_date.strftime('%A')  # Corrected attribute name
             db.session.commit()
+    def __init__(self, *args, **kwargs):
+        super(Order, self).__init__(*args, **kwargs)
+        self.update_order_day_of_week()
+
+@event.listens_for(Order, 'before_insert')
+def before_insert_order(mapper, connection, target):
+    target.update_order_day_of_week()
+
 
 
 class OrderItem(db.Model):

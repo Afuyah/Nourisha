@@ -3,9 +3,10 @@ from flask import render_template, abort, Blueprint,flash, redirect, url_for, re
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
 from app.admin import admin_bp
-from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm, CustomerLocationForm, LoginForm, AddRoleForm, AddSupplierForm
+from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm
 from app.main.models import User, Role, Cart, Supplier, ProductImage,  ProductCategory,  Product, Order, OrderItem, Location, Cart
 from datetime import datetime, timedelta
+
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 import os 
@@ -350,3 +351,4 @@ def product_listing():
     # Render a template with the product data
     return render_template('product_listing.html', products=products, total_products=total_products,
                            active_products=active_products, out_of_stock=out_of_stock, quantity=quantity, form=form)
+

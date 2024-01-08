@@ -2,10 +2,6 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, FloatField, IntegerField, TextAreaField, SelectField, DateField, SubmitField
 from wtforms.validators import DataRequired, Email, Length
 from flask_wtf.file import FileField, FileRequired, DataRequired
-from flask_babel import lazy_gettext as _
-from flask_wtf import FlaskForm, CSRFProtect
-from app.main.models import Supplier, Location
-
 
 
 class RegistrationForm(FlaskForm):
@@ -79,9 +75,6 @@ class AddressLineForm(FlaskForm):
     def set_location_choices(self):
         # Update location choices dynamically
         self.location_id.choices = [(location.id, location.name) for location in CustomerLocation.query.all()]
-
-class CustomerLocationForm(FlaskForm):
-    name = StringField('Location Name', validators=[DataRequired()])
 
 
 class AddLocationForm(FlaskForm):

@@ -1,180 +1,178 @@
-{% extends 'base.html'%}
-{% block content %}
-      <div class="container-fluid mt-2">
-        <div class="row">
-          <div class="col-lg-4">
-            <div class="card">
-              <div class="card-header">Total Products</div>
-              <div class="card-body">
-                <h2>{{ admin_data.total_products }}</h2>
-                <p>Active Products: {{ admin_data.active_products }}</p>
-                <p>Out of Stock: {{ admin_data.out_of_stock }}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Add the loop to display individual product information if needed -->
-          {% for product in products %}
-          <p>{{ product.name }}</p>
-          <!-- Add other product information as needed -->
-          {% endfor %}
-
-          <div class="col-lg-4">
-            <div class="card">
-              <div class="card-header">Recent Orders</div>
-              <div class="card-body">
-                <ul>
-                  {% for order in admin_data.recent_orders %}
-                  <li>
-                    Order #{{ order.id }} - Placed on {{
-                    order.order_date.strftime('%Y-%m-%d') }}
-                  </li>
-                  {% endfor %}
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4">
-            <div class="card">
-              <div class="card-header">Customer Stats</div>
-              <div class="card-body">
-                <p>Total Customers: {{ admin_data.total_customers }}</p>
-                <p>
-                  New Customers (Last 7 Days): {{
-                  admin_data.new_customers_last_7_days }}
-                </p>
-                <p>Returning Customers: {{ admin_data.returning_customers }}</p>
-              </div>
-            </div>
-          </div>
+{% extends 'base.html'%} {% block content %}
+<div class="container-fluid mt-2">
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">Total Products</div>
+        <div class="card-body">
+          <h2>{{ admin_data.total_products }}</h2>
+          <p>Active Products: {{ admin_data.active_products }}</p>
+          <p>Out of Stock: {{ admin_data.out_of_stock }}</p>
         </div>
+      </div>
+    </div>
 
-           <div class="row">
-          <div class="col-lg-6">
-    <div class="card">
+    <!-- Add the loop to display individual product information if needed -->
+    {% for product in products %}
+    <p>{{ product.name }}</p>
+    <!-- Add other product information as needed -->
+    {% endfor %}
+
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">Recent Orders</div>
+        <div class="card-body">
+          <ul>
+            {% for order in admin_data.recent_orders %}
+            <li>
+              Order #{{ order.id }} - Placed on {{
+              order.order_date.strftime('%Y-%m-%d') }}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">Customer Stats</div>
+        <div class="card-body">
+          <p>Total Customers: {{ admin_data.total_customers }}</p>
+          <p>
+            New Customers (Last 7 Days): {{ admin_data.new_customers_last_7_days
+            }}
+          </p>
+          <p>Returning Customers: {{ admin_data.returning_customers }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="card">
         <div class="card-header">Sales Overview</div>
         <div class="card-body">
-           <canvas id="salesChart" width="400" height="200"></canvas>
+          <canvas id="salesChart" width="400" height="200"></canvas>
         </div>
-    </div>
+      </div>
     </div>
 
-          <div class="col-lg-6">
-            <div class="card">
-              <div class="card-header">Top Selling Products</div>
-              <div class="card-body">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Product</th>
-                      <th>Quantity Sold</th>
-                      <th>Revenue</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for product, total_quantity_sold, total_revenue in
-                    admin_data.top_selling_products %}
-                    <tr>
-                      <td>{{ product.brand }}</td>
-                      <td>{{ total_quantity_sold }}</td>
-                      <td>Ksh. {{ total_revenue }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">Top Selling Products</div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity Sold</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for product, total_quantity_sold, total_revenue in
+              admin_data.top_selling_products %}
+              <tr>
+                <td>{{ product.brand }}</td>
+                <td>{{ total_quantity_sold }}</td>
+                <td>Ksh. {{ total_revenue }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-<div class="row">
-  <div class="col-lg-6">
-    <div class="card">
-      <div class="card-header">User Growth</div>
-      <div class="card-body">
-        <canvas id="userGrowthChart"></canvas>
       </div>
     </div>
   </div>
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">User Growth</div>
+        <div class="card-body">
+          <canvas id="userGrowthChart"></canvas>
+        </div>
+      </div>
+    </div>
 
-<div class="col-lg-6">
-    <div class="card">
+    <div class="col-lg-6">
+      <div class="card">
         <div class="card-header">Average Order Value</div>
         <div class="card-body">
-           <canvas id="averageOrderValueChart" width="400" height="200"></canvas>
+          <canvas id="averageOrderValueChart" width="400" height="200"></canvas>
         </div>
-    </div>
-</div>
-  
-</div>
-
-
-    <div class="row mt-4">
-    
-        <div class="col-lg-4">
-    <div class="card">
-      <div class="card-header">Monthly Revenue</div>
-      <div class="card-body">
-        <canvas id="monthlyRevenueChart"></canvas>
       </div>
     </div>
   </div>
 
-    
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header">Inventory Status</div>
-                <div class="card-body">
-                    <div class="progress">
-                        <div class="progress-bar bg-success" style="width: {{ admin_data.inventory_percentage }}%">{{ admin_data.inventory_percentage }}%</div>
-                    </div>
-                    <p>Total Products: {{ admin_data.total_products }}</p>
-                    <p>Out of Stock: {{ admin_data.out_of_stock }}</p>
-                </div>
-            </div>
-        </div>
-
-
-
-
- <div class="col-lg-4">
-    <div class="card">
-      <div class="card-header">Order Progress</div>
-      <div class="card-body">
+  <div class="row mt-4">
+    <div class="col-lg-4">
+      <div class="card">
         <div class="progress">
-          <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 60%">60%</div>
+        <div class="card-header">Monthly Revenue</div>
+        <div class="card-body">
+          <canvas id="monthlyRevenueChart"></canvas>
         </div>
-        <p>Processing Orders: 60%</p>
-        <p>Completed Orders: 40%</p>
+      </div>
+    </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">Inventory Status</div>
+        <div class="card-body">
+          <div class="progress">
+            <div
+              class="progress-bar bg-success"
+              style="width: {{ admin_data.inventory_percentage }}%"
+            >
+              {{ admin_data.inventory_percentage }}%
+            </div>
+          </div>
+          <p>Total Products: {{ admin_data.total_products }}</p>
+          <p>Out of Stock: {{ admin_data.out_of_stock }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">Order Progress</div>
+        <div class="card-body">
+          <div class="progress">
+            <div
+              class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+              style="width: 60%"
+            >
+              60%
+            </div>
+          </div>
+          <p>Processing Orders: 60%</p>
+          <p>Completed Orders: 40%</p>
+        </div>
       </div>
     </div>
   </div>
-
-
-      
-    </div>
-
-      
-    </div>
-
-
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  
-  // Customer Growth Chart
+
+   
+
+  // User Growth Chart
   var userGrowthCtx = document.getElementById("userGrowthChart").getContext("2d");
   var userGrowthChart = new Chart(userGrowthCtx, {
-    type: "line",
+    type: "bar",
     data: {
       labels: {{ admin_data.user_growth_data.labels|tojson|safe }},
       datasets: [{
         label: "User Growth",
         data: {{ admin_data.user_growth_data.data|tojson|safe }},
-        borderColor: "#5bc0de",  // Adjust color as needed
+        borderColor: "#5bc0de",
         borderWidth: 2,
         pointRadius: 5,
-        pointBackgroundColor: "#5bc0de",  // Adjust color as needed
+        pointBackgroundColor: "#5bc0de",
         fill: false,
       }],
     },
@@ -182,46 +180,75 @@
       scales: {
         y: { beginAtZero: true },
       },
+      animation: {
+        duration: 1000,
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              var label = context.dataset.label || "";
+              if (label) {
+                label += ": ";
+              }
+              label += context.formattedValue;
+              return label;
+            },
+          },
+        },
+      },
     },
   });
-document.addEventListener('DOMContentLoaded', function () {
-    // Wait for the DOM content to be fully loaded
 
-    // Fetch sales chart data from the server
+  // Total Sales Chart
+  document.addEventListener('DOMContentLoaded', function () {
     fetch('/admin/get_sales_chart_data')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Extract labels and data from the received JSON data
-            const labels = data.labels;
-            const salesData = data.data;
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        const labels = data.labels;
+        const salesData = data.data;
 
-            // Update or create the sales chart using a chart library (not provided here)
-            // You need to have a chart library (e.g., Chart.js) initialized on your page
-
-            // Example using Chart.js:
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            const salesChart = new Chart(ctx, {
-                type: 'bar', // Use the appropriate chart type (e.g., 'line', 'bar', etc.)
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Total Sales',
-                        data: salesData,
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1,
-                    }],
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const salesChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Total Sales',
+              data: salesData,
+              backgroundColor: 'green',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1,
+            }],
+          },
+          options: {
+            animation: {
+              duration: 1000,
+            },
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    var label = context.dataset.label || "";
+                    if (label) {
+                      label += ": ";
+                    }
+                    label += context.formattedValue;
+                    return label;
+                  },
                 },
-            });
-        })
-        .catch(error => console.error('Error fetching sales chart data:', error));
-});
-
+              },
+            },
+          },
+        });
+      })
+      .catch(error => console.error('Error fetching sales chart data:', error));
+  });
 
 document.addEventListener('DOMContentLoaded', function () {
     // Wait for the DOM content to be fully loaded
@@ -284,8 +311,6 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => console.error('Error fetching average order values by day:', error));
 });
-
 </script>
-
 
 {% endblock%}

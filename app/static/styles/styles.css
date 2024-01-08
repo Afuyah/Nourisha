@@ -115,3 +115,21 @@
         height: 20px;
         margin-bottom: 20px;
       }
+/* Chart container styles */
+  .chart-container {
+    background-color: #fff; /* White background for charts */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  /* Chart title styles */
+  .chart-title {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    background-color: #4CAF50; /* Green color for title background */
+    color: #fff; /* White text color for title */
+  }
