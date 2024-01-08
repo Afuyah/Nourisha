@@ -4,14 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Grocery Store User Dashboard</title>
+    <title>Nourisha</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-
+ <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+      crossorigin="anonymous"
+    ></script>
     <!-- Custom CSS -->
     <style>
         body {
@@ -77,9 +86,9 @@
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light">
+    <nav class="navbar navbar-expand navbar-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Grocery Store</a>
+            <a class="navbar-brand" href="#">Nourisha</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -93,56 +102,71 @@
                         <a class="nav-link" href="#"><i class="fas fa-user"></i> Account</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        <a class="nav-link" href="{{url_for('main.logout')}}"><i class="fas fa-sign-out-alt"></i> Logout</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div id="content">
+     <div id="content">
         <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header">My Orders</div>
-                        <div class="card-body">
-                            <!-- Display a list of user's orders -->
-                            <ul>
-                                <li>Order #1234 - Placed on 2022-05-01</li>
-                                <li>Order #5678 - Placed on 2022-05-02</li>
-                                <li>Order #91011 - Placed on 2022-05-03</li>
-                                <li>Order #121314 - Placed on 2022-05-04</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
+            <h2>Welcome, {{ user.name }}!</h2>
+            
+            <!-- Display user information -->
+            <div class="row mb-4">
+                <div class="col-lg-6">
                     <div class="card">
                         <div class="card-header">Account Information</div>
                         <div class="card-body">
-                            <!-- Display user account information -->
-                            <p>Name: John Doe</p>
-                            <p>Email: john@example.com</p>
-                            <p>Address: 123 Main St, Cityville</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header">Recommendations</div>
-                        <div class="card-body">
-                            <!-- Display personalized product recommendations for the user -->
-                            <p>Based on your purchase history, we recommend:</p>
-                            <ul>
-                                <li>Product A</li>
-                                <li>Product B</li>
-                                <li>Product C</li>
-                            </ul>
+                            <p><strong>Name:</strong> {{ user.name }}</p>
+                            <p><strong>Email:</strong> {{ user.email }}</p>
+                            <p><strong>Phone:</strong> {{ user.phone }}</p>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Display user's orders -->
+          <!-- Display user's orders in a table -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">My Orders</div>
+            <div class="card-body">
+                {% if orders %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Order Status</th>
+                                <th>Order Date</th>
+                                <th>Total Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td>{{ order.id }}</td>
+                                    <td>{{ order.status }}</td>
+                                    <td>{{ order.order_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>Ksh. {{ order.total_price }}</td>
+                                    <td>
+                                        <a href="{{ url_for('main.view_order', order_id=order.id) }}" class="btn btn-info btn-sm"> Details</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No orders found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
         </div>
     </div>
 

@@ -5,7 +5,7 @@ from app.main import bp
 from app.admin import admin_bp
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm,  LoginForm, AddRoleForm, AddSupplierForm
 from app.main.models import User, Role, Cart, Supplier, ProductImage,  ProductCategory,  Product, Order, OrderItem, Location, Cart
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
@@ -31,6 +31,22 @@ def send_email(to, subject, body):
 def index():
     user_authenticated = current_user.is_authenticated
     return render_template('home.html', title='Home', product_listing_url=url_for('main.product_listing'), user_authenticated=user_authenticated)
+
+
+
+
+@bp.route('/dashboard')
+@login_required
+def user_dashboard():
+    # Fetch user information from the database
+    user = User.query.filter_by(id=current_user.id).first()
+
+    # Fetch user's orders from the database
+    orders = Order.query.filter_by(user_id=current_user.id).all()
+
+    return render_template('user_dashboard.html', user=user, orders=orders)
+
+
 
 
 @bp.route('/register', methods=['POST', 'GET'])
@@ -118,6 +134,7 @@ def login():
         if user and user.check_password(form.password.data):
             if user.confirmed:
                 login_user(user, remember=True)
+                session['login_time'] = datetime.utcnow()
                 user.last_login_date = datetime.utcnow()
                 user.last_login_ip = request.remote_addr
                 db.session.commit()
@@ -135,6 +152,27 @@ def login():
             flash('Invalid phone number or password. Please check your credentials and try again.', 'danger')
 
     return render_template('login.html', form=form)
+
+
+@bp.before_request
+def before_request():
+    # Track session end time for each request
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
+
+    # Check if a login_time is stored in the session
+    login_time = session.get('login_time')
+
+    if login_time:
+        # Make datetime.utcnow() aware of UTC timezone
+        utc_now = datetime.utcnow().replace(tzinfo=timezone.utc)
+
+        # Calculate session duration and store it in the session
+        session_duration = utc_now - login_time
+        session['average_session_duration'] = session_duration.total_seconds()
+        # Reset login_time to the current time for the next request
+        session['login_time'] = utc_now
 
 
 @bp.route('/logout')
@@ -352,3 +390,9 @@ def product_listing():
     return render_template('product_listing.html', products=products, total_products=total_products,
                            active_products=active_products, out_of_stock=out_of_stock, quantity=quantity, form=form)
 
+
+@bp.route('/view_order/<int:order_id>')
+@login_required
+def view_order(order_id):
+    order = Order.query.get_or_404(order_id)
+    return render_template('view_order.html', order=order)

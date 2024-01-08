@@ -107,32 +107,33 @@
 
   <div class="row mt-4">
     <div class="col-lg-4">
-      <div class="card">
-        <div class="progress">
-        <div class="card-header">Monthly Revenue</div>
+    <div class="card">
+        <div class="card-header">Average Session Duration</div>
         <div class="card-body">
-          <canvas id="monthlyRevenueChart"></canvas>
+            <canvas id="averageSessionDurationChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+</div>
+<div class="col-lg-4">
+  <div class="card">
+    <div class="card-header">Inventory Status</div>
+    <div class="card-body">
+      {% set percentage_out_of_stock = (admin_data.out_of_stock / admin_data.total_products) * 100 %}
+      
+      <div class="progress">
+        <div
+          class="progress-bar bg-success"
+          style="width: {{ percentage_out_of_stock }}%"
+        >
+          {{ percentage_out_of_stock }}%
         </div>
       </div>
+      <p>Total Products: {{ admin_data.total_products }}</p>
+      <p>Out of Stock: {{ admin_data.out_of_stock }}</p>
     </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="card">
-        <div class="card-header">Inventory Status</div>
-        <div class="card-body">
-          <div class="progress">
-            <div
-              class="progress-bar bg-success"
-              style="width: {{ admin_data.inventory_percentage }}%"
-            >
-              {{ admin_data.inventory_percentage }}%
-            </div>
-          </div>
-          <p>Total Products: {{ admin_data.total_products }}</p>
-          <p>Out of Stock: {{ admin_data.out_of_stock }}</p>
-        </div>
-      </div>
-    </div>
+  </div>
+</div>
+ 
 
     <div class="col-lg-4">
       <div class="card">
@@ -163,7 +164,7 @@
   // User Growth Chart
   var userGrowthCtx = document.getElementById("userGrowthChart").getContext("2d");
   var userGrowthChart = new Chart(userGrowthCtx, {
-    type: "bar",
+    type: "line",
     data: {
       labels: {{ admin_data.user_growth_data.labels|tojson|safe }},
       datasets: [{
@@ -279,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Update or create the bar chart using Chart.js
             const ctx = document.getElementById('averageOrderValueChart').getContext('2d');
             const averageOrderValueChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
@@ -311,6 +312,39 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => console.error('Error fetching average order values by day:', error));
 });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Fetch average session duration from the session
+    const averageSessionDuration = {{ session.get('average_session_duration', 0) }};
+
+    // Update or create the bar chart using Chart.js
+    const ctx = document.getElementById('averageSessionDurationChart').getContext('2d');
+    const averageSessionDurationChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Average Session Duration'],
+            datasets: [{
+                data: [averageSessionDuration],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+            }],
+        },
+        options: {
+            scales: {
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Seconds',
+                    },
+                    beginAtZero: true,
+                },
+            },
+        },
+    });
+});
+        
 </script>
 
 {% endblock%}

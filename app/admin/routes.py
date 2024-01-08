@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import current_user, login_required
 from app.admin import admin_bp
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm,  LoginForm, AddLocationForm, AddRoleForm, AddSupplierForm
@@ -8,8 +8,8 @@ from flask import jsonify
 from sqlalchemy import cast, Date, func
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
-
-
+from app import db, mail
+from flask_mail import Message
 
 
 
@@ -91,9 +91,10 @@ def fetch_user_activity_timeline():
 @login_required
 def admin_dashboard():
     def route():
-        if current_user.role.name != 'admin':
-            flash('You do not have permission to access the admin dashboard.', 'danger')
-            return redirect(url_for('main.index'))
+        if current_user is None or not current_user.is_authenticated or current_user.role is None or current_user.role.name != 'admin':
+          flash('You do not have permission to access the admin dashboard.', 'danger')
+          return redirect(url_for('main.index'))
+
 
         # Fetch sales data
         sales_data = fetch_sales_data()
@@ -260,6 +261,14 @@ def add_location():
 
     return handle_db_error_and_redirect(route)
 
+
+
+def send_email(subject, recipient, body):
+    msg = Message(subject, recipients=[recipient])
+    msg.body = body
+    mail.send(msg)
+
+
 @admin_bp.route('/view_order_details/<int:order_id>')
 def view_order_details(order_id):
     def route():
@@ -278,7 +287,11 @@ def confirm_order(order_id):
         order = Order.query.get_or_404(order_id)
         order.status = 'confirmed'
         db.session.commit()
-
+        send_email(
+            subject='Order Confirmation',
+            recipient=order.user.email,
+            body=f"Dear {order.user.username},\n\nYour order with ID {order.id} has been confirmed. Thank you for shopping with us!\n\nSincerely,\nThe Nourisha Team"
+        )
         flash('Order confirmed successfully!', 'success')
         return redirect(url_for('admin.view_orders'))
 
@@ -300,7 +313,13 @@ def cancel_order(order_id):
 
         db.session.commit()
 
-        flash('Order canceled successfully!', 'success')
+        send_email(
+            subject='Order Cancellation',
+            recipient=order.user.email,
+            body=f"Dear {order.user.username},\n\nYour order with ID {order.id} has been canceled. If you have any questions, please contact our support team.\n\nSincerely,\nThe Nourisha Team"
+        )
+
+        flash('Order canceled successfully! Cancellation email sent to the user.', 'success')
         return redirect(url_for('admin.view_orders'))
 
     return handle_db_error_and_redirect(route)
