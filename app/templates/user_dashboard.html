@@ -11,11 +11,16 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
- <script
-      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Arizonia&family=Love+Ya+Like+A+Sister&display=swap" rel="stylesheet">
+  
+    <script>  src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
       integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
       crossorigin="anonymous"
-    ></script>
+    </script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
@@ -35,18 +40,23 @@
         }
 
         .navbar {
-            background-color: #5cb85c;
+            background-color: #cdc;
             color: #fff;
         }
 
         .navbar-brand,
         .navbar-nav .nav-link {
-            color: #fff;
+            color: #000;
+      }   
+        .navbar-brand {
+          font-family: "Love Ya Like A Sister";
         }
+
+        
 
         .navbar-brand:hover,
         .navbar-nav .nav-link:hover {
-            color: #fff;
+            color: lightgrey;
         }
 
         .placeholder-content {
@@ -64,8 +74,8 @@
         }
 
         .card-header {
-            background-color: #5cb85c;
-            color: #fff;
+            background-color: #cdc;
+            color: #000;
             font-weight: bold;
         }
 
@@ -86,20 +96,20 @@
 
 <body>
 
-    <nav class="navbar navbar-expand navbar-light">
+    <nav class="navbar navbar-expand navbar-light shadow navbar sticky-top" >
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Nourisha</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#"><i class="fas fa-shopping-cart"></i> My Orders</a>
+                        <a class="nav-link" href="{{url_for('cart.view_cart')}}"><i class="fas fa-shopping-cart"></i> cart</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-user"></i> Account</a>
+                        <a class="nav-link" href="{{url_for('main.product_listing')}}"><i class="fas fa-shopping-basket"></i> Shop</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{url_for('main.logout')}}"><i class="fas fa-sign-out-alt"></i> Logout</a>

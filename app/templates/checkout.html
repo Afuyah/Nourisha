@@ -73,7 +73,7 @@
       </div>
     {% else %}
       <div class="alert alert-info" role="alert">
-        Your grocery cart is empty. Explore our store and add items before checking out.
+        Your grocery cart is empty. <a href="{{url_for('main.product_listing')}}" > EXPLORE OUR STORE</a> and add items before checking out.
       </div>
     {% endif %}
   </div>
