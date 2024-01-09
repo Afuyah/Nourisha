@@ -44,7 +44,8 @@
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
         // Update cart items on page load
-        const productIds = {% for product in products %}['{{ product.id }}',]{% endfor %};
+       const productIds = [{% for product in replica_products %}'{{ product.id }}'{% if not loop.last %},{% endif %}{% endfor %}];
+
 
         for (const productId of productIds) {
             await updateCartItem(productId, 'sync');
