@@ -64,7 +64,7 @@ def create_app(environ=None, start_response=None):
             upgrade()
         return 'Migrations completed successfully.'
     @app.route('/init_migrations')
-     def init_migrations():
+    def init_migrations():
         with app.app_context():
             from flask_migrate import init
             init()
