@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
@@ -8,18 +8,16 @@ from config import Config
 from datetime import timedelta
 from flask_cors import CORS
 
-
 db = SQLAlchemy()
 login_manager = LoginManager()
 mail = Mail()
 migrate = Migrate()
 CORS(resources={r"/*": {"origins": "*"}})
 
-
 def create_app(environ=None, start_response=None):
-    app = Flask(__name__)   
+    app = Flask(__name__)
     app.config.from_object(Config)
-  
+
     # Set the session timeout to 7 days
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
     app.config['SESSION_COOKIE_NAME'] = 'myapp_session'
@@ -58,4 +56,16 @@ def create_app(environ=None, start_response=None):
     def load_user(user_id):
         return User.query.get(int(user_id))
 
+    # Add Flask-Migrate commands
+    @app.route('/run_migrations')
+    def run_migrations():
+        with app.app_context():
+            from flask_migrate import upgrade
+            upgrade()
+        return 'Migrations completed successfully.'
+
     return app
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run(debug=True)
