@@ -2,12 +2,12 @@
 
 {% block content %}
     <!-- Header Section -->
-    <div class="container mt-5">
+    <div class="container mt-3">
        
         
         <!-- Small Images/Advertisements -->
         <div class="row mb-4">
-            <div class="col-md-4">
+            <div class="col-md-4 d-none d-sm-block">
                 <img src="https://images.unsplash.com/flagged/photo-1587302164675-820fe61bbd55?q=80&w=1160&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Advertisement 1" class="img-fluid">
             </div>
             <div class="col-md-4">
@@ -46,26 +46,79 @@
             <a href="#" class="btn btn-primary">View All Products</a>
         </div>
     </div>
-    <!-- Advertisements Section -->
-    <div class="container mt-5">
-        <h2 class="text-center mb-4">Special Offers</h2>
-        <div class="row">
-            <!-- Advertisements -->
-            <div class="col-md-6">
-                <img src="" alt="Special Offer 1" class="img-fluid">
+
+<!-- Add Animate.css and Hover.css in your project -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hover.css/2.3.1/css/hover-min.css">
+
+<!-- Special Offers Section with Enhanced Carousel -->
+<div class="container mt-5">
+    <h2 class="text-center mb-4 animate__animated animate__fadeIn">Special Offers</h2>
+    <div id="specialOffersCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <!-- First Special Offer -->
+            <div class="carousel-item active">
+                <img src="https://images.unsplash.com/photo-1591184510259-b6f1be3d7aff?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="d-block w-100 carousel-img" alt="Special Offer 1">
+                <div class="carousel-caption animate__animated animate__fadeInDown">
+                    <h5>Exclusive Offer</h5>
+                    <p>Save big with our limited-time discounts!</p>
+                </div>
             </div>
-            <div class="col-md-6">
-                <img src="" alt="Special Offer 2" class="img-fluid">
+            <!-- Second Special Offer -->
+            <div class="carousel-item">
+                <img src="https://images.unsplash.com/photo-1439127989242-c3749a012eac?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="d-block w-100 carousel-img" alt="Special Offer 2">
+                <div class="carousel-caption animate__animated animate__fadeInDown">
+                    <h5>Flash Sale</h5>
+                    <p>Hurry up! Grab your favorite items now.</p>
+                </div>
             </div>
+            <!-- Add more carousel items as needed -->
+        </div>
+        <!-- Carousel Controls -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#specialOffersCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#specialOffersCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</div>
+
+
+
+<!-- About Us Section -->
+
+<div class="container mt-5 p-4 bg-light rounded">
+    <h2 class="text-center mb-4 animate__animated animate__fadeIn">About Us</h2>
+    <div class="row">
+        <div class="col-md-6 animate__animated animate__fadeInLeft">
+            <p class="lead">Welcome to Nourisha Groceries Ltd, your trusted source for high-quality products and excellent customer service. We are dedicated to providing our customers with a seamless shopping experience, offering a wide range of products to meet your needs.</p>
+        </div>
+        <div class="col-md-6 d-none d-sm-block animate__animated animate__fadeInRight">
+            <!-- Hidden on small devices -->
+            <img src="https://images.unsplash.com/photo-1588964895597-cfccd6e2dbf9?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="About Us Image" class="img-fluid mt-4 mb-3 rounded" style="border-bottom-left-radius:20%; border-bottom-right-radius:20%">
         </div>
     </div>
+    <div class="col-md-12 text-center mt-4 animate__animated animate__fadeIn">
+        <p class="lead">Our commitment to quality ensures that every product in our inventory is carefully selected to meet the highest standards. Whether you're looking for fresh groceries, household essentials, or unique specialty items, we've got you covered.</p>
+    </div>
 
-    <!-- Contact Us Section -->
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Contact Us</h2>
+    <!-- Read More Button-->
+    <div class="text-center mt-4 animate__animated animate__fadeInUp">
+        <a href="/read-more" class="btn btn-primary btn-lg">Discover More</a>
+    </div>
+</div>
+</div>
+
+
+<!-- Contact Us Section with Enhancements -->
+<div class="container mt-5 p-4 bg-light rounded">
+    <h2 class="text-center mb-4 animate__animated animate__fadeIn">Contact Us</h2>
     <div class="row">
         <!-- Contact Form -->
-        <div class="col-md-6">
+        <div class="col-md-6 animate__animated animate__fadeInLeft">
             <form action="{{ url_for('main.products') }}" method="post">
                 <!-- Contact Form Fields -->
                 <div class="mb-3">
@@ -84,38 +137,61 @@
             </form>
         </div>
         <!-- Contact Information -->
-        <div class="col-md-6">
-            <p>Address: Your Address</p>
-            <p>Email: your@email.com</p>
-            <p>Phone: +123456789</p>
+        <div class="col-md-6 mt-5 animate__animated animate__fadeInRight">
+            <ul class="list-unstyled">
+                <li><i class="bi bi-geo-alt"></i> Address: Your Address</li>
+                <li><i class="bi bi-envelope"></i> Email: your@email.com</li>
+                <li><i class="bi bi-phone"></i> Phone: +123456789</li>
+            </ul>
         </div>
     </div>
 </div>
-
-
-    <!-- Testimonials Section -->
-    <div class="container mt-5 mb-4">
-        <h2 class="text-center mb-4">What Our Customers Say</h2>
-        <div class="row">
-            <!-- Testimonials -->
-            <div class="col-md-4">
+    
+<!-- Testimonials Section -->
+<div class="container mt-3 mb-5">
+    <h2 class="text-center mb-4">What Our Customers Say</h2>
+    <div class="row">
+        <!-- Testimonials -->
+        <div class="col-md-4">
+            <div class="testimonial-card">
                 <blockquote class="blockquote">
-                    <p class="mb-0">"Great service and high-quality products!"</p>
+                    <p class="mb-0">"Great service and high-quality products! The team is always helpful."</p>
                     <footer class="blockquote-footer">Customer 1</footer>
                 </blockquote>
             </div>
-            <div class="col-md-4">
+        </div>
+        <div class="col-md-4">
+            <div class="testimonial-card">
                 <blockquote class="blockquote">
-                    <p class="mb-0">"Always on time and fresh groceries."</p>
+                    <p class="mb-0">"Always on time and fresh groceries. A reliable choice for busy lifestyles."</p>
                     <footer class="blockquote-footer">Customer 2</footer>
                 </blockquote>
             </div>
-            <div class="col-md-4">
+        </div>
+        <div class="col-md-4">
+            <div class="testimonial-card">
                 <blockquote class="blockquote">
-                    <p class="mb-0">"Love the variety of products available."</p>
+                    <p class="mb-0">"Love the variety of products available. The quality is unmatched!"</p>
                     <footer class="blockquote-footer">Customer 3</footer>
                 </blockquote>
             </div>
         </div>
     </div>
+</div>
+<div class= " container mt-5 mb-5" >
+</div>
+
+<script>
+    document.getElementById('specialOffersCarousel').addEventListener('slid.bs.carousel', function () {
+        setTimeout(function () {
+            $('#specialOffersCarousel').carousel('next');
+        }, 5000); // Adjust the time delay (in milliseconds) for a slower slide
+    });
+
+    // Start the carousel
+    $('#specialOffersCarousel').carousel({
+        interval: 10000 // Set the initial interval for the carousel (in milliseconds)
+    });
+</script>
+
 {% endblock %}

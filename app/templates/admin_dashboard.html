@@ -164,7 +164,7 @@
   // User Growth Chart
   var userGrowthCtx = document.getElementById("userGrowthChart").getContext("2d");
   var userGrowthChart = new Chart(userGrowthCtx, {
-    type: "line",
+    type: "bar",
     data: {
       labels: {{ admin_data.user_growth_data.labels|tojson|safe }},
       datasets: [{

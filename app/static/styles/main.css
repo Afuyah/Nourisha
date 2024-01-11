@@ -1,10 +1,48 @@
 /* main.css */
 
-body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6{
+    font-family: "inter", sans-serif ;
+    font-weight: 600;
+    color: #222222;
+
 }
+h1{
+    font-size: 2.5rem;
+    text-align: center;
+}
+h2{
+    font-size: 2rem;
+    text-align: center;
+
+}
+h3{
+    font-size: 1.75rem;
+
+}
+h4{
+    font-size: 1.5rem;
+}
+h5{
+    font-size: 1.5rem;
+}
+h6{
+    font-size: 1.25rem;
+}
+a{
+    text-decoration: none;
+    color: #1d4cd8;
+}
+a:hover,
+a:focus{
+    color:#3b82f6
+}
+
 
 header {
     background-color: #333;
@@ -163,4 +201,67 @@ body {
     height: 1.5rem;
 }
 
-/* Add more styles based on your design preferences */
+/* Contact Form Styles */
+.contact-form {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.contact-form label {
+    font-weight: bold;
+}
+
+.contact-form textarea {
+    resize: vertical;
+}
+
+.contact-form button {
+    margin-top: 10px;
+}
+
+/* Contact Information Styles */
+.contact-info {
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+}
+
+.contact-info h4 {
+    margin-bottom: 15px;
+}
+
+    .testimonial-card {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .testimonial-card:hover {
+        transform: scale(1.03);
+    }
+
+    .testimonial-card blockquote {
+        border-left: 3px solid #007bff;
+        padding-left: 25px;
+        margin: 0;
+    }
+
+    .testimonial-card p {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+
+    .testimonial-card footer {
+        color: #888;
+        font-size: 14px;
+    }
+
+    /* Add additional styling as needed */
+
+

@@ -37,22 +37,22 @@
     </div>
 
     <p class="total-price">Total Price: Ksh<span id="total-price">{{ total_price }}</span></p>
-    
+
     <button class="btn btn-primary btn-sm proceed-to-checkout-btn" onclick="window.location.href='/cart/checkout'">Proceed to Checkout</button>
-    
+
     <div class="spinner-border text-primary d-none" role="status" id="loading-spinner">
       <span class="sr-only"></span>
     </div>
   </div>
 
   <script>
-    
+
  function confirmClearCart(csrfToken) {
     if (confirm('Are you sure you want to clear your cart?')) {
       clearCart(csrfToken);
     }
   }
-    
+
     document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('.decrement-btn').forEach(function (button) {
         button.addEventListener('click', function () {
@@ -181,6 +181,6 @@
       console.log('Updating quantity in stock...');
     }
 
-    
+
   </script>
 {% endblock %}

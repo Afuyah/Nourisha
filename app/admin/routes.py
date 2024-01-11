@@ -10,7 +10,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
 from app import db, mail
 from flask_mail import Message
-
+from flask_migrate import Migrate
+from flask_migrate import Migrate
 
 
 def handle_db_error_and_redirect(route):
@@ -260,8 +261,6 @@ def add_location():
         return render_template('add_location.html', form=form, locations=locations)
 
     return handle_db_error_and_redirect(route)
-
-
 
 def send_email(subject, recipient, body):
     msg = Message(subject, recipients=[recipient])

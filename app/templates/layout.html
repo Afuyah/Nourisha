@@ -1,4 +1,4 @@
-<!doctype html>
+
 <html lang="en">
   <head>
     <!-- Meta Tags -->
@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     <!-- Title -->
-    <title>Nourisha Groceries</title>
+    <title>Naurisha Groceries</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -46,6 +46,10 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
       rel="stylesheet"
     />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    
     <!-- Scripts -->
     <script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
@@ -144,10 +148,98 @@
     height: 1.5rem;
 }
 
-/* Add more styles based on your design preferences */
+ /* Style for About Us Section */
+    .about-us-section {
+        padding: 40px 0;
+    }
 
+    .about-us-section h2 {
+        font-size: 36px;
+        color: #333;
+        margin-bottom: 30px;
+    }
 
-</style>
+    .about-us-section p {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .about-us-section img {
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+    }/* Add more styles based on your design preferences */
+
+<style>
+    .testimonial-card {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .testimonial-card:hover {
+        transform: scale(1.03);
+    }
+
+    .testimonial-card blockquote {
+        border-left: 3px solid #007bff;
+        padding-left: 25px;
+        margin: 0;
+    }
+
+    .testimonial-card p {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+
+    .testimonial-card footer {
+        color: #888;
+        font-size: 14px;
+    }
+
+    /* Custom styles for enhanced carousel */
+    .carousel-img {
+        max-height: 200px; /* Adjust the maximum height of the images */
+        object-fit: cover;
+        filter: brightness(70%); /* Apply a slight dark overlay to images */
+        transition: filter 0.5s ease;
+    }
+
+    .carousel-caption {
+        position: absolute;
+        top: 30%;
+        transform: translateY(-50%);
+        width: 100%;
+        text-align: center;
+        color: #fff;
+    }
+
+    .carousel-caption h5 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .carousel-caption p {
+        font-size: 1.2rem;
+    }
+
+    /* Hover effect to lighten the dark overlay on images */
+    .carousel-item:hover .carousel-img {
+        filter: brightness(100%);
+    }
+
+    /* Optional: Add a subtle box-shadow to the carousel for a polished look */
+    #specialOffersCarousel {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+</style >
   <body>
     <!-- Header -->
 
@@ -155,13 +247,13 @@
 <nav class="navbar navbar-expand shadow navbar sticky-top bg-white ">
   <!-- ... -->
 <a class="navbar-brand" href="{{url_for('main.index')}}">
-      <img src="/static/logo.svg" alt="Naurisha" height="30px" class="d-md-none" />
-      <img src="/static/logo.svg" alt="Naurisha logo" height="30px" class="d-none d-md-inline" />
+      <img src="/static/logo2.png" alt="Naurisha" height="30px" class="d-md-none" />
+      <img src="/static/logo2.png" alt="Naurisha logo" height="30px" class="d-none d-md-inline" />
     </a>
   <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" href="{{url_for('cart.view_cart')}}"><i class="fas fa-shopping-cart">cart</i>  </a>
+        <a class="nav-link" href="{{url_for('cart.view_cart')}}"<i class="fas fa-shopping-cart">cart</i>  </a>
       </li>
 
       <li class="nav-item">
