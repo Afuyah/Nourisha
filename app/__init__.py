@@ -69,6 +69,7 @@ def create_app(environ=None, start_response=None):
             from flask_migrate import init
             init()
         return 'Migrations initialized successfully.'
+
     return app
 
 if __name__ == '__main__':
