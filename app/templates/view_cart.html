@@ -1,186 +1,401 @@
-{% extends 'layout.html' %}
-
-{% block content %}
-  <div class="container mt-4 mb-5 p-2">
-    <h1 class="mb-4 text-center">Your Cart</h1>
-    <button class="btn btn-danger btn-sm clear-cart-btn" onclick="clearCart('{{ csrf_token() }}')">Clear Cart</button>
-
-    <div class="cart-items-container">
-      {% if cart_items %}
-        {% for item in cart_items %}
-          <div class="col mb-4">
-            <div class="card product-card d-flex flex-column h-100">
-              <div class="card-body product-details-wrapper flex-grow-1">
-                <h5 class="card-title text-primary">{{ item.product.brand }}</h5>
-                <p class="card-text">{{ item.product.description | truncate(120) }}</p>
-                <p class="card-text"><strong>Price:</strong> Ksh {{ item.product.unit_price }} / {{ item.product.unit_measurement }}</p>
-                <p class="card-text">
-                  <strong>Quantity:</strong>
-                  <button class="btn btn-secondary btn-sm decrement-btn" data-product-id="{{ item.product.id }}">-</button>
-                  <span class="quantity-display" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
-                  <button class="btn btn-secondary btn-sm increment-btn" data-product-id="{{ item.product.id }}">+</button>
-                  <div class="spinner-border text-primary d-none loading-spinner" role="status" data-product-id="{{ item.product.id }}">
-                    <span class="sr-only"></span>
-                  </div>
-                </p>
-                <p class="card-text"><strong>Subtotal:</strong> Ksh<span id="subtotal-{{ item.product.id }}">{{ item.product.unit_price * item.quantity }}</span></p>
-              </div>
-            </div>
-          </div>
-        {% endfor %}
-      {% else %}
-        <p class="text-center">Your cart is empty.</p>
-        <div class="text-center">
-           <a href =" {{url_for('main.product_listing')}}">SHOP NOW </a> 
-        </div>
-      {% endif %}
-    </div>
-
-    <p class="total-price">Total Price: Ksh<span id="total-price">{{ total_price }}</span></p>
-
-    <button class="btn btn-primary btn-sm proceed-to-checkout-btn" onclick="window.location.href='/cart/checkout'">Proceed to Checkout</button>
-
-    <div class="spinner-border text-primary d-none" role="status" id="loading-spinner">
-      <span class="sr-only"></span>
-    </div>
+{% extends 'layout.html' %} {% block content %}
+<div class="container mt-4 mb-5 p-2">
+  <!-- Animated Welcome Banner -->
+  <div class="alert alert-primary alert-dismissible fade show" role="alert">
+    <strong>Welcome to Your Cart!</strong> Enjoy a seamless shopping experience.
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
   </div>
 
-  <script>
+  <h1 class="mb-4 text-center">Your Cart</h1>
 
- function confirmClearCart(csrfToken) {
-    if (confirm('Are you sure you want to clear your cart?')) {
-      clearCart(csrfToken);
+  {% if cart_items %}
+  <div class="table-responsive mt-4">
+    <table class="table table-bordered table-hover">
+      <!-- Table Header -->
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">Product</th>
+          <th scope="col">Price</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Subtotal</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <!-- Table Body -->
+      <tbody>
+        {% for item in cart_items %}
+        <tr class="fade-in">
+          <td class="align-middle">
+            <img
+              src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image) }}"
+              class="img-thumbnail"
+              alt="{{ item.product.brand }}"
+              style="max-width: 80px"
+            />
+            <br />
+            <strong>{{ item.product.brand }}</strong>
+          </td>
+
+          <td class="align-middle">Ksh {{ item.product.unit_price }}</td>
+          <td class="align-middle">
+            <button
+              class="btn btn-secondary btn-sm decrement-btn"
+              data-product-id="{{ item.product.id }}"
+            >
+              -
+            </button>
+            <span
+              class="quantity-display"
+              data-product-id="{{ item.product.id }}"
+              >{{ item.quantity }}</span
+            >
+            <button
+              class="btn btn-secondary btn-sm increment-btn"
+              data-product-id="{{ item.product.id }}"
+            >
+              +
+            </button>
+            <div
+              class="spinner-border text-primary d-none loading-spinner"
+              role="status"
+              data-product-id="{{ item.product.id }}"
+            >
+              <span class="sr-only"></span>
+            </div>
+          </td>
+          <td class="align-middle">
+            Ksh<span id="subtotal-{{ item.product.id }}"
+              >{{ item.product.unit_price * item.quantity }}</span
+            >
+          </td>
+          <td class="align-middle">
+            <button
+              class="btn btn-danger btn-sm remove-item-btn"
+              data-product-id="{{ item.product.id }}"
+            >
+              Remove
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Total Price and Proceed to Checkout -->
+  <p class="total-price text-center mt-4">
+    Total Price: Ksh<span id="total-price">{{ total_price }}</span>
+  </p>
+  <div class="text-center">
+    <button
+      class="btn btn-primary btn-sm proceed-to-checkout-btn"
+      onclick="window.location.href='/cart/checkout'"
+    >
+      Proceed to Checkout
+    </button>
+  </div>
+
+  <!-- Clear Cart Button -->
+  <div class="text-center mt-4">
+    <button
+      class="btn btn-danger btn-sm clear-cart-btn"
+      onclick="confirmClearCart('{{ csrf_token() }}')"
+    >
+      Clear Cart
+    </button>
+  </div>
+  {% else %}
+  <!-- Display a message and suggest some items -->
+  <div class="text-center">
+    <p>Your cart is empty. Why not explore our products?</p>
+    <a href="{{url_for('main.product_listing')}}" class="btn btn-primary btn-sm"
+      >Explore Products</a
+    >
+  </div>
+  {% endif %}
+
+  <div
+    class="spinner-border text-primary d-none"
+    role="status"
+    id="loading-spinner"
+  >
+    <span class="sr-only"></span>
+  </div>
+</div>
+
+<style>
+  /* Custom styles for animations and additional styles */
+  .fade-in {
+    animation: fadeIn ease 1s;
+  }
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
     }
   }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('.decrement-btn').forEach(function (button) {
-        button.addEventListener('click', function () {
-          const productId = button.getAttribute('data-product-id');
-          const csrfToken = document.querySelector('meta[name=csrf-token]').content;
-          updateCartItem(productId, 'decrement', csrfToken);
-        });
-      });
+  /* Additional styling for the welcome banner */
+  .alert {
+    border-radius: 0;
+    text-align: center;
+    font-size: 18px;
+  }
+ /* Styles for small devices */
+  @media (max-width: 576px) {
+    .decrement-btn,
+    .increment-btn {
+      font-size: 8px;
+      padding: 5px 10px;
+      
+    }
+  }
 
-      document.querySelectorAll('.increment-btn').forEach(function (button) {
-        button.addEventListener('click', function () {
-          const productId = button.getAttribute('data-product-id');
-          const csrfToken = document.querySelector('meta[name=csrf-token]').content;
-          updateCartItem(productId, 'increment', csrfToken);
-        });
-      });
+  
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"
+/>
 
-      document.querySelectorAll('.clear-cart-btn').forEach(function (button) {
-        button.addEventListener('click', function () {
-          const csrfToken = document.querySelector('meta[name=csrf-token]').content;
-          clearCart(csrfToken);
-        });
+<script>
+  function confirmClearCart(csrfToken) {
+    if (confirm("Are you sure you want to clear your cart?")) {
+      clearCart(csrfToken);
+      // Reload the page after clearing the cart
+      location.reload();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".decrement-btn").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const productId = button.getAttribute("data-product-id");
+        const csrfToken = document.querySelector(
+          "meta[name=csrf-token]",
+        ).content;
+        updateCartItem(productId, "decrement", csrfToken);
       });
     });
 
-    async function updateCartItem(productId, action, csrfToken) {
-      const loadingSpinner = document.getElementById('loading-spinner');
+    document.querySelectorAll(".increment-btn").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const productId = button.getAttribute("data-product-id");
+        const csrfToken = document.querySelector(
+          "meta[name=csrf-token]",
+        ).content;
+        updateCartItem(productId, "increment", csrfToken);
+      });
+    });
 
-      // Show loading spinner
-      loadingSpinner.classList.remove('d-none');
+    document.querySelectorAll(".clear-cart-btn").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const csrfToken = document.querySelector(
+          "meta[name=csrf-token]",
+        ).content;
+        clearCart(csrfToken);
+        // Reload the page after clearing the cart
+        location.reload();
+      });
+    });
 
-      try {
-        const response = await fetch(`/cart/api/update`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-          },
-          body: JSON.stringify({ productId, action }),
+    document.querySelectorAll(".remove-item-btn").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const productId = button.getAttribute("data-product-id");
+        const csrfToken = document.querySelector(
+          "meta[name=csrf-token]",
+        ).content;
+        removeCartItem(productId, csrfToken);
+      });
+    });
+  });
+
+  async function updateCartItem(productId, action, csrfToken) {
+    const loadingSpinner = document.getElementById("loading-spinner");
+
+    // Show loading spinner
+    loadingSpinner.classList.remove("d-none");
+
+    try {
+      const response = await fetch(`/cart/api/update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify({ productId, action }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        // Update each cart item in the UI
+        data.data.cartItems.forEach((cartItem) => {
+          const quantityDisplay = document.querySelector(
+            `.quantity-display[data-product-id="${cartItem.productId}"]`,
+          );
+          const subtotalElement = document.getElementById(
+            `subtotal-${cartItem.productId}`,
+          );
+
+          // Update quantity and subtotal for each item
+          if (quantityDisplay && subtotalElement) {
+            quantityDisplay.textContent = cartItem.quantity;
+            subtotalElement.textContent = cartItem.subtotal;
+          }
         });
 
-        const data = await response.json();
-
-        if (data.status === 'success') {
-          // Update each cart item in the UI
-          data.data.cartItems.forEach(cartItem => {
-            const quantityDisplay = document.querySelector(`.quantity-display[data-product-id="${cartItem.productId}"]`);
-            const subtotalElement = document.getElementById(`subtotal-${cartItem.productId}`);
-
-            // Update quantity and subtotal for each item
-            if (quantityDisplay && subtotalElement) {
-              quantityDisplay.textContent = cartItem.quantity;
-              subtotalElement.textContent = cartItem.subtotal;
-            }
-          });
-
-          // Update total price
-          const totalPriceElement = document.getElementById('total-price');
-          if (totalPriceElement) {
-            totalPriceElement.textContent = data.data.totalPrice;
-          }
-
-          // Update quantity in stock
-          updateQuantityInStock();
-
-          // Optionally, update other elements or perform additional actions
-        } else {
-          console.error('Error updating cart:', data.message);
+        // Update total price
+        const totalPriceElement = document.getElementById("total-price");
+        if (totalPriceElement) {
+          totalPriceElement.textContent = data.data.totalPrice;
         }
-      } catch (error) {
-        console.error('Error updating quantity:', error);
-      } finally {
-        // Hide loading spinner
-        loadingSpinner.classList.add('d-none');
+
+        // Update quantity in stock
+        updateQuantityInStock();
+
+        // Optionally, update other elements or perform additional actions
+      } else {
+        console.error("Error updating cart:", data.message);
       }
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+    } finally {
+      // Hide loading spinner
+      loadingSpinner.classList.add("d-none");
     }
+  }
 
-    async function clearCart(csrfToken) {
-      const loadingSpinner = document.getElementById('loading-spinner');
+  async function clearCart(csrfToken) {
+    const loadingSpinner = document.getElementById("loading-spinner");
 
-      // Show loading spinner
-      loadingSpinner.classList.remove('d-none');
+    // Show loading spinner
+    loadingSpinner.classList.remove("d-none");
 
-      try {
-        // Send a request to your server to clear the cart
-        const response = await fetch(`/main/cart/clear_cart`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-          },
-        });
+    try {
+      // Send a request to your server to clear the cart
+      const response = await fetch(`/main/cart/clear_cart`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (data.status === 'success') {
-          // Clear the UI elements
-          const cartItemsContainer = document.querySelector('.cart-items-container');
-          if (cartItemsContainer) {
-            cartItemsContainer.innerHTML = '';  // Clear the cart items container
-          }
-
-          // Update total price
-          const totalPriceElement = document.getElementById('total-price');
-          if (totalPriceElement) {
-            totalPriceElement.textContent = '0';  // Assuming the total price element is a number
-          }
-
-          // Optionally, update other elements or perform additional actions
-        } else {
-          console.error('Error clearing cart:', data.message);
-          // Optionally, show a user-friendly error message or perform other error handling
+      if (data.status === "success") {
+        // Clear the UI elements
+        const cartItemsContainer = document.querySelector(".row");
+        if (cartItemsContainer) {
+          cartItemsContainer.innerHTML = ""; // Clear the cart items container
         }
-      } catch (error) {
-        console.error('Fetch error:', error);
-        // Handle the error (e.g., show a user-friendly message)
-      } finally {
-        // Hide loading spinner
-        loadingSpinner.classList.add('d-none');
+
+        // Update total price
+        const totalPriceElement = document.getElementById("total-price");
+        if (totalPriceElement) {
+          totalPriceElement.textContent = "0"; // Assuming the total price element is a number
+        }
+
+        // Optionally, update other elements or perform additional actions
+      } else {
+        console.error("Error clearing cart:", data.message);
+        // Optionally, show a user-friendly error message or perform other error handling
       }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      // Handle the error (e.g., show a user-friendly message)
+    } finally {
+      // Hide loading spinner
+      loadingSpinner.classList.add("d-none");
     }
+  }
 
-    function updateQuantityInStock() {
-      // Implement the logic to update the quantity in stock in the UI
-      // This function should be customized based on your specific requirements
-      console.log('Updating quantity in stock...');
+  async function removeCartItem(productId, csrfToken) {
+    const loadingSpinner = document.getElementById("loading-spinner");
+
+    // Show loading spinner
+    loadingSpinner.classList.remove("d-none");
+
+    try {
+      // Send a request to your server to remove the item from the cart
+      const response = await fetch(`/cart/api/remove`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify({ productId }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        // Remove the item from the UI with a fade-out animation
+        const removedItem = document
+          .querySelector(`.remove-item-btn[data-product-id="${productId}"]`)
+          .closest("tr");
+        if (removedItem) {
+          // Fade-out animation
+          removedItem.style.transition = "opacity 0.5s";
+          removedItem.style.opacity = 0;
+
+          // After the animation completes, remove the item from the DOM
+          setTimeout(() => {
+            removedItem.remove();
+          }, 500);
+
+          // Show Toastr notification
+          toastr.success("Item removed from the cart");
+        }
+
+        // Update total price
+        const totalPriceElement = document.getElementById("total-price");
+        if (totalPriceElement) {
+          totalPriceElement.textContent = data.data.totalPrice;
+        }
+
+        // Optionally, update other elements or perform additional actions
+      } else {
+        // Display an error Toastr notification
+        toastr.error("Error removing item from the cart");
+        console.error("Error removing item from cart:", data.message);
+      }
+    } catch (error) {
+      // Display a generic error Toastr notification
+      toastr.error("An error occurred");
+      console.error("Fetch error:", error);
+    } finally {
+      // Hide loading spinner
+      loadingSpinner.classList.add("d-none");
     }
+  }
 
+  document.addEventListener("DOMContentLoaded", function () {
+    // ... Existing code ...
 
-  </script>
+    document.querySelectorAll(".remove-item-btn").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const productId = button.getAttribute("data-product-id");
+        const csrfToken = document.querySelector(
+          "meta[name=csrf-token]",
+        ).content;
+        removeCartItem(productId, csrfToken);
+      });
+    });
+  });
+
+async function updateQuantityInStock() {
+  // Implement the logic to update the quantity in stock in the UI
+  // This function should be customized based on your specific requirements
+  console.log('Updating quantity in stock...');
+
+}  
+</script>
 {% endblock %}

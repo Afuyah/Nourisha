@@ -216,7 +216,7 @@
 
         const ctx = document.getElementById('salesChart').getContext('2d');
         const salesChart = new Chart(ctx, {
-          type: 'line',
+          type: 'bar',
           data: {
             labels: labels,
             datasets: [{
@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Update or create the bar chart using Chart.js
             const ctx = document.getElementById('averageOrderValueChart').getContext('2d');
             const averageOrderValueChart = new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{

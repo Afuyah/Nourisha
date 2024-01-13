@@ -315,3 +315,61 @@ def send_order_confirmation_email(user_email, admin_email, order):
     admin_body = f'New order received!\n\nOrder ID: {order.id}\nUser: {order.user.username}\nTotal Price: {order.total_price}'
     admin_msg = Message(admin_subject, recipients=[admin_email], body=admin_body)
     mail.send(admin_msg)
+
+
+@cart_bp.route('/api/remove', methods=['POST'])
+@login_required
+def remove_from_cart():
+    try:
+        data = request.get_json()
+        product_id = data.get('productId')
+
+        # Authenticate the user and obtain the user_id (replace with your actual authentication logic)
+        user_id = get_authenticated_user_id()
+
+        if user_id is None:
+            raise ValueError('User not authenticated')  # You can customize this error message
+
+        # Perform database queries to remove the item from the cart
+        remove_item_from_cart(user_id, product_id)
+
+        # Fetch updated cart info
+        updated_cart_info = get_updated_cart_info(user_id)
+
+        # Example response
+        response_data = {
+            'status': 'success',
+            'message': 'Item removed from cart successfully',
+            'data': {
+                'cartItems': updated_cart_info['cartItems'],
+                'totalPrice': updated_cart_info['totalPrice'],
+            }
+        }
+
+        return jsonify(response_data)
+
+    except Exception as e:
+        # Log the exception using the blueprint's logger
+        current_app.logger.error('Error removing item from cart: %s', str(e))
+
+        response_data = {
+            'status': 'error',
+            'message': 'Internal Server Error: ' + str(e),
+        }
+        return jsonify(response_data), 500
+
+# ...
+
+def remove_item_from_cart(user_id, product_id):
+    # Perform database queries to remove the item from the cart
+    cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+
+    if cart_item:
+        # Update quantity in stock for the corresponding product
+        product = Product.query.get(product_id)
+        if product:
+            product.quantity_in_stock += cart_item.quantity
+
+        # Remove the item from the cart
+        db.session.delete(cart_item)
+        db.session.commit()

@@ -3,24 +3,22 @@
 {% block content %}
   <div class="container d-flex justify-content-center align-items-center">
     <div class="text-center" style="max-width: 980px;">
-      <h1 class="mb-4">Product Listing</h1>
+      <h1 class="mb-4 display-4">Product Listing</h1>
       <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
         {% for product in products %}
           <div class="col">
-            <div class="card product-card border-0 shadow-sm">
-              <div class="product-image-container">
+            <div class="card product-card border-0 shadow">
+              <div class="product-image-container position-relative overflow-hidden">
                 {% if product.images %}
                   <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
                 {% else %}
                   <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image" alt="Placeholder Image">
                 {% endif %}
-                <div class="magnifier">
-                  <div class="magnifier-glass"></div>
-                </div>
+                <div class="magnifier"></div>
               </div>
 
               <div class="card-body text-center">
-                <h5 class="card-title text-primary fs-5">{{ product.brand }}</h5>
+                <h5 class="card-title text-primary fs-4 fw-bold">{{ product.brand }}</h5>
                 <p class="card-text text-muted fs-6">{{ product.description | truncate(120) }}</p>
                 <p class="card-text fs-6"><strong>Price:</strong> Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</p>
                 <p class="card-text {% if product.quantity_in_stock < 5 %}text-danger{% endif %} fs-6"><strong>Stock:</strong> {{ product.quantity_in_stock }}</p>
@@ -30,7 +28,7 @@
                   <input type="hidden" id="quantity-input-{{ product.id }}" name="quantity" value="1">
                   <button type="submit" class="btn btn-primary btn-sm fs-6" id="add-to-cart-btn-{{ product.id }}">Add to Cart</button>
                   <div class="spinner-border text-primary d-none fs-6" role="status" id="loading-spinner-{{ product.id }}">
-                    <span class="sr-only"></span>
+                    <span class="visually-hidden">Loading...</span>
                   </div>
                 </form>
               </div>
@@ -41,11 +39,28 @@
     </div>
   </div>
 
+  <style>
+    /* Custom styles for the product cards */
+    .product-card {
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .product-card:hover {
+      transform: scale(1.05);
+    }
+
+    /* Additional styling for the welcome banner */
+    .alert {
+      border-radius: 0;
+      text-align: center;
+      font-size: 18px;
+    }
+  </style>
+
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
         // Update cart items on page load
-       const productIds = [{% for product in replica_products %}'{{ product.id }}'{% if not loop.last %},{% endif %}{% endfor %}];
-
+        const productIds = [{% for product in replica_products %}'{{ product.id }}'{% if not loop.last %},{% endif %}{% endfor %}];
 
         for (const productId of productIds) {
             await updateCartItem(productId, 'sync');
@@ -57,11 +72,10 @@
             card.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s`;
         });
     });
-  
 
-    document.addEventListener('DOMContentLoaded', async () => {
+     document.addEventListener('DOMContentLoaded', async () => {
         // Update cart items on page load
-        const productIds = [{% for product in products %}'{{ product.id }}',{% endfor %}];
+        const productIds = [{% for product in replica_products %}'{{ product.id }}'{% if not loop.last %},{% endif %}{% endfor %}];
 
         for (const productId of productIds) {
             await updateCartItem(productId, 'sync');
@@ -74,90 +88,49 @@
         });
     });
 
-
-    
-     async function getCurrentQuantity(productId) {
-    try {
-        const response = await fetch(`/api/cart/${productId}/quantity`);
-        const data = await response.json();
-        return data.quantity;
-    } catch (error) {
-        console.error('Error fetching quantity:', error);
-        return 1; // Default to 1 if there's an error
-    }
-}
-
-async function updateCartItem(productId, action) {
-    const quantityInput = document.getElementById('quantity-input-' + productId);
-    const loadingSpinner = document.getElementById('loading-spinner-' + productId);
-
-    loadingSpinner.classList.remove('d-none');
-
-    try {
-        const serverQuantity = await getCurrentQuantity(productId);
-        let currentQuantity = parseInt(quantityInput.value);
-
-        if (action === 'increment') {
-            currentQuantity++;
-        } else if (action === 'decrement' && currentQuantity > 1) {
-            currentQuantity--;
+    async function getCurrentQuantity(productId) {
+        try {
+            const response = await fetch(`/api/cart/${productId}/quantity`);
+            const data = await response.json();
+            return data.quantity;
+        } catch (error) {
+            console.error('Error fetching quantity:', error);
+            return 1; // Default to 1 if there's an error
         }
+    }
 
-        quantityInput.value = currentQuantity;
+    async function updateCartItem(productId, action) {
+        const quantityInput = document.getElementById('quantity-input-' + productId);
+        const loadingSpinner = document.getElementById('loading-spinner-' + productId);
 
-        if (action !== 'increment' && action !== 'decrement') {
-            quantityInput.value = serverQuantity;
+        loadingSpinner.classList.remove('d-none');
+
+        try {
+            const serverQuantity = await getCurrentQuantity(productId);
+            let currentQuantity = parseInt(quantityInput.value);
+
+            if (action === 'increment') {
+                currentQuantity++;
+            } else if (action === 'decrement' && currentQuantity > 1) {
+                currentQuantity--;
+            }
+
+            quantityInput.value = currentQuantity;
+
+            if (action !== 'increment' && action !== 'decrement') {
+                quantityInput.value = serverQuantity;
+            }
+        } catch (error) {
+            console.error('Error updating quantity:', error);
+        } finally {
+            loadingSpinner.classList.add('d-none');
         }
-    } catch (error) {
-        console.error('Error updating quantity:', error);
-    } finally {
-        loadingSpinner.classList.add('d-none');
     }
-}
 
-function showLoadingSpinner(productId) {
-    const loadingSpinner = document.getElementById('loading-spinner-' + productId);
-    loadingSpinner.classList.remove('d-none');
-    return true; // or false based on your requirements
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
-    // Update cart items on page load
-    const productIds = {% for product in products %}['{{ product.id }}',]{% endfor %};
-
-    for (const productId of productIds) {
-        await updateCartItem(productId, 'sync');
+    function showLoadingSpinner(productId) {
+        const loadingSpinner = document.getElementById('loading-spinner-' + productId);
+        loadingSpinner.classList.remove('d-none');
+        return true; // or false based on your requirements
     }
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    const floatingCart = document.getElementById("floating-cart");
-
-    floatingCart.addEventListener("dragstart", function (event) {
-        event.dataTransfer.setData("text/plain", "dummy");  // Required for Firefox
-        floatingCart.style.opacity = "0.5";
-    });
-
-    floatingCart.addEventListener("dragend", function () {
-        floatingCart.style.opacity = "1";
-    });
-
-    // Example: Update the cart count every second (replace with actual event)
-    let cartItemCount = 0;
-    setInterval(function () {
-        cartItemCount++;
-        updateCartCount(cartItemCount);
-    }, 1000);
-
-    // Function to update the cart count
-    function updateCartCount(count) {
-        const cartCountElement = document.getElementById("cart-count");
-        cartCountElement.textContent = count;
-    }
-});
-
-
-    
   </script>
-  
 {% endblock %}

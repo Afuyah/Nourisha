@@ -1,9 +1,10 @@
+<!doctype>
 
 <html lang="en">
   <head>
     <!-- Meta Tags -->
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     <!-- Title -->
@@ -15,8 +16,8 @@
       crossorigin="anonymous"
     />
 
-    <link
-      rel="stylesheet"
+    <link 
+      rel="stylesheet" type ="text/css"
       href="{{ url_for('static', filename='styles/main.css') }}"
     />
     <link
@@ -49,10 +50,10 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 
-    
+
     <!-- Scripts -->
     <script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -68,13 +69,9 @@
       integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
       crossorigin="anonymous"
     ></script>
-  </head>
+ 
 <style>
-  .custom-toggler {
-  background-color: lightgreen;
-  float: right;
-  /* You can customize other styles as needed */
-}
+  
   body {
     font-family: 'Arial', sans-serif;
     background-color: #f8f9fa;
@@ -172,7 +169,7 @@
         margin-top: 20px;
     }/* Add more styles based on your design preferences */
 
-<style>
+
     .testimonial-card {
         background-color: #f8f9fa;
         padding: 20px;
@@ -239,7 +236,9 @@
     #specialOffersCarousel {
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+ 
 </style >
+  </head>
   <body>
     <!-- Header -->
 
@@ -259,18 +258,18 @@
       <li class="nav-item">
         <a class="nav-link" href="{{url_for('main.product_listing')}}">Shop</a>
       </li>
-      
+
 
       {% if not user_authenticated %}
 <li class="nav-item">
         <a class="nav-link" href="#">About</a>
       </li>
-      
+
         <li class="nav-item">
           <a class="btn btn-outline md-3" href="{{url_for('main.login')}}">Sign In</a>
         </li>
       {% else %}
-        
+
         <li class="nav-item">
           <a class="nav-link" href="{{url_for('main.user_dashboard')}}"> Account</a>
         </li>
