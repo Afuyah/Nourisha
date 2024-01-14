@@ -118,7 +118,12 @@
   <div class="card">
     <div class="card-header">Inventory Status</div>
     <div class="card-body">
-      {% set percentage_out_of_stock = (admin_data.out_of_stock / admin_data.total_products) * 100 %}
+     {% if admin_data.total_products > 0 %}
+  {% set percentage_out_of_stock = (admin_data.out_of_stock / admin_data.total_products) * 100 %}
+{% else %}
+  {% set percentage_out_of_stock = 0 %}
+{% endif %}
+
       
       <div class="progress">
         <div
@@ -216,13 +221,13 @@
 
         const ctx = document.getElementById('salesChart').getContext('2d');
         const salesChart = new Chart(ctx, {
-          type: 'bar',
+          type: 'line',
           data: {
             labels: labels,
             datasets: [{
               label: 'Total Sales',
               data: salesData,
-              backgroundColor: 'green',
+              backgroundColor: '#cdc',
               borderColor: 'rgba(75, 192, 192, 1)',
               borderWidth: 1,
             }],
@@ -321,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update or create the bar chart using Chart.js
     const ctx = document.getElementById('averageSessionDurationChart').getContext('2d');
     const averageSessionDurationChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'pie',
         data: {
             labels: ['Average Session Duration'],
             datasets: [{

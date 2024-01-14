@@ -95,8 +95,9 @@ def admin_dashboard():
         if current_user is None or not current_user.is_authenticated or current_user.role is None or current_user.role.name != 'admin':
           flash('You do not have permission to access the admin dashboard.', 'danger')
           return redirect(url_for('main.index'))
-
-
+ # Fetch product categories
+        categories = ProductCategory.query.all()
+        
         # Fetch sales data
         sales_data = fetch_sales_data()
         labels = [datetime.strptime(data.order_date, '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
@@ -151,11 +152,11 @@ def admin_dashboard():
         if request.method == 'POST':
             flash('POST request received.', 'info')
 
-        return render_template('admin_dashboard.html', users=users, roles=roles, admin_data=admin_data, user_growth_chart_image=user_growth_chart_image)
+        return render_template('admin_dashboard.html', users=users, roles=roles, admin_data=admin_data, user_growth_chart_image=user_growth_chart_image, categories=categories)
 
     return handle_db_error_and_redirect(route)
 
-
+  
 
 def create_user_growth_chart(labels, data):
     # Create a user growth chart using Chart.js
@@ -238,6 +239,16 @@ def product_categories():
         return render_template('add_product_category.html', form=form, categories=categories)
 
     return handle_db_error_and_redirect(route)
+
+
+
+@admin_bp.route('/products_by_category/<int:category_id>')
+def products_by_category(category_id):
+    category = ProductCategory.query.get_or_404(category_id)
+    products = Product.query.filter_by(category=category).all()  # Assuming you have a relationship between Product and ProductCategory
+    return render_template('products_by_category.html', category=category, products=products)
+
+
 
 @admin_bp.route('/add_location', methods=['GET', 'POST'])
 @login_required
@@ -363,3 +374,5 @@ def fetch_daily_sales_data():
         current_app.logger.error(f"Error fetching daily sales data: {str(e)}")
         # Return an empty dictionary or None, depending on your preference
         return {'labels': [], 'data': []}
+
+

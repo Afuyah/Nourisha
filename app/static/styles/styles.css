@@ -45,7 +45,7 @@
         padding: 16px;
       }
 
-      @media (max-width: 768px) {
+      @media (max-width: 368px) {
         #sidebar {
           left: 0;
         }

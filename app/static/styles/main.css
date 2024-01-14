@@ -1,7 +1,8 @@
+
+
+
 /* main.css */
-body {
-margin: 0;
-}
+
 header {
     background-color: #333;
     color: #fff;
@@ -60,14 +61,6 @@ form {
 }
 
 
-
-:root {
-  --primary-color: #3498db;  /* Blue */
-  --secondary-color: #2ecc71;  /* Green */
-  --background-color: #ecf0f1;  /* Light Grayish Blue */
-  --text-color: #34495e;  /* Dark Grayish Blue */
-  --accent-color: #e74c3c;  /* Red */
-}
 .flash-messages {
       margin-top: 20px;
   }
@@ -95,7 +88,6 @@ body {
 .container {
     padding-top: 20px;
 }
-
 .product-card {
     background-color: #fff;
     border: 1px solid #dee2e6;
@@ -103,6 +95,7 @@ body {
     overflow: hidden;
     transition: transform 0.3s, box-shadow 0.3s;
 }
+
 
 .product-card:hover {
     transform: scale(1.05);
@@ -221,3 +214,172 @@ body {
     }
 
     /* Add additional styling as needed */
+
+
+
+
+
+
+
+
+
+  
+
+.container {
+    padding-top: 20px;
+}
+
+.product-card {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.product-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-image-container {
+    position: relative;
+}
+
+.product-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px 10px 0 0;
+}
+
+.magnifier {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border: 1px solid #28a745;
+    border-radius: 50%;
+    display: none;
+}
+
+.magnifier-glass {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(40, 167, 69, 0.5);
+    border-radius: 50%;
+    position: absolute;
+}
+
+.product-card:hover .magnifier {
+    display: block;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.btn-primary {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-primary:hover {
+    background-color: #218838;
+    border-color: #218838;
+}
+
+.spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+ /* Style for About Us Section */
+    .about-us-section {
+        padding: 40px 0;
+    }
+
+    .about-us-section h2 {
+        font-size: 36px;
+        color: #333;
+        margin-bottom: 30px;
+    }
+
+    .about-us-section p {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .about-us-section img {
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+    }/* Add more styles based on your design preferences */
+
+
+    .testimonial-card {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .testimonial-card:hover {
+        transform: scale(1.03);
+    }
+
+    .testimonial-card blockquote {
+        border-left: 3px solid #007bff;
+        padding-left: 25px;
+        margin: 0;
+    }
+
+    .testimonial-card p {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+
+    .testimonial-card footer {
+        color: #888;
+        font-size: 14px;
+    }
+
+    /* Custom styles for enhanced carousel */
+    .carousel-img {
+        max-height: 200px; /* Adjust the maximum height of the images */
+        object-fit: cover;
+        filter: brightness(70%); /* Apply a slight dark overlay to images */
+        transition: filter 0.5s ease;
+    }
+
+    .carousel-caption {
+        position: absolute;
+        top: 30%;
+        transform: translateY(-50%);
+        width: 100%;
+        text-align: center;
+        color: #fff;
+    }
+
+    .carousel-caption h5 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .carousel-caption p {
+        font-size: 1.2rem;
+    }
+
+    /* Hover effect to lighten the dark overlay on images */
+    .carousel-item:hover .carousel-img {
+        filter: brightness(100%);
+    }
+
+    /* Optional: Add a subtle box-shadow to the carousel for a polished look */
+    #specialOffersCarousel {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }

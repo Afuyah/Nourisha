@@ -25,6 +25,7 @@
                     <tr>
                       <td>{{ item.product.brand }}</td>
                       <td>
+                        <!-- Use the "readonly" attribute for a better user experience -->
                         <input type="number" name="quantity_{{ item.product.id }}" value="{{ item.quantity }}" min="1" max="{{ item.product.quantity_in_stock }}" readonly class="form-control">
                       </td>
                       <td>Ksh. {{ item.product.unit_price * item.quantity }}</td>
@@ -41,13 +42,14 @@
             <div class="mb-4">
               <h2>Delivery Details</h2>
               <div class="form-group">
+                <!-- Add a required attribute for better form validation -->
                 {{ form.location.label }}
-                {{ form.location(class="form-control") }}
+                {{ form.location(class="form-control", required=true) }}
               </div>
 
               <div class="mb-3">
                 <label for="address_line" class="form-label">Delivery Address</label>
-                {{ form.address_line(class="form-control") }}
+                {{ form.address_line(class="form-control", required=true) }}
               </div>
             </div>
 
@@ -63,7 +65,7 @@
               <h2>Payment Method</h2>
               <div class="mb-3">
                 {{ form.payment_method.label }}
-                {{ form.payment_method(class="form-control") }}
+                {{ form.payment_method(class="form-control", required=true) }}
               </div>
             </div>
 
@@ -73,7 +75,7 @@
       </div>
     {% else %}
       <div class="alert alert-info" role="alert">
-        Your grocery cart is empty. <a href="{{url_for('main.product_listing')}}" > EXPLORE OUR STORE</a> and add items before checking out.
+        Your grocery cart is empty. <a href="{{url_for('main.product_listing')}}">EXPLORE OUR STORE</a> and add items before checking out.
       </div>
     {% endif %}
   </div>

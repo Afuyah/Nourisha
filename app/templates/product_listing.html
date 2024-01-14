@@ -1,136 +1,344 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-  <div class="container d-flex justify-content-center align-items-center">
-    <div class="text-center" style="max-width: 980px;">
-      <h1 class="mb-4 display-4">Product Listing</h1>
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
-        {% for product in products %}
-          <div class="col">
-            <div class="card product-card border-0 shadow">
-              <div class="product-image-container position-relative overflow-hidden">
-                {% if product.images %}
-                  <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
-                {% else %}
-                  <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image" alt="Placeholder Image">
-                {% endif %}
-                <div class="magnifier"></div>
-              </div>
+  <div class="container mt-3">
+    <!-- Search Bar Section -->
+    <div class="mb-4">
+      <form class="d-flex">
+        <input class="form-control me-2" type="search" placeholder="Search for products" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+    </div>
 
-              <div class="card-body text-center">
-                <h5 class="card-title text-primary fs-4 fw-bold">{{ product.brand }}</h5>
-                <p class="card-text text-muted fs-6">{{ product.description | truncate(120) }}</p>
-                <p class="card-text fs-6"><strong>Price:</strong> Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</p>
-                <p class="card-text {% if product.quantity_in_stock < 5 %}text-danger{% endif %} fs-6"><strong>Stock:</strong> {{ product.quantity_in_stock }}</p>
+    <!-- Category Carousel -->
+    <!-- Category Carousel -->
 
-                <form id="add-to-cart-form-{{ product.id }}" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}" method="post" onsubmit="return showLoadingSpinner('{{ product.id }}')">
-                  {{ form.csrf_token }}
-                  <input type="hidden" id="quantity-input-{{ product.id }}" name="quantity" value="1">
-                  <button type="submit" class="btn btn-primary btn-sm fs-6" id="add-to-cart-btn-{{ product.id }}">Add to Cart</button>
-                  <div class="spinner-border text-primary d-none fs-6" role="status" id="loading-spinner-{{ product.id }}">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                </form>
-              </div>
-            </div>
+<!-- Category Carousel -->
+    <div id="categoryCarousel" class="carousel slide mb-4" data-bs-ride="carousel" >
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <div class="table-responsive">
+            <table class="table">
+              <tr>
+                <td><button type="button" class="btn btn-outline-primary">Vegetables</button></td>
+                <td><button type="button" class="btn btn-outline-primary">Fruits</button></td>
+                <td><button type="button" class="btn btn-outline-primary">Dairy</button></td>
+                <!-- Add more buttons as needed -->
+                <td><button type="button" class="btn btn-outline-primary">Vegetables</button></td>
+                <td><button type="button" class="btn btn-outline-primary">Fruits</button></td>
+                <td><button type="button" class="btn btn-outline-primary">Dairy</button></td>
+                 <td><button type="button" class="btn btn-outline-primary">Vegetables</button></td>
+                <td><button type="button" class="btn btn-outline-primary">Fruits</button></td>
+                <td><button type="button" class="btn btn-outline-primary">Dairy</button></td>
+                <!-- Add more buttons as needed -->
+                <td><button type="button" class="btn btn-outline-primary">Vegetables</button></td>
+                <td><button type="button" class="btn btn-outline-primary">Fruits</button></td>
+                <td><button type="button" class="btn btn-outline-primary">Dairy</button></td>
+                 <td><button type="button" class="btn btn-outline-primary">Vegetables</button></td>
+                <td><button type="button" class="btn btn-outline-primary">Fruits</button></td>
+                <td><button type="button" class="btn btn-outline-primary">Dairy</button></td>
+                <!-- Add more buttons as needed -->
+                <td><button type="button" class="btn btn-outline-primary">Vegetables</button></td>
+                <td><button type="button" class="btn btn-outline-primary">Fruits</button></td>
+                <td><button type="button" class="btn btn-outline-primary">Dairy</button></td>
+              </tr>
+            </table>
           </div>
-        {% endfor %}
+        </div>
+        <!-- Add more carousel items with additional category buttons as needed -->
+      </div>
+    
+    </div>
+
+
+
+    <!-- Product Listing Section with Advanced Features -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+      {% for product in products %}
+        <div class="col">
+          <div class="card product-card border-0 shadow">
+            <div class="magnifier position-relative overflow-hidden">
+              <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
+            </div>
+
+            <div class="card-body text-center">
+              <h6 class="card-title text-primary">{{ product.brand }}</h6>
+              <div class="card-text text-muted fs-6">{{ product.description | truncate(120) }}</div>
+              <div class="card-text fs-6"><strong>Price:</strong> Ksh {{ product.unit_price }} </div>
+              <div class="card-text {% if product.quantity_in_stock < 5 %}text-danger{% endif %} fs-6"><strong>Stock:</strong> <span class="badge bg-secondary">{{ product.quantity_in_stock }}</span></div>
+
+              <div class="mb-1">
+                {% if product.rating is defined %}
+                  {% for _ in range(product.rating) %}
+                    <span class="text-warning">&#9733;</span>
+                  {% endfor %}
+                  {% for _ in range(5 - product.rating) %}
+                    <span class="text-muted">&#9733;</span>
+                  {% endfor %}
+                {% else %}
+                  <span class="text-muted">No rating available</span>
+                {% endif %}
+              </div>
+
+             <!-- Add to Cart Modal -->
+<button type="button" class="btn btn-outline-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
+                Add to Cart
+              </button>
+
+<!-- Product Modal -->
+<div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Do you want to add this item to your cart?</p>
+
+        <!-- Quantity Controls -->
+        <div class="mb-3">
+          <label for="quantity" class="form-label">Quantity</label>
+          <div class="input-group">
+            <!--<button type="button" class="btn btn-outline-secondary" onclick="decreaseQuantity('{{ product.id }}')">-</button>-->
+<input type="number" class="form-control" id="quantity{{ product.id }}" name="quantity" value="1" min="1">
+<!--<button type="button" class="btn btn-outline-secondary" onclick="increaseQuantity('{{ product.id }}')">+</button>-->
+
+
+          </div>
+        </div>
+
+        <!-- Text area for customer's description -->
+        <div class="mb-3">
+          <label for="customDescription" class="form-label">Custom Description (optional)</label>
+          <textarea class="form-control" id="customDescription{{ product.id }}" name="custom_description" rows="3"></textarea>
+        </div>
+
+        <!-- Display current quantity in cart -->
+        <p><strong>Current Quantity in Cart:</strong> <span id="Quantity{{ product.id }}">{{ product.quantity }}</span></p>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>-
+        <form action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}" method="post" onsubmit="return showLoadingSpinner('{{ product.id }}')">
+          {{ form.csrf_token }}
+          <input type="hidden" name="quantity" value="1">
+          <input type="hidden" name="custom_description" id="hiddenCustomDescription{{ product.id }}">
+          <button type="submit" class="btn btn-primary">Add to Cart</button>
+        </form>
       </div>
     </div>
   </div>
+</div>
 
-  <style>
-    /* Custom styles for the product cards */
-    .product-card {
-      transition: transform 0.3s ease-in-out;
-    }
 
-    .product-card:hover {
-      transform: scale(1.05);
-    }
+              <!-- Loading Spinner -->
+              <!-- ... (same as previous) ... -->
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
 
-    /* Additional styling for the welcome banner */
-    .alert {
-      border-radius: 0;
-      text-align: center;
-      font-size: 18px;
-    }
-  </style>
+<style>
+  .product-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    transition: box-shadow 0.3s ease;
+  }
 
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        // Update cart items on page load
-        const productIds = [{% for product in replica_products %}'{{ product.id }}'{% if not loop.last %},{% endif %}{% endfor %}];
+  .product-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
 
-        for (const productId of productIds) {
-            await updateCartItem(productId, 'sync');
+  .btn-outline-primary {
+    color: #007bff;
+    background-color: #fff;
+    border-color: #007bff;
+  }
+
+  .btn-outline-primary:hover {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+  }
+
+  .btn-primary {
+    background-color: #28a745;
+    border-color: #28a745;
+  }
+
+  .btn-primary:hover {
+    background-color: #218838;
+    border-color: #218838;
+  }
+
+  .badge {
+    font-size: 0.8rem;
+    background-color: #6c757d;
+  }
+</style>
+<script>
+
+
+  
+  document.addEventListener('DOMContentLoaded', async () => {
+    const productQuantities = {};
+
+    // Function to fetch product quantity from the server
+    async function getProductQuantity(productId) {
+      try {
+        const response = await fetch(`/cart/api/get_quantity/${productId}`);
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          return data.data.quantity;
+        } else {
+          console.error('Error fetching product quantity:', data.message);
         }
+      } catch (error) {
+        console.error('Error fetching product quantity:', error);
+      }
+    }
 
-        // Add fade-in animation to product cards
-        const productCards = document.querySelectorAll('.product-card');
-        productCards.forEach((card, index) => {
-            card.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s`;
+    // Function to update product quantity on the server
+    async function updateProductQuantity(productId, newQuantity) {
+      try {
+        const response = await fetch(`/cart/api/update_quantity/${productId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name=csrf-token]').content,
+          },
+          body: JSON.stringify({ newQuantity }),
         });
-    });
 
-     document.addEventListener('DOMContentLoaded', async () => {
-        // Update cart items on page load
-        const productIds = [{% for product in replica_products %}'{{ product.id }}'{% if not loop.last %},{% endif %}{% endfor %}];
+        const data = await response.json();
 
-        for (const productId of productIds) {
-            await updateCartItem(productId, 'sync');
+        if (data.status === 'success') {
+          return true;
+        } else {
+          console.error('Error updating product quantity:', data.message);
+          return false;
         }
-
-        // Add fade-in animation to product cards
-        const productCards = document.querySelectorAll('.product-card');
-        productCards.forEach((card, index) => {
-            card.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s`;
-        });
-    });
-
-    async function getCurrentQuantity(productId) {
-        try {
-            const response = await fetch(`/api/cart/${productId}/quantity`);
-            const data = await response.json();
-            return data.quantity;
-        } catch (error) {
-            console.error('Error fetching quantity:', error);
-            return 1; // Default to 1 if there's an error
-        }
+      } catch (error) {
+        console.error('Error updating product quantity:', error);
+        return false;
+      }
     }
 
-    async function updateCartItem(productId, action) {
-        const quantityInput = document.getElementById('quantity-input-' + productId);
-        const loadingSpinner = document.getElementById('loading-spinner-' + productId);
+    function increaseQuantity(productId) {
+      const currentQuantity = productQuantities[productId];
+      const newQuantity = currentQuantity + 1;
 
-        loadingSpinner.classList.remove('d-none');
-
-        try {
-            const serverQuantity = await getCurrentQuantity(productId);
-            let currentQuantity = parseInt(quantityInput.value);
-
-            if (action === 'increment') {
-                currentQuantity++;
-            } else if (action === 'decrement' && currentQuantity > 1) {
-                currentQuantity--;
-            }
-
-            quantityInput.value = currentQuantity;
-
-            if (action !== 'increment' && action !== 'decrement') {
-                quantityInput.value = serverQuantity;
-            }
-        } catch (error) {
-            console.error('Error updating quantity:', error);
-        } finally {
-            loadingSpinner.classList.add('d-none');
-        }
+      updateQuantity(productId, newQuantity);
     }
 
-    function showLoadingSpinner(productId) {
-        const loadingSpinner = document.getElementById('loading-spinner-' + productId);
-        loadingSpinner.classList.remove('d-none');
-        return true; // or false based on your requirements
+    function decreaseQuantity(productId) {
+      const currentQuantity = productQuantities[productId];
+      const newQuantity = Math.max(currentQuantity - 1, 0);
+
+      updateQuantity(productId, newQuantity);
     }
-  </script>
+
+    async function updateQuantity(productId, newQuantity) {
+      const success = await updateProductQuantity(productId, newQuantity);
+
+      if (success) {
+        productQuantities[productId] = newQuantity;
+        updateQuantityDisplay(productId);
+      }
+    }
+
+    function updateQuantityDisplay(productId) {
+      const quantityElement = document.getElementById('quantity' + productId);
+      quantityElement.value = productQuantities[productId];
+    }
+
+    // Initialize quantities and update display
+    const productIds = [{% for product in products %}'{{ product.id }}'{% if not loop.last %},{% endif %}{% endfor %}];
+
+    for (const productId of productIds) {
+      const quantityElement = document.getElementById('quantity' + productId);
+      productQuantities[productId] = parseInt(quantityElement.value);
+    }
+
+    // Fetch initial quantities from the server
+    for (const productId of productIds) {
+      const serverQuantity = await getProductQuantity(productId);
+      productQuantities[productId] = serverQuantity;
+      updateQuantityDisplay(productId);
+    }
+
+      });
+
+
+  // Add dynamic stock updates (simulate real-time updates)
+  const productIds = [{% for product in products %}'{{ product.id }}'{% if not loop.last %},{% endif %}{% endfor %}];
+
+  setInterval(async () => {
+    for (const productId of productIds) {
+      const newStock = Math.floor(Math.random() * 20); // Simulate dynamic stock updates
+      document.getElementById('stock-' + productId).innerText = newStock;
+    }
+  }, 10000); // Update every 5 seconds (adjust as needed)
+
+
+  // Function to handle Add to Cart button click
+  function addToCartHandler(productId) {
+    // Check if the user is authenticated
+    if (!isUserAuthenticated()) {
+      // If not authenticated, show a message and redirect to the login page
+      alert('Please sign in to start shopping with us.');
+      window.location.href = '/login';  // Adjust the URL to your login page
+      return;
+    }
+
+    // If authenticated, open the Add to Cart modal
+    openAddToCartModal(productId);
+  }
+
+  // Function to check if the user is authenticated
+  function isUserAuthenticated() {
+    // Adjust this logic based on your authentication implementation
+    return {{ current_user.is_authenticated }};
+  }
+
+  // Function to open the Add to Cart modal
+  function openAddToCartModal(productId) {
+    // Use Bootstrap's modal function to open the modal
+    $('#addToCartModal' + productId).modal('show');
+    
+    // Fetch and update the quantity when the modal is opened
+    updateQuantityOnModalOpen(productId);
+  }
+
+  // Function to fetch and update the quantity when the modal is opened
+  async function updateQuantityOnModalOpen(productId) {
+    try {
+      const response = await fetch(`/cart/api/get_quantity/${productId}`);
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        // Update the quantity input in the modal
+        const quantityInput = document.getElementById('quantity' + productId);
+        quantityInput.value = data.data.quantity;
+      } else {
+        console.error('Error fetching product quantity:', data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching product quantity:', error);
+    }
+  }
+ 
+
+
+
+  
+  
+</script>
+
+
+  
 {% endblock %}

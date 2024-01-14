@@ -7,8 +7,6 @@ from itsdangerous import URLSafeTimedSerializer as Serializer
 from app import db
 from sqlalchemy import event
 
-
-
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
@@ -28,7 +26,7 @@ class User(db.Model, UserMixin):
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
     confirmed = db.Column(db.Boolean, default=False)
     confirmation_token = db.Column(db.String(64), unique=True)
-
+    
     # Define the relationship with the Role model
     role = db.relationship('Role', backref=db.backref('users', lazy=True))
     orders = db.relationship('Order', back_populates='user')
@@ -39,7 +37,6 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    
     def set_last_login_info(self):
         self.last_login_date = datetime.utcnow()
         self.last_login_ip = request.remote_addr if request and request.remote_addr else None  
@@ -67,7 +64,6 @@ class User(db.Model, UserMixin):
         db.session.commit()
         return True
 
-
 class ProductCategory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
@@ -91,8 +87,6 @@ class Supplier(db.Model):
     # Define the relationship with Product
     products = db.relationship('Product', back_populates='supplier')
 
-
-
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -108,14 +102,14 @@ class Product(db.Model):
     country_of_origin = db.Column(db.String(50), nullable=True)
     supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False)
     date_added = db.Column(db.Date, nullable=False)
-        # Define relationships with Supplier and ProductCategory and images
+    
+    # Define relationships with Supplier and ProductCategory and images
     supplier = db.relationship('Supplier', back_populates='products')
     category = db.relationship('ProductCategory', back_populates='products')
     images = db.relationship('ProductImage', back_populates='product')
     carts = db.relationship('Cart', back_populates='product')
-    #order_items = db.relationship('OrderItem', backref='product', lazy=True)
     order_items = db.relationship('OrderItem', back_populates='product')
-  
+
 class ProductImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
@@ -132,8 +126,8 @@ class Cart(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-  
     product = db.relationship('Product', back_populates='carts')
+    custom_description = db.Column(db.Text) 
 
 class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -154,7 +148,7 @@ class Order(db.Model):
     address_line = db.Column(db.Text, nullable=False)
     additional_info = db.Column(db.Text)
     payment_method = db.Column(db.String(50), nullable=False)
-
+    
     # Payment details
     payment_status = db.Column(db.String(50), default='unpaid')  # 'unpaid', 'paid', etc.
     payment_date = db.Column(db.DateTime)  # Date when payment was made
@@ -171,11 +165,12 @@ class Order(db.Model):
     
     # Relationship with OrderItem
     order_items = db.relationship('OrderItem', back_populates='order')
+
     def update_order_day_of_week(self):
         # Update the day_of_week based on the order_date
         if self.order_date:
-            self.day_of_week = self.order_date.strftime('%A')  # Corrected attribute name
-            db.session.commit()
+            self.day_of_week = self.order_date.strftime('%A')
+    
     def __init__(self, *args, **kwargs):
         super(Order, self).__init__(*args, **kwargs)
         self.update_order_day_of_week()
@@ -183,8 +178,6 @@ class Order(db.Model):
 @event.listens_for(Order, 'before_insert')
 def before_insert_order(mapper, connection, target):
     target.update_order_day_of_week()
-
-
 
 class OrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -194,13 +187,9 @@ class OrderItem(db.Model):
     unit_price = db.Column(db.Float, nullable=False)
 
     # Define the relationship with Order
-    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
     order = db.relationship('Order', back_populates='order_items')
     product = db.relationship('Product', back_populates='order_items')
 
     def update_product_quantity_sold(self):
         # Update the quantity_sold field for the associated product
         self.product.quantity_sold += self.quantity
-        db.session.commit()
-
-
