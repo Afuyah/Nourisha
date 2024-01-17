@@ -65,9 +65,9 @@
               <h6 class="card-title text-primary">{{ product.brand }}</h6>
               <div class="card-text text-muted fs-6">{{ product.description | truncate(120) }}</div>
               <div class="card-text fs-6"><strong>Price:</strong> Ksh {{ product.unit_price }} </div>
-              <div class="card-text {% if product.quantity_in_stock < 5 %}text-danger{% endif %} fs-6"><strong>Stock:</strong> <span class="badge bg-secondary">{{ product.quantity_in_stock }}</span></div>
+             <!-- <div class="card-text {% if product.quantity_in_stock < 5 %}text-danger{% endif %} fs-6"><strong>Stock:</strong> <span class="badge bg-secondary">{{ product.quantity_in_stock }}</span></div>-->
 
-              <div class="mb-1">
+              <!--<div class="mb-1">
                 {% if product.rating is defined %}
                   {% for _ in range(product.rating) %}
                     <span class="text-warning">&#9733;</span>
@@ -78,7 +78,7 @@
                 {% else %}
                   <span class="text-muted">No rating available</span>
                 {% endif %}
-              </div>
+              </div>-->
 
              <!-- Add to Cart Modal -->
 <button type="button" class="btn btn-outline-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
