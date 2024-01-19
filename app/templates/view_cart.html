@@ -20,6 +20,7 @@
           <th scope="col">Price</th>
           <th scope="col">Quantity</th>
           <th scope="col">Subtotal</th>
+          <th scope="col">Description</th>
           <th scope="col">Actions</th>
         </tr>
       </thead>
@@ -70,6 +71,9 @@
               >{{ item.product.unit_price * item.quantity }}</span
             >
           </td>
+          
+          <td class="align-middle">{{ item.custom_description }}</td>
+
           <td class="align-middle">
             <button
               class="btn btn-danger btn-sm remove-item-btn"

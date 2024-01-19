@@ -1,3 +1,4 @@
+
 {% extends 'layout.html' %}
 
 {% block content %}
@@ -14,8 +15,8 @@
     <!-- Category Carousel -->
 
 <!-- Category Carousel -->
-    <div id="categoryCarousel" class="carousel slide mb-4" data-bs-ride="carousel" >
-      <div class="carousel-inner">
+        <div id="categoryCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+          <div class="carousel-inner">
         <div class="carousel-item active">
           <div class="table-responsive">
             <table class="table">
@@ -52,11 +53,12 @@
 
 
 
-    <!-- Product Listing Section with Advanced Features -->
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
-      {% for product in products %}
-        <div class="col">
-          <div class="card product-card border-0 shadow">
+    <!-- Product Listing Section -->
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+              {% for product in products %}
+                <div class="col">
+                  <div class="card product-card border-0 shadow">
+
             <div class="magnifier position-relative overflow-hidden">
               <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
             </div>
@@ -86,62 +88,116 @@
               </button>
 
 <!-- Product Modal -->
-<div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>Do you want to add this item to your cart?</p>
+              <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
+                          <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                              <div class="modal-header bg-primary text-light">
+                                <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                <p class="lead">Do you want to add this item to your cart?</p>
 
-        <!-- Quantity Controls -->
-        <div class="mb-3">
-          <label for="quantity" class="form-label">Quantity</label>
-          <div class="input-group">
-            <!--<button type="button" class="btn btn-outline-secondary" onclick="decreaseQuantity('{{ product.id }}')">-</button>-->
-<input type="number" class="form-control" id="quantity{{ product.id }}" name="quantity" value="1" min="1">
-<!--<button type="button" class="btn btn-outline-secondary" onclick="increaseQuantity('{{ product.id }}')">+</button>-->
+                                <!-- Quantity and Custom Description Form -->
+                                  <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}">
+
+                                  {{ form.csrf_token }}
+                                  <!-- Quantity Input -->
+                                  <div class="mb-3">
+                                    <label for="quantity" class="form-label">Quantity:</label>
+                                    <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
+                                  </div>
+
+                                  <!-- Custom Description Textarea -->
+                                  <div class="mb-3">
+                                    <label for="custom_description" class="form-label">Custom Description:</label>
+                                    <textarea class="form-control" id="custom_description" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
+                                    <input type="hidden" id="hidden_custom_description" name="hidden_custom_description" value="">
+                                  </div>
+
+                                  <button class="btn btn-success" type="submit">Add to Cart</button>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
 
 
-          </div>
-        </div>
 
-        <!-- Text area for customer's description -->
-        <div class="mb-3">
-          <label for="customDescription" class="form-label">Custom Description (optional)</label>
-          <textarea class="form-control" id="customDescription{{ product.id }}" name="custom_description" rows="3"></textarea>
-        </div>
-
-        <!-- Display current quantity in cart -->
-        <p><strong>Current Quantity in Cart:</strong> <span id="Quantity{{ product.id }}">{{ product.quantity }}</span></p>
-
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>-
-        <form action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}" method="post" onsubmit="return showLoadingSpinner('{{ product.id }}')">
-          {{ form.csrf_token }}
-          <input type="hidden" name="quantity" value="1">
-          <input type="hidden" name="custom_description" id="hiddenCustomDescription{{ product.id }}">
-          <button type="submit" class="btn btn-primary">Add to Cart</button>
-        </form>
-      </div>
-    </div>
+                        <!-- Loading Spinner -->
+                        <!-- ... (same as previous) ... -->
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
   </div>
+
+<div class="container mt-3">
+    <!-- Your existing content -->
+
+    <!-- Floating Cart Icon -->
+    <a href="{{ url_for('cart.view_cart') }}" class="floating-cart-icon">
+      <img src="static/cart2.gif" alt="Cart Icon" class="cart-icon">
+      <span id= "cart-badge" class="badge">0</span>
+    </a>
 </div>
 
+  <style>
+    /* Add your custom styles here */
 
-              <!-- Loading Spinner -->
-              <!-- ... (same as previous) ... -->
-            </div>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
+    .floating-cart-icon {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
 
-<style>
+    .cart-icon {
+      position: relative;
+      width: 80px; /* Adjust the size as needed */
+      height: auto;
+      margin-right: 10px; /* Adjust the spacing between icon and badge */
+    }
+
+    .badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background-color: #ff5722; /* Choose a color for the badge */
+      color: #fff;
+      border-radius: 50%;
+      padding: 5px 8px; /* Adjust the padding as needed */
+      font-size: 14px; /* Adjust the font size as needed */
+    }
+
+    /* Add a transition effect to make the badge shake every 15 seconds */
+    .badge.shake {
+      animation: shake 0.5s ease-in-out infinite;
+    }
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25%, 75% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+  .carousel-inner .carousel-item img {
+    max-height: 200px;
+    object-fit: cover;
+  }
+
   .product-card {
     border: 1px solid #ddd;
     border-radius: 10px;
@@ -164,12 +220,12 @@
     border-color: #007bff;
   }
 
-  .btn-primary {
+  .btn-success {
     background-color: #28a745;
     border-color: #28a745;
   }
 
-  .btn-primary:hover {
+  .btn-success:hover {
     background-color: #218838;
     border-color: #218838;
   }
@@ -179,110 +235,12 @@
     background-color: #6c757d;
   }
 </style>
-<script>
 
+
+  <script>
+   
 
   
-  document.addEventListener('DOMContentLoaded', async () => {
-    const productQuantities = {};
-
-    // Function to fetch product quantity from the server
-    async function getProductQuantity(productId) {
-      try {
-        const response = await fetch(`/cart/api/get_quantity/${productId}`);
-        const data = await response.json();
-
-        if (data.status === 'success') {
-          return data.data.quantity;
-        } else {
-          console.error('Error fetching product quantity:', data.message);
-        }
-      } catch (error) {
-        console.error('Error fetching product quantity:', error);
-      }
-    }
-
-    // Function to update product quantity on the server
-    async function updateProductQuantity(productId, newQuantity) {
-      try {
-        const response = await fetch(`/cart/api/update_quantity/${productId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('meta[name=csrf-token]').content,
-          },
-          body: JSON.stringify({ newQuantity }),
-        });
-
-        const data = await response.json();
-
-        if (data.status === 'success') {
-          return true;
-        } else {
-          console.error('Error updating product quantity:', data.message);
-          return false;
-        }
-      } catch (error) {
-        console.error('Error updating product quantity:', error);
-        return false;
-      }
-    }
-
-    function increaseQuantity(productId) {
-      const currentQuantity = productQuantities[productId];
-      const newQuantity = currentQuantity + 1;
-
-      updateQuantity(productId, newQuantity);
-    }
-
-    function decreaseQuantity(productId) {
-      const currentQuantity = productQuantities[productId];
-      const newQuantity = Math.max(currentQuantity - 1, 0);
-
-      updateQuantity(productId, newQuantity);
-    }
-
-    async function updateQuantity(productId, newQuantity) {
-      const success = await updateProductQuantity(productId, newQuantity);
-
-      if (success) {
-        productQuantities[productId] = newQuantity;
-        updateQuantityDisplay(productId);
-      }
-    }
-
-    function updateQuantityDisplay(productId) {
-      const quantityElement = document.getElementById('quantity' + productId);
-      quantityElement.value = productQuantities[productId];
-    }
-
-    // Initialize quantities and update display
-    const productIds = [{% for product in products %}'{{ product.id }}'{% if not loop.last %},{% endif %}{% endfor %}];
-
-    for (const productId of productIds) {
-      const quantityElement = document.getElementById('quantity' + productId);
-      productQuantities[productId] = parseInt(quantityElement.value);
-    }
-
-    // Fetch initial quantities from the server
-    for (const productId of productIds) {
-      const serverQuantity = await getProductQuantity(productId);
-      productQuantities[productId] = serverQuantity;
-      updateQuantityDisplay(productId);
-    }
-
-      });
-
-
-  // Add dynamic stock updates (simulate real-time updates)
-  const productIds = [{% for product in products %}'{{ product.id }}'{% if not loop.last %},{% endif %}{% endfor %}];
-
-  setInterval(async () => {
-    for (const productId of productIds) {
-      const newStock = Math.floor(Math.random() * 20); // Simulate dynamic stock updates
-      document.getElementById('stock-' + productId).innerText = newStock;
-    }
-  }, 10000); // Update every 5 seconds (adjust as needed)
 
 
   // Function to handle Add to Cart button click
@@ -331,14 +289,108 @@
       console.error('Error fetching product quantity:', error);
     }
   }
- 
 
+   // Update cart count using AJAX
+$(document).ready(function () {
+  function updateCartCount() {
+    console.log('Updating cart count...'); // Debug statement
+    $.ajax({
+      url: 'cart/get_cart_count',
+      method: 'GET',
+      success: function (response) {
+        console.log('AJAX Response:', response); // Debug statement
+        if (response.status === 'success') {
+          console.log('Updating cart count:', response.cart_count); // Debug statement
+          // Update the badge with the actual cart count
+          const cartIcon = $('.floating-cart-icon');
+          const currentCount = parseInt(cartIcon.find('.badge').text(), 10);
+          const newCount = response.cart_count;
 
+          cartIcon.find('.badge').text(newCount);
 
-  
-  
-</script>
+          // Toggle visibility of the entire cart icon based on the cart count
+          if (newCount > 0) {
+            cartIcon.removeClass('inactive');
+          } else {
+            cartIcon.addClass('inactive');
+          }
 
+          // Add shake class to the entire cart icon if the count has increased
+          if (newCount > currentCount) {
+            cartIcon.addClass('shake');
 
-  
-{% endblock %}
+            // Remove the shake class after a short delay (e.g., 1 second)
+            setTimeout(function () {
+              cartIcon.removeClass('shake');
+            }, 1000);
+          }
+        } else {
+          console.error('Error fetching cart count:', response.message);
+        }
+      },
+      error: function (error) {
+        console.error('AJAX Error:', error);
+      },
+    });
+  }
+
+  updateCartCount();
+
+  // Set an interval to periodically update the cart count (every 15 seconds as you mentioned)
+  setInterval(function () {
+    console.log('Periodic cart count update...'); // Debug statement
+    updateCartCount();
+  }, 15000);
+});
+
+// Trigger the Add to Cart modal when clicking on the floating cart icon
+$('.floating-cart-icon').click(function () {
+  // Check if the user is authenticated
+  if (!isUserAuthenticated()) {
+    // If not authenticated, show a message and redirect to the login page
+    alert('Please sign in to start shopping with us.');
+    window.location.href = '/login'; // Adjust the URL to your login page
+    return;
+  }
+
+  // If authenticated, open the Add to Cart modal for the first product
+  const firstProductId = $('.product-card:first').data('product-id');
+  openAddToCartModal(firstProductId);
+});
+
+// Function to check if the user is authenticated
+function isUserAuthenticated() {
+  // Adjust this logic based on your authentication implementation
+  return {{ current_user.is_authenticated }};
+}
+
+// Function to open the Add to Cart modal
+function openAddToCartModal(productId) {
+  // Use Bootstrap's modal function to open the modal
+  $('#addToCartModal' + productId).modal('show');
+
+  // Fetch and update the quantity when the modal is opened
+  updateQuantityOnModalOpen(productId);
+}
+
+// Function to fetch and update the quantity when the modal is opened
+async function updateQuantityOnModalOpen(productId) {
+  try {
+    const response = await fetch(`/cart/api/get_quantity/${productId}`);
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      // Update the quantity input in the modal
+      const quantityInput = document.getElementById('quantity' + productId);
+      quantityInput.value = data.data.quantity;
+    } else {
+      console.error('Error fetching product quantity:', data.message);
+    }
+  } catch (error) {
+    console.error('Error fetching product quantity:', error);
+  }
+}
+
+  </script>
+
+{% endblock%}

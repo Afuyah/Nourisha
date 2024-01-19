@@ -1,13 +1,14 @@
-{% extends 'base.html'%} {% block content %}
-<div class="container-fluid mt-2">
+{% extends 'base.html'%}
+{% block content %}
+<div class="container-fluid mt-4">
   <div class="row">
     <div class="col-lg-4">
-      <div class="card">
-        <div class="card-header">Total Products</div>
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">Total Products</div>
         <div class="card-body">
-          <h2>{{ admin_data.total_products }}</h2>
-          <p>Active Products: {{ admin_data.active_products }}</p>
-          <p>Out of Stock: {{ admin_data.out_of_stock }}</p>
+          <h2 class="text-primary">{{ admin_data.total_products }}</h2>
+          <p class="text-success">Active Products: {{ admin_data.active_products }}</p>
+          <p class="text-danger">Out of Stock: {{ admin_data.out_of_stock }}</p>
         </div>
       </div>
     </div>
@@ -19,14 +20,13 @@
     {% endfor %}
 
     <div class="col-lg-4">
-      <div class="card">
-        <div class="card-header">Recent Orders</div>
+      <div class="card shadow">
+        <div class="card-header bg-info text-white">Recent Orders</div>
         <div class="card-body">
-          <ul>
+          <ul class="list-group">
             {% for order in admin_data.recent_orders %}
-            <li>
-              Order #{{ order.id }} - Placed on {{
-              order.order_date.strftime('%Y-%m-%d') }}
+            <li class="list-group-item">
+              Order #{{ order.id }} - Placed on {{ order.order_date.strftime('%Y-%m-%d') }}
             </li>
             {% endfor %}
           </ul>
@@ -34,24 +34,21 @@
       </div>
     </div>
     <div class="col-lg-4">
-      <div class="card">
-        <div class="card-header">Customer Stats</div>
+      <div class="card shadow">
+        <div class="card-header bg-secondary text-white">Customer Stats</div>
         <div class="card-body">
-          <p>Total Customers: {{ admin_data.total_customers }}</p>
-          <p>
-            New Customers (Last 7 Days): {{ admin_data.new_customers_last_7_days
-            }}
-          </p>
-          <p>Returning Customers: {{ admin_data.returning_customers }}</p>
+          <p class="text-primary">Total Customers: {{ admin_data.total_customers }}</p>
+          <p class="text-success">New Customers (Last 7 Days): {{ admin_data.new_customers_last_7_days }}</p>
+          <p class="text-info">Returning Customers: {{ admin_data.returning_customers }}</p>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="row">
+  <div class="row mt-4">
     <div class="col-lg-6">
-      <div class="card">
-        <div class="card-header">Sales Overview</div>
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">Sales Overview</div>
         <div class="card-body">
           <canvas id="salesChart" width="400" height="200"></canvas>
         </div>
@@ -59,36 +56,37 @@
     </div>
 
     <div class="col-lg-6">
-      <div class="card">
-        <div class="card-header">Top Selling Products</div>
+      <div class="card shadow">
+        <div class="card-header bg-success text-white">Top Selling Products</div>
         <div class="card-body">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Quantity Sold</th>
-                <th>Revenue</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for product, total_quantity_sold, total_revenue in
-              admin_data.top_selling_products %}
-              <tr>
-                <td>{{ product.brand }}</td>
-                <td>{{ total_quantity_sold }}</td>
-                <td>Ksh. {{ total_revenue }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead class="thead-dark">
+                <tr>
+                  <th>Product</th>
+                  <th>Quantity Sold</th>
+                  <th>Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for product, total_quantity_sold, total_revenue in admin_data.top_selling_products %}
+                <tr>
+                  <td>{{ product.brand }}</td>
+                  <td>{{ total_quantity_sold }}</td>
+                  <td>Ksh. {{ total_revenue }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   </div>
   <div class="row">
     <div class="col-lg-6">
-      <div class="card">
-        <div class="card-header">User Growth</div>
+      <div class="card shadow">
+        <div class="card-header bg-info text-white">User Growth</div>
         <div class="card-body">
           <canvas id="userGrowthChart"></canvas>
         </div>
@@ -96,8 +94,8 @@
     </div>
 
     <div class="col-lg-6">
-      <div class="card">
-        <div class="card-header">Average Order Value</div>
+      <div class="card shadow">
+        <div class="card-header bg-secondary text-white">Average Order Value</div>
         <div class="card-body">
           <canvas id="averageOrderValueChart" width="400" height="200"></canvas>
         </div>
@@ -107,52 +105,43 @@
 
   <div class="row mt-4">
     <div class="col-lg-4">
-    <div class="card">
-        <div class="card-header">Average Session Duration</div>
+      <div class="card shadow">
+        <div class="card-header bg-danger text-white">Average Session Duration</div>
         <div class="card-body">
-            <canvas id="averageSessionDurationChart" width="400" height="200"></canvas>
-        </div>
-    </div>
-</div>
-<div class="col-lg-4">
-  <div class="card">
-    <div class="card-header">Inventory Status</div>
-    <div class="card-body">
-     {% if admin_data.total_products > 0 %}
-  {% set percentage_out_of_stock = (admin_data.out_of_stock / admin_data.total_products) * 100 %}
-{% else %}
-  {% set percentage_out_of_stock = 0 %}
-{% endif %}
-
-      
-      <div class="progress">
-        <div
-          class="progress-bar bg-success"
-          style="width: {{ percentage_out_of_stock }}%"
-        >
-          {{ percentage_out_of_stock }}%
+          <canvas id="averageSessionDurationChart" width="400" height="200"></canvas>
         </div>
       </div>
-      <p>Total Products: {{ admin_data.total_products }}</p>
-      <p>Out of Stock: {{ admin_data.out_of_stock }}</p>
     </div>
-  </div>
-</div>
- 
-
     <div class="col-lg-4">
-      <div class="card">
-        <div class="card-header">Order Progress</div>
+      <div class="card shadow">
+        <div class="card-header bg-warning text-white">Inventory Status</div>
+        <div class="card-body">
+          {% if admin_data.total_products > 0 %}
+          {% set percentage_out_of_stock = (admin_data.out_of_stock / admin_data.total_products) * 100 %}
+          {% else %}
+          {% set percentage_out_of_stock = 0 %}
+          {% endif %}
+
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: {{ percentage_out_of_stock }}%;">
+              {{ percentage_out_of_stock }}%
+            </div>
+          </div>
+          <p class="mt-2">Total Products: {{ admin_data.total_products }}</p>
+          <p>Out of Stock: {{ admin_data.out_of_stock }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card shadow">
+        <div class="card-header bg-dark text-white">Order Progress</div>
         <div class="card-body">
           <div class="progress">
-            <div
-              class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-              style="width: 60%"
-            >
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 60%;">
               60%
             </div>
           </div>
-          <p>Processing Orders: 60%</p>
+          <p class="mt-2">Processing Orders: 60%</p>
           <p>Completed Orders: 40%</p>
         </div>
       </div>
@@ -161,11 +150,16 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
 
-   
-
+  
   // User Growth Chart
   var userGrowthCtx = document.getElementById("userGrowthChart").getContext("2d");
   var userGrowthChart = new Chart(userGrowthCtx, {
@@ -352,4 +346,4 @@ document.addEventListener('DOMContentLoaded', function () {
         
 </script>
 
-{% endblock%}
+{% endblock %}

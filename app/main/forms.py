@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, FloatField, IntegerField, TextAreaField, SelectField, DateField, SubmitField
 from wtforms.validators import DataRequired, Email, Length
 from flask_wtf.file import FileField, FileRequired, DataRequired
-
+from wtforms import HiddenField, TextAreaField 
 
 class RegistrationForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
@@ -87,6 +87,8 @@ class CheckoutForm(FlaskForm):
     location = SelectField('Location', validators=[DataRequired()])
     address_line = TextAreaField('Address', validators=[DataRequired()])
     additional_info = TextAreaField('Additional Information')
+    hidden_custom_description = HiddenField("Custom Description")
+    custom_description = TextAreaField('Custom Description')
     payment_method = SelectField('Payment Method', choices=[('pay_on_delivery', 'Pay on Delivery'), ('pay_now', 'Pay Now')], validators=[DataRequired()])
     submit = SubmitField('Place Order')
 

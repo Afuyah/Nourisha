@@ -225,30 +225,25 @@ def edit_role(role_id):
 @admin_bp.route('/product_categories', methods=['GET', 'POST'])
 @login_required
 def product_categories():
-    def route():
-        form = AddProductCategoryForm()
+    form = AddProductCategoryForm()
 
-        if form.validate_on_submit():
-            category = ProductCategory(name=form.name.data)
-            db.session.add(category)
-            db.session.commit()
-            flash('Product category added successfully', 'success')
+    if form.validate_on_submit():
+        category = ProductCategory(name=form.name.data)
+        db.session.add(category)
+        db.session.commit()
+        flash('Product category added successfully', 'success')
 
-        categories = ProductCategory.query.all()
+    categories = ProductCategory.query.all()
 
-        return render_template('add_product_category.html', form=form, categories=categories)
-
-    return handle_db_error_and_redirect(route)
+    return render_template('add_product_category.html', form=form, categories=categories)
 
 
-
+# Add a new route to display products under a specific category
 @admin_bp.route('/products_by_category/<int:category_id>')
 def products_by_category(category_id):
     category = ProductCategory.query.get_or_404(category_id)
-    products = Product.query.filter_by(category=category).all()  # Assuming you have a relationship between Product and ProductCategory
+    products = Product.query.filter_by(category=category).all()
     return render_template('products_by_category.html', category=category, products=products)
-
-
 
 @admin_bp.route('/add_location', methods=['GET', 'POST'])
 @login_required
@@ -374,5 +369,4 @@ def fetch_daily_sales_data():
         current_app.logger.error(f"Error fetching daily sales data: {str(e)}")
         # Return an empty dictionary or None, depending on your preference
         return {'labels': [], 'data': []}
-
 

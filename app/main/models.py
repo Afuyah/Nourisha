@@ -7,10 +7,12 @@ from itsdangerous import URLSafeTimedSerializer as Serializer
 from app import db
 from sqlalchemy import event
 
+# Role model for user roles
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
 
+# User model for handling user information
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
 
@@ -64,6 +66,7 @@ class User(db.Model, UserMixin):
         db.session.commit()
         return True
 
+# ProductCategory model for product categories
 class ProductCategory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
@@ -74,6 +77,7 @@ class ProductCategory(db.Model):
     def __repr__(self):
         return f"<ProductCategory {self.name}>"
 
+# Supplier model for handling information about product suppliers
 class Supplier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     supplier_id = db.Column(db.String(20), unique=True, nullable=False)
@@ -87,6 +91,7 @@ class Supplier(db.Model):
     # Define the relationship with Product
     products = db.relationship('Product', back_populates='supplier')
 
+# Product model for handling product information
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -110,6 +115,7 @@ class Product(db.Model):
     carts = db.relationship('Cart', back_populates='product')
     order_items = db.relationship('OrderItem', back_populates='product')
 
+# ProductImage model for handling product images
 class ProductImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
@@ -121,6 +127,7 @@ class ProductImage(db.Model):
     # Define a relationship with Product
     product = db.relationship('Product', back_populates='images')
 
+# Cart model for handling user shopping carts
 class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -129,6 +136,7 @@ class Cart(db.Model):
     product = db.relationship('Product', back_populates='carts')
     custom_description = db.Column(db.Text) 
 
+# Location model for handling delivery locations
 class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     location_name = db.Column(db.String(100))
@@ -136,6 +144,7 @@ class Location(db.Model):
 
     orders = db.relationship('Order', back_populates='location')
 
+# Order model for handling user orders
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -144,6 +153,7 @@ class Order(db.Model):
     day_of_week = db.Column(db.Integer)
     expected_delivery_date = db.Column(db.Date)
     total_price = db.Column(db.Float, nullable=False)
+    custom_description = db.Column(db.Text) 
     location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
     address_line = db.Column(db.Text, nullable=False)
     additional_info = db.Column(db.Text)
@@ -175,18 +185,20 @@ class Order(db.Model):
         super(Order, self).__init__(*args, **kwargs)
         self.update_order_day_of_week()
 
+# Event listener to update day_of_week before inserting an order
 @event.listens_for(Order, 'before_insert')
 def before_insert_order(mapper, connection, target):
     target.update_order_day_of_week()
 
+# OrderItem model for handling order items
 class OrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     unit_price = db.Column(db.Float, nullable=False)
-
-    # Define the relationship with Order
+    custom_description = db.Column(db.Text) 
+  # Define the relationship with Order
     order = db.relationship('Order', back_populates='order_items')
     product = db.relationship('Product', back_populates='order_items')
 
