@@ -5,10 +5,12 @@
   <div class="container mt-3">
     <!-- Search Bar Section -->
     <div class="mb-4">
-      <form class="d-flex">
-        <input class="form-control me-2" type="search" placeholder="Search for products" aria-label="Search">
+      <form class="d-flex" id="searchForm" method="post" action="{{ url_for('main.search') }}">
+        <input class="form-control me-2"  type="text" id="searchInput" placeholder="Search products..." onkeyup="searchProducts()">
+        {{form.csrf_token}}
         <button class="btn btn-outline-success" type="submit">Search</button>
       </form>
+      
     </div>
 
    <!-- Category Carousel -->
@@ -59,6 +61,10 @@
                 Add to Cart
               </button>
 
+
+
+
+              
 <!-- Product Modal -->
               <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
                           <div class="modal-dialog modal-lg">
@@ -107,8 +113,6 @@
 
 
 
-
-
 <div class="container mt-3">
     <!-- Your existing content -->
 
@@ -118,6 +122,8 @@
       <span id= "cart-badge" class="badge">0</span>
     </a>
 </div>
+
+
 
   <style>
     /* Add your custom styles here */
@@ -367,6 +373,30 @@ async function updateQuantityOnModalOpen(productId) {
   }
 }
 
-  </script>
+    function searchProducts() {
+        var query = document.getElementById("searchInput").value.trim();
+        if (query.length === 0) {
+            // Clear search results and display all products
+            document.getElementById("searchResults").innerHTML = "";
+            document.getElementById("productListing").style.display = "block";
+            return;
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/search?query=' + encodeURIComponent(query), true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    // Update search results
+                    document.getElementById("searchResults").innerHTML = xhr.responseText;
+                    // Hide product listing when search results are displayed
+                    document.getElementById("productListing").style.display = "none";
+                }
+            }
+        };
+        xhr.send();
+    }
+</script>
+ 
 
 {% endblock%}

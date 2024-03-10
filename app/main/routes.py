@@ -414,8 +414,9 @@ def product_details(product_id):
 @bp.route('/product_listing')
 def product_listing():
     categories = ProductCategory.query.all()
+    products = Product.query.all()
     form = AddProductForm()
-    return render_template('product_listing.html', categories=categories, form=form)
+    return render_template('product_listing.html', categories=categories, form=form, products=products)
 
 # Route to render the product listing based on the selected category
 @bp.route('/product_listing/<int:category_id>')
@@ -426,13 +427,16 @@ def product_listing_by_category(category_id):
     form = AddProductForm()
     return render_template('product_listing.html', category=category, products=products, categories=categories, form=form)
 
-
-
-
-
-
 @bp.route('/view_order/<int:order_id>')
 @login_required
 def view_order(order_id):
   order = Order.query.get_or_404(order_id)
   return render_template('view_order.html', order=order)
+
+@bp.route('/search', methods=['GET', 'POST'])
+def search():
+    query = request.args.get('query', '')
+    products = Product.query.filter(Product.name.ilike(f"%{query}%")).all()
+    form= AddProductForm()
+    return render_template('product_listing.html', products=products, form=form)
+

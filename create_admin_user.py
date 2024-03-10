@@ -16,7 +16,7 @@ def create_admin_user():
         admin_user = User.query.filter_by(username='jsync').first()
         if not admin_user:
             admin_user = User(
-                username='bha',
+                username='jhsync',
                 email='jsync@bha.com',
                 phone='1044314',
                 name='Henry A',
