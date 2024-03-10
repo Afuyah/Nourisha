@@ -1,0 +1,103 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container mt-3">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title text-center mb-4">Checkout</h2>
+
+          {% if existing_address %}
+          <!-- Render existing delivery address in a card -->
+          <div class="card mb-4">
+            <div class="card-body">
+              <h3 class="card-title">Current Delivery Address</h3>
+              <p><strong>Location:</strong> {{ existing_address.location.name }}</p>
+              <p><strong>Arealine:</strong> {{ existing_address.arealine.name }}</p>
+              <p><strong>Nearest Place:</strong> {{ existing_address.nearest_place.name }}</p>
+              <p><strong>Address:</strong> {{ existing_address.address_line }}</p>
+              <p><strong>Additional Info:</strong> {{ existing_address.additional_info }}</p>
+              <button class="btn btn-secondary" id="changeAddressBtn">Change Delivery Address</button>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Checkout form -->
+          <form method="post" action="{{ url_for('cart.checkout') }}" class="mb-4">
+            {{ form.csrf_token }}
+
+            <!-- Existing address form section (initially hidden) -->
+            <div id="existing-address-section" {% if existing_address %}style="display: none;"{% endif %}>
+              <!-- Add hidden field for existing address id -->
+              <input type="hidden" name="existing_address_id" value="{{ existing_address.id }}">
+            </div>
+
+            <!-- New address form section (initially hidden) -->
+            <div id="new-address-section">
+              <!-- Location dropdown -->
+              <div class="mb-3">
+                <label for="location" class="form-label">Select Location</label>
+                {{ form.location(class="form-control", required=true) }}
+              </div>
+
+              <!-- Arealine dropdown (initially disabled) -->
+              <div class="mb-3">
+                <label for="arealine" class="form-label">Select Arealine</label>
+                {{ form.arealine(class="form-control", required=true, disabled=true) }}
+              </div>
+
+              <!-- Nearest Place dropdown (initially disabled) -->
+              <div class="mb-3">
+                <label for="nearest_place" class="form-label">Select Nearest Place</label>
+                {{ form.nearest_place(class="form-control", required=true, disabled=true) }}
+              </div>
+
+              <!-- Address textarea -->
+              <div class="mb-3">
+                <label for="address_line" class="form-label">Delivery Address</label>
+                {{ form.address_line(class="form-control", required=true) }}
+              </div>
+            </div>
+
+            <!-- Additional Information textarea -->
+            <div class="card mb-4">
+              <div class="card-body">
+                <h3 class="card-title">Additional Information</h3>
+                <div class="mb-3">
+                  <label for="additional_info" class="form-label">Special Instructions</label>
+                  {{ form.additional_info(class="form-control") }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Method dropdown -->
+            <div class="card mb-4">
+              <div class="card-body">
+                <h3 class="card-title">Payment Method</h3>
+                <div class="mb-3">
+                  {{ form.payment_method.label }} {{ form.payment_method(class="form-control", required=true) }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Place Order button -->
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Place Order</button>
+          </form>
+
+          <!-- jQuery script for toggling form sections -->
+          <script>
+            $(document).ready(function () {
+              // Toggle existing and new address sections based on the button click
+              $('#changeAddressBtn').click(function () {
+                $('#existing-address-section').toggle();
+                $('#new-address-section').toggle();
+              });
+            });
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

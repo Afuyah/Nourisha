@@ -17,9 +17,7 @@
               <li class="list-group-item"><strong>Total Price:</strong> 
                 <span class="badge bg-success">Ksh. {{ "{:,.2f}".format(order.total_price) }}</span>
               </li>
-              <li class="list-group-item"><strong>Location:</strong> {{ order.location.name }}</li>
-              <li class="list-group-item"><strong>Arealine:</strong> {{ order.arealine.name }}</li>
-              <li class="list-group-item"><strong>Nearest Place:</strong> {{ order.nearest_place.name }}</li>
+              <li class="list-group-item"><strong>Location:</strong> {{ order.location.location_name }}</li>
               <li class="list-group-item"><strong>Address:</strong> {{ order.address_line }}</li>
               <li class="list-group-item"><strong>Additional Info:</strong> {{ order.additional_info }}</li>
               <li class="list-group-item"><strong>Payment Method:</strong> {{ order.payment_method }}</li>
@@ -72,6 +70,8 @@
           <button type="submit" class="btn btn-danger">Cancel Order</button>
         </form>
       {% endif %}
+
+     
     </div>
 
     <a href="{{ url_for('admin.view_orders') }}" class="btn btn-primary mt-4">Back to Orders</a>

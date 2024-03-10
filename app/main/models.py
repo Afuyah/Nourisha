@@ -28,7 +28,8 @@ class User(db.Model, UserMixin):
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
     confirmed = db.Column(db.Boolean, default=False)
     confirmation_token = db.Column(db.String(64), unique=True)
-    
+    delivery_info = db.relationship('UserDeliveryInfo', back_populates='user', lazy='dynamic')
+  
     # Define the relationship with the Role model
     role = db.relationship('Role', backref=db.backref('users', lazy=True))
     orders = db.relationship('Order', back_populates='user')
@@ -136,13 +137,7 @@ class Cart(db.Model):
     product = db.relationship('Product', back_populates='carts')
     custom_description = db.Column(db.Text) 
 
-# Location model for handling delivery locations
-class Location(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    location_name = db.Column(db.String(100))
-    arealine = db.Column(db.String(255))
 
-    orders = db.relationship('Order', back_populates='location')
 
 # Order model for handling user orders
 class Order(db.Model):
@@ -155,10 +150,12 @@ class Order(db.Model):
     total_price = db.Column(db.Float, nullable=False)
     custom_description = db.Column(db.Text) 
     location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
-    address_line = db.Column(db.Text, nullable=False)
+    arealine_id = db.Column(db.Integer, db.ForeignKey('arealine.id'), nullable=False)
+    nearest_place_id = db.Column(db.Integer, db.ForeignKey('nearest_place.id'), nullable=False)
+    address_line = db.Column(db.String(500), nullable=False)
     additional_info = db.Column(db.Text)
     payment_method = db.Column(db.String(50), nullable=False)
-    
+
     # Payment details
     payment_status = db.Column(db.String(50), default='unpaid')  # 'unpaid', 'paid', etc.
     payment_date = db.Column(db.DateTime)  # Date when payment was made
@@ -170,9 +167,11 @@ class Order(db.Model):
     # Define the relationship with User
     user = db.relationship('User', back_populates='orders')
 
-    # Define the relationship with Location
+    # Define the relationship with Location, Arealine, and NearestPlace
     location = db.relationship('Location', back_populates='orders')
-    
+    arealine = db.relationship('Arealine', back_populates='orders')
+    nearest_place = db.relationship('NearestPlace', back_populates='orders')
+
     # Relationship with OrderItem
     order_items = db.relationship('OrderItem', back_populates='order')
 
@@ -205,3 +204,46 @@ class OrderItem(db.Model):
     def update_product_quantity_sold(self):
         # Update the quantity_sold field for the associated product
         self.product.quantity_sold += self.quantity
+
+
+
+class Location(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    arealines = db.relationship('Arealine', back_populates='location')
+    orders = db.relationship('Order', back_populates='location')
+    user_delivery_info = db.relationship('UserDeliveryInfo', back_populates='location')
+  
+class Arealine(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
+    location = db.relationship('Location', back_populates='arealines')
+    nearest_places = db.relationship('NearestPlace', back_populates='arealine')
+    user_delivery_info = db.relationship('UserDeliveryInfo', back_populates='arealine')
+    orders = db.relationship('Order', back_populates='arealine')
+    
+class NearestPlace(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    arealine_id = db.Column(db.Integer, db.ForeignKey('arealine.id'), nullable=False)
+    arealine = db.relationship('Arealine', back_populates='nearest_places')
+
+
+    orders = db.relationship('Order', back_populates='nearest_place')
+    user_delivery_info = db.relationship('UserDeliveryInfo', back_populates='nearest_place')
+
+class UserDeliveryInfo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False, index=True)
+    arealine_id = db.Column(db.Integer, db.ForeignKey('arealine.id'), nullable=False, index=True)
+    nearest_place_id = db.Column(db.Integer, db.ForeignKey('nearest_place.id'), nullable=False, index=True)
+    address_line = db.Column(db.String(500), nullable=False)
+    additional_info = db.Column(db.Text)
+
+  # Define relationships with User, Location, Arealine, and NearestPlace
+    user = db.relationship('User', back_populates='delivery_info')
+    location = db.relationship('Location', back_populates='user_delivery_info')
+    arealine = db.relationship('Arealine', back_populates='user_delivery_info')
+    nearest_place = db.relationship('NearestPlace', back_populates='user_delivery_info')

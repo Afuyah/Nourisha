@@ -2,7 +2,7 @@
 from flask import render_template, flash, redirect, url_for, request, jsonify, current_app
 from flask_login import current_user, login_required
 from app.main.models import User, Location, Order, OrderItem
-from app.main.models import Cart, Product, Location, Order
+from app.main.models import Cart, Product, Location, Order, Arealine, NearestPlace, UserDeliveryInfo
 from app.cart import cart_bp
 from app.main.forms import CheckoutForm, AddProductForm
 from app import db, mail
@@ -15,7 +15,7 @@ def login_required(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
-            flash('Please Login to access this page.', 'warning')
+            flash('Please Login to complete this action!.', 'warning')
             return redirect(url_for('main.login', next=request.url))
         return func(*args, **kwargs)
 
@@ -259,8 +259,14 @@ def _in_stock(product_id):
             'message': 'Internal Server Error: ' + str(e),
         }
         return jsonify(response_data), 500
+        
 
-# Route for the checkout page
+
+
+
+
+
+
 @cart_bp.route('/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():
@@ -273,15 +279,47 @@ def checkout():
 
     custom_description = cart_items[0].custom_description if cart_items else None
 
-    form.location.choices = [(location.id, location.location_name)
-                             for location in Location.query.all()]
+    locations = Location.query.all()
+    form.location.choices = [(location.id, location.name) for location in locations]
+
+    arealines = Arealine.query.all()
+    form.arealine.choices = [(arealine.id, arealine.name) for arealine in arealines]
+
+    nearest_places = NearestPlace.query.all()
+    form.nearest_place.choices = [(place.id, place.name) for place in nearest_places]
 
     if form.validate_on_submit():
+        if form.use_saved_address.data:
+            # User has opted to use saved address
+            delivery_info = current_user.delivery_info.first()
+            if delivery_info:
+                form.location.data = delivery_info.location_id
+                form.arealine.data = delivery_info.arealine_id
+                form.nearest_place.data = delivery_info.nearest_place_id
+                form.address_line.data = delivery_info.address_line
+                form.additional_info.data = delivery_info.additional_info
+            else:
+                flash('No saved delivery information found.', 'warning')
+        else:
+            # User is entering a new address, save it
+            delivery_info = UserDeliveryInfo(
+                user_id=current_user.id,
+                location_id=form.location.data,
+                arealine_id=form.arealine.data,
+                nearest_place_id=form.nearest_place.data,
+                address_line=form.address_line.data,
+                additional_info=form.additional_info.data
+            )
+            db.session.add(delivery_info)
+            db.session.commit()
+
         order = Order(
             user_id=current_user.id,
             status='pending',
             total_price=total_price,
             location_id=form.location.data,
+            arealine_id=form.arealine.data,
+            nearest_place_id=form.nearest_place.data,
             address_line=form.address_line.data,
             additional_info=form.additional_info.data,
             payment_method=form.payment_method.data,
@@ -289,11 +327,13 @@ def checkout():
         )
 
         for cart_item in cart_items:
-            order_item = OrderItem(order=order,
-                                   product_id=cart_item.product.id,
-                                   quantity=cart_item.quantity,
-                                   unit_price=cart_item.product.unit_price,
-                                   custom_description=cart_item.custom_description)
+            order_item = OrderItem(
+                order=order,
+                product_id=cart_item.product.id,
+                quantity=cart_item.quantity,
+                unit_price=cart_item.product.unit_price,
+                custom_description=cart_item.custom_description
+            )
             db.session.add(order_item)
 
         db.session.add(order)
@@ -306,20 +346,19 @@ def checkout():
 
         transaction_id = order.id
 
-        send_order_confirmation_email(current_user.email, 'afuyaah@gmail.com',
-                                      order)
+        send_order_confirmation_email(current_user.email, 'afuyaah@gmail.com', order)
 
-        flash('Order placed successfully! Redirecting to the payment page...',
-              'success')
+        flash('Order placed successfully! Redirecting to the payment page...', 'success')
         return redirect(url_for('payments.mpesa_payment', order_id=order.id))
 
-    return render_template('checkout.html',
-                           form=form,
-                           cart_items=cart_items,
-                           total_price=total_price)
+    return render_template('checkout.html', form=form, cart_items=cart_items, total_price=total_price)
+
+
+
+
 
 # Function to send order confirmation emails
-def send_order_confirmation_email(user_email, admin_email, order):
+def  send_order_confirmation_email(user_email, admin_email, order):
     user_subject = 'Order Confirmation - Your Order was Successful'
     user_body = f'Thank you for your order!\n\nOrder ID: {order.id}\nTotal Price: {order.total_price}\n\nWe will process your order shortly.'
     user_msg = Message(user_subject, recipients=[user_email], body=user_body)

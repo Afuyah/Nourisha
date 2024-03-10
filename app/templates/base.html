@@ -191,13 +191,26 @@
           </ul>
         </div>
       </nav>
+
+      
+    <!-- Flash Messages Section -->
+    {% with messages = get_flashed_messages() %} {% if messages %}
+    <div class="flash-messages">
+      {% for message in messages %}
+      <div class="flash-message alert alert-danger">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
+      
+      <!-- Main content-->
+      
     <main>{% block content %}{% endblock %}</main>
  
 
      <footer class="mt-5">
       <div class="container">
         <!-- Footer Content -->
-        &copy; 2023 Naurisha Groceries
+        &copy; 2024 Nourisha Groceries
       </div>
     </footer>
       <script>

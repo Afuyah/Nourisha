@@ -1,8 +1,8 @@
 from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import current_user, login_required
 from app.admin import admin_bp
-from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm,  LoginForm, AddLocationForm, AddRoleForm, AddSupplierForm
-from app.main.models import User, Role, Cart, Supplier, ProductImage,  ProductCategory,  Product, Order, OrderItem, Location, Cart
+from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm,  LoginForm, AddLocationForm, AddRoleForm, AddSupplierForm, AddNearestPlaceForm, AddArealineForm
+from app.main.models import User, Role, Cart,  ProductCategory,  Product, Order, OrderItem, Location, Cart, Arealine, NearestPlace, Arealine, UserDeliveryInfo
 from app import db
 from flask import jsonify
 from sqlalchemy import cast, Date, func
@@ -14,6 +14,7 @@ from flask_migrate import Migrate
 from flask_migrate import Migrate
 
 
+# Helper function to handle database errors and redirects
 def handle_db_error_and_redirect(route):
     try:
         return route()
@@ -245,33 +246,111 @@ def products_by_category(category_id):
     products = Product.query.filter_by(category=category).all()
     return render_template('products_by_category.html', category=category, products=products)
 
+
 @admin_bp.route('/add_location', methods=['GET', 'POST'])
 @login_required
 def add_location():
     def route():
-        form = AddLocationForm()
+        # Initialize forms for adding location, arealine, and nearest place
+        form_location = AddLocationForm()
+        form_arealine = AddArealineForm()
+        form_nearest_place = AddNearestPlaceForm()
 
-        if form.validate_on_submit():
-            location = Location(
-                location_name=form.location_name.data,
-                arealine=form.arealine.data
-            )
-
-            db.session.add(location)
-            db.session.commit()
-
-            flash('Location added successfully!', 'success')
-
+        # Fetch locations and arealines for dropdowns
         locations = Location.query.all()
+        arealines = Arealine.query.all()
 
-        return render_template('add_location.html', form=form, locations=locations)
+        # Set choices for location field in AddArealineForm
+        form_arealine.location.choices = [(location.id, location.name) for location in locations]
 
+        # Set choices for arealine field in AddNearestPlaceForm
+        form_nearest_place.arealine.choices = [(arealine.id, arealine.name) for arealine in arealines]
+
+        # Handle form submissions
+        if form_location.validate_on_submit():
+            existing_location = Location.query.filter_by(name=form_location.location_name.data).first()
+
+            if existing_location:
+                flash('Location already exists!', 'error')
+            else:
+                # Process Add Location Form
+                location = Location(name=form_location.location_name.data)
+                db.session.add(location)
+                db.session.commit()
+                flash('Location added successfully!', 'success')
+
+        elif form_arealine.validate_on_submit():
+            existing_arealine = Arealine.query.filter_by(name=form_arealine.name.data,
+                                                         location_id=form_arealine.location.data).first()
+
+            if existing_arealine:
+                flash('Arealine already exists!', 'error')
+            else:
+                # Process Add Arealine Form
+                arealine = Arealine(name=form_arealine.name.data,
+                                    location_id=form_arealine.location.data)
+                db.session.add(arealine)
+                db.session.commit()
+                flash('Arealine added successfully!', 'success')
+
+        elif form_nearest_place.validate_on_submit():
+            existing_nearest_place = NearestPlace.query.filter_by(name=form_nearest_place.name.data,
+                                                                 arealine_id=form_nearest_place.arealine.data).first()
+
+            if existing_nearest_place:
+                flash('Nearest Place already exists!', 'error')
+            else:
+                # Process Add Nearest Place Form
+                nearest_place = NearestPlace(name=form_nearest_place.name.data,
+                                             arealine_id=form_nearest_place.arealine.data)
+                db.session.add(nearest_place)
+                db.session.commit()
+                flash('Nearest Place added successfully!', 'success')
+
+        # Render the template with the forms and data
+        return render_template('add_location.html',
+                               form_location=form_location,
+                               form_arealine=form_arealine,
+                               form_nearest_place=form_nearest_place,
+                               locations=locations,
+                               arealines=arealines)
+
+    # Use helper function to handle database errors and redirects
     return handle_db_error_and_redirect(route)
 
-def send_email(subject, recipient, body):
-    msg = Message(subject, recipients=[recipient])
-    msg.body = body
-    mail.send(msg)
+
+
+@admin_bp.route('/get_locations', methods=['GET'])
+def get_locations():
+    locations = Location.query.all()
+    locations_data = [{'id': location.id, 'name': location.name} for location in locations]
+    return jsonify({'locations': locations_data})
+  
+
+@admin_bp.route('/get_arealines/<location_id>', methods=['GET'])
+def get_arealines(location_id):
+    location = Location.query.get(location_id)
+
+    if not location:
+        return jsonify({'error': 'Invalid location ID'}), 400
+
+    arealines = [{'id': arealine.id, 'name': arealine.name} for arealine in location.arealines]
+    
+    return jsonify({'arealines': arealines})
+
+
+    
+
+@admin_bp.route('/get_nearest_places/<arealine_id>', methods=['GET'])
+def get_nearest_places(arealine_id):
+    arealine = Arealine.query.get(arealine_id)
+
+    if not arealine:
+        return jsonify({'error': 'Invalid arealine ID'}), 400
+
+    nearest_places = [{'id': place.id, 'name': place.name} for place in arealine.nearest_places]
+
+    return jsonify({'nearest_places': nearest_places})
 
 
 @admin_bp.route('/view_order_details/<int:order_id>')

@@ -1,11 +1,11 @@
-<!doctype html>
-
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
+     <head>
     <!-- Meta Tags -->
     <meta charset="UTF-8" />
      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Title -->
     <title>Naurisha Groceries</title>
@@ -77,30 +77,65 @@
       integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
       crossorigin="anonymous"
     ></script>
- 
-<style>
+    <link rel="stylesheet" href="styles.css">
+  
+    <style>
+        /* Add your custom CSS styles here */
+     
+       
+        header {
+            background-color: #fff;
+            color: #1c2331;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin: 0;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #1c2331;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #f9b115;
+        }
+
+     
+     
+
+        </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h2>Nourisha</h2>
+           <nav class="navbar navbar-expand shadow navbar sticky-top bg-white ">
   
 
-
-
-
- 
-</style >
-  </head>
-  <body>
-    <!-- Header -->
-
-  <!-- Your existing navigation bar code -->
-<nav class="navbar navbar-expand shadow navbar sticky-top bg-white ">
-  <!-- ... -->
-<a class="navbar-brand" href="{{url_for('main.index')}}">
-      <img src="/static/logo2.png" alt="Naurisha" height="30px" class="d-md-none" />
-      <img src="/static/logo2.png" alt="Naurisha logo" height="30px" class="d-none d-md-inline" />
-    </a>
   <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" href="{{url_for('cart.view_cart')}}"<i class="fas fa-shopping-cart">cart</i>  </a>
+        <a class="nav-link" href="{{url_for('main.index')}}"<i class="fas fa-shopping-cart">Home</i>  </a>
       </li>
 
       <li class="nav-item">
@@ -129,7 +164,7 @@
   </div>
 </div>
 </nav>
-
+        </div>
 
 
 
@@ -149,7 +184,7 @@
     <footer class="mt-5">
       <div class="container">
         <!-- Footer Content -->
-        &copy; 2023 Naurisha Groceries
+        &copy; 2024 Nourisha Groceries
       </div>
     </footer>
   </body>

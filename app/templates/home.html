@@ -1,199 +1,401 @@
-{% extends 'layout.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <head>
+    <!-- Meta Tags -->
+    <meta charset="UTF-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-{% block content %}
-    <!-- Header Section -->
-    <div class="container mt-3">
+    <!-- Title -->
+    <title>Naurisha Groceries</title>
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
-
-        <!-- Small Images/Advertisements -->
-        <div class="row mb-4">
-            <div class="col-md-4 d-none d-sm-block">
-                <img src="https://images.unsplash.com/flagged/photo-1587302164675-820fe61bbd55?q=80&w=1160&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Advertisement 1" class="img-fluid">
-            </div>
-            <div class="col-md-4">
-                <img src="https://images.unsplash.com/photo-1504472685735-9bd4075b3779?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="img-fluid">
-            </div>
-            <div class="col-md-4">
-                <img src="https://media.istockphoto.com/id/165835384/photo/wire-shopping-basket-filled-with-groceries-and-vegetables.jpg?s=1024x1024&w=is&k=20&c=2U4t_28vojmpuMwsity7Ln8ZeWr7rpnD1VpQXpcZ56k=" alt="Advertisement 3" class="img-fluid">
-            </div>
-        </div>
-
-
-    </div>
-
-
-    <!-- Featured Products Section -->
-    <div class="container mt-4">
-        <h2 class="text-center mb-4">Featured Products</h2>
-        <div class="row">
-            <!-- Featured Product Cards -->
-            {% for product in products %}
-                <div class="col-md-4">
-                    <div class="card mb-4">
-                        <!-- Product Image, Title, Description, etc. -->
-                        <div class="card-body">
-                            <h5 class="card-title">{{ product.name }}</h5>
-                            <p class="card-text">{{ product.description }}</p>
-                            <a href="{{ url_for('product_details', product_id=product.id) }}" class="btn btn-primary">View Details</a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-
-        <!-- Link to Product Listing -->
-        <div class="text-center">
-            <a href="#" class="btn btn-success">View All Products</a>
-        </div>
-    </div>
-
-<!-- Add Animate.css and Hover.css in your project -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hover.css/2.3.1/css/hover-min.css">
-
-<!-- Special Offers Section with Enhanced Carousel -->
-<div class="container mt-3">
-    <h2 class="text-center mb-5 animate__animated animate__fadeIn">Special Offers</h2>
-    <div id="specialOffersCarousel" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            <!-- First Special Offer -->
-            <div class="carousel-item active">
-                <img src="https://images.unsplash.com/photo-1591184510259-b6f1be3d7aff?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="d-block w-100 carousel-img" alt="Special Offer 1">
-                <div class="carousel-caption animate__animated animate__fadeInDown">
-                    <h5>Exclusive Offer</h5>
-                    <p>Save big with our limited-time discounts!</p>
-                </div>
-            </div>
-            <!-- Second Special Offer -->
-            <div class="carousel-item">
-                <img src="https://images.unsplash.com/photo-1439127989242-c3749a012eac?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="d-block w-100 carousel-img" alt="Special Offer 2">
-                <div class="carousel-caption animate__animated animate__fadeInDown">
-                    <h5>Flash Sale</h5>
-                    <p>Hurry up! Grab your favorite items now.</p>
-                </div>
-            </div>
-            <!-- Add more carousel items as needed -->
-        </div>
-        <!-- Carousel Controls -->
-        <button class="carousel-control-prev" type="button" data-bs-target="#specialOffersCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#specialOffersCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
-</div>
-
-
-
-<!-- About Us Section -->
-
-<div class="container mt-5 p-4 bg-light rounded">
-    <h2 class="text-center mb-3 animate__animated animate__fadeIn">About Us</h2>
-    <div class="row">
-        <div class="col-md-6 animate__animated animate__fadeInLeft">
-            <p class="card-text">Welcome to Nourisha Groceries Ltd, your trusted source for high-quality products and excellent customer service. We are dedicated to providing our customers with a seamless shopping experience, offering a wide range of products to meet your needs.</p>
-      <p class="card-text">Our commitment to quality ensures that every product in our inventory is carefully selected to meet the highest standards. Whether you're looking for fresh groceries, household essentials, or unique specialty items, we've got you covered.</p>
-       
-        </div>
-        <div class="col-md-6 d-none d-sm-block animate__animated animate__fadeInRight">
-            <!-- Hidden on small devices -->
-            <img src="https://images.unsplash.com/photo-1588964895597-cfccd6e2dbf9?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="About Us Image" class="img-fluid mt-4 mb-3 rounded" style="border-bottom-left-radius:20%; border-bottom-right-radius:20%">
-        </div>
-    </div>
     
+ <link 
+      rel="stylesheet" type ="text/css"
+      href="{{ url_for('static', filename='styles/main.css') }}"
+    />
 
-    <!-- Read More Button-->
-    <div class="text-center mt-4 animate__animated animate__fadeInUp">
-        <a href="#" class="btn btn-success btn-lg">Discover More</a>
-    </div>
+
+
+    
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+
+   
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Arizonia&family=Love+Ya+Like+A+Sister&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+
+    <!-- Scripts -->
+    <script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script
+      type="text/javascript"
+      charset="utf8"
+      src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"
+    ></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="styles.css">
+  
+    <style>
+        /* Add your custom CSS styles here */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: #f9f9f9;
+            color: #1c2331;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin: 0;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #1c2331;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #f9b115;
+        }
+
+        section {
+            padding: 40px 0;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            color: #1c2331;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .product-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .product {
+            width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .product:hover {
+            transform: translateY(-10px);
+        }
+
+        .product img {
+            max-width: 100%;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .product h3 {
+            margin: 20px 0;
+            font-size: 1.8em;
+            color: #1c2331;
+        }
+
+        .product p {
+            font-size: 1.6em;
+            color: #f9b115;
+            margin-bottom: 20px;
+        }
+
+        .product button {
+            background-color: #f9b115;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1.3em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .product button:hover {
+            background-color: #ffce55;
+        }
+
+        .about-us p {
+            text-align: justify;
+            font-size: 1.6em;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .contact-info ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .contact-info ul li {
+            margin-bottom: 10px;
+            font-size: 1.6em;
+            color: #555;
+        }
+
+        .testimonials {
+            text-align: center;
+        }
+
+        .testimonial {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .testimonial p {
+            margin: 0;
+            font-style: italic;
+            font-size: 1.6em;
+            color: #555;
+        }
+
+        footer {
+            background-color: #1c2331;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 1.6em;
+        }
+
+        @media screen and (max-width: 768px) {
+            header h1 {
+                font-size: 2.5em;
+            }
+
+            .product {
+                width: calc(50% - 20px);
+            }
+
+            .product h3 {
+                font-size: 1.8em;
+            }
+
+            .product p, .about-us p, .contact-info ul li, .testimonial p, footer p {
+                font-size: 1.4em;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .product {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h2>Nourisha</h2>
+           <nav class="navbar navbar-expand shadow navbar sticky-top bg-white ">
+  
+
+  <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('main.index')}}"<i class="fas fa-shopping-cart">Home</i>  </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('main.product_listing')}}">Shop</a>
+      </li>
+
+
+      {% if not user_authenticated %}
+<li class="nav-item">
+        <a class="nav-link" href="#">About</a>
+      </li>
+
+        <li class="nav-item">
+          <a class="btn btn-outline md-3" href="{{url_for('main.login')}}">Sign In</a>
+        </li>
+      {% else %}
+
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('main.user_dashboard')}}"> Account</a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="{{url_for('main.logout')}}">Logout</a>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
 </div>
-</div>
-
-
-<!-- Contact Us Section with Enhancements -->
-<div class="container mt-2 p-4 bg-light rounded">
-    <h2 class="text-center mb-4 animate__animated animate__fadeIn">Contact Us</h2>
-    <div class="row">
-        <!-- Contact Form -->
-        <div class="col-md-6 animate__animated animate__fadeInLeft">
-            <form action="{{ url_for('main.products') }}" method="post">
-                <!-- Contact Form Fields -->
-                <div class="mb-3">
-                    <label for="name" class="form-label">Your Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Your Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                </div>
-                <div class="mb-3">
-                    <label for="message" class="form-label">Message</label>
-                    <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
-                </div>
-              <div class= "text-center">
-                <button type="submit" class="btn btn-success">Submit</button>
-              </div>
-            </form>
+</nav>
         </div>
-        <!-- Contact Information -->
-        <div class="col-md-6 mt-5 animate__animated animate__fadeInRight text-center">
-            <ul class="list-unstyled">
-                <li><i class="bi bi-geo-alt"></i> Address: Your Address</li>
-                <li><i class="bi bi-envelope"></i> Email: your@email.com</li>
-                <li><i class="bi bi-phone"></i> Phone: +123456789</li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-<!-- Testimonials Section -->
-<div class="container mt-3 mb-5">
-    <h2 class="text-center mb-4">What Our Customers Say</h2>
-    <div class="row">
-        <!-- Testimonials -->
-        <div class="col-md-4">
-            <div class="testimonial-card">
-                <blockquote class="blockquote">
-                    <p class="mb-0">"Great service and high-quality products! The team is always helpful."</p>
-                    <footer class="blockquote-footer">Customer 1</footer>
-                </blockquote>
+    </header>
+<div class="alert alert-primary alert-dismissible fade show" role="alert">
+    <strong>
+</strong>You can Call/Whatsapp <strong><a href="tel:+254700622298"> +254 (700) 622-298</a>
+ </strong>to place your order. 
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+    <section id="featured-products">
+        <div class="container">
+            <h3>Discover Our Featured Products</h3>
+            <div class="product-container">
+                <div class="product">
+                    <img src="/static/uploads/PhotoRoom-20240123_114305_5_20240123092030.png" alt="Matoke">
+                    <h3>Matoke</h3>
+                    <p>Ksh100.99</p>
+                    <button>Shop Now</button>
+                </div>
+                <div class="product">
+                    <img src="static/uploads/PhotoRoom-20240123_114305_3_20240123091950.png" alt="Irish Potatoes">
+                    <h3>Irish Potatoes</h3>
+                    <p>Ksh80.99</p>
+                    <button>Shop Now</button>
+                </div>
+                <div class="product">
+                    <img src="static/uploads/PhotoRoom-20240123_105100_7_20240123084447.png" alt="Dragon Fruit">
+                    <h3>Dragon Fruit</h3>
+                    <p>Ksh720.99</p>
+                    <button>Shop Now</button>
+                </div>
+                <!-- Add more products here -->
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="testimonial-card">
-                <blockquote class="blockquote">
-                    <p class="mb-0">"Always on time and fresh groceries. A reliable choice for busy lifestyles."</p>
-                    <footer class="blockquote-footer">Customer 2</footer>
-                </blockquote>
+    </section>
+
+    <section id="about-us">
+        <div class="container">
+            <h2>Who We Are</h2>
+            <div class="about-us">
+                <p>Welcome to Nourisha! We're dedicated to bringing you the freshest groceries right to your doorstep. Our commitment to quality and convenience ensures a delightful shopping experience every time.</p>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="testimonial-card">
-                <blockquote class="blockquote">
-                    <p class="mb-0">"Love the variety of products available. The quality is unmatched!"</p>
-                    <footer class="blockquote-footer">Customer 3</footer>
-                </blockquote>
+    </section>
+
+    <section id="contact-us">
+        <div class="container">
+            <h2>Contact Us</h2>
+            <div class="contact-info">
+                <ul>
+                    <li>Email: info@nourisha.com</li>
+                    <li>Phone: 070-062-2298</li>
+                    <li>Address: 123 Nourisha Str </li>
+                    <li><a href="https://wa.me/+254700622298"> <i class="fab fa-whatsapp"></i> Whatsapp </a>
+</li>
+                </ul>
             </div>
         </div>
-    </div>
-</div>
-<div class= " container mt-5 mb-5" >
-</div>
+    </section>
 
-<script>
-    document.getElementById('specialOffersCarousel').addEventListener('slid.bs.carousel', function () {
-        setTimeout(function () {
-            $('#specialOffersCarousel').carousel('next');
-        }, 5000); // Adjust the time delay (in milliseconds) for a slower slide
-    });
+    <section id="testimonials">
+        <div class="container">
+            <h2>What Our Customers Say</h2>
+            <div class="testimonials">
+                <div class="testimonial">
+                    <p>"Amazing service! I've never had fresher produce delivered to my doorstep. Highly recommend!"</p>
+                    <p>- John Doe</p>
+                </div>
+                <div class="testimonial">
+                    <p>"Nourisha has made grocery shopping so convenient for me. The quality of their products is unmatched."</p>
+                    <p>- Jane Smith</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    // Start the carousel
-    $('#specialOffersCarousel').carousel({
-        interval: 10000 // Set the initial interval for the carousel (in milliseconds)
-    });
-</script>
-
-{% endblock %}
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Nourisha. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

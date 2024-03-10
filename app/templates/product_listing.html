@@ -11,76 +11,48 @@
       </form>
     </div>
 
-    <!-- Category Carousel -->
-    <!-- Category Carousel -->
-
-<!-- Category Carousel -->
-        <div id="categoryCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
-          <div class="carousel-inner">
+   <!-- Category Carousel -->
+<div id="categoryCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+    <div class="carousel-inner">
         <div class="carousel-item active">
-          <div class="table-responsive">
-            <table class="table">
-              <tr>
-                <td><button type="button" class="btn btn-outline-primary">Vegetables</button></td>
-                <td><button type="button" class="btn btn-outline-primary">Fruits</button></td>
-                <td><button type="button" class="btn btn-outline-primary">Dairy</button></td>
-                <!-- Add more buttons as needed -->
-                <td><button type="button" class="btn btn-outline-primary">Vegetables</button></td>
-                <td><button type="button" class="btn btn-outline-primary">Fruits</button></td>
-                <td><button type="button" class="btn btn-outline-primary">Dairy</button></td>
-                 <td><button type="button" class="btn btn-outline-primary">Vegetables</button></td>
-                <td><button type="button" class="btn btn-outline-primary">Fruits</button></td>
-                <td><button type="button" class="btn btn-outline-primary">Dairy</button></td>
-                <!-- Add more buttons as needed -->
-                <td><button type="button" class="btn btn-outline-primary">Vegetables</button></td>
-                <td><button type="button" class="btn btn-outline-primary">Fruits</button></td>
-                <td><button type="button" class="btn btn-outline-primary">Dairy</button></td>
-                 <td><button type="button" class="btn btn-outline-primary">Vegetables</button></td>
-                <td><button type="button" class="btn btn-outline-primary">Fruits</button></td>
-                <td><button type="button" class="btn btn-outline-primary">Dairy</button></td>
-                <!-- Add more buttons as needed -->
-                <td><button type="button" class="btn btn-outline-primary">Vegetables</button></td>
-                <td><button type="button" class="btn btn-outline-primary">Fruits</button></td>
-                <td><button type="button" class="btn btn-outline-primary">Dairy</button></td>
-              </tr>
-            </table>
-          </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <tr>
+                        {% for category in categories %}
+                        <td>
+                            <a href="{{ url_for('main.product_listing_by_category', category_id=category.id) }}">
+                                <button type="button" class="btn btn-outline-primary">{{ category.name }}</button>
+                            </a>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                </table>
+            </div>
         </div>
         <!-- Add more carousel items with additional category buttons as needed -->
-      </div>
-    
     </div>
+</div>
 
-
-
-    <!-- Product Listing Section -->
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+  <!-- Product Listing Section -->
+            <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
               {% for product in products %}
                 <div class="col">
-                  <div class="card product-card border-0 shadow">
+                  <div class="card product-card border-0">
 
-            <div class="magnifier position-relative overflow-hidden">
-              <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
+            <div class="magnifier position-relative overflow-hidden" style="height:p80x";>
+              {% if product.images %}
+                <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
+              {% else %}
+                <img src="{{ url_for('static', filename='path_to_default_image.jpg') }}" class="card-img-top product-image" alt="{{ product.name }}">
+              {% endif %}
+
             </div>
 
             <div class="card-body text-center">
-              <h6 class="card-title text-primary">{{ product.brand }}</h6>
+              <h6 class="card-title text-primary mb-1">{{ product.brand }}</h6>
               <div class="card-text text-muted fs-6">{{ product.description | truncate(120) }}</div>
-              <div class="card-text fs-6"><strong>Price:</strong> Ksh {{ product.unit_price }} </div>
-             <!-- <div class="card-text {% if product.quantity_in_stock < 5 %}text-danger{% endif %} fs-6"><strong>Stock:</strong> <span class="badge bg-secondary">{{ product.quantity_in_stock }}</span></div>-->
-
-              <!--<div class="mb-1">
-                {% if product.rating is defined %}
-                  {% for _ in range(product.rating) %}
-                    <span class="text-warning">&#9733;</span>
-                  {% endfor %}
-                  {% for _ in range(5 - product.rating) %}
-                    <span class="text-muted">&#9733;</span>
-                  {% endfor %}
-                {% else %}
-                  <span class="text-muted">No rating available</span>
-                {% endif %}
-              </div>-->
+              <div class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} </strong></div>
+            
 
              <!-- Add to Cart Modal -->
 <button type="button" class="btn btn-outline-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
@@ -101,9 +73,9 @@
                                 <!-- Quantity and Custom Description Form -->
                                   <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}">
 
-                                  {{ form.csrf_token }}
+                                {{form.hidden_tag()}}
                                   <!-- Quantity Input -->
-                                  <div class="mb-3">
+                                  <div class="mb-2">
                                     <label for="quantity" class="form-label">Quantity:</label>
                                     <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
                                   </div>
@@ -133,6 +105,10 @@
               </div>
   </div>
 
+
+
+
+
 <div class="container mt-3">
     <!-- Your existing content -->
 
@@ -157,9 +133,9 @@
 
     .cart-icon {
       position: relative;
-      width: 80px; /* Adjust the size as needed */
+      width: 62px; /* Adjust the size as needed */
       height: auto;
-      margin-right: 10px; /* Adjust the spacing between icon and badge */
+      margin-right: 5px; /* Adjust the spacing between icon and badge */
     }
 
     .badge {
@@ -182,10 +158,10 @@
     transform: translateX(0);
   }
   25%, 75% {
-    transform: translateX(-5px);
+    transform: translateX(-10px);
   }
   50% {
-    transform: translateX(5px);
+    transform: translateX(10px);
   }
 }
 

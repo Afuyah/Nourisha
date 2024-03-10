@@ -410,44 +410,25 @@ def product_details(product_id):
     abort(404)
 
 
+# Route to render the product listing page with categories
 @bp.route('/product_listing')
 def product_listing():
-  # Fetch products from the database
-  products = Product.query.all()
-
-  # Calculate the total number of products
-  total_products = len(products)
-
-  # Calculate the number of active products (you need to define the criteria for "active")
-  active_products = sum(1 for product in products
-                        if product.quantity_in_stock > 0)
-
-  # Calculate the number of products that are out of stock
-  out_of_stock = sum(1 for product in products
-                     if product.quantity_in_stock == 0)
-
-  quantity = 10
-  form = AddProductForm()
-  # Render a template with the product data
-  return render_template('product_listing.html',
-                         products=products,
-                         total_products=total_products,
-                         active_products=active_products,
-                         out_of_stock=out_of_stock,
-                         quantity=quantity,
-                         form=form)
-# Route to render the page with category carousel
-@bp.route('/category_listing')
-def category_listing():
     categories = ProductCategory.query.all()
-    return render_template('category_listing.html', categories=categories)
+    form = AddProductForm()
+    return render_template('product_listing.html', categories=categories, form=form)
 
 # Route to render the product listing based on the selected category
 @bp.route('/product_listing/<int:category_id>')
 def product_listing_by_category(category_id):
     category = ProductCategory.query.get_or_404(category_id)
     products = Product.query.filter_by(category=category).all()
-    return render_template('product_listing.html', category=category, products=products)
+    categories = ProductCategory.query.all()  # Fetch all categories to display in the carousel
+    form = AddProductForm()
+    return render_template('product_listing.html', category=category, products=products, categories=categories, form=form)
+
+
+
+
 
 
 @bp.route('/view_order/<int:order_id>')
