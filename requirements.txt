@@ -9,3 +9,4 @@ flask_babel
 requests
 flask_cors
 mysqlclient
+psycopg2
