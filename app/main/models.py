@@ -21,7 +21,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), index=True, unique=True)
     phone = db.Column(db.String(15), index=True, unique=True)
     name = db.Column(db.String(120))
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(100))
     registration_date = db.Column(db.DateTime, default=datetime.utcnow)
     last_login_date = db.Column(db.DateTime)
     last_login_ip = db.Column(db.String(15))
