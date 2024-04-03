@@ -10,7 +10,7 @@ migrate = Migrate()
 
 class Config: 
     SECRET_KEY = secrets.token_hex(16)
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql://Naurishagstores_seasonsix:H3n%20r1X%4010443@zeh.h.filess.io:3307/Naurishagstores_seasonsix'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql://Naurishagstores_properlyso:89504ec588e8a3e0d500843c975e0a5f5a1289a8@f3x.h.filess.io:3307/Naurishagstores_properlyso'
 #'sqlite:///naurish_a_g_stores.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
