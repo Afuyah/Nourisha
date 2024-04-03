@@ -8,3 +8,4 @@ flask_mail
 flask_babel
 requests
 flask_cors
+mysqlclient
