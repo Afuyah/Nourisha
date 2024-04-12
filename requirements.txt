@@ -10,3 +10,4 @@ requests
 flask_cors
 mysqlclient
 psycopg2
+
