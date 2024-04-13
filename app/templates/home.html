@@ -1,86 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     <head>
     <!-- Meta Tags -->
-    <meta charset="UTF-8" />
-     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="csrf-token" content="{{ csrf_token() }}" />
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Title -->
-    <title>Naurisha Groceries</title>
-<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
-    
- <link 
-      rel="stylesheet" type ="text/css"
-      href="{{ url_for('static', filename='styles/main.css') }}"
-    />
-
-
-
-    
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-      crossorigin="anonymous"
-    />
-
-   
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    />
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Arizonia&family=Love+Ya+Like+A+Sister&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
-      rel="stylesheet"
-    />
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-
-
+    <title>Nourisha Groceries</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!-- External CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Arizonia&family=Love+Ya+Like+A+Sister&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <!-- Scripts -->
     <script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <script
-      type="text/javascript"
-      charset="utf8"
-      src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"
-    ></script>
-
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-      crossorigin="anonymous"
-    ></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <!-- Internal CSS -->
     <link rel="stylesheet" href="styles.css">
-  
     <style>
-        /* Add your custom CSS styles here */
+        /* Custom CSS styles */
+        /* General styles */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -90,13 +40,11 @@
             line-height: 1.6;
             text-align: center;
         }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
-
         header {
             background-color: #f9f9f9;
             color: #1c2331;
@@ -104,41 +52,34 @@
             text-align: center;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-
-        header h1 {
+        header h2 {
             font-size: 3em;
             margin: 0;
             color: #333;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
-
         nav ul {
             list-style: none;
             padding: 0;
             margin: 20px 0;
         }
-
         nav ul li {
             display: inline;
             margin-right: 20px;
         }
-
         nav ul li a {
             text-decoration: none;
             color: #1c2331;
             font-weight: bold;
             transition: color 0.3s ease;
         }
-
         nav ul li a:hover {
             color: #f9b115;
         }
-
         section {
             padding: 40px 0;
         }
-
-        h2 {
+        h3 {
             text-align: center;
             margin-bottom: 40px;
             font-size: 2.5em;
@@ -147,14 +88,12 @@
             letter-spacing: 2px;
             font-weight: bold;
         }
-
         .product-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 40px;
         }
-
         .product {
             width: 300px;
             padding: 20px;
@@ -163,29 +102,24 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
         }
-
         .product:hover {
             transform: translateY(-10px);
         }
-
         .product img {
             max-width: 100%;
             border-radius: 8px;
             transition: transform 0.3s ease;
         }
-
-        .product h3 {
+        .product h5 {
             margin: 20px 0;
             font-size: 1.8em;
             color: #1c2331;
         }
-
         .product p {
             font-size: 1.6em;
             color: #f9b115;
             margin-bottom: 20px;
         }
-
         .product button {
             background-color: #f9b115;
             color: #fff;
@@ -196,33 +130,27 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-
         .product button:hover {
             background-color: #ffce55;
         }
-
         .about-us p {
             text-align: justify;
             font-size: 1.6em;
             line-height: 1.6;
             color: #555;
         }
-
         .contact-info ul {
             list-style: none;
             padding: 0;
         }
-
         .contact-info ul li {
             margin-bottom: 10px;
             font-size: 1.6em;
             color: #555;
         }
-
         .testimonials {
             text-align: center;
         }
-
         .testimonial {
             background-color: #fff;
             padding: 20px;
@@ -230,14 +158,12 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
-
         .testimonial p {
             margin: 0;
             font-style: italic;
             font-size: 1.6em;
             color: #555;
         }
-
         footer {
             background-color: #1c2331;
             color: #fff;
@@ -245,30 +171,24 @@
             padding: 20px 0;
             margin-top: 40px;
         }
-
         footer p {
             margin: 0;
             font-size: 1.6em;
         }
-
         @media screen and (max-width: 768px) {
-            header h1 {
+            header h2 {
                 font-size: 2.5em;
             }
-
             .product {
                 width: calc(50% - 20px);
             }
-
-            .product h3 {
+            .product h5 {
                 font-size: 1.8em;
             }
-
             .product p, .about-us p, .contact-info ul li, .testimonial p, footer p {
                 font-size: 1.4em;
             }
         }
-
         @media screen and (max-width: 480px) {
             .product {
                 width: 100%;
@@ -280,51 +200,41 @@
     <header>
         <div class="container">
             <h2>Nourisha</h2>
-           <nav class="navbar navbar-expand shadow navbar sticky-top bg-white ">
-  
-
-  <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link" href="{{url_for('main.index')}}"<i class="fas fa-shopping-cart">Home</i>  </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link" href="{{url_for('main.product_listing')}}">Shop</a>
-      </li>
-
-
-      {% if not user_authenticated %}
-<li class="nav-item">
-        <a class="nav-link" href="#">About</a>
-      </li>
-
-        <li class="nav-item">
-          <a class="btn btn-outline md-3" href="{{url_for('main.login')}}">Sign In</a>
-        </li>
-      {% else %}
-
-        <li class="nav-item">
-          <a class="nav-link" href="{{url_for('main.user_dashboard')}}"> Account</a>
-        </li>
-      <li class="nav-item">
-          <a class="nav-link" href="{{url_for('main.logout')}}">Logout</a>
-        </li>
-      {% endif %}
-    </ul>
-  </div>
-</div>
-</nav>
+            <nav class="navbar navbar-expand shadow navbar sticky-top bg-white">
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{url_for('main.index')}}"></i> Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{url_for('main.product_listing')}}">Shop</a>
+                        </li>
+                        {% if not user_authenticated %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">About</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-outline md-3" href="{{url_for('main.login')}}">Login</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{url_for('main.user_dashboard')}}">Account</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{url_for('main.logout')}}">Logout</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
         </div>
     </header>
-<div class="alert alert-primary alert-dismissible fade show" role="alert">
-    <strong>
-</strong>You can Call/Whatsapp <strong><a href="tel:+254700622298"> +254 (700) 622-298</a>
- </strong>to place your order. 
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
+    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+        <strong>You can Call/Whatsapp <a href="tel:+254700622298"> +254 (700) 622-298</a> to place your order.</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
     <section id="featured-products">
         <div class="container">
             <h3>Discover Our Featured Products</h3>
@@ -351,7 +261,6 @@
             </div>
         </div>
     </section>
-
     <section id="about-us">
         <div class="container">
             <h2>Who We Are</h2>
@@ -360,7 +269,6 @@
             </div>
         </div>
     </section>
-
     <section id="contact-us">
         <div class="container">
             <h2>Contact Us</h2>
@@ -369,13 +277,11 @@
                     <li>Email: info@nourisha.com</li>
                     <li>Phone: 070-062-2298</li>
                     <li>Address: 123 Nourisha Str </li>
-                    <li><a href="https://wa.me/+254700622298"> <i class="fab fa-whatsapp"></i> Whatsapp </a>
-</li>
+                    <li><a href="https://wa.me/+254700622298"> <i class="fab fa-whatsapp"></i> Whatsapp </a></li>
                 </ul>
             </div>
         </div>
     </section>
-
     <section id="testimonials">
         <div class="container">
             <h2>What Our Customers Say</h2>
@@ -391,7 +297,6 @@
             </div>
         </div>
     </section>
-
     <footer>
         <div class="container">
             <p>&copy; 2024 Nourisha. All rights reserved.</p>

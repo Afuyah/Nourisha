@@ -1,23 +1,82 @@
 {% extends 'layout.html' %}
 
+{% block styles %}
+  <style>
+    /* Themed Colors */
+    .primary-color {
+      color: #4CAF50; /* Green */
+    }
+
+    .secondary-color {
+      color: #FFC107; /* Yellow */
+    }
+
+    .tertiary-color {
+      color: #2196F3; /* Blue */
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* Page Loader */
+    .loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.5);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loader {
+      border: 5px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 5px solid #3498db;
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-3">
-  <div class="row justify-content-center">
-    <div class="col-lg-10">
-      <div class="card">
-        <div class="card-body">
-          <h2 class="card-title text-center mb-4">Checkout</h2>
+  <div class="loader-container" id="loader-container">
+    <div class="loader"></div>
+  </div>
 
-          {% if cart_items %}
-          <form method="post" action="{{ url_for('cart.checkout') }}" class="mb-4">
-            {{ form.csrf_token }}
+  <div class="container mt-5 mb-5">
+    <div class="row">
+      <div class="col-md-12 mb-4">
+        <a href="{{ url_for('cart.view_cart') }}" class="btn btn-secondary mb-3">Back to Cart</a>
+      </div>
+    </div>
 
-            <!-- Display the user's grocery cart -->
-            <div class="card mb-4">
-              <div class="card-body">
-                <h3 class="card-title">Your Grocery Cart</h3>
-                <table class="table table-bordered">
-                  <thead class="table-success">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title mb-4 primary-color">Checkout</h3>
+
+            {% if cart_items %}
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
                     <tr>
                       <th>Product</th>
                       <th>Quantity</th>
@@ -26,99 +85,101 @@
                   </thead>
                   <tbody>
                     {% for item in cart_items %}
-                    <tr>
-                      <td>{{ item.product.brand }}</td>
-                      <td>{{ item.quantity }}</td>
-                      <td>Ksh. {{ item.product.unit_price * item.quantity }}</td>
-                    </tr>
+                      <tr>
+                        <td>{{ item.product.brand }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>Ksh. {{ item.product.unit_price * item.quantity }}</td>
+                      </tr>
                     {% endfor %}
                   </tbody>
                 </table>
               </div>
-            </div>
 
-            <!-- Display the total amount of the order -->
-            <div class="card mb-4">
-              <div class="card-body">
-                <h3 class="card-title">Total Amount: Ksh. {{ total_price }}</h3>
+              <div class="mb-4">
+                <h4 class="secondary-color">Total Amount: Ksh. {{ total_price + 200 }}</h4>
+                <p class="text-muted">Includes standard shipping fee of Ksh 200.</p>
               </div>
-            </div>
 
-            <!-- Display the delivery details form if there is no existing address -->
-            {% if not existing_address %}
-            <div id="new-address-section">
-              <div class="card mb-4">
-                <div class="card-body">
-                  <h3 class="card-title">Delivery Details</h3>
-                   <div class="mb-3">
+              <div class="mb-4">
+                <h4 class="tertiary-color">Shipping Information</h4>
+                
+                <div class="mb-3">
+                  <label for="full_name" class="form-label">Full Name</label>
+                  <input type="text" id="full_name" name="full_name" class="form-control" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="phone_number" class="form-label">Phone Number</label>
+                    <input type="tel" id="phone_number" name="phone_number" class="form-control" placeholder="Enter your phone number" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="alt_phone_number" class="form-label">Alternative Phone</label>
+                    <input type="tel" id="alt_phone_number" name="alt_phone_number" class="form-control" placeholder="Enter alternative phone number">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-md-4">
                     <label for="location" class="form-label">Select Location</label>
                     <select id="location" name="location" class="form-control" required>
                       <option value="" disabled selected>Select Location</option>
                       {% for location in locations %}
-                      <option value="{{ location.id }}">{{ location.name }}</option>
+                        <option value="{{ location.id }}">{{ location.name }}</option>
                       {% endfor %}
                     </select>
                   </div>
 
-                  <div class="mb-3">
+                  <div class="col-md-4">
                     <label for="arealine" class="form-label">Select Arealine</label>
                     <select id="arealine" name="arealine" class="form-control" required disabled>
                       <option value="" disabled selected>Select Arealine</option>
-                      <!-- Arealine options will be populated using JavaScript when a location is selected -->
                     </select>
                   </div>
 
-                  <div class="mb-3">
+                  <div class="col-md-4">
                     <label for="nearest_place" class="form-label">Select Nearest Place</label>
                     <select id="nearest_place" name="nearest_place" class="form-control" required disabled>
                       <option value="" disabled selected>Select Nearest Place</option>
-                      <!-- Nearest Place options will be populated using JavaScript when an arealine is selected -->
                     </select>
                   </div>
+                </div>
 
-                  <div class="mb-3">
-                    <label for="address_line" class="form-label">Delivery Address</label>
-                    {{ form.address_line(class="form-control", required=true) }}
-                  </div>
+                <div class="mb-3">
+                  <label for="address" class="form-label">Delivery Address</label>
+                  <textarea id="address" name="address" class="form-control" rows="3" placeholder="Enter your delivery address" required></textarea>
                 </div>
               </div>
-            </div>
-            {% endif %}
 
-<div class="card mb-4">
-              <div class="card-body">
-                <h3 class="card-title">Additional Information</h3>
+              <div class="mb-4">
+                <h4 class="secondary-color">Additional Information</h4>
                 <div class="mb-3">
                   <label for="additional_info" class="form-label">Special Instructions</label>
                   {{ form.additional_info(class="form-control") }}
                 </div>
               </div>
-            </div>
 
-            <div class="card mb-4">
-              <div class="card-body">
-                <h3 class="card-title">Payment Method</h3>
+              <div class="mb-4">
+                <h4 class="tertiary-color">Payment Method</h4>
                 <div class="mb-3">
                   {{ form.payment_method.label }} {{ form.payment_method(class="form-control", required=true) }}
                 </div>
               </div>
-            </div>
-            
 
-            <button type="submit" class="btn btn-primary btn-lg btn-block">Place Order</button>
-          </form>
-          {% else %}
-          <!-- Display a message if the user's grocery cart is empty -->
-          <div class="alert alert-info text-center" role="alert">
-            Your grocery cart is empty. <a href="{{url_for('main.product_listing')}}">EXPLORE OUR STORE</a> and add items before checking out.
+              {{ form.submit(class="btn btn-success") }}
+              
+            {% else %}
+              <div class="alert alert-info text-center" role="alert">
+                Your grocery cart is empty.
+                <a href="{{url_for('main.product_listing')}}">EXPLORE OUR STORE</a>
+                and add items before checking out.
+              </div>
+            {% endif %}
           </div>
-          {% endif %}
         </div>
       </div>
     </div>
   </div>
-</div>
-
 
 <script>
   $(document).ready(function () {
@@ -126,83 +187,87 @@
     $('#use_saved_address').change(function () {
       $('#new-address-section').toggle(!this.checked);
     });
-
-    // Toggle existing address section
-    $('#change-address-btn').click(function () {
-      $('#new-address-section').toggle();
-    });
   });
 
+  $(document).ready(function () {
+    // Fetch locations on page load
+    $.ajax({
+      url: "/admin/get_locations",
+      type: "GET",
+      beforeSend: function () {
+        // Show loading spinner
+        $("#loader-container").show();
+        $("#location").prop("disabled", true).html("<option> Fetching ...</option>");
+        $("#arealine, #nearest_place").prop("disabled", true).html("<option>Select Arealine</option>");
+      },
+      success: function (response) {
+        // Update locations dropdown
+        var locationsDropdown = $("#location");
+        locationsDropdown.prop("disabled", false).empty();
+        locationsDropdown.append('<option value="" disabled selected>Select Location</option>');
+        $.each(response.locations, function (index, location) {
+          locationsDropdown.append('<option value="' + location.id + '">' + location.name + "</option>");
+        });
+      },
+      complete: function () {
+        // Hide loading spinner
+        $("#loader-container").hide();
+      }
+    });
 
-$(document).ready(function () {
-  // Fetch locations on page load
-  $.ajax({
-    url: "/admin/get_locations",
-    type: "GET",
-    beforeSend: function () {
-      // Show loading spinner
-      $("#location").prop("disabled", true).html("<option>Loading...</option>");
-      $("#arealine, #nearest_place").prop("disabled", true).html("<option>Select Arealine</option>");
-    },
-    success: function (response) {
-      // Update locations dropdown
-      var locationsDropdown = $("#location");
-      locationsDropdown.prop("disabled", false).empty();
-      locationsDropdown.append('<option value="" disabled selected>Select Location</option>');
-      $.each(response.locations, function (index, location) {
-        locationsDropdown.append('<option value="' + location.id + '">' + location.name + "</option>");
+    // Handle location change
+    $("#location").change(function () {
+      var selectedLocation = $(this).val();
+
+      // Fetch arealines based on the selected location
+      $.ajax({
+        url: `/admin/get_arealines/${selectedLocation}`,
+        type: "GET",
+        beforeSend: function () {
+          // Show loading spinner
+          $("#loader-container").show();
+          $("#arealine").prop("disabled", true).html("<option>Fetching data...</option>");
+          $("#nearest_place").prop("disabled", true).html("<option>Select Arealine</option>");
+        },
+        success: function (response) {
+          // Update arealine dropdown
+          var arealineDropdown = $("#arealine");
+          arealineDropdown.prop("disabled", false).empty();
+          arealineDropdown.append('<option value="" disabled selected>Select Arealine</option>');
+          $.each(response.arealines, function (index, arealine) {
+            arealineDropdown.append('<option value="' + arealine.id + '">' + arealine.name + "</option>");
+          });
+        },
+        complete: function () {
+          // Hide loading spinner
+          $("#loader-container").hide();
+        }
       });
-    },
-  });
 
-  // Handle location change
-  $("#location").change(function () {
-    var selectedLocation = $(this).val();
-
-    // Fetch arealines based on the selected location
-    $.ajax({
-      url: `/admin/get_arealines/${selectedLocation}`,
-      type: "GET",
-      beforeSend: function () {
-        // Show loading spinner
-        $("#arealine").prop("disabled", true).html("<option>Loading...</option>");
-        $("#nearest_place").prop("disabled", true).html("<option>Select Nearest Place</option>");
-      },
-      success: function (response) {
-        // Update arealines dropdown
-        var arealinesDropdown = $("#arealine");
-        arealinesDropdown.prop("disabled", false).empty();
-        arealinesDropdown.append('<option value="" disabled selected>Select Arealine</option>');
-        $.each(response.arealines, function (index, arealine) {
-          arealinesDropdown.append('<option value="' + arealine.id + '">' + arealine.name + "</option>");
-        });
-      },
+      // Fetch nearest places based on the selected arealine
+      $.ajax({
+        url: `/admin/get_nearest_places/${selectedLocation}`, // Update with the correct route
+        type: "GET",
+        beforeSend: function () {
+          // Show loading spinner
+          $("#loader-container").show();
+          $("#nearest_place").prop("disabled", true).html("<option>Fetching Data...</option>");
+        },
+        success: function (response) {
+          // Update nearest place dropdown
+          var nearestPlaceDropdown = $("#nearest_place");
+          nearestPlaceDropdown.prop("disabled", false).empty();
+          nearestPlaceDropdown.append('<option value="" disabled selected>Select Nearest Place</option>');
+          $.each(response.nearest_places, function (index, place) {
+            nearestPlaceDropdown.append('<option value="' + place.id + '">' + place.name + "</option>");
+          });
+        },
+        complete: function () {
+          // Hide loading spinner
+          $("#loader-container").hide();
+        }
+      });
     });
   });
-
-  // Handle arealine change
-  $("#arealine").change(function () {
-    var selectedArealine = $(this).val();
-
-    // Fetch nearest places based on the selected arealine
-    $.ajax({
-      url: `/admin/get_nearest_places/${selectedArealine}`,
-      type: "GET",
-      beforeSend: function () {
-        // Show loading spinner
-        $("#nearest_place").prop("disabled", true).html("<option>Loading...</option>");
-      },
-      success: function (response) {
-        // Update nearest places dropdown
-        var nearestPlacesDropdown = $("#nearest_place");
-        nearestPlacesDropdown.prop("disabled", false).empty();
-        nearestPlacesDropdown.append('<option value="" disabled selected>Select Nearest Place</option>');
-        $.each(response.nearest_places, function (index, nearestPlace) {
-          nearestPlacesDropdown.append('<option value="' + nearestPlace.id + '">' + nearestPlace.name + "</option>");
-        });
-      },
-    });
-  });
-});
 </script>
 {% endblock %}
