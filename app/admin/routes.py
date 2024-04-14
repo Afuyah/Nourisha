@@ -366,23 +366,21 @@ def view_order_details(order_id):
 @admin_bp.route('/confirm_order/<int:order_id>', methods=['POST'])
 @login_required
 def confirm_order(order_id):
-    def route():
-        if not current_user.is_authenticated or (current_user.role and current_user.role.name != 'admin'):
-            abort(403)
+    if not current_user.is_authenticated or (current_user.role and current_user.role.name != 'admin'):
+        abort(403)
 
-        order = Order.query.get_or_404(order_id)
-        order.status = 'confirmed'
-        db.session.commit()
-        send_email(
-            subject='Order Confirmation',
-            recipient=order.user.email,
-            body=f"Dear {order.user.username},\n\nYour order with ID {order.id} has been confirmed. Thank you for shopping with us!\n\nSincerely,\nThe Nourisha Team"
-        )
-        flash('Order confirmed successfully!', 'success')
-        return redirect(url_for('admin.view_orders'))
+    order = Order.query.get_or_404(order_id)
+    order.status = 'confirmed'
+    db.session.commit()
 
-    return handle_db_error_and_redirect(route)
+    # Send confirmation email
+    msg = Message('Order Confirmation', recipients=[order.user.email])
+    msg.body = f"Dear {order.user.username},\n\n We're thrilled to inform you that your order #{order.id} has been successfully confirmed! 🎉. \n\n If you have any questions or need assistance with your order, feel free to reach out to our customer support team at support@nourishagroceries.com or by replying to this email.!\n\nThank you once again for choosing Nourisha Groceries. We truly appreciate your support!\nBest regards,\n\nThe Nourisha Team"
+    mail.send(msg)
 
+    flash('Order confirmed successfully!', 'success')
+    return redirect(url_for('admin.view_orders'))
+  
 @admin_bp.route('/cancel_order/<int:order_id>', methods=['POST'])
 @login_required
 def cancel_order(order_id):
@@ -399,9 +397,9 @@ def cancel_order(order_id):
 
         db.session.commit()
 
-        send_email(
+        sendmail(
             subject='Order Cancellation',
-            recipient=order.user.email,
+            recipients=[order.user.email],
             body=f"Dear {order.user.username},\n\nYour order with ID {order.id} has been canceled. If you have any questions, please contact our support team.\n\nSincerely,\nThe Nourisha Team"
         )
 
@@ -409,6 +407,7 @@ def cancel_order(order_id):
         return redirect(url_for('admin.view_orders'))
 
     return handle_db_error_and_redirect(route)
+
 
 @admin_bp.route('/view_orders', methods=['GET'])
 def view_orders():
@@ -451,3 +450,7 @@ def fetch_daily_sales_data():
         # Return an empty dictionary or None, depending on your preference
         return {'labels': [], 'data': []}
 
+def sendmail(subject, recipients, body):
+    msg = Message(subject, recipients=recipients)
+    msg.body = body
+    mail.send(msg)
