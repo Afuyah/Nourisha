@@ -101,7 +101,9 @@ def admin_dashboard():
         
         # Fetch sales data
         sales_data = fetch_sales_data()
-        labels = [datetime.strptime(data.order_date, '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
+        #labels = [datetime.strptime(data.order_date, '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
+        labels = [datetime.strptime(str(data.order_date), '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
+
         data = [float(data.total_sales) for data in sales_data]
         
         # Fetch user registrations for user growth chart
