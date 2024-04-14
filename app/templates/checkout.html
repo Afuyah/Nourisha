@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
-{% block styles %}
-  <style>
+{% block content %}
+<style>
     /* Themed Colors */
     .primary-color {
       color: #4CAF50; /* Green */
@@ -53,22 +53,21 @@
       100% { transform: rotate(360deg); }
     }
   </style>
-{% endblock %}
 
-{% block content %}
+
   <div class="loader-container" id="loader-container">
     <div class="loader"></div>
   </div>
 
-  <div class="container mt-5 mb-5">
+  <div class="container mt-2 mb-1">
     <div class="row">
-      <div class="col-md-12 mb-4">
+      <div class="col-md-12 mb-1">
         <a href="{{ url_for('cart.view_cart') }}" class="btn btn-secondary mb-3">Back to Cart</a>
       </div>
     </div>
 
     <div class="row justify-content-center">
-      <div class="col-md-8">
+      <div class="col-md-10">
         <div class="card">
           <div class="card-body">
             <h3 class="card-title mb-4 primary-color">Checkout</h3>
@@ -96,78 +95,75 @@
               </div>
 
               <div class="mb-4">
-                <h4 class="secondary-color">Total Amount: Ksh. {{ total_price + 200 }}</h4>
+                <h4 class="primary-color">Total Amount: Ksh. {{ total_price + 200 }}</h4>
                 <p class="text-muted">Includes standard shipping fee of Ksh 200.</p>
               </div>
 
-              <div class="mb-4">
-                <h4 class="tertiary-color">Shipping Information</h4>
-                
-                <div class="mb-3">
-                  <label for="full_name" class="form-label">Full Name</label>
-                  <input type="text" id="full_name" name="full_name" class="form-control" placeholder="Enter your full name" required>
-                </div>
 
-                <div class="row mb-3">
-                  <div class="col-md-6">
+              <div class="mb-4">
+    <form method="POST" action="{{ url_for('cart.checkout') }}">
+        {{ form.hidden_tag() }}
+        <div class="mb-4">
+            <h4 class="tertiary-color">Shipping Information</h4>
+            <div class="mb-3">
+                <label for="full_name" class="form-label">Full Name</label>
+                <input type="text" id="full_name" name="full_name" class="form-control" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
                     <label for="phone_number" class="form-label">Phone Number</label>
                     <input type="tel" id="phone_number" name="phone_number" class="form-control" placeholder="Enter your phone number" required>
-                  </div>
-                  <div class="col-md-6">
+                </div>
+                <div class="col-md-6">
                     <label for="alt_phone_number" class="form-label">Alternative Phone</label>
                     <input type="tel" id="alt_phone_number" name="alt_phone_number" class="form-control" placeholder="Enter alternative phone number">
-                  </div>
                 </div>
+            </div>
 
-                <div class="row mb-3">
-                  <div class="col-md-4">
+            <div class="row mb-3">
+                <div class="col-md-4">
                     <label for="location" class="form-label">Select Location</label>
-                    <select id="location" name="location" class="form-control" required>
-                      <option value="" disabled selected>Select Location</option>
-                      {% for location in locations %}
-                        <option value="{{ location.id }}">{{ location.name }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
+                    {{ form.location(class="form-control", id="location", required=true) }}
+                </div>
 
-                  <div class="col-md-4">
+                <div class="col-md-4">
                     <label for="arealine" class="form-label">Select Arealine</label>
-                    <select id="arealine" name="arealine" class="form-control" required disabled>
-                      <option value="" disabled selected>Select Arealine</option>
-                    </select>
-                  </div>
+                    {{ form.arealine(class="form-control", id="arealine", required=true) }}
+                </div>
 
-                  <div class="col-md-4">
+                <div class="col-md-4">
                     <label for="nearest_place" class="form-label">Select Nearest Place</label>
-                    <select id="nearest_place" name="nearest_place" class="form-control" required disabled>
-                      <option value="" disabled selected>Select Nearest Place</option>
-                    </select>
-                  </div>
+                    {{ form.nearest_place(class="form-control", id="nearest_place", required=true) }}
                 </div>
+            </div>
 
-                <div class="mb-3">
-                  <label for="address" class="form-label">Delivery Address</label>
-                  <textarea id="address" name="address" class="form-control" rows="3" placeholder="Enter your delivery address" required></textarea>
-                </div>
-              </div>
+            <div class="mb-3">
+                <label for="address" class="form-label">Delivery Address</label>
+                {{ form.address_line(class="form-control", id="address", rows="3", placeholder="Enter your delivery address", required=true) }}
+            </div>
+        </div>
 
-              <div class="mb-4">
-                <h4 class="secondary-color">Additional Information</h4>
-                <div class="mb-3">
-                  <label for="additional_info" class="form-label">Special Instructions</label>
-                  {{ form.additional_info(class="form-control") }}
-                </div>
-              </div>
+        <div class="mb-4">
+            <h4 class="secondary-color">Additional Information</h4>
+            <div class="mb-3">
+                <label for="additional_info" class="form-label">Special Instructions</label>
+                {{ form.additional_info(class="form-control", id="additional_info") }}
+            </div>
+        </div>
 
-              <div class="mb-4">
-                <h4 class="tertiary-color">Payment Method</h4>
-                <div class="mb-3">
-                  {{ form.payment_method.label }} {{ form.payment_method(class="form-control", required=true) }}
-                </div>
-              </div>
+        <div class="mb-4">
+            <h4 class="tertiary-color">Payment Method</h4>
+            <div class="mb-3">
+                {{ form.payment_method.label }} {{ form.payment_method(class="form-control", required=true) }}
+            </div>
+        </div>
 
-              {{ form.submit(class="btn btn-success") }}
-              
+        <button type="submit" class="btn btn-success">Confirm Order</button>
+    </form>
+</div>
+
+            
             {% else %}
               <div class="alert alert-info text-center" role="alert">
                 Your grocery cart is empty.

@@ -265,27 +265,63 @@ def _in_stock(product_id):
 @cart_bp.route('/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():
+    # Initialize the checkout form
     form = CheckoutForm()
 
-    # Fetch user's cart items with product details
+    # Retrieve cart items for the current user
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
 
-    # Calculate total price
-    total_price = sum(cart_item.product.unit_price * cart_item.quantity for cart_item in cart_items)
+    # Calculate the total price of all cart items
+    total_price = sum(cart_item.product.unit_price * cart_item.quantity
+                      for cart_item in cart_items)
 
-    # Set choices for the location field
-    
+    # Fetch delivery addresses for the user
+    user_delivery_info = UserDeliveryInfo.query.filter_by(user_id=current_user.id).all()
 
+    # Populate choices for locations, arealines, and nearest places in the form
+    locations = Location.query.all()
+    form.set_location_choices(locations)
+
+    arealines = Arealine.query.all()
+    form.set_arealine_choices(arealines)
+
+    nearest_places = NearestPlace.query.all()
+    form.set_nearest_place_choices(nearest_places)
+
+    # Handle form submission
     if form.validate_on_submit():
-        
+        # User is entering a new address, save it
+        delivery_info = UserDeliveryInfo(
+            user_id=current_user.id,
+            location_id=form.location.data,
+            arealine_id=form.arealine.data,
+            nearest_place_id=form.nearest_place.data,
+            address_line=form.address_line.data,
+            full_name=form.full_name.data,
+            phone_number=form.phone_number.data,
+            alt_phone_number=form.alt_phone_number.data,
+            additional_info=form.additional_info.data
+        )
+
+        # Add new delivery information to the database
+        db.session.add(delivery_info)
+        db.session.commit()
+
         # Create a new order
         order = Order(
             user_id=current_user.id,
-            status='pending',  # Set status to 'pending' by default
+            status='pending',
             total_price=total_price,
+            location_id=form.location.data,
+            arealine_id=form.arealine.data,
+            nearest_place_id=form.nearest_place.data,
             address_line=form.address_line.data,
+            #full_name=form.full_name.data,
+            #phone_number=form.phone_number.data,
+            #alt_phone_number=form.alt_phone_number.data,
             additional_info=form.additional_info.data,
-            payment_method=form.payment_method.data
+            payment_method=form.payment_method.data,
+            custom_description=form.custom_description.data
         )
 
         # Add order items to the order
@@ -294,31 +330,30 @@ def checkout():
                 order=order,
                 product_id=cart_item.product.id,
                 quantity=cart_item.quantity,
-                unit_price=cart_item.product.unit_price
+                unit_price=cart_item.product.unit_price,
+                custom_description=cart_item.custom_description
             )
             db.session.add(order_item)
 
-        # Commit changes to the database
+        # Commit the order and order items to the database
         db.session.add(order)
         db.session.commit()
 
-        # Update the day_of_week for the order
+        # Update the order day of the week (if applicable)
         order.update_order_day_of_week()
 
         # Clear the user's cart
         Cart.query.filter_by(user_id=current_user.id).delete()
         db.session.commit()
 
-        transaction_id = order.id
-
-        # Send email alerts
+        # Send order confirmation email to the user
         send_order_confirmation_email(current_user.email, 'afuyaah@gmail.com', order)
 
-        # You can now redirect the user to the payment page, passing the transaction ID
-        # Ensure to implement the redirection logic to the payment page
-        flash('Order placed successfully! Redirecting to payment page...', 'success')
+        # Flash success message and redirect to payment page
+        flash('Order placed successfully! Redirecting to the payment page...', 'success')
         return redirect(url_for('payments.mpesa_payment', order_id=order.id))
 
+    # Render the checkout template with form and cart items
     return render_template('checkout.html', form=form, cart_items=cart_items, total_price=total_price)
 
 
