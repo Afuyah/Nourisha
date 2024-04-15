@@ -166,7 +166,7 @@ class Order(db.Model):
       db.String(50),
       default='pending')  # Status can be 'pending', 'confirmed', etc.
   order_date = db.Column(db.DateTime, default=datetime.utcnow)
-  day_of_week = db.Column(db.Text)
+  day_of_week = db.Column(db.Integer)
   expected_delivery_date = db.Column(db.Date)
   total_price = db.Column(db.Float, nullable=False)
   custom_description = db.Column(db.Text)
