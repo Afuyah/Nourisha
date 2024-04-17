@@ -1,33 +1,40 @@
+{% extends 'layout.html' %} {% block content %}
+<div class="container mt-3">
+  <!-- Search Bar Section -->
+  <div class="mb-4">
+    <form
+      class="d-flex"
+      id="searchForm"
+      method="post"
+      action="{{ url_for('main.search') }}"
+    >
+      <input
+        class="form-control me-2"
+        type="text"
+        id="searchInput"
+        placeholder="Search products..."
+        onkeyup="searchProducts()"
+      />
+      {{form.csrf_token}}
+      <button class="btn btn-outline-success" type="submit">Search</button>
+    </form>
+  </div>
 
-{% extends 'layout.html' %}
-
-{% block content %}
-  <div class="container mt-3">
-    <!-- Search Bar Section -->
-    <div class="mb-4">
-      <form class="d-flex" id="searchForm" method="post" action="{{ url_for('main.search') }}">
-        <input class="form-control me-2"  type="text" id="searchInput" placeholder="Search products..." onkeyup="searchProducts()">
-        {{form.csrf_token}}
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-      
-    </div>
-
-   <!-- Category Carousel -->
+<!-- Category Carousel -->
 <div id="categoryCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
     <div class="carousel-inner">
         <div class="carousel-item active">
             <div class="table-responsive">
-                <table class="table">
-                    <tr>
-                        {% for category in categories %}
-                        <td>
-                            <a href="{{ url_for('main.product_listing_by_category', category_id=category.id) }}">
-                                <button type="button" class="btn btn-outline-primary">{{ category.name }}</button>
-                            </a>
-                        </td>
-                        {% endfor %}
-                    </tr>
+                <table class="table table-hover">
+                    <tbody>
+                        <tr>
+                            {% for category in categories %}
+                            <td>
+                                <a href="{{ url_for('main.product_listing_by_category', category_id=category.id) }}" class="btn btn-outline-primary">{{ category.name }}</a>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -35,209 +42,268 @@
     </div>
 </div>
 
+
+
   <!-- Product Listing Section -->
-            <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
-              {% for product in products %}
-                <div class="col">
-                  <div class="card product-card border-0">
-
-            <div class="magnifier position-relative overflow-hidden" style="height:p80x";>
-              {% if product.images %}
+<div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
+    {% for product in products %}
+    <div class="col">
+        <div class="card product-card border-0">
+            <div class="magnifier position-relative overflow-hidden">
+                {% if product.images %}
                 <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
-              {% else %}
+                {% else %}
                 <img src="{{ url_for('static', filename='path_to_default_image.jpg') }}" class="card-img-top product-image" alt="{{ product.name }}">
-              {% endif %}
-
+                {% endif %}
             </div>
 
             <div class="card-body text-center">
-              <h6 class="card-title text-primary mb-1">{{ product.brand }}</h6>
-              <div class="card-text text-muted fs-6">{{ product.description | truncate(120) }}</div>
-              <div class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} </strong></div>
-            
+                <h6 class="card-title text-primary mb-2">{{ product.brand }}</h6>
+                <p class="card-text text-muted fs-6 mb-3">{{ product.description | truncate(120) }}</p>
+                <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} </strong></p>
 
-             <!-- Add to Cart Modal -->
-<button type="button" class="btn btn-outline-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
-                Add to Cart
-              </button>
+                <!-- Add to Cart Button -->
+                <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
+                    Add to Cart
+                </button>
 
-
-
-
-              
-<!-- Product Modal -->
-              <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
-                          <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                              <div class="modal-header bg-primary text-light">
+                <!-- Product Modal -->
+                <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-light">
                                 <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                              </div>
-                              <div class="modal-body">
+                            </div>
+                            <div class="modal-body">
                                 <p class="lead">Do you want to add this item to your cart?</p>
 
                                 <!-- Quantity and Custom Description Form -->
-                                  <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}">
-
-                                {{form.hidden_tag()}}
-                                  <!-- Quantity Input -->
-                                  <div class="mb-2">
-                                    <label for="quantity" class="form-label">Quantity:</label>
-                                    <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
-                                  </div>
-
-                                  <!-- Custom Description Textarea -->
-                                  <div class="mb-3">
-                                    <label for="custom_description" class="form-label">Custom Description:</label>
-                                    <textarea class="form-control" id="custom_description" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
-                                    <input type="hidden" id="hidden_custom_description" name="hidden_custom_description" value="">
-                                  </div>
-
-                                  <button class="btn btn-success" type="submit">Add to Cart</button>
+                                <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}">
+                                    {{form.hidden_tag()}}
+                                    <div class="mb-3">
+                                        <label for="quantity" class="form-label">Quantity:</label>
+                                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="custom_description" class="form-label">Custom Description:</label>
+                                        <textarea class="form-control" id="custom_description" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
+                                        <input type="hidden" id="hidden_custom_description" name="hidden_custom_description" value="">
+                                    </div>
+                                    <button class="btn btn-success" type="submit">Add to Cart</button>
                                 </form>
-                              </div>
                             </div>
-                          </div>
                         </div>
-
-
-
-                        <!-- Loading Spinner -->
-                        <!-- ... (same as previous) ... -->
-                      </div>
                     </div>
-                  </div>
-                {% endfor %}
-              </div>
-  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 
+</div>
 
-
-<div class="container mt-3">
-    <!-- Your existing content -->
-
-    <!-- Floating Cart Icon -->
-    <a href="{{ url_for('cart.view_cart') }}" class="floating-cart-icon">
-      <img src="static/cart2.gif" alt="Cart Icon" class="cart-icon">
-      <span id= "cart-badge" class="badge">0</span>
+<!-- Floating Cart Icon -->
+<div class="floating-cart-icon">
+    <a href="{{ url_for('cart.view_cart') }}" class="d-flex align-items-center justify-content-center text-decoration-none">
+        <img src="static/cart2.gif" alt="Cart Icon" class="cart-icon">
+        <span id="cart-badge" class="badge bg-danger">0</span>
     </a>
 </div>
 
 
+<style>
+/* Floating Cart Icon */
+.floating-cart-icon {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000; /* Ensure it's above other content */
+}
 
-  <style>
-    /* Add your custom styles here */
+.floating-cart-icon a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #007bff; /* Use your preferred color */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
 
-    .floating-cart-icon {
-      position: fixed;
-      bottom: 80px;
-      right: 20px;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-    }
+.floating-cart-icon a:hover {
+    background-color: green; /* Darker shade of the primary color */
+}
 
-    .cart-icon {
-      position: relative;
-      width: 62px; /* Adjust the size as needed */
-      height: auto;
-      margin-right: 5px; /* Adjust the spacing between icon and badge */
-    }
+.cart-icon {
+    width: 30px;
+    height: auto;
+    margin-right: 5px;
+}
 
-    .badge {
-      position: absolute;
-      top: -3px;
-      right: -3px;
-      background-color: #ff5722; /* Choose a color for the badge */
-      color: #fff;
-      border-radius: 50%;
-      padding: 5px 8px; /* Adjust the padding as needed */
-      font-size: 14px; /* Adjust the font size as needed */
-    }
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 20px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 50%;
+}
 
-    /* Add a transition effect to make the badge shake every 15 seconds */
-    .badge.shake {
-      animation: shake 0.5s ease-in-out infinite;
-    }
+/* Badge colors */
+.badge.bg-danger {
+    background-color: #dc3545; /* Bootstrap's danger color */
+    color: #fff;
+}
+
+/* Badge animation */
+.badge.shake {
+    animation: shake 0.5s ease-in-out infinite;
+}
+
 @keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  25%, 75% {
-    transform: translateX(-10px);
-  }
-  50% {
-    transform: translateX(10px);
-  }
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25%, 75% {
+        transform: translateX(-10px);
+    }
+    50% {
+        transform: translateX(10px);
+    }
 }
 
 .shake {
-  animation: shake 0.5s ease-in-out;
+    animation: shake 0.5s ease-in-out;
 }
 
-  .carousel-inner .carousel-item img {
-    max-height: 200px;
-    object-fit: cover;
-  }
-
-  .product-card {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    transition: box-shadow 0.3s ease;
-  }
-
-  .product-card:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .btn-outline-primary {
-    color: #007bff;
-    background-color: #fff;
-    border-color: #007bff;
-  }
-
-  .btn-outline-primary:hover {
-    color: #fff;
-    background-color: #007bff;
-    border-color: #007bff;
-  }
-
-  .btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
-  }
-
-  .btn-success:hover {
-    background-color: #218838;
-    border-color: #218838;
-  }
-
-  .badge {
-    font-size: 0.8rem;
-    background-color: #6c757d;
-  }
 </style>
 
-
-  <script>
-   
-
-  
+<script>
 
 
-  // Function to handle Add to Cart button click
-  function addToCartHandler(productId) {
+
+
+
+    // Function to handle Add to Cart button click
+    function addToCartHandler(productId) {
+      // Check if the user is authenticated
+      if (!isUserAuthenticated()) {
+        // If not authenticated, show a message and redirect to the login page
+        alert('Please sign in to start shopping with us.');
+        window.location.href = '/login';  // Adjust the URL to your login page
+        return;
+      }
+
+      // If authenticated, open the Add to Cart modal
+      openAddToCartModal(productId);
+    }
+
+    // Function to check if the user is authenticated
+    function isUserAuthenticated() {
+      // Adjust this logic based on your authentication implementation
+      return {{ current_user.is_authenticated }};
+    }
+
+    // Function to open the Add to Cart modal
+    function openAddToCartModal(productId) {
+      // Use Bootstrap's modal function to open the modal
+      $('#addToCartModal' + productId).modal('show');
+
+      // Fetch and update the quantity when the modal is opened
+      updateQuantityOnModalOpen(productId);
+    }
+
+    // Function to fetch and update the quantity when the modal is opened
+    async function updateQuantityOnModalOpen(productId) {
+      try {
+        const response = await fetch(`/cart/api/get_quantity/${productId}`);
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          // Update the quantity input in the modal
+          const quantityInput = document.getElementById('quantity' + productId);
+          quantityInput.value = data.data.quantity;
+        } else {
+          console.error('Error fetching product quantity:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching product quantity:', error);
+      }
+    }
+
+     // Update cart count using AJAX
+  $(document).ready(function () {
+    function updateCartCount() {
+      console.log('Updating cart count...'); // Debug statement
+      $.ajax({
+        url: 'cart/get_cart_count',
+        method: 'GET',
+        success: function (response) {
+          console.log('AJAX Response:', response); // Debug statement
+          if (response.status === 'success') {
+            console.log('Updating cart count:', response.cart_count); // Debug statement
+            // Update the badge with the actual cart count
+            const cartIcon = $('.floating-cart-icon');
+            const currentCount = parseInt(cartIcon.find('.badge').text(), 10);
+            const newCount = response.cart_count;
+
+            cartIcon.find('.badge').text(newCount);
+
+            // Toggle visibility of the entire cart icon based on the cart count
+            if (newCount > 0) {
+              cartIcon.removeClass('inactive');
+            } else {
+              cartIcon.addClass('inactive');
+            }
+
+            // Add shake class to the entire cart icon if the count has increased
+            if (newCount > currentCount) {
+              cartIcon.addClass('shake');
+
+              // Remove the shake class after a short delay (e.g., 1 second)
+              setTimeout(function () {
+                cartIcon.removeClass('shake');
+              }, 1000);
+            }
+          } else {
+            console.error('Error fetching cart count:', response.message);
+          }
+        },
+        error: function (error) {
+          console.error('AJAX Error:', error);
+        },
+      });
+    }
+
+    updateCartCount();
+
+    // Set an interval to periodically update the cart count (every 15 seconds as you mentioned)
+    setInterval(function () {
+      console.log('Periodic cart count update...'); // Debug statement
+      updateCartCount();
+    }, 15000);
+  });
+
+  // Trigger the Add to Cart modal when clicking on the floating cart icon
+  $('.floating-cart-icon').click(function () {
     // Check if the user is authenticated
     if (!isUserAuthenticated()) {
       // If not authenticated, show a message and redirect to the login page
       alert('Please sign in to start shopping with us.');
-      window.location.href = '/login';  // Adjust the URL to your login page
+      window.location.href = '/login'; // Adjust the URL to your login page
       return;
     }
 
-    // If authenticated, open the Add to Cart modal
-    openAddToCartModal(productId);
-  }
+    // If authenticated, open the Add to Cart modal for the first product
+    const firstProductId = $('.product-card:first').data('product-id');
+    openAddToCartModal(firstProductId);
+  });
 
   // Function to check if the user is authenticated
   function isUserAuthenticated() {
@@ -249,7 +315,7 @@
   function openAddToCartModal(productId) {
     // Use Bootstrap's modal function to open the modal
     $('#addToCartModal' + productId).modal('show');
-    
+
     // Fetch and update the quantity when the modal is opened
     updateQuantityOnModalOpen(productId);
   }
@@ -272,131 +338,29 @@
     }
   }
 
-   // Update cart count using AJAX
-$(document).ready(function () {
-  function updateCartCount() {
-    console.log('Updating cart count...'); // Debug statement
-    $.ajax({
-      url: 'cart/get_cart_count',
-      method: 'GET',
-      success: function (response) {
-        console.log('AJAX Response:', response); // Debug statement
-        if (response.status === 'success') {
-          console.log('Updating cart count:', response.cart_count); // Debug statement
-          // Update the badge with the actual cart count
-          const cartIcon = $('.floating-cart-icon');
-          const currentCount = parseInt(cartIcon.find('.badge').text(), 10);
-          const newCount = response.cart_count;
-
-          cartIcon.find('.badge').text(newCount);
-
-          // Toggle visibility of the entire cart icon based on the cart count
-          if (newCount > 0) {
-            cartIcon.removeClass('inactive');
-          } else {
-            cartIcon.addClass('inactive');
+      function searchProducts() {
+          var query = document.getElementById("searchInput").value.trim();
+          if (query.length === 0) {
+              // Clear search results and display all products
+              document.getElementById("searchResults").innerHTML = "";
+              document.getElementById("productListing").style.display = "block";
+              return;
           }
-
-          // Add shake class to the entire cart icon if the count has increased
-          if (newCount > currentCount) {
-            cartIcon.addClass('shake');
-
-            // Remove the shake class after a short delay (e.g., 1 second)
-            setTimeout(function () {
-              cartIcon.removeClass('shake');
-            }, 1000);
-          }
-        } else {
-          console.error('Error fetching cart count:', response.message);
-        }
-      },
-      error: function (error) {
-        console.error('AJAX Error:', error);
-      },
-    });
-  }
-
-  updateCartCount();
-
-  // Set an interval to periodically update the cart count (every 15 seconds as you mentioned)
-  setInterval(function () {
-    console.log('Periodic cart count update...'); // Debug statement
-    updateCartCount();
-  }, 15000);
-});
-
-// Trigger the Add to Cart modal when clicking on the floating cart icon
-$('.floating-cart-icon').click(function () {
-  // Check if the user is authenticated
-  if (!isUserAuthenticated()) {
-    // If not authenticated, show a message and redirect to the login page
-    alert('Please sign in to start shopping with us.');
-    window.location.href = '/login'; // Adjust the URL to your login page
-    return;
-  }
-
-  // If authenticated, open the Add to Cart modal for the first product
-  const firstProductId = $('.product-card:first').data('product-id');
-  openAddToCartModal(firstProductId);
-});
-
-// Function to check if the user is authenticated
-function isUserAuthenticated() {
-  // Adjust this logic based on your authentication implementation
-  return {{ current_user.is_authenticated }};
-}
-
-// Function to open the Add to Cart modal
-function openAddToCartModal(productId) {
-  // Use Bootstrap's modal function to open the modal
-  $('#addToCartModal' + productId).modal('show');
-
-  // Fetch and update the quantity when the modal is opened
-  updateQuantityOnModalOpen(productId);
-}
-
-// Function to fetch and update the quantity when the modal is opened
-async function updateQuantityOnModalOpen(productId) {
-  try {
-    const response = await fetch(`/cart/api/get_quantity/${productId}`);
-    const data = await response.json();
-
-    if (data.status === 'success') {
-      // Update the quantity input in the modal
-      const quantityInput = document.getElementById('quantity' + productId);
-      quantityInput.value = data.data.quantity;
-    } else {
-      console.error('Error fetching product quantity:', data.message);
-    }
-  } catch (error) {
-    console.error('Error fetching product quantity:', error);
-  }
-}
-
-    function searchProducts() {
-        var query = document.getElementById("searchInput").value.trim();
-        if (query.length === 0) {
-            // Clear search results and display all products
-            document.getElementById("searchResults").innerHTML = "";
-            document.getElementById("productListing").style.display = "block";
-            return;
-        }
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', '/search?query=' + encodeURIComponent(query), true);
-        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    // Update search results
-                    document.getElementById("searchResults").innerHTML = xhr.responseText;
-                    // Hide product listing when search results are displayed
-                    document.getElementById("productListing").style.display = "none";
-                }
-            }
-        };
-        xhr.send();
-    }
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', '/search?query=' + encodeURIComponent(query), true);
+          xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+          xhr.onreadystatechange = function() {
+              if (xhr.readyState === XMLHttpRequest.DONE) {
+                  if (xhr.status === 200) {
+                      // Update search results
+                      document.getElementById("searchResults").innerHTML = xhr.responseText;
+                      // Hide product listing when search results are displayed
+                      document.getElementById("productListing").style.display = "none";
+                  }
+              }
+          };
+          xhr.send();
+      }
 </script>
- 
 
 {% endblock%}
