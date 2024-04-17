@@ -166,7 +166,7 @@ class Order(db.Model):
       db.String(50),
       default='pending')  # Status can be 'pending', 'confirmed', etc.
   order_date = db.Column(db.DateTime, default=datetime.utcnow)
-  day_of_week = db.Column(db.Integer)
+  
   expected_delivery_date = db.Column(db.Date)
   total_price = db.Column(db.Float, nullable=False)
   custom_description = db.Column(db.Text)
@@ -204,22 +204,7 @@ class Order(db.Model):
   # Relationship with OrderItem
   order_items = db.relationship('OrderItem', back_populates='order')
 
-  def update_order_day_of_week(self):
-    # Update the day_of_week based on the order_date
-    if self.order_date:
-      self.day_of_week = self.order_date.strftime('%A')
-
-  def __init__(self, *args, **kwargs):
-    super(Order, self).__init__(*args, **kwargs)
-    self.update_order_day_of_week()
-
-
-# Event listener to update day_of_week before inserting an order
-@event.listens_for(Order, 'before_insert')
-def before_insert_order(mapper, connection, target):
-  target.update_order_day_of_week()
-
-
+  
 # OrderItem model for handling order items
 class OrderItem(db.Model):
   id = db.Column(db.Integer, primary_key=True)

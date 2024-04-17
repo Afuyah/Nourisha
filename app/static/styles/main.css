@@ -1,81 +1,4 @@
-
-
-
-/* main.css */
-
-header {
-    background-color: #333;
-    color: #fff;
-    padding: 10px;
-    text-align: center;
 }
-
-main {
-    padding: 20px;
-}
-
-footer {
-    background-color: #333;
-    color: #fff;
-    padding: 10px;
-    text-align: center;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-}
-
-/* Form styling */
-form {
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.form-control {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.btn {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.btn:hover {
-    background-color: #45a049;
-}
-
-
-.flash-messages {
-      margin-top: 20px;
-  }
-
-.flash-message {
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #d6d8db;
-            background-color: #f8d7da;
-            color: #721c24;
-            border-radius: 0.25rem;
-        }
-
-
-
 h1,h2,h3,h4,h5,h6{
     font-family: "inter", sans-serif;
     font-weight: 600;
@@ -85,302 +8,321 @@ body {
     margin: 0;
 }
 
-.container {
-    padding-top: 20px;
+
+
+/* Reset CSS */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #fff;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header */
+.header {
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px 0;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.navbar {
+    background-color: #fff !important; /* Change background color to white */
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.navbar a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    margin-left: 20px;
+    transition: color 0.3s ease;
+}
+
+.navbar a:hover {
+    color: #ff7f50;
+}
+
+/* Hero Section */
+.hero {
+    background: url('hero-bg.jpg') no-repeat center center/cover;
+    padding: 100px 0;
+    text-align: center;
+    color: #fff;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #000000;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    color:grey;
+}
+
+.hero .btn-primary {
+    background-color: #ff7f50;
+    border: none;
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-size: 1.2rem;
+    color: #fff;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.hero .btn-primary:hover {
+    background-color: #ff6348;
+}
+
+/* Featured Products Section */
+.featured-products {
+    padding: 100px 0;
+}
+
+.featured-products h2 {
+    font-size: 2.5rem;
+    font-weight: 500;
+    margin-bottom: 50px;
+    text-align: center;
+}
+
 .product-card {
     background-color: #fff;
-    border: 1px solid #dee2e6;
     border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: transform 0.3s ease;
 }
-
 
 .product-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
 }
 
-.product-image-container {
-    position: relative;
-}
-
-.product-image {
+.product-card img {
     width: 100%;
-    height: auto;
-    border-radius: 10px 10px 0 0;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid #eee;
 }
 
-.magnifier {
-    position: absolute;
-    width: 80px;
-    height: 80px;
-    border: 1px solid #28a745;
-    border-radius: 50%;
-    display: none;
-}
-
-.magnifier-glass {
-    width: 40px;
-    height: 40px;
-    background-color: rgba(40, 167, 69, 0.5);
-    border-radius: 50%;
-    position: absolute;
-}
-
-.product-card:hover .magnifier {
-    display: block;
-}
-
-.card-body {
+.product-card .card-body {
     padding: 20px;
 }
 
-.btn-primary {
-    background-color: #28a745;
-    border-color: #28a745;
+.product-card .card-title {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 10px;
 }
 
-.btn-primary:hover {
-    background-color: #218838;
-    border-color: #218838;
+.product-card .card-text {
+    font-size: 1.25rem;
+    color: #555;
 }
 
-.spinner-border {
-    width: 1.5rem;
-    height: 1.5rem;
+.product-card .btn-primary {
+    background-color: #ff7f50;
+    border: none;
+    border-radius: 25px;
+    padding: 8px 20px;
+    font-size: 1rem;
+    color: #fff;
+    transition: background-color 0.3s ease;
 }
 
-/* Contact Form Styles */
-.contact-form {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
+.product-card .btn-primary:hover {
+    background-color: #ff6348;
 }
 
-.contact-form label {
-    font-weight: bold;
-}
-
-.contact-form textarea {
-    resize: vertical;
-}
-
-.contact-form button {
-    margin-top: 10px;
-}
-
-/* Contact Information Styles */
-.contact-info {
-    padding: 20px;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-}
-
-.contact-info h4 {
-    margin-bottom: 15px;
-}
-
-    .testimonial-card {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-        transition: transform 0.3s ease-in-out;
-    }
-
-    .testimonial-card:hover {
-        transform: scale(1.03);
-    }
-
-    .testimonial-card blockquote {
-        border-left: 3px solid #007bff;
-        padding-left: 25px;
-        margin: 0;
-    }
-
-    .testimonial-card p {
-        font-size: 16px;
-        color: #555;
-        line-height: 1.6;
-        margin-bottom: 15px;
-    }
-
-    .testimonial-card footer {
-        color: #888;
-        font-size: 14px;
-    }
-
-    /* Add additional styling as needed */
-
-
-
-
-
-
-
-
-
-  
-
-.container {
-    padding-top: 20px;
-}
-
-.product-card {
+/* Testimonials Section */
+.testimonials {
     background-color: #f9f9f9;
-    border: 1px solid #dee2e6;
+    padding: 100px 0;
+}
+
+.testimonials h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+.testimonial-card {
+    background-color: #fff;
     border-radius: 10px;
-    overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.product-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.product-image-container {
-    position: relative;
-}
-
-.product-image {
-    width: 100%;
-    height: auto;
-    border-radius: 10px 10px 0 0;
-}
-
-.magnifier {
-    position: absolute;
-    width: 80px;
-    height: 80px;
-    border: 1px solid #28a745;
-    border-radius: 50%;
-    display: none;
-}
-
-.magnifier-glass {
-    width: 40px;
-    height: 40px;
-    background-color: rgba(40, 167, 69, 0.5);
-    border-radius: 50%;
-    position: absolute;
-}
-
-.product-card:hover .magnifier {
-    display: block;
-}
-
-.card-body {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
 }
 
-.btn-primary {
-    background-color: #28a745;
-    border-color: #28a745;
+.testimonial-card:hover {
+    transform: translateY(-5px);
 }
 
-.btn-primary:hover {
-    background-color: #218838;
-    border-color: #218838;
+.testimonial-card p {
+    font-size: 1.25rem;
+    color: #555;
+    margin-bottom: 20px;
 }
 
-.spinner-border {
-    width: 1.5rem;
-    height: 1.5rem;
+.testimonial-card span {
+    font-weight: 500;
+    color: #333;
 }
 
- /* Style for About Us Section */
-    .about-us-section {
-        padding: 40px 0;
-    }
+/* Special Offers Section */
+.special-offers {
+    background-color: #ff7f50;
+    color: #fff;
+    padding: 100px 0;
+    text-align: center;
+}
 
-    .about-us-section h2 {
-        font-size: 36px;
-        color: #333;
-        margin-bottom: 30px;
-    }
+.special-offers h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 50px;
+}
 
-    .about-us-section p {
-        font-size: 16px;
-        color: #555;
-        line-height: 1.6;
-        margin-bottom: 20px;
-    }
+.offer-card {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease;
+}
 
-    .about-us-section img {
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        margin-top: 20px;
-    }/* Add more styles based on your design preferences */
+.offer-card:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
 
+.offer-card h3 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
 
-    .testimonial-card {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-        transition: transform 0.3s ease-in-out;
-    }
+.offer-card p {
+    font-size: 1.25rem;
+    color: #fff;
+}
 
-    .testimonial-card:hover {
-        transform: scale(1.03);
-    }
+/* About Us Section */
+.about-us {
+    padding: 100px 0;
+}
 
-    .testimonial-card blockquote {
-        border-left: 3px solid #007bff;
-        padding-left: 25px;
-        margin: 0;
-    }
+.about-us h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 50px;
+    text-align: center;
+}
 
-    .testimonial-card p {
-        font-size: 16px;
-        color: #555;
-        line-height: 1.6;
-        margin-bottom: 15px;
-    }
+.about-us .row {
+    align-items: center;
+}
 
-    .testimonial-card footer {
-        color: #888;
-        font-size: 14px;
-    }
+.about-us p {
+    font-size: 1.25rem;
+    color: #555;
+}
 
-    /* Custom styles for enhanced carousel */
-    .carousel-img {
-        max-height: 200px; /* Adjust the maximum height of the images */
-        object-fit: cover;
-        filter: brightness(70%); /* Apply a slight dark overlay to images */
-        transition: filter 0.5s ease;
-    }
+/* Contact Us Section */
+.contact-us {
+    background-color: #333;
+    color: #fff;
+    padding: 100px 0;
+}
 
-    .carousel-caption {
-        position: absolute;
-        top: 30%;
-        transform: translateY(-50%);
-        width: 100%;
-        text-align: center;
-        color: #fff;
-    }
+.contact-us h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 50px;
+    text-align: center;
+}
 
-    .carousel-caption h5 {
-        font-size: 2rem;
-        margin-bottom: 10px;
-    }
+.contact-us form {
+    margin-bottom: 20px;
+}
 
-    .carousel-caption p {
-        font-size: 1.2rem;
-    }
+.contact-us .form-control {
+    background-color: #555;
+    border: none;
+    border-radius: 25px;
+    padding: 12px 20px;
+    color: #fff;
+    margin-bottom: 20px;
+}
 
-    /* Hover effect to lighten the dark overlay on images */
-    .carousel-item:hover .carousel-img {
-        filter: brightness(100%);
-    }
+.contact-us .btn-primary {
+    background-color: #ff7f50;
+    border: none;
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-size: 1.2rem;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
 
-    /* Optional: Add a subtle box-shadow to the carousel for a polished look */
-    #specialOffersCarousel {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+.contact-us .btn-primary:hover {
+    background-color: #ff6348;
+}
 
+.contact-us ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.contact-us ul li {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+}
+
+.contact-us ul li i {
+    margin-right: 10px;
+}
+
+/* Footer */
+.footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+}
+  .flash-messages {
+      margin-top: 20px;
+  }
+
+.flash-message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #d6d8db;
+            background-color: #f8d7da;
+            color: #050505;
+            border-radius: 0.25rem;

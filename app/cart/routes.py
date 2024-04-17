@@ -339,8 +339,7 @@ def checkout():
         db.session.add(order)
         db.session.commit()
 
-        # Update the order day of the week (if applicable)
-        order.update_order_day_of_week()
+       
 
         # Clear the user's cart
         Cart.query.filter_by(user_id=current_user.id).delete()
