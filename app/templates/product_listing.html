@@ -82,7 +82,7 @@
                                 <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}">
                                     {{form.hidden_tag()}}
                                     <div class="mb-3">
-                                        <label for="quantity" class="form-label">Quantity:</label>
+                                        <label for="quantity" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
                                         <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
                                     </div>
                                     <div class="mb-3">

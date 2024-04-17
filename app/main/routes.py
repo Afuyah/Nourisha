@@ -18,7 +18,8 @@ from flask_mail import Message
 import logging
 from functools import wraps
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
-
+from sqlalchemy.orm.exc import NoResultFound
+import re
 
 def login_required(func):
 
@@ -65,39 +66,54 @@ def user_dashboard():
 
 @bp.route('/register', methods=['POST', 'GET'])
 def register():
-  form = RegistrationForm()
+    form = RegistrationForm()
 
-  if form.validate_on_submit():
-    try:
-      user = User(
-          username=form.username.data,
-          email=form.email.data,
-          phone=form.phone.data,
-          name=form.name.data,
-      )
-      user.set_password(form.password.data)
-      db.session.add(user)
-      db.session.commit()
+    if form.validate_on_submit():
+        try:
+            # Simplified password validation
+            if not is_strong_password(form.password.data):
+                flash('Password must be at least 4 characters long.', 'danger')
+                return redirect(url_for('main.register'))
 
-      # Now that the user is committed, generate the confirmation token
-      token = generate_confirmation_token(user.id)
+            # Validate email format
+            if not is_valid_email(form.email.data):
+                flash('Invalid email format. Please provide a valid email address.', 'danger')
+                return redirect(url_for('main.register'))
 
-      # Send confirmation email
-      send_confirmation_email(user, token)
+            # Validate phone number format
+            if not is_valid_phone_number(form.phone.data):
+                flash('Invalid phone number format. Please provide a valid phone number starting with "07".', 'danger')
+                return redirect(url_for('main.register'))
 
-      flash(
-          'Registration successful! Please check your email for confirmation.',
-          'success')
-      return redirect(url_for('main.login'))
+            user = User(
+                username=form.username.data,
+                email=form.email.data,
+                phone=form.phone.data,
+                name=form.name.data,
+            )
+            user.set_password(form.password.data)
+            db.session.add(user)
+            db.session.commit()
 
-    except IntegrityError:
-      db.session.rollback()
-      flash('Email address is already registered. Please use Sign In.',
-            'danger')
-      return redirect(url_for('main.register'))
+            # Now that the user is committed, generate the confirmation token
+            token = generate_confirmation_token(user.id)
 
-  return render_template('register.html', form=form)
+            # Send confirmation email
+            send_confirmation_email(user, token)
 
+            flash('Registration successful! Please check your email for confirmation.', 'success')
+            return redirect(url_for('main.login'))
+
+        except IntegrityError:
+            db.session.rollback()
+            flash('Email address is already registered. Please use Sign In.', 'danger')
+            return redirect(url_for('main.login'))
+
+    return render_template('register.html', form=form)
+
+def is_valid_phone_number(phone):
+    # Regular expression to match phone number format: 07xxxxxxxx
+    return bool(re.match(r'^07\d{8}$', phone))
 
 def generate_confirmation_token(user_id):
   return serializer.dumps(user_id)
@@ -110,8 +126,13 @@ def send_confirmation_email(user, token):
   send_email(user.email, subject, body)
 
 
-from sqlalchemy.orm.exc import NoResultFound
-
+def is_strong_password(password):
+    # Allow any password with 4 or more characters
+    return len(password) >= 4
+def is_valid_email(email):
+    # Implement email validation logic here
+    
+    return bool(re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email))
 
 @bp.route('/confirm_email/<token>', methods=['GET'])
 def confirm_email(token):

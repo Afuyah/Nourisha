@@ -4,7 +4,7 @@
 <style>
     /* Themed Colors */
     .primary-color {
-      color: #4CAF50; /* Green */
+      color: purple; /* purple */
     }
 
     .secondary-color {
@@ -61,7 +61,7 @@
 
   <div class="container mt-2 mb-1">
     <div class="row">
-      <div class="col-md-12 mb-1">
+      <div class="col-md-12 mb-1" style="text-align:center;">
         <a href="{{ url_for('cart.view_cart') }}" class="btn btn-secondary mb-3">Back to Cart</a>
       </div>
     </div>
@@ -94,9 +94,10 @@
                 </table>
               </div>
 
-              <div class="mb-4">
-                <h4 class="primary-color">Total Amount: Ksh. {{ total_price + 200 }}</h4>
-                <p class="text-muted">Includes standard shipping fee of Ksh 200.</p>
+              <div class="mb-2">
+                <p class="text-muted text-center">Standard shipping fee : Ksh 200.</p>
+                <h4 class="primary-color mb-4 text-center">Total Amount + shipping: Ksh. {{ total_price }}</h4>
+                
               </div>
 
 
@@ -158,8 +159,8 @@
                 {{ form.payment_method.label }} {{ form.payment_method(class="form-control", required=true) }}
             </div>
         </div>
-
-        <button type="submit" class="btn btn-success">Confirm Order</button>
+<div class="mb-4 row justify-content-center">
+        <button type="submit" class="btn btn-success btn-lg ">Place Order</button>
     </form>
 </div>
 

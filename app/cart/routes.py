@@ -273,7 +273,7 @@ def checkout():
 
     # Calculate the total price of all cart items
     total_price = sum(cart_item.product.unit_price * cart_item.quantity
-                      for cart_item in cart_items)
+                      for cart_item in cart_items)+200
 
     # Fetch delivery addresses for the user
     user_delivery_info = UserDeliveryInfo.query.filter_by(user_id=current_user.id).all()

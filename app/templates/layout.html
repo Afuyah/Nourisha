@@ -170,40 +170,56 @@
 </style>
 <body>
    
- <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top ">
-        <div class="container">
-            <a class="navbar-brand" href="{{url_for('main.index')}}">Nourisha Groceries</a>
-                <!--<img src="static/logo.svg" alt="Nourisha Groceries" style= "height: 50px; width: 50px;"">
-            </a>-->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+ <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+    <!-- Navbar content -->
+    <div class="container">
+        <!-- Brand -->
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">Nourisha Groceries</a>
+        
+        <!-- Navbar toggler -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{url_for('main.index')}}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{url_for('main.product_listing')}}">Shop</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{url_for('main.index')}}#testimonials">Testimonials</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{url_for('main.login')}}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{url_for('main.index')}}#about-us">About Us</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{url_for('main.index')}}#contact-us">Contact Us</a>
-                    </li>
-                </ul>
-            </div>
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Navbar links -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Common links for both authenticated and unauthenticated users -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.product_listing') }}">Shop</a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.index') }}#about-us">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.index') }}#contact-us">Contact</a>
+                </li>
+                
+                <!-- Links specific to authenticated users -->
+                {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('main.user_dashboard')}}">My Account</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a>
+                </li>
+                {% else %}
+                <!-- Links specific to unauthenticated users -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.login') }}">Login</a>
+                </li>
+                
+                {% endif %}
+            </ul>
         </div>
-    </nav>
-
+    </div>
+</nav>
 
 
     <!-- Flash Messages Section -->

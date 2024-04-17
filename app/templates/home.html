@@ -4,21 +4,38 @@
 {% block content %}
 <!-- Navigation -->
    
-    <!-- Hero Section -->
-    <section id="hero" class="hero">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h1 class="display-4 animate__animated animate__fadeInLeft">Your One-Stop Destination for Fresh Groceries</h1>
-                    <p class="lead animate__animated animate__fadeInLeft">Get the finest quality products delivered to your doorstep.</p>
-                    <a href="#featured-products" class="btn btn-primary btn-lg animate__animated animate__fadeInLeft">Shop Now</a>
-                </div>
-                <div class="col-lg-6">
-                    <img src="/static/uploads/PhotoRoom-20240123_114305_5_20240123092030.png" class="img-fluid animate__animated animate__fadeInRight" alt="Hero Image">
+<!-- Hero Section -->
+<section id="hero" class="hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="display-4 animate__animated animate__fadeInLeft">Your One- Stop Destination for Fresh Groceries</h2>
+                <p class="lead animate__animated animate__fadeInLeft">Get the finest quality products delivered to your doorstep.</p>
+                <div class="text-lg-start text-center"> <!-- Center align the button for lg screens and start (left align) for smaller screens -->
+                    <a href="{{url_for('main.product_listing')}}" class="btn btn-primary btn-lg animate__animated animate__fadeInLeft">Shop Now</a>
                 </div>
             </div>
+            <div class="col-lg-6">
+                <img src="/static/uploads/PhotoRoom-20240123_114305_5_20240123092030.png" class="img-fluid animate__animated animate__fadeInRight" alt="Hero Image">
+            </div>
         </div>
-    </section>
+    </div>
+</section>
+
+<style>
+    /* Styles for small devices */
+    @media (max-width: 576px) {
+        .hero h2.display-4 {
+            font-size: 1.8rem; /* Adjust the font size for h2 elements on small devices */
+        }
+        .hero p.lead {
+            font-size: 1rem; /* Adjust the font size for p elements with lead class on small devices */
+           color: grey;
+        }
+    }
+</style>
+
+
 
    <!-- Featured Products Section -->
 <section id="featured-products" class="featured-products py-5">
