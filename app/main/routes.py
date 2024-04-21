@@ -21,13 +21,6 @@ from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from sqlalchemy.orm.exc import NoResultFound
 import re
 
-
-
-
-
-
-
-
 def login_required(func):
 
   @wraps(func)
@@ -360,64 +353,59 @@ def products():
   return render_template('products.html', products=products)
 
 
-
-
-# Configure the path where images will be stored on the persistent disk
-UPLOAD_FOLDER = '/mnt/nourish/uploads'
-
-# Ensure the upload folder exists
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 @bp.route('/add_product_image', methods=['GET', 'POST'])
 @login_required
 def add_product_image():
-    form = ProductImageForm()
+  form = ProductImageForm()
 
-    # Populate the product choices in the form
-    form.product.choices = [(product.id, product.name)
-                            for product in Product.query.all()]
+  # Populate the product choices in the form
+  form.product.choices = [(product.id, product.name)
+                          for product in Product.query.all()]
 
-    if form.validate_on_submit():
-        # Handle image uploads and save links to the database
-        product_id = form.product.data
-        cover_image = form.cover_image.data
-        image1 = form.image1.data
-        image2 = form.image2.data
-        image3 = form.image3.data
+  if form.validate_on_submit():
+    # Handle image uploads and save links to the database
+    product_id = form.product.data
+    cover_image = form.cover_image.data
+    image1 = form.image1.data
+    image2 = form.image2.data
+    image3 = form.image3.data
 
-        # Save cover image
-        cover_filename = save_image(cover_image)
-        cover_image_entry = ProductImage(product_id=product_id,
-                                         cover_image=cover_filename)
-        db.session.add(cover_image_entry)
+    # Save cover image
+    cover_filename = save_image(cover_image)
+    cover_image_entry = ProductImage(product_id=product_id,
+                                     cover_image=cover_filename)
+    db.session.add(cover_image_entry)
 
-        # Save additional images
-        for image_data in [image1, image2, image3]:
-            if image_data:
-                filename = save_image(image_data)
-                image_entry = ProductImage(product_id=product_id, cover_image=filename)
-                db.session.add(image_entry)
+    # Save additional images
+    for image_data in [image1, image2, image3]:
+      if image_data:
+        filename = save_image(image_data)
+        image_entry = ProductImage(product_id=product_id, cover_image=filename)
+        db.session.add(image_entry)
 
-        db.session.commit()
-        flash('Images uploaded successfully', 'success')
-        return redirect(url_for('main.add_product_image'))
+    db.session.commit()
+    flash('Images uploaded successfully', 'success')
+    return redirect(url_for('main.add_product_image'))
 
-    return render_template('add_product_image.html', form=form)
+  return render_template('add_product_image.html', form=form)
+
 
 # Helper function to save uploaded image and return the filename
 def save_image(image_data):
-    # Generate a unique filename
-    filename = generate_unique_filename(image_data.filename)
-    # Save image to the persistent disk
-    image_data.save(os.path.join(UPLOAD_FOLDER, filename))
-    return filename
+  # Implement your image-saving logic here (e.g., using Flask-Uploads)
+  # This is a basic example assuming you have an 'uploads' folder
+  # and you want to save images with unique filenames
+  filename = generate_unique_filename(image_data.filename)
+  image_data.save(os.path.join('app', 'static', 'uploads', filename))
+  return filename
+
 
 # Helper function to generate a unique filename
 def generate_unique_filename(original_filename):
-    filename, extension = os.path.splitext(original_filename)
-    timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-    unique_filename = f"{secure_filename(filename)}_{timestamp}{extension}"
-    return unique_filename
+  filename, extension = os.path.splitext(original_filename)
+  timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+  unique_filename = f"{secure_filename(filename)}_{timestamp}{extension}"
+  return unique_filename
 
 
 @bp.route('/product_details/<int:product_id>')
