@@ -82,7 +82,7 @@ def register():
 
             # Validate phone number format
             if not is_valid_phone_number(form.phone.data):
-                flash('Invalid phone number format. Please provide a valid phone number starting with "07".', 'danger')
+                flash('Invalid phone number format. Please provide a valid phone number starting with "07" and exactly 10 digits.', 'danger')
                 return redirect(url_for('main.register'))
 
             user = User(
@@ -396,7 +396,7 @@ def save_image(image_data):
   # This is a basic example assuming you have an 'uploads' folder
   # and you want to save images with unique filenames
   filename = generate_unique_filename(image_data.filename)
-  image_data.save(os.path.join('/var', 'static', 'uploads', filename))
+  image_data.save(os.path.join('app', 'static', 'uploads', filename))
   return filename
 
 
