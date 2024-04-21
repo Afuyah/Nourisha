@@ -7,8 +7,8 @@ main {
 }
 
 footer {
-    background-color: #fff;
-    color: grey;
+    background-color: #a8a4a4;
+    color: #000;
     padding: 6px;
     text-align: center;
     position: bottom;
@@ -33,7 +33,7 @@ form {
 
 .form-control {
     width: 100%;
-    padding: 8px;
+    padding: 4px;
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -141,14 +141,11 @@ body {
 }
 
 .btn-primary {
-    background-color: #28a745;
+    background-color: #8fa895;
     border-color: #28a745;
 }
 
-.btn-primary:hover {
-    background-color: #218838;
-    border-color: #218838;
-}
+
 
 .spinner-border {
     width: 1.5rem;
