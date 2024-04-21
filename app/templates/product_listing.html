@@ -44,28 +44,30 @@
 
 
 
-  <!-- Product Listing Section -->
-<div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
-    {% for product in products %}
-    <div class="col">
-        <div class="card product-card border-0">
-            <div class="magnifier position-relative overflow-hidden">
-                {% if product.images %}
-                <img src="{{ url_for('/var', 'static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
-                {% else %}
-                <img src="{{ url_for('/var', 'static', filename='path_to_default_image.jpg') }}" class="card-img-top product-image" alt="{{ product.name }}">
-                {% endif %}
-            </div>
+              <!-- Product Listing Section -->
+              <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
+                  {% for product in products %}
+                  <div class="col">
+                      <div class="card product-card border-0">
+                          <div class="magnifier position-relative overflow-hidden">
+                              {% if product.images %}
+                              <!-- Use absolute path for images stored outside static directory -->
+                              <img src="/var/static/uploads/{{ product.images[0].cover_image }}" class="card-img-top product-image" alt="{{ product.name }}">
+                              {% else %}
+                              <!-- Provide path to default image if product has no images -->
+                              <img src="/path_to_default_image.jpg" class="card-img-top product-image" alt="{{ product.name }}">
+                              {% endif %}
+                          </div>
 
-            <div class="card-body text-center">
-                <h6 class="card-title text-primary mb-2">{{ product.brand }}</h6>
-                <p class="card-text text-muted fs-6 mb-3">{{ product.description | truncate(120) }}</p>
-                <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} </strong></p>
+                          <div class="card-body text-center">
+                              <h6 class="card-title text-primary mb-2">{{ product.brand }}</h6>
+                              <p class="card-text text-muted fs-6 mb-3">{{ product.description | truncate(120) }}</p>
+                              <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} </strong></p>
 
-                <!-- Add to Cart Button -->
-                <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
-                     Buy
-                </button>
+                              <!-- Add to Cart Button -->
+                              <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
+                                   Buy
+                              </button>
 
                 <!-- Product Modal -->
                 <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
