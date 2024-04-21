@@ -29,15 +29,20 @@
         {% for item in cart_items %}
         <tr class="fade-in">
           <td class="align-middle">
-            <img
-              src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image) }}"
-              class="img-thumbnail"
-              alt="{{ item.product.brand }}"
-              style="max-width: 80px"
-            />
-            <br />
-            <strong>{{ item.product.brand }}</strong>
-          </td>
+    {% if item.product.images %}
+        <img
+          src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image) }}"
+          class="img-thumbnail"
+          alt="{{ item.product.brand }}"
+          style="max-width: 80px"
+        />
+    {% else %}
+        <p>No image available</p>
+    {% endif %}
+    <br />
+    <strong>{{ item.product.brand }}</strong>
+</td>
+
 
           <td class="align-middle">Ksh {{ item.product.unit_price }}</td>
           <td class="align-middle">
