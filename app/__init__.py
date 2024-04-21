@@ -15,7 +15,7 @@ migrate = Migrate()
 CORS(resources={r"/*": {"origins": "*"}})
 
 def create_app(environ=None, start_response=None):
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='/var/static')
     app.config.from_object(Config)
 
     # Set the session timeout to 7 days
