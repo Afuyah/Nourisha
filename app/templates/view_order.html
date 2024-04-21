@@ -5,121 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Order Details</title>
-
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Arizonia&family=Love+Ya+Like+A+Sister&display=swap"
-        rel="stylesheet">
-
     <!-- Custom CSS -->
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
-        }
-
-        .navbar {
-            background-color: #cdc;
-            color: #fff;
-        }
-
-        .navbar-brand,
-        .navbar-nav .nav-link {
-            color: #000;
-        }
-
-        .navbar-brand {
-            font-family: "Love Ya Like A Sister";
-        }
-
-        .navbar-brand:hover,
-        .navbar-nav .nav-link:hover {
-            color: lightgrey;
-        }
-
-        .container {
-            padding-top: 20px;
-        }
-
-        .card {
-            border: none;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            background-color: #cdc;
-            color: #000000;
-            font-weight: bold;
-        }
-
-        .card-body {
-            background-color: #fff;
-        }
-
-        .order-details-table {
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .order-details-table th,
-        .order-details-table td {
-            padding: 10px;
-            text-align: left;
-        }
-
-        .order-tracking {
-            margin-top: 20px;
-        }
-
-        .tracking-step {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .step-number {
-            width: 30px;
-            height: 30px;
-            background-color: #5cb85c;
-            color: #fff;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-right: 10px;
-            font-weight: bold;
-        }
-
-        .step-description {
-            flex: 1;
-        }
-
-        .step-time {
-            font-size: 12px;
-            color: #777;
-        }
-
-        .btn-track-order {
-            background-color: #5cb85c;
-            color: #fff;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/view_order.css') }}">
 </head>
 
 <body>
 
-    <nav class="navbar navbar-expand navbar-light sticky-top shadow">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top shadow">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Nourisha</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -128,7 +25,7 @@
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item active">
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('cart.view_cart')}}">
                             <i class="fas fa-shopping-cart"></i> Cart
                         </a>
@@ -232,7 +129,6 @@
     <!-- Bootstrap JS and Popper.js -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    
 
 </body>
 

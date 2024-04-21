@@ -1,193 +1,206 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>Nourisha</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-<!-- jQuery, Popper.js, and Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
-
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Arizonia&family=Love+Ya+Like+A+Sister&display=swap" rel="stylesheet">
-  
-    
-    <!-- Custom CSS -->
+{% extends 'layout.html' %}
+{% block content %}
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 250px;
+            background-color: #fff;
+            padding-top: 60px;
+            transition: all 0.3s;
+            z-index: 1000;
+            
+        }
+
+        .sidebar-nav {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .sidebar-nav-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            color: #333;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .sidebar-nav-item:hover {
             background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
         }
 
-        #content {
-            padding: 20px;
+        .sidebar-nav-item i {
+            margin-right: 10px;
         }
 
-        .navbar {
-            background-color: #cdc;
-            color: #fff;
-        }
-
-        .navbar-brand,
-        .navbar-nav .nav-link {
-            color: #000;
-      }   
-        .navbar-brand {
-          font-family: "Love Ya Like A Sister";
-        }
-
-        
-
-        .navbar-brand:hover,
-        .navbar-nav .nav-link:hover {
-            color: lightgrey;
-        }
-
-        .placeholder-content {
-            padding: 20px;
-            background-color: #fff;
-            margin: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .card {
-            border: none;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            background-color: #cdc;
-            color: #000;
+        .sidebar-brand {
+            font-size: 24px;
             font-weight: bold;
-        }
-
-        .card-body {
+            color: #333;
+            padding: 20px 20px 10px 20px;
+            text-align: center;
             background-color: #fff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 1100;
         }
 
-        .dropdown-item {
-            color: #000;
+        .sidebar-brand:hover {
+            text-decoration: none;
+            color: #333;
         }
 
-        .dropdown-item:hover {
-            background-color: #5cb85c;
-            color: #fff;
+        .main-content {
+            padding: 20px;
+            margin-left: 250px;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .order-card {
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s;
+        }
+
+        .order-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-link {
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .order-id {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .status {
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .total {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .date {
+            font-size: 14px;
+            color: #999;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -250px;
+                width: 250px;
+                height: 100%;
+                z-index: 1000;
+                transition: left 0.3s ease-in-out;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+                border-radius: 0;
+            }
         }
     </style>
 </head>
 
-<body>
 
-    <nav class="navbar navbar-expand navbar-light shadow navbar sticky-top" >
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Nourisha</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="{{url_for('cart.view_cart')}}"><i class="fas fa-shopping-cart"></i> cart</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{url_for('main.product_listing')}}"><i class="fas fa-shopping-basket"></i> Shop</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{url_for('main.logout')}}"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+    <!-- Navbar with Sidebar Toggle Button -->
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <button style="background-color:#cdf; color:#000" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar"> More  Actions
+           
+        </button>
+        
     </nav>
 
-     <div id="content">
-        <div class="container-fluid">
-            <h2>Welcome, {{ user.name }}!</h2>
-            
-            <!-- Display user information -->
-            <div class="row mb-4">
-                <div class="col-lg-6">
-                    <div class="card">
-                        <div class="card-header">Account Information</div>
-                        <div class="card-body">
-                            <p><strong>Name:</strong> {{ user.name }}</p>
-                            <p><strong>Email:</strong> {{ user.email }}</p>
-                            <p><strong>Phone:</strong> {{ user.phone }}</p>
-                        </div>
+    <!-- Sidebar -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Menu</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+      
+        <ul class="sidebar-nav">
+            <li class="sidebar-nav-item">
+                <i class="fas fa-user"></i> Profile Settings
+            </li>
+            <li class="sidebar-nav-item">
+                <i class="fas fa-clipboard-list"></i> Orders
+            </li>
+            <li class="sidebar-nav-item">
+                <i class="fas fa-envelope"></i> Messages
+            </li>
+            <li class="sidebar-nav-item">
+                <i class="fas fa-star"></i> Reviews
+            </li>
+            <li class="sidebar-nav-item">
+                <i class="fas fa-envelope-square"></i> Private Messages
+            </li>
+            <li class="sidebar-nav-item">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </li>
+        </ul>
+    </div>
+    </div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="mb-4">My Orders</h3>
+                    {% for order in orders %}
+                    <div class="order-card">
+                        <a href="{{ url_for('main.view_order', order_id=order.id) }}" class="order-link">
+                            <span class="order-id">#{{ order.id }}</span> 
+                            <span class="status {% if order.status == 'pending' %}text-danger{% elif order.status == 'confirmed' %}text-success{% else %}text-muted{% endif %} ms-3">
+                             Date:   {{ order.order_date.strftime('%Y-%m-%d')  }}
+                            </span>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <span class="total">Total: Ksh. {{ order.total_price }}</span>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <span class="date">Status: {{ order.status.capitalize() }}</span>
+                                </div>
+                            </div>
+                        </a>
                     </div>
+                    {% endfor %}
                 </div>
             </div>
-
-            <!-- Display user's orders -->
-          <!-- Display user's orders in a table -->
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-header">My Orders</div>
-            <div class="card-body">
-                {% if orders %}
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Order Status</th>
-                                <th>Order Date</th>
-                                <th>Total Price</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for order in orders %}
-                                <tr>
-                                    <td>{{ order.id }}</td>
-                                    <td>{{ order.status }}</td>
-                                    <td>{{ order.order_date.strftime('%Y-%m-%d') }}</td>
-                                    <td>Ksh. {{ order.total_price }}</td>
-                                    <td>
-                                        <a href="{{ url_for('main.view_order', order_id=order.id) }}" class="btn btn-info btn-sm"> Details</a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <p>No orders found.</p>
-                {% endif %}
-            </div>
         </div>
     </div>
-</div>
-
-        </div>
-    </div>
-
-    <!-- jQuery, Popper.js, and Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
 
   
+   
 
-    <!-- Font Awesome -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
-
-</body>
-
-</html>
+{% endblock %}

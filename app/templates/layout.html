@@ -1,258 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-     <head>
-    <!-- Meta Tags -->
-    <meta charset="UTF-8" />
-     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+       <!DOCTYPE html>
+       <html lang="en">
+       <head>
+           <meta charset="UTF-8">
+           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+           <meta name="csrf-token" content="{{ csrf_token() }}">
+           <title>Nourisha Groceries</title>
+           <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
-    <!-- Title -->
-    <title>Naurisha Groceries</title>
-<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+           <!-- Bootstrap CSS -->
+           <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+                 rel="stylesheet"
+                 integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+                 crossorigin="anonymous">
 
+           <!-- Custom CSS -->
+           <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/main.css') }}">
 
+           <!-- Google Fonts -->
+           <link rel="preconnect" href="https://fonts.googleapis.com">
+           <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
-    
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-      crossorigin="anonymous"
-    />
-    <!-- Custom CSS -->
-     <link 
-      rel="stylesheet" type ="text/css"
-      href="{{ url_for('static', filename='styles/main.css') }}"
-    />
+           <!-- Font Awesome -->
+           <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+           <!-- Animate CSS -->
+           <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <!-- Animate CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-
-<link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-      crossorigin="anonymous"
-    />
-
-   
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    />
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Arizonia&family=Love+Ya+Like+A+Sister&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
-      rel="stylesheet"
-    />
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-
-
-    <!-- Scripts -->
-    <script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <script
-      type="text/javascript"
-      charset="utf8"
-      src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"
-    ></script>
-
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-      crossorigin="anonymous"
-    ></script>
-</head>
-<style>
-  .navbar {
-    background-color: #ffffff !important; /* White background */
-    padding: 20px 0; /* Add padding for spacing */
+         <style>
+           .navbar {
+           background-color: #ffffff !important; /* White background */
+           padding: 10px 0; /* Add padding for spacing */
     
 }
+         </style>
+       </head>
+       <body>
 
-.navbar-brand {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #333; /* Dark text color */
-    text-decoration: none; /* Remove underline */
-}
+       <!-- Navbar -->
+       <nav class="navbar navbar-expand-md navbar-light bg-light shadow-sm sticky-top">
+           <div class="container">
+               <a class="navbar-brand" href="{{ url_for('main.index') }}">Nourisha Groceries</a>
+               <button  class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                       aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                   <span class="navbar-toggler-icon"></span>
+               </button>
+               <div class="collapse navbar-collapse" id="navbarNav">
+                   <ul class="navbar-nav ms-auto">
+                       <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}">Home</a></li>
+                       <li class="nav-item"><a class="nav-link" href="{{ url_for('main.product_listing') }}">Shop</a></li>
+                       <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}#about-us">About</a></li>
+                       <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}#contact-us">Contact</a></li>
+                       {% if current_user.is_authenticated %}
+                           <li class="nav-item"><a class="nav-link" href="{{ url_for('main.user_dashboard') }}">Account</a></li>
+                           <li class="nav-item"><a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a></li>
+                       {% else %}
+                           <li class="nav-item"><a class="nav-link" href="{{ url_for('main.login') }}">Login</a></li>
+                       {% endif %}
+                   </ul>
+               </div>
+           </div>
+       </nav>
 
-.navbar-nav {
-    margin-left: auto; /* Push navigation links to the right */
-}
+       <!-- Flash Messages Section -->
+       {% with messages = get_flashed_messages() %}
+           {% if messages %}
+               <div class="flash-messages">
+                   {% for message in messages %}
+                       <div class="flash-message alert alert-danger">{{ message }}</div>
+                   {% endfor %}
+               </div>
+           {% endif %}
+       {% endwith %}
 
-.nav-link {
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: #333; /* Dark text color */
-    margin-left: 20px; /* Add spacing between links */
-    text-decoration: none; /* Remove underline */
-    transition: color 0.3s ease; /* Smooth color transition */
-}
+       <!-- Main Content -->
+       <main>
+           {% block content %}{% endblock %}
+       </main>
 
-.nav-link:hover {
-    color: #ff7f50; /* Change text color on hover */
-}
-  
-.featured-products .card {
-    
-    border-radius: 1px;
-    overflow: hidden;
-}
+       <!-- Footer -->
+       <footer class="footer py-4">
+           <div class="container text-center">
+               <p>&copy; 2024 Nourisha Groceries. All rights reserved.</p>
+           </div>
+       </footer>
 
-.featured-products .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.featured-products .card-img-top {
-    border-bottom: 1px solid #ddd;
-}
-
-.featured-products .card-title {
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: #333;
-}
-
-.featured-products .card-text {
-    font-size: 1rem;
-    color: #777;
-}
-
-.featured-products .btn-primary {
-    
-    border: none;
-    border-radius: 25px;
-    padding: 6px 12px;
-    font-size: 0.9rem;
-    color: #fff;
-    transition: background-color 0.3s ease;
-}
-
-.featured-products .btn-primary:hover {
-    background-color: #ff6348;
-}
-
-
-  
-</style>
-<body>
-   
- <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
-    <!-- Navbar content -->
-    <div class="container">
-        <!-- Brand -->
-        <a class="navbar-brand" href="{{ url_for('main.index') }}">Nourisha Groceries</a>
-        
-        <!-- Navbar toggler -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <!-- Navbar links -->
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <!-- Common links for both authenticated and unauthenticated users -->
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.product_listing') }}">Shop</a>
-                </li>
-                
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.index') }}#about-us">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.index') }}#contact-us">Contact</a>
-                </li>
-                
-                <!-- Links specific to authenticated users -->
-                {% if current_user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('main.user_dashboard')}}">My Account</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a>
-                </li>
-                {% else %}
-                <!-- Links specific to unauthenticated users -->
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.login') }}">Login</a>
-                </li>
-                
-                {% endif %}
-            </ul>
-        </div>
-    </div>
-</nav>
-
-
-    <!-- Flash Messages Section -->
-    {% with messages = get_flashed_messages() %} {% if messages %}
-    <div class="flash-messages">
-      {% for message in messages %}
-      <div class="flash-message alert alert-danger">{{ message }}</div>
-      {% endfor %}
-    </div>
-    {% endif %} {% endwith %}
-
-    <!-- Main Content -->
-
-  
-    <main>{% block content %}{% endblock %}</main>
-
-   <footer class="footer py-4">
-              <div class="container text-center">
-                  <p>&copy; 2024 Nourisha Groceries. All rights reserved.</p>
-              </div>
-          </footer>
-   
-
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-        crossorigin="anonymous"></script>
-
-    <!-- Font Awesome -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
-
-    <!-- Animate CSS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.js"></script>
-</body>
-
-</html>
+       <!-- JavaScript -->
+       <script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+       <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+       <script defer src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+       <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+               integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+               crossorigin="anonymous"></script>
+       <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"></script>
+       <script defer src="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.js"></script>
+       </body>
+       </html>

@@ -10,8 +10,8 @@ migrate = Migrate()
 
 class Config: 
     SECRET_KEY = secrets.token_hex(16)
-    SQLALCHEMY_DATABASE_URI='postgresql://naurisha_gstores_user:5HNvexMQXLtCTWDeP1C2fssc0wFjxLVA@dpg-cocc7pol5elc739qbqsg-a.oregon-postgres.render.com/naurisha_gstores'
-  #'sqlite:///naurish_a_g_stores.db' 
+    SQLALCHEMY_DATABASE_URI= 'sqlite:///naurish_a_g_stores.db' #postgresql://naurisha_gstores_user:5HNvexMQXLtCTWDeP1C2fssc0wFjxLVA@dpg-cocc7pol5elc739qbqsg-a.oregon-postgres.render.com/naurisha_gstores'
+ 
   
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -35,4 +35,3 @@ class Config:
     MAIL_MAX_EMAILS = None
     MAIL_SUPPRESS_SEND = False
     MAIL_ASCII_ATTACHMENTS = False
-      
