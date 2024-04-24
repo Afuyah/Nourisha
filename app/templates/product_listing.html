@@ -51,32 +51,27 @@
         <div class="card product-card border-0">
             <div class="magnifier position-relative overflow-hidden">
                 {% if product.images %}
-                <!-- Display the first image as cover image -->
+                <!-- Display the first image of the product if available -->
                 <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
-                <!-- Display additional images -->
-                {% for image in product.images[1:] %}
-                <img src="{{ url_for('static', filename='uploads/' + image.image) }}" class="additional-product-image" alt="{{ product.name }}">
-                {% endfor %}
                 {% else %}
-                <!-- Display default image if no images are available -->
-                <img src="{{ url_for('static', filename='uploads/default_image.jpg') }}" class="card-img-top product-image" alt="{{ product.name }}">
+                <!-- Display a default image if no images are available for the product -->
+                <img src="{{ url_for('static', filename='path_to_default_image.jpg') }}" class="card-img-top product-image" alt="{{ product.name }}">
                 {% endif %}
             </div>
 
             <div class="card-body text-center">
+                <!-- Product title -->
                 <h6 class="card-title text-primary mb-2">{{ product.brand }}</h6>
+                <!-- Product description -->
                 <p class="card-text text-muted fs-6 mb-3">{{ product.description | truncate(120) }}</p>
+                <!-- Product price -->
                 <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} </strong></p>
 
                 <!-- Add to Cart Button -->
                 <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
                      Buy
                 </button>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-</div>
+        
 
                 <!-- Product Modal -->
                 <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
