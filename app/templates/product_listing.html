@@ -51,9 +51,9 @@
           <div class="card product-card border-0">
               <div class="magnifier position-relative overflow-hidden">
                   {% if product.cover_image %}
-                      <img src="{{ url_for('static', filename='uploads/' + product.cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
+                      <img src="/var/static/uploads/{{ product.cover_image }}" class="card-img-top product-image" alt="{{ product.name }}">
                   {% else %}
-                      <img src="{{ url_for('static', filename='path_to_default_image.jpg') }}" class="card-img-top product-image" alt="{{ product.name }}">
+                      <img src="/var/static/path_to_default_image.jpg" class="card-img-top product-image" alt="{{ product.name }}">
                   {% endif %}
               </div>
 
@@ -66,7 +66,8 @@
                   <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
                        Buy
                   </button>
-        
+           
+
 
           
          
