@@ -396,7 +396,7 @@ def save_image(image_data):
     filename = generate_unique_filename(image_data.filename)
     
     # Define the path to the 'static/uploads' directory within the 'var' directory
-    static_uploads_folder = os.path.join('/mnt/var/static/uploads')
+    static_uploads_folder = os.path.join('var/static/uploads')
     
     # Save the image to the 'static/uploads' directory
     image_data.save(os.path.join(static_uploads_folder, filename))
