@@ -396,7 +396,7 @@ def save_image(image_data):
   # This is a basic example assuming you have an 'uploads' folder
   # and you want to save images with unique filenames
   filename = generate_unique_filename(image_data.filename)
-  image_data.save(os.path.join('var', 'static', 'uploads', filename))
+  image_data.save(os.path.join('app', 'static', 'uploads', filename))
   return filename
 
 

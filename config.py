@@ -8,18 +8,16 @@ db = SQLAlchemy()
 migrate = Migrate()
 
 
-class Config: 
+
+
+class Config:
     SECRET_KEY = secrets.token_hex(16)
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') 
-      
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
-    SAFARICOM_API_KEY = 'your_api_key'
-    SAFARICOM_API_SECRET = 'your_api_secret'
-    SAFARICOM_LNM_PASSKEY = 'your_lnm_passkey'
-    SAFARICOM_SHORTCODE = 'your_shortcode'
-    SAFARICOM_LNM_CALLBACK_URL = 'your_callback_url'
+
+    
 
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 465
