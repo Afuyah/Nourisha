@@ -56,7 +56,7 @@ def get_sales_chart_data():
         return jsonify({'error': 'Permission denied'}), 403
 
     sales_data = fetch_sales_data()
-    labels = [datetime.strptime(data.order_date, '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
+    labels = [data.order_date.strftime('%Y-%m-%d') for data in sales_data]
     data = [float(data.total_sales) for data in sales_data]
 
     sales_chart_data = {
@@ -65,6 +65,7 @@ def get_sales_chart_data():
     }
 
     return jsonify(sales_chart_data)
+
 
 @admin_bp.route('/get_average_order_value_by_day')
 @login_required
