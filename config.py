@@ -10,7 +10,9 @@ migrate = Migrate()
 
 class Config: 
     SECRET_KEY = secrets.token_hex(16)
-    SQLALCHEMY_DATABASE_URI='os.environ.get('DATABASE_URL') or 'postgresql://naurisha_gstores_user:5HNvexMQXLtCTWDeP1C2fssc0wFjxLVA@dpg-cocc7pol5elc739qbqsg-a/naurisha_gstores'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'postgresql://naurisha_gstores_user:5HNvexMQXLtCTWDeP1C2fssc0wFjxLVA@dpg-cocc7pol5elc739qbqsg-a/naurisha_gstores'
+    
+
   #'sqlite:///naurish_a_g_stores.db'
   
     SQLALCHEMY_TRACK_MODIFICATIONS = False
