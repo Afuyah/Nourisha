@@ -392,20 +392,27 @@ def add_product_image():
 
 # Helper function to save uploaded image and return the filename
 def save_image(image_data):
-  # Implement your image-saving logic here (e.g., using Flask-Uploads)
-  # This is a basic example assuming you have an 'uploads' folder
-  # and you want to save images with unique filenames
-  filename = generate_unique_filename(image_data.filename)
-  image_data.save(os.path.join('static', 'uploads', filename))
-  return filename
-
+    # Generate a unique filename for the image
+    filename = generate_unique_filename(image_data.filename)
+    
+    # Define the path to the 'static/uploads' directory within the 'var' directory
+    static_uploads_folder = os.path.join('var', 'static', 'uploads')
+    
+    # Ensure that the 'static/uploads' directory exists, creating it if necessary
+    os.makedirs(static_uploads_folder, exist_ok=True)
+    
+    # Save the image to the 'static/uploads' directory
+    image_data.save(os.path.join(static_uploads_folder, filename))
+    
+    # Return the filename for reference
+    return filename
 
 # Helper function to generate a unique filename
 def generate_unique_filename(original_filename):
-  filename, extension = os.path.splitext(original_filename)
-  timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-  unique_filename = f"{secure_filename(filename)}_{timestamp}{extension}"
-  return unique_filename
+    filename, extension = os.path.splitext(original_filename)
+    timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+    unique_filename = f"{secure_filename(filename)}_{timestamp}{extension}"
+    return unique_filename
 
 
 @bp.route('/product_details/<int:product_id>')
