@@ -15,63 +15,66 @@ migrate = Migrate()
 CORS(resources={r"/*": {"origins": "*"}})
 
 def create_app(environ=None, start_response=None):
-    app = Flask(__name__)
-    app.config.from_object(Config)
+  app = Flask(__name__)
+  app.config.from_object(Config)
 
-    # Set the session timeout to 7 days
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
-    app.config['SESSION_COOKIE_NAME'] = 'myapp_session'
-    app.config['SESSION_COOKIE_DURATION'] = timedelta(days=7)  # Set the cookie duration to 7 days
-    app.config['SESSION_REFRESH_EACH_REQUEST'] = True
-    app.config['SESSION_COOKIE_SECURE'] = True
+  # Set the session timeout to 7 days
+  app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+  app.config['SESSION_COOKIE_NAME'] = 'myapp_session'
+  app.config['SESSION_COOKIE_DURATION'] = timedelta(days=7)  # Set the cookie duration to 7 days
+  app.config['SESSION_REFRESH_EACH_REQUEST'] = True
+  app.config['SESSION_COOKIE_SECURE'] = True
 
-    # Initialize extensions
-    db.init_app(app)
-    login_manager.init_app(app)
-    mail.init_app(app)
-    migrate.init_app(app, db)
+  # Configure the static folder to serve images from '/var/static/uploads'
+  app.static_folder = '/var/static/uploads'
 
-    csrf = CSRFProtect(app)
-    app.config['WTF_CSRF_TIME_LIMIT'] = None
+  # Initialize extensions
+  db.init_app(app)
+  login_manager.init_app(app)
+  mail.init_app(app)
+  migrate.init_app(app, db)
 
-    # Blueprints registration
-    from app.main import bp as main_bp
-    app.register_blueprint(main_bp)
+  csrf = CSRFProtect(app)
+  app.config['WTF_CSRF_TIME_LIMIT'] = None
 
-    from app.admin.routes import admin_bp
-    app.register_blueprint(admin_bp)
+  # Blueprints registration
+  from app.main import bp as main_bp
+  app.register_blueprint(main_bp)
 
-    from app.user.routes import user_bp
-    app.register_blueprint(user_bp)
+  from app.admin.routes import admin_bp
+  app.register_blueprint(admin_bp)
 
-    from app.payments.routes import payment_bp
-    app.register_blueprint(payment_bp)
+  from app.user.routes import user_bp
+  app.register_blueprint(user_bp)
 
-    from app.cart.routes import cart_bp
-    app.register_blueprint(cart_bp)
+  from app.payments.routes import payment_bp
+  app.register_blueprint(payment_bp)
 
-    # User loader function
-    from app.main.models import User
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(int(user_id))
+  from app.cart.routes import cart_bp
+  app.register_blueprint(cart_bp)
 
-    # Add Flask-Migrate commands
-    @app.route('/run_migrations')
-    def run_migrations():
-        with app.app_context():
-            from flask_migrate import upgrade
-            upgrade()
-        return 'Migrations completed successfully.'
-    @app.route('/init_migrations')
-    def init_migrations():
-        with app.app_context():
-            from flask_migrate import init
-            init()
-        return 'Migrations initialized successfully.'
+  # User loader function
+  from app.main.models import User
+  @login_manager.user_loader
+  def load_user(user_id):
+      return User.query.get(int(user_id))
 
-    return app
+  # Add Flask-Migrate commands
+  @app.route('/run_migrations')
+  def run_migrations():
+      with app.app_context():
+          from flask_migrate import upgrade
+          upgrade()
+      return 'Migrations completed successfully.'
+  @app.route('/init_migrations')
+  def init_migrations():
+      with app.app_context():
+          from flask_migrate import init
+          init()
+      return 'Migrations initialized successfully.'
+
+  return app
 
 if __name__ == '__main__':
-    app = create_app()
-    app.run(debug=True)
+  app = create_app()
+  app.run(debug=True)
