@@ -122,7 +122,8 @@ class Product(db.Model):
                           db.ForeignKey('supplier.id'),
                           nullable=False)
   date_added = db.Column(db.Date, nullable=False)
-
+  is_deleted = db.Column(db.Boolean, default=False)
+  
   # Define relationships with Supplier and ProductCategory and images
   supplier = db.relationship('Supplier', back_populates='products')
   category = db.relationship('ProductCategory', back_populates='products')

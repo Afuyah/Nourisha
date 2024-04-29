@@ -82,7 +82,7 @@ def register():
 
             # Validate phone number format
             if not is_valid_phone_number(form.phone.data):
-                flash('Invalid phone number format. ', 'danger')
+                flash('Invalid phone number format. Please provide a valid phone number starting with "07" and exactly 10 digits.', 'danger')
                 return redirect(url_for('main.register'))
 
             user = User(
@@ -131,7 +131,7 @@ def is_strong_password(password):
     return len(password) >= 4
 def is_valid_email(email):
     # Implement email validation logic here
-    
+
     return bool(re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email))
 
 @bp.route('/confirm_email/<token>', methods=['GET'])
@@ -396,7 +396,7 @@ def save_image(image_data):
   # This is a basic example assuming you have an 'uploads' folder
   # and you want to save images with unique filenames
   filename = generate_unique_filename(image_data.filename)
-  image_data.save(os.path.join('/var', 'static', 'uploads', filename))
+  image_data.save(os.path.join('var', 'static', 'uploads', filename))
   return filename
 
 
@@ -460,4 +460,3 @@ def search():
     products = Product.query.filter(Product.name.ilike(f"%{query}%")).all()
     form= AddProductForm()
     return render_template('product_listing.html', products=products, form=form)
-

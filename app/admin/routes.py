@@ -14,6 +14,7 @@ from flask_migrate import Migrate
 from flask_migrate import Migrate
 
 
+
 # Helper function to handle database errors and redirects
 def handle_db_error_and_redirect(route):
     try:

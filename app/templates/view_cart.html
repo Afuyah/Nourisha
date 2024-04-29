@@ -29,20 +29,19 @@
         {% for item in cart_items %}
         <tr class="fade-in">
           <td class="align-middle">
-    {% if item.product.images %}
-        <img
-          src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image) }}"
-          class="img-thumbnail"
-          alt="{{ item.product.brand }}"
-          style="max-width: 80px"
-        />
-    {% else %}
-        <p>No image available</p>
-    {% endif %}
-    <br />
-    <strong>{{ item.product.brand }}</strong>
-</td>
-
+            {% if item.product.images %}
+            <img
+              src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image) }}"
+              class="img-thumbnail"
+              alt="{{ item.product.brand }}"
+              style="max-width: 80px"
+            />
+            {% else %}
+            <p>No image available</p>
+            {% endif %}
+            <br />
+            <strong>{{ item.product.brand }}</strong>
+          </td>
 
           <td class="align-middle">Ksh {{ item.product.unit_price }}</td>
           <td class="align-middle">
@@ -76,7 +75,7 @@
               >{{ item.product.unit_price * item.quantity }}</span
             >
           </td>
-          
+
           <td class="align-middle">{{ item.custom_description }}</td>
 
           <td class="align-middle">
@@ -116,14 +115,15 @@
     </button>
   </div>
 
-<div class="text-center mt-4">
-  <a href="{{ url_for('main.product_listing') }}" class="btn btn-outline-primary btn-sm">
-    Continue Shopping
-  </a>
-</div>
+  <div class="text-center mt-4">
+    <a
+      href="{{ url_for('main.product_listing') }}"
+      class="btn btn-outline-primary btn-sm"
+    >
+      Continue Shopping
+    </a>
+  </div>
 
-
-  
   {% else %}
   <!-- Display a message and suggest some items -->
   <div class="text-center">
@@ -164,17 +164,14 @@
     text-align: center;
     font-size: 18px;
   }
- /* Styles for small devices */
+  /* Styles for small devices */
   @media (max-width: 576px) {
     .decrement-btn,
     .increment-btn {
       font-size: 8px;
       padding: 5px 10px;
-      
     }
   }
-
-  
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 <link
@@ -409,12 +406,10 @@
     });
   });
 
-async function updateQuantityInStock() {
-  // Implement the logic to update the quantity in stock in the UI
-  // This function should be customized based on your specific requirements
-  console.log('Updating quantity in stock...');
-
-}  
+  async function updateQuantityInStock() {
+    // Implement the logic to update the quantity in stock in the UI
+    // This function should be customized based on your specific requirements
+    console.log("Updating quantity in stock...");
+  }
 </script>
 {% endblock %}
-
