@@ -12,7 +12,7 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 mail = Mail()
 migrate = Migrate()
-CORS(resources={r"/*": {"origins": "*"}})
+
 
 def create_app(environ=None, start_response=None):
   app = Flask(__name__)
@@ -26,7 +26,7 @@ def create_app(environ=None, start_response=None):
   app.config['SESSION_COOKIE_SECURE'] = True
 
   # Configure the static folder to serve images from '/var/static/uploads'
-  app.static_folder = '/var/static/uploads'
+  #app.static_folder = '/var/static/uploads'
 
   # Initialize extensions
   db.init_app(app)
@@ -59,19 +59,7 @@ def create_app(environ=None, start_response=None):
   def load_user(user_id):
       return User.query.get(int(user_id))
 
-  # Add Flask-Migrate commands
-  @app.route('/run_migrations')
-  def run_migrations():
-      with app.app_context():
-          from flask_migrate import upgrade
-          upgrade()
-      return 'Migrations completed successfully.'
-  @app.route('/init_migrations')
-  def init_migrations():
-      with app.app_context():
-          from flask_migrate import init
-          init()
-      return 'Migrations initialized successfully.'
+  
 
   return app
 
