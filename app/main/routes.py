@@ -163,7 +163,7 @@ def register():
             # Send welcome email to the user
             send_welcome_email(user)
 
-            flash(f'Registration successful! You are now logged in as {current_user.username}. Welcome email sent.', 'success')
+            flash(f'Registration successful! You are now logged in as {current_user.username}.!', 'success')
             return redirect(url_for('main.index'))
 
         except IntegrityError:
@@ -403,7 +403,7 @@ def save_image(image_data):
   # This is a basic example assuming you have an 'uploads' folder
   # and you want to save images with unique filenames
   filename = generate_unique_filename(image_data.filename)
-  image_data.save(os.path.join('app', 'static', 'uploads', filename))
+  image_data.save(os.path.join('/app', 'static', 'uploads', filename))
   return filename
 
 
