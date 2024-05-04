@@ -22,6 +22,22 @@ from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from sqlalchemy.orm.exc import NoResultFound
 import re
 
+
+@bp.route('/refresh_csrf_token', methods=['GET'])
+def refresh_csrf_token():
+    # Generate a new CSRF token
+    new_csrf_token = generate_csrf_token()  # Implement your token generation logic here
+
+    # Get the expiration time for the new token (assuming a fixed expiration time)
+    # You can adjust this as per your application's requirements
+    expiration_time = datetime.utcnow() + timedelta(minutes=30)  # Example: Token expires in 30 minutes
+
+    # Return the new CSRF token and its expiration time as JSON response
+    return jsonify({'csrf_token': new_csrf_token, 'expiration_time': expiration_time.strftime('%Y-%m-%dT%H:%M:%SZ')})
+
+
+
+
 def login_required(func):
 
   @wraps(func)
@@ -64,6 +80,58 @@ def user_dashboard():
 
   return render_template('user_dashboard.html', user=user, orders=orders)
 
+def send_welcome_email(user):
+  msg = Message('Welcome to Our Application!', recipients=[user.email])
+  msg.body = f"Dear {user.username},\n\nWelcome to our application! We're excited to have you on board."
+  # You can also use HTML for the email body:
+  # msg.html = render_template('welcome_email.html', user=user)
+  mail.send(msg)
+
+# Regular expression to match phone number format: 07xxxxxxxx
+def is_valid_phone_number(phone):
+    return bool(re.match(r'^07\d{8}$', phone))
+
+def generate_confirmation_token(user_id):
+    return serializer.dumps(user_id)
+
+def send_confirmation_email(user, token):
+    confirm_url = url_for('main.confirm_email', token=token, _external=True)
+    subject = 'Confirm Your Email Address'
+    body = f"Thank you for joining! Please click the following link to confirm your email address: {confirm_url}"
+    send_email(user.email, subject, body)
+
+def is_strong_password(password):
+    return len(password) >= 4
+
+def is_valid_email(email):
+    return bool(re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email))
+
+@bp.route('/confirm_email/<token>', methods=['GET'])
+def confirm_email(token):
+    try:
+        user_id = serializer.loads(token, max_age=3600)  # Token expires in 1 hour
+        user = User.query.get(int(user_id))  # Ensure user_id is converted to int
+
+        if user and not user.confirmed:
+            user.confirmed = True
+            db.session.commit()
+            flash('Email confirmation successful! You can now log in.', 'success')
+        elif user and user.confirmed:
+            flash('Email already confirmed. You can log in.', 'info')
+        else:
+            flash('Invalid confirmation link. Please contact support.', 'danger')
+
+    except SignatureExpired:
+        flash('The confirmation link has expired. Please register again.', 'danger')
+    except BadSignature:
+        flash('Invalid confirmation link. Please contact support.', 'danger')
+    except Exception as e:
+        flash(f'Error confirming email: {str(e)}', 'danger')
+        app.logger.error(f"Error confirming email: {e}")
+
+    return redirect(url_for('main.login'))
+
+from flask_login import login_user
 
 @bp.route('/register', methods=['POST', 'GET'])
 def register():
@@ -71,39 +139,32 @@ def register():
 
     if form.validate_on_submit():
         try:
-            # Simplified password validation
-            if not is_strong_password(form.password.data):
-                flash('Password must be at least 4 characters long.', 'danger')
-                return redirect(url_for('main.register'))
-
-            # Validate email format
-            if not is_valid_email(form.email.data):
-                flash('Invalid email format. Please provide a valid email address.', 'danger')
-                return redirect(url_for('main.register'))
-
-            # Validate phone number format
-            if not is_valid_phone_number(form.phone.data):
-                flash('Invalid phone number format. Please provide a valid phone number starting with "07" and exactly 10 digits.', 'danger')
-                return redirect(url_for('main.register'))
-
+            # Create a new user instance
             user = User(
                 username=form.username.data,
                 email=form.email.data,
                 phone=form.phone.data,
                 name=form.name.data,
             )
+
+            # Set the user password
             user.set_password(form.password.data)
+
+            # Set confirmed to True to allow immediate login
+            user.confirmed = True
+
+            # Add the user to the database
             db.session.add(user)
             db.session.commit()
 
-            # Now that the user is committed, generate the confirmation token
-            token = generate_confirmation_token(user.id)
+            # Automatically log in the user after registration
+            login_user(user)
 
-            # Send confirmation email
-            send_confirmation_email(user, token)
+            # Send welcome email to the user
+            send_welcome_email(user)
 
-            flash('Registration successful! Please check your email for confirmation.', 'success')
-            return redirect(url_for('main.login'))
+            flash(f'Registration successful! You are now logged in as {current_user.username}. Welcome email sent.', 'success')
+            return redirect(url_for('main.index'))
 
         except IntegrityError:
             db.session.rollback()
@@ -112,120 +173,65 @@ def register():
 
     return render_template('register.html', form=form)
 
-def is_valid_phone_number(phone):
-    # Regular expression to match phone number format: 07xxxxxxxx
-    return bool(re.match(r'^07\d{8}$', phone))
-
-def generate_confirmation_token(user_id):
-  return serializer.dumps(user_id)
-
-
-def send_confirmation_email(user, token):
-  confirm_url = url_for('main.confirm_email', token=token, _external=True)
-  subject = 'Confirm Your Email Address'
-  body = f"Thank you for Joining Naurisha Family. Please click the following link to confirm your email address: {confirm_url}"
-  send_email(user.email, subject, body)
-
-
-def is_strong_password(password):
-    # Allow any password with 4 or more characters
-    return len(password) >= 4
-def is_valid_email(email):
-    # Implement email validation logic here
-
-    return bool(re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email))
-
-@bp.route('/confirm_email/<token>', methods=['GET'])
-def confirm_email(token):
-  try:
-    user_id = serializer.loads(token, max_age=3600)  # Token expires in 1 hour
-    user = User.query.get(int(user_id))  # Ensure user_id is converted to int
-
-    if user and not user.confirmed:
-      user.confirmed = True
-      db.session.commit()
-      flash('Email confirmation successful! You can now log in.', 'success')
-    elif user and user.confirmed:
-      flash('Email already confirmed. You can log in.', 'info')
-    else:
-      flash('Invalid confirmation link. Please contact support.', 'danger')
-
-  except SignatureExpired:
-    flash('The confirmation link has expired. Please register again.',
-          'danger')
-  except BadSignature:
-    flash('Invalid confirmation link. Please contact support.', 'danger')
-  except NoResultFound:
-    flash('User not found. Please register again.', 'danger')
-  except Exception as e:
-    flash(f'Error confirming email: {str(e)}', 'danger')
-    current_app.logger.error(f"Error confirming email: {e}")
-
-  return redirect(url_for('main.login'))
-
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
-  form = LoginForm()
+    form = LoginForm()
 
-  if request.method == 'POST' and form.validate_on_submit():
-    # Your login logic here
-    phone_number = form.phone.data
-    user = User.query.filter_by(phone=phone_number).first()
+    if request.method == 'POST' and form.validate_on_submit():
+        identifier = form.identifier.data
+        password = form.password.data
 
-    if user and user.check_password(form.password.data):
-      if user.confirmed:
-        login_user(user, remember=True)
-        session['login_time'] = datetime.utcnow()
-        user.last_login_date = datetime.utcnow()
-        user.last_login_ip = request.remote_addr
-        db.session.commit()
-        flash('Login successful!', 'success')
+        # Check if the identifier is an email
+        user = User.query.filter_by(email=identifier).first()
 
-        # Redirect to the admin dashboard if the user has the 'admin' role
-        if user.role and user.role.name == 'admin':
-          return redirect(url_for('admin.admin_dashboard'))
+        # If not found, check if it's a phone number
+        if not user:
+            user = User.query.filter_by(phone=identifier).first()
 
-        return redirect(url_for('main.index'))
-      else:
-        flash(
-            'Your account is not confirmed. Please check your email for the confirmation link.',
-            'warning')
-    else:
-      flash(
-          'Invalid phone number or password. Please check your credentials and try again.',
-          'danger')
+        # If still not found, check if it's a username
+        if not user:
+            user = User.query.filter_by(username=identifier).first()
 
-  return render_template('login.html', form=form)
+        if user and user.check_password(password):
+            if user.confirmed:
+                login_user(user)
+                session['login_time'] = datetime.utcnow()
+                user.last_login_date = datetime.utcnow()
+                user.last_login_ip = request.remote_addr
+                db.session.commit()
+                flash(f'Welcome back, {current_user.username}!', 'success')
 
+                if user.role and user.role.name == 'admin':
+                    return redirect(url_for('admin.admin_dashboard'))
+
+                return redirect(url_for('main.index'))
+            else:
+                flash('Your account is not confirmed. Please check your email for the confirmation link.', 'warning')
+        else:
+            flash('Invalid credentials. Please check your username/email/phone number and password.', 'danger')
+
+    return render_template('login.html', form=form)
 
 @bp.before_request
 def before_request():
-  # Track session end time for each request
-  if current_user.is_authenticated:
-    current_user.last_seen = datetime.utcnow()
-    db.session.commit()
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
 
-  # Check if a login_time is stored in the session
-  login_time = session.get('login_time')
+    login_time = session.get('login_time')
 
-  if login_time:
-    # Make datetime.utcnow() aware of UTC timezone
-    utc_now = datetime.utcnow().replace(tzinfo=timezone.utc)
-
-    # Calculate session duration and store it in the session
-    session_duration = utc_now - login_time
-    session['average_session_duration'] = session_duration.total_seconds()
-    # Reset login_time to the current time for the next request
-    session['login_time'] = utc_now
-
+    if login_time:
+        utc_now = datetime.utcnow().replace(tzinfo=timezone.utc)
+        session_duration = utc_now - login_time
+        session['average_session_duration'] = session_duration.total_seconds()
+        session['login_time'] = utc_now
 
 @bp.route('/logout')
 @login_required
 def logout():
-  logout_user()
-  return redirect(url_for('main.index'))
-
+    logout_user()
+    return redirect(url_for('main.index'))
 
 @bp.route('/add_role', methods=['GET', 'POST'])
 @login_required

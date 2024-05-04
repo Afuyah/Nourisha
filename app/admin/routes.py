@@ -143,7 +143,7 @@ def admin_dashboard():
             'total_products': Product.query.count(),
             'active_products': 0,  # You need to define how to calculate active products
             'out_of_stock': Product.query.filter(Product.quantity_in_stock == 0).count(),
-            'recent_orders': Order.query.order_by(Order.order_date.desc()).limit(5).all(),
+            'recent_orders': Order.query.order_by(Order.order_date.desc()).limit(3).all(),
             'total_customers': User.query.count(),
             'new_customers_last_7_days': User.query.filter(User.registration_date >= (datetime.utcnow() - timedelta(days=7))).count(),
             'returning_customers': User.query.filter(User.registration_date < (datetime.utcnow() - timedelta(days=7))).count(),

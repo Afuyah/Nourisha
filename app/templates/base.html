@@ -76,13 +76,14 @@
             aria-haspopup="true"
             aria-expanded="false"
           >
-            <i class="product-icon fas fa-shopping-basket"></i> Products
+            <i class="product-icon fas fa-shopping-basket"></i> Product Management
           </a>
           <div class="dropdown-menu" aria-labelledby="productsDropdown">
-            <a class="dropdown-item" href="{{ url_for('main.products')}}">All Products</a>
+            <a class="dropdown-item" href="{{ url_for('main.products')}}">Products</a>
             <a class="dropdown-item" href="{{url_for('main.add_product')}}">Add Product</a>
             <a class="dropdown-item" href="{{url_for('admin.product_categories')}}">Product Categories</a>
             <a class="dropdown-item" href="{{url_for('main.add_product_image')}}">Add Product Images</a>
+            <a class="dropdown-item" href="{{ url_for('main.add_supplier')}}">Product Suppliers</a>
           </div>
         </li>
         <li class="dropdown">
@@ -95,7 +96,7 @@
             aria-haspopup="true"
             aria-expanded="false"
           >
-            <i class="order-icon fas fa-shopping-cart"></i> Orders
+            <i class="order-icon fas fa-shopping-cart"></i> Order Management
           </a>
           <div class="dropdown-menu" aria-labelledby="ordersDropdown">
             <a class="dropdown-item" href="{{ url_for('admin.view_orders')}}">All Orders</a>
@@ -113,11 +114,11 @@
             aria-haspopup="true"
             aria-expanded="false"
           >
-            <i class="order-icon fas fa-map-marker-alt"></i> Suppliers
+            <i class="order-icon fas fa-chart-line"></i> Data Visualization
           </a>
           <div class="dropdown-menu" aria-labelledby="ordersDropdown">
-            <a class="dropdown-item" href="{{ url_for('main.add_supplier')}}">Add Supplies</a>
-            <a class="dropdown-item" href="#">Suppliers Info</a>
+            <a class="dropdown-item" href="#">Sales Overview</a>
+            <a class="dropdown-item" href="#">More Data Visualization</a>
           </div>
         </li>
 
@@ -131,7 +132,7 @@
             aria-haspopup="true"
             aria-expanded="false"
           >
-            <i class="order-icon fas fa-map-marker-alt"></i> Locations
+            <i class="order-icon fas fa-map-marker-alt"></i> Our Locations
           </a>
           <div class="dropdown-menu" aria-labelledby="ordersDropdown">
             <a class="dropdown-item" href="{{ url_for('admin.add_location')}}">Add Location</a>
@@ -149,11 +150,11 @@
             aria-haspopup="true"
             aria-expanded="false"
           >
-            <i class="customer-icon fas fa-users"></i> Customers
+            <i class="customer-icon fas fa-users"></i> User Management
           </a>
           <div class="dropdown-menu" aria-labelledby="customersDropdown">
-            <a class="dropdown-item" href="#">All Customers</a>
-            <a class="dropdown-item" href="#">Customer Groups</a>
+            <a class="dropdown-item" href="#">Our Clients</a>
+            <a class="dropdown-item" href="#">Sales Representatives</a>
           </div>
         </li>
 

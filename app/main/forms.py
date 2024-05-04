@@ -16,9 +16,10 @@ class RegistrationForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-  phone = StringField('Phone', validators=[DataRequired()])
-  password = PasswordField('Password', validators=[DataRequired()])
-  submit = SubmitField('Login')
+    # Add the identifier field for username, email, or phone number
+    identifier = StringField('Username/Email/Phone', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')
 
 
 class AddRoleForm(FlaskForm):
