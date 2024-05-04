@@ -52,7 +52,9 @@
         <div class="card product-card border-0">
             <div class="magnifier position-relative overflow-hidden">
                 {% if product.images %}
-                <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
+              <img src="{{ url_for('static', filename='/app/static/uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
+
+              
                 {% else %}
                 <img src="{{ url_for('static', filename='path_to_default_image.jpg') }}" class="card-img-top product-image" alt="{{ product.name }}">
                 {% endif %}
