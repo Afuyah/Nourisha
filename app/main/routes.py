@@ -401,7 +401,7 @@ def save_image(image_data):
     # Implement your image-saving logic here (e.g., using Flask-Uploads)
     # This is a basic example assuming you want to save images with unique filenames
     filename = generate_unique_filename(image_data.filename)
-    image_data.save(os.path.join('static', 'uploads', filename))
+    image_data.save(os.path.join('/static', 'uploads', filename))
     return filename
 
 
