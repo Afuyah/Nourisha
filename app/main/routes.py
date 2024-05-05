@@ -397,14 +397,12 @@ def add_product_image():
   return render_template('add_product_image.html', form=form)
 
 
-# Helper function to save uploaded image and return the filename
 def save_image(image_data):
-  # Implement your image-saving logic here (e.g., using Flask-Uploads)
-  # This is a basic example assuming you have an 'uploads' folder
-  # and you want to save images with unique filenames
-  filename = generate_unique_filename(image_data.filename)
-  image_data.save(os.path.join('/app', 'static', 'uploads', filename))
-  return filename
+    # Implement your image-saving logic here (e.g., using Flask-Uploads)
+    # This is a basic example assuming you want to save images with unique filenames
+    filename = generate_unique_filename(image_data.filename)
+    image_data.save(os.path.join('static', 'uploads', filename))
+    return filename
 
 
 # Helper function to generate a unique filename
