@@ -26,7 +26,7 @@ def create_app(environ=None, start_response=None):
   app.config['SESSION_COOKIE_SECURE'] = True
 
   # Configure the static folder to serve images from '/var/static/uploads'
-  app.static_folder = 'ar/static/uploads'
+  app.static_folder = 'var/static/uploads'
 
   # Initialize extensions
   db.init_app(app)
