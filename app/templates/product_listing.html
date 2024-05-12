@@ -51,7 +51,11 @@
                   <div class="col">
                       <div class="card product-card border-0">
                           <div class="magnifier position-relative overflow-hidden">
+                            {% if product.images %}
                               <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
+                            {% else %}
+                              <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image" alt="Placeholder Image">
+                            {% endif %}
                           </div>
 
                           <div class="card-body text-center">
