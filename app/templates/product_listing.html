@@ -51,7 +51,7 @@
                   <div class="col">
                       <div class="card product-card border-0">
                           <div class="magnifier position-relative overflow-hidden">
-                              <img src="{{ url_for('static', filename='uploads/' + product.image_filename) }}" class="card-img-top product-image" alt="{{ product.name }}">
+                              <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
                           </div>
 
                           <div class="card-body text-center">
