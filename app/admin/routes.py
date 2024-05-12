@@ -1,18 +1,30 @@
-from flask import render_template, redirect, url_for, flash, request, abort
-from flask_login import current_user, login_required
-from app.admin import admin_bp
-from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm,  RegistrationForm,  LoginForm, AddLocationForm, AddRoleForm, AddSupplierForm, AddNearestPlaceForm, AddArealineForm
-from app.main.models import User, Role, Cart,  ProductCategory,  Product, Order, OrderItem, Location, Cart, Arealine, NearestPlace, Arealine, UserDeliveryInfo
-from app import db
-from flask import jsonify
-from sqlalchemy import cast, Date, func
-from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
-from app import db, mail
-from flask_mail import Message
-from flask_migrate import Migrate
-from flask_migrate import Migrate
 
+from flask import abort, flash, jsonify, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
+from flask_mail import Message
+from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
+
+from app import db, mail
+from app.admin import admin_bp
+from app.main.forms import (
+    AddArealineForm,
+    AddLocationForm,
+    AddNearestPlaceForm,
+    AddProductCategoryForm,
+)
+from app.main.models import (
+    Arealine,
+    Location,
+    NearestPlace,
+    Order,
+    OrderItem,
+    Product,
+    ProductCategory,
+    Role,
+    User,
+)
 
 
 # Helper function to handle database errors and redirects
@@ -80,7 +92,7 @@ def get_average_order_value_by_day():
 
 
 def fetch_user_activity_timeline():
-    # Fetch user activity data based on your application's logic
+    
     # Example: Assuming you have a 'UserActivity' model with 'timestamp' and 'activity_type' fields
     user_activity_data = (
         db.session.query(UserActivity.timestamp, UserActivity.activity_type)
