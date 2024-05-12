@@ -398,13 +398,9 @@ def add_product_image():
 
 
 def save_image(image_data):
-   
-    filename = generate_unique_filename(image_data.filename)
     
-    static_uploads_folder = os.path.join('/var/static/uploads')
-   
-    image_data.save(os.path.join(static_uploads_folder, filename))
-   
+    filename = generate_unique_filename(image_data.filename)
+    image_data.save(os.path.join('app', 'static', 'uploads', filename))
     return filename
 
 
