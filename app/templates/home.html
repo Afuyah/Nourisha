@@ -2,21 +2,23 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-<!-- Navigation -->
-   
+  
 <!-- Hero Section -->
 <section id="hero" class="hero">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6">
-                <h2 class="display-4 animate__animated animate__fadeInLeft">Your One- Stop Destination for Fresh Groceries</h2>
-                <p class="lead animate__animated animate__fadeInLeft">Get the finest quality products delivered to your doorstep.</p>
-                <div class="text-lg-start text-center"> <!-- Center align the button for lg screens and start (left align) for smaller screens -->
+                <h2 class="display-4 animate__animated animate__fadeInLeft "><b></b>Where Quality Meets Convenience: Your Grocery Haven</b></h2>
+                <p class="lead animate__animated animate__fadeInLeft">Step into a world of freshness and variety at Nourisha Grocery Store, where every visit is a journey of discovery</p>
+                <div class="text-lg-start text-center d-none d-lg-block"> <!-- Display the button only on large screens -->
                     <a href="{{url_for('main.product_listing')}}" class="btn btn-primary btn-lg animate__animated animate__fadeInLeft">Shop Now</a>
                 </div>
             </div>
             <div class="col-lg-6">
-                <img src="/static/uploads/cover.png" class="img-fluid animate__animated animate__fadeInRight" alt="Hero Image">
+                <img src="/static/uploads/cover.png" class="img-fluid animate__animated animate__fadeInRight blur-on-small" alt="Hero Image">
+                <div class="text-center d-lg-none"> <!-- Display the button only on small screens -->
+                    <a href="{{url_for('main.product_listing')}}" class="btn btn-primary btn-lg animate__animated animate__fadeInLeft">Shop Now</a>
+                </div>
             </div>
         </div>
     </div>
@@ -30,47 +32,61 @@
         }
         .hero p.lead {
             font-size: 1rem; /* Adjust the font size for p elements with lead class on small devices */
-           color: grey;
+            color: grey;
+        }
+        .hero .img-fluid {
+            position: relative; /* Ensure the image container is positioned relative */
+        }
+        .hero .img-fluid.blur-on-small {
+            filter: blur(1px); /* Apply a blur effect to the image on small devices */
+        }
+        .hero .btn {
+            position: absolute; /* Position the button absolutely */
+            top: 50%; /* Position the button at the center vertically */
+            left: 30%; /* Center horizontally */
+            transform: translate(-50%, -50%); /* Center horizontally and vertically */
+            z-index: 1; /* Ensure the button appears above the image */
         }
     }
 </style>
 
 
-
    <!-- Featured Products Section -->
 <section id="featured-products" class="featured-products py-5">
     <div class="container">
-        <h2 class="display-4 text-center mb-5">Featured Products</h2>
+        <h3 class="display-4 text-center mb-5">Featured Selections</h2>
+        <p class="section-description">Explore a wide range of products carefully curated for your needs. From fresh produce to pantry essentials, we've got you covered.</p>
+
         <div class="row row-cols-1 row-cols-md-3 g-4">
             <div class="col">
                 <div class="card h-100 border-0 shadow">
-                    <img src="static/uploads/PhotoRoom-20240123_105100_7_20240123084447.png" alt="Dragon Fruit" class="card-img-top">
+                    <img src="static/uploads/PhotoRoom-20240123_105100_7_20240123084447.png" alt="Handpicked Fresh Fruits" class="card-img-top">
                     <div class="card-body">
-                        <h5 class="card-title">Dragon Fruit</h5>
-                        <p class="card-text">Ksh. 1099</p>
-                        <a href="#" class="btn btn-primary btn-sm">Add to Cart</a>
+                        <h4 class="card-title">Handpicked Fresh Fruits</h4>
+                        <p class="card-text">Fresh Fruits, Fresh Flavors, Every Bite Delights!"</p>
+                        <a href="#" class="btn btn-primary btn-sm">Explore...</a>
                     </div>
                 </div>
             </div>
 
             <div class="col">
                 <div class="card h-100 border-0 shadow">
-                    <img src="static/uploads/PhotoRoom-20240123_114305_3_20240123091950.png" alt="Irish Potatoes" class="card-img-top">
+                    <img src="static/cerials.png" alt="Cereal Kingdom" class="card-img-top">
                     <div class="card-body">
-                        <h5 class="card-title">Irish Potatoes</h5>
-                        <p class="card-text">Ksh.105</p>
-                        <a href="#" class="btn btn-primary btn-sm">Add to Cart</a>
+                        <h5 class="card-title">Cereal Kingdom</h5>
+                        <p class="card-text">Discover Exclusive Cereals for a Special Treat!</p>
+                        <a href="#" class="btn btn-primary btn-sm">Explore...</a>
                     </div>
                 </div>
             </div>
 
             <div class="col">
                 <div class="card h-100 border-0 shadow">
-                    <img src="static/uploads/PhotoRoom-20240123_114304_1_20240123084348.png" alt="Product 1" class="card-img-top">
+                    <img src="static/meat1.png" alt="Product 1" class="card-img-top">
                     <div class="card-body">
-                        <h5 class="card-title">Sweet Bananas</h5>
-                        <p class="card-text">Ksh 180</p>
-                        <a href="#" class="btn btn-primary btn-sm">Add to Cart</a>
+                        <h5 class="card-title">Butcher's Picks</h5>
+                        <p class="card-text">Naturally Raised Meats for Quality Conscious!</p>
+                        <a href="#" class="btn btn-primary btn-sm">Explore...</a>
                     </div>
                 </div>
             </div>
@@ -123,54 +139,50 @@
 
 
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="testimonials py-5">
-        <div class="container">
-            <h2 class="display-4 text-center mb-5 animate__animated animate__fadeInDown">What Our Customers Say</h2>
-            <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-                    <div class="carousel-item active">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <p class="card-text">"Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                    Sed euismod felis quis ante laoreet."</p>
-                                <p class="card-text">- John Doe</p>
-                            </div>
+<!-- Testimonials Section -->
+<section id="testimonials" class="testimonials py-5">
+    <div class="container">
+        <h2 class="display-4 text-center mb-5">Real Stories, Real Experiences!</h2>
+        <p class="text-center lead">Discover what our customers have to say about their experiences with us:</p>
+        <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <p class="card-text">"I've been a loyal customer for years, and I'm always impressed by the quality of products and exceptional service. Highly recommend!"</p>
+                            <p class="card-text">- Sarah Johnson</p>
                         </div>
                     </div>
- <div class="carousel-item active">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <p class="card-text">"Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                    Sed euismod felis quis ante laoreet."</p>
-                                <p class="card-text">- John Doe</p>
-                            </div>
-                        </div>
-                    </div>
-                   <div class="carousel-item active">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <p class="card-text">"Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                    Sed euismod felis quis ante laoreet."</p>
-                                <p class="card-text">- John Doe</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Add more testimonials here -->
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel"
-                    data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel"
-                    data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
+                <div class="carousel-item">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <p class="card-text">"The variety of options available is incredible, and I love that I can find everything I need in one place. Great job, team!"</p>
+                            <p class="card-text">- Michael Smith</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <p class="card-text">"I'm amazed by the fast delivery and the freshness of the products. Thank you for making my shopping experience so enjoyable!"</p>
+                            <p class="card-text">- Emily Davis</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Add more testimonials here -->
             </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
         </div>
-    </section>
+    </div>
+</section>
 
 <!-- Special Offers Section -->
 <section id="special-offers" class="special-offers py-5">
@@ -208,9 +220,9 @@
 
 
     <!-- About Us Section -->
-    <section id="about-us" class="about-us py-5">
+    <section id="about-us" class="about-us py-2">
         <div class="container">
-            <h2 class="display-4 text-center mb-5 animate__animated animate__fadeInDown">About Us</h2>
+            <h2 class="display-4 text-center mb-3 animate__animated animate__fadeInDown">About Us</h2>
             <div class="row">
                 <div class="col-md-6">
                     <p class="lead animate__animated animate__fadeInLeft">Your Grocery Store is committed to providing the freshest and highest quality
