@@ -29,16 +29,22 @@
     @media (max-width: 576px) {
         .hero h2.display-4 {
             font-size: 1.8rem; /* Adjust the font size for h2 elements on small devices */
+            padding-top: 52px;
+            color: seagreen;
+            font-weight: 500;
         }
         .hero p.lead {
             font-size: 1rem; /* Adjust the font size for p elements with lead class on small devices */
             color: grey;
+            padding-top: 10px;
+            font-family: Tahoma;
         }
         .hero .img-fluid {
+            
             position: relative; /* Ensure the image container is positioned relative */
         }
         .hero .img-fluid.blur-on-small {
-            filter: blur(1px); /* Apply a blur effect to the image on small devices */
+            filter: blur(0.5px); /* Apply a blur effect to the image on small devices */
         }
         .hero .btn {
             position: absolute; /* Position the button absolutely */
@@ -59,7 +65,7 @@
 
         <div class="row row-cols-1 row-cols-md-3 g-4">
             <div class="col">
-                <div class="card h-100 border-0 shadow">
+                <div class="card h-100 border-0 ">
                     <img src="static/hero.png" alt="Handpicked Fresh Fruits" class="card-img-top">
                     <div class="card-body">
                         <h4 class="card-title">Handpicked Fresh Fruits</h4>
@@ -70,7 +76,7 @@
             </div>
 
             <div class="col">
-                <div class="card h-100 border-0 shadow">
+                <div class="card h-100 border-0 ">
                     <img src="static/cerials.png" alt="Cereal Kingdom" class="card-img-top">
                     <div class="card-body">
                         <h5 class="card-title">Cereal Kingdom</h5>
@@ -81,7 +87,7 @@
             </div>
 
             <div class="col">
-                <div class="card h-100 border-0 shadow">
+                <div class="card h-100 border-0 ">
                     <img src="static/meat1.png" alt="Product 1" class="card-img-top">
                     <div class="card-body">
                         <h5 class="card-title">Butcher's Picks</h5>

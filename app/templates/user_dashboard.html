@@ -133,13 +133,17 @@
 </head>
 
 
-    <!-- Navbar with Sidebar Toggle Button -->
-    <nav class="navbar navbar-expand-md navbar-light bg-light">
-        <button style="background-color:#cdf; color:#000" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar"> More  Actions
-           
-        </button>
-        
-    </nav>
+<!-- Navbar with Sidebar Toggle Button -->
+<nav class="navbar navbar-expand-md navbar-light bg-light">
+    <div class="container-fluid d-flex flex-column align-items-center">
+        <button class="btn btn-primary-outline mb-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+            <i class="fas fa-user"></i> <!-- Font Awesome user icon -->
+       
+        <span class="text-muted">Hi  {{ current_user.username }}</span> <!-- Username -->
+        <i class="fas fa-caret-down text-muted"></i> <!-- Downward arrow icon -->
+             </button>
+    </div>
+</nav>
 
     <!-- Sidebar -->
     <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
