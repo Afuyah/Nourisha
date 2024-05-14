@@ -36,7 +36,9 @@
 
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           
-          <button type="submit" class="btn btn-primary w-100">Register</button>
+          
+        <button type="submit" class="btn btn-success w-100">Register</button>
+          <p>Already Have and Account <a href="{{url_for('main.login')}}"> Login Here </a></p>
         </form>
       </div>
     </div>
