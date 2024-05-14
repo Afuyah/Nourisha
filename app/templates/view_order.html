@@ -1,180 +1,166 @@
-    {% extends 'layout.html' %}
-    {% block content %}
-        <style>
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+{% extends 'layout.html' %}
+{% block content %}
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-            }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 250px;
+            background-color: #fff;
+            padding-top: 60px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
 
+        .sidebar-nav {
+            list-style-type: none;
+            padding-left: 0;
+       
+
+        .sidebar-nav-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            color: #333;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .sidebar-nav-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .sidebar-nav-item i {
+            margin-right: 10px;
+        }
+
+        .sidebar-brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            padding: 20px 20px 10px 20px;
+            text-align: center;
+            background-color: #fff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 1100;
+        }
+
+        .sidebar-brand:hover {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .main-content {
+            padding: 20px;
+            margin-left: 250px;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .order-card {
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s;
+        }
+
+        .order-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-link {
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .order-id {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .status {
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .total {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .date {
+            font-size: 14px;
+            color: #999;
+        }
+
+        @media (max-width: 992px) {
             .sidebar {
                 position: fixed;
                 top: 0;
-                left: 0;
-                height: 100%;
+                left: -250px;
                 width: 250px;
-                background-color: #fff;
-                padding-top: 60px;
-                transition: all 0.3s;
+                height: 100%;
                 z-index: 1000;
-
+                transition: left 0.3s ease-in-out;
             }
 
-            .sidebar-nav {
-                list-style-type: none;
-                padding-left: 0;
-            }
-
-            .sidebar-nav-item {
-                padding: 15px 20px;
-                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-                color: #333;
-                transition: background-color 0.3s;
-                cursor: pointer;
-            }
-
-            .sidebar-nav-item:hover {
-                background-color: #f8f9fa;
-            }
-
-            .sidebar-nav-item i {
-                margin-right: 10px;
-            }
-
-            .sidebar-brand {
-                font-size: 24px;
-                font-weight: bold;
-                color: #333;
-                padding: 20px 20px 10px 20px;
-                text-align: center;
-                background-color: #fff;
-                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-                z-index: 1100;
-            }
-
-            .sidebar-brand:hover {
-                text-decoration: none;
-                color: #333;
+            .sidebar.show {
+                left: 0;
             }
 
             .main-content {
-                padding: 20px;
-                margin-left: 250px;
-                background-color: #fff;
-                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-                border-radius: 10px;
+                margin-left: 0;
+                border-radius: 0;
             }
-
-            .order-card {
-                background-color: #fff;
-                border: 1px solid rgba(0, 0, 0, 0.1);
-                border-radius: 10px;
-                padding: 20px;
-                margin-bottom: 20px;
-                transition: box-shadow 0.3s;
-            }
-
-            .order-card:hover {
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
-
-            .order-link {
-                color: #333;
-                text-decoration: none;
-                cursor: pointer;
-            }
-
-            .order-id {
-                font-size: 18px;
-                font-weight: bold;
-                margin-bottom: 10px;
-                color: #555;
-            }
-
-            .status {
-                font-size: 16px;
-                margin-bottom: 10px;
-                font-weight: bold;
-                color: #007bff;
-            }
-
-            .total {
-                font-size: 16px;
-                font-weight: bold;
-                margin-bottom: 10px;
-                color: #555;
-            }
-
-            .date {
-                font-size: 14px;
-                color: #999;
-            }
-
-            @media (max-width: 992px) {
-                .sidebar {
-                    position: fixed;
-                    top: 0;
-                    left: -250px;
-                    width: 250px;
-                    height: 100%;
-                    z-index: 1000;
-                    transition: left 0.3s ease-in-out;
-                }
-
-                .sidebar.show {
-                    left: 0;
-                }
-
-                .main-content {
-                    margin-left: 0;
-                    border-radius: 0;
-                }
-            }
-        </style>
-    </head>
-
+        }
+    </style>
 
     <!-- Navbar with Sidebar Toggle Button -->
     <nav class="navbar navbar-expand-md navbar-light bg-light">
         <div class="container-fluid d-flex flex-column align-items-center">
-            <button class="btn btn-primary-outline mb-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
-                <i class="fas fa-user"></i> <!-- Font Awesome user icon -->
-
-            <span class="text-muted">Hi  {{ current_user.username }}</span> <!-- Username -->
-            <i class="fas fa-caret-down text-muted"></i> <!-- Downward arrow icon -->
-                 </button>
+            <button class="btn btn-outline-primary mb-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+                <i class="fas fa-cog fa-spin"></i>
+                <span class="text-muted">Hi {{ current_user.username }}</span>
+                <i class="fas fa-caret-down text-muted"></i>
+            </button>
         </div>
     </nav>
 
-        <!-- Sidebar -->
-        <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title">Menu</h5>
-                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body">
-
+    <!-- Sidebar -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Menu</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
             <ul class="sidebar-nav">
+                <li class="sidebar-nav-item"><a href="#" class="text-primary"><i class="fas fa-user"></i> Profile Settings</li>
+                <li class="sidebar-nav-item"><a href="#" class="text-primary"><i class="fas fa-clipboard-list"></i> Orders</li>
+                <li class="sidebar-nav-item"><a href="#" class="text-primary"><i class="fas fa-envelope"></i> Messages</li>
+                <li class="sidebar-nav-item"><a href="#" class="text-primary"><i class="fas fa-star"></i> Reviews</li>
+                <li class="sidebar-nav-item"><a href="#" class="text-primary"><i class="fas fa-envelope-square"></i>Private Messages</a>
                 <li class="sidebar-nav-item">
-                    <i class="fas fa-user"></i> Profile Settings
-                </li>
-                <li class="sidebar-nav-item">
-                    <i class="fas fa-clipboard-list"></i> Orders
-                </li>
-                <li class="sidebar-nav-item">
-                    <i class="fas fa-envelope"></i> Messages
-                </li>
-                <li class="sidebar-nav-item">
-                    <i class="fas fa-star"></i> Reviews
-                </li>
-                <li class="sidebar-nav-item">
-                    <i class="fas fa-envelope-square"></i> Private Messages
-                </li>
-                <li class="sidebar-nav-item">
-                    <i class="fas fa-sign-out-alt"></i> Logout
+                    <a href="{{ url_for('main.logout') }}" class="text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </li>
             </ul>
         </div>
-        </div>
+    </div>
+
+    <!-- Main Content -->
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
@@ -183,16 +169,15 @@
                     <div class="card-body">
                         <h5>Order #{{ order.id }}</h5>
                         <p><strong>Status:</strong> {{ order.status }}</p>
-                        <p><strong>Order Date:</strong>
-                            {{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                        <p><strong>Order Date:</strong> {{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
                         <p><strong>Delivery Address:</strong> {{ order.address_line }}</p>
                         <p><strong>Total Price:</strong> Ksh.{{ order.total_price }}</p>
                     </div>
                 </div>
             </div>
-        </div>
+        
 
-        <div class="row">
+        
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header">Order Items</div>
@@ -201,7 +186,7 @@
                             <thead>
                                 <tr>
                                     <th>Product</th>
-                                    <th>Quantity</th>
+                                    <th>Qty</th>
                                     <th>Unit Price</th>
                                     <th>Total</th>
                                 </tr>
@@ -220,10 +205,9 @@
                     </div>
                 </div>
             </div>
-        </div>
+      
 
         {% if order.location %}
-
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">Order Tracking</div>
@@ -231,8 +215,8 @@
                     {% if order.status == 'canceled' %}
                     <div class="alert alert-danger" role="alert">
                         This order has been canceled.
-                        <p class="lead text-center ">
-                            <a href="{{url_for('main.product_listing')}}"> SHOP NOW!!!"</a>
+                        <p class="lead text-center">
+                            <a href="{{ url_for('main.product_listing') }}">SHOP NOW!!!</a>
                         </p>
                     </div>
                     {% else %}
@@ -254,10 +238,18 @@
             </div>
         </div>
         {% endif %}
-    </div>
+    </div></div>
+<div class="container">
+    <button class="btn btn-outline-primary mt-4" >
+        <a href= "{{url_for('main.user_dashboard')}}" class="text-primary">
+        <i class="fas fa-arrow-left"></i>
+        <span class="text-muted">Back To Orders </span>
+        
+    </button>
+</div>
 
     <!-- Bootstrap JS and Popper.js -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
 {% endblock %}
