@@ -14,7 +14,7 @@
             background-color: #fff;
             padding-top: 60px;
             transition: all 0.3s;
-            z-index: 1000;
+            z-index: 1000;5
         }
 
         .sidebar-nav {
@@ -167,16 +167,25 @@
                 <div class="card">
                     <div class="card-header">Order Details</div>
                     <div class="card-body">
-                        <h5>Order #{{ order.id }}</h5>
+                        <h5>Order #N-G-0{{ order.id }}</h5>
                         <p><strong>Status:</strong> {{ order.status }}</p>
                         <p><strong>Order Date:</strong> {{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
                         <p><strong>Delivery Address:</strong> {{ order.address_line }}</p>
                         <p><strong>Total Price:</strong> Ksh.{{ order.total_price }}</p>
+
+                        <div class="order">
+                            
+                            <!-- Order details here -->
+                            <button class="btn btn-success reorder-btn" data-order-id="{{ order.id }}">Re-order</button>
+                        </div>
                     </div>
                 </div>
+                
             </div>
         
-
+            
+           
+            
         
             <div class="col-lg-12">
                 <div class="card">
@@ -240,14 +249,36 @@
         {% endif %}
     </div></div>
 <div class="container">
-    <button class="btn btn-outline-primary mt-4" >
+    <button class="btn btn-outline-primary mt-4 mb-4" >
         <a href= "{{url_for('main.user_dashboard')}}" class="text-primary">
         <i class="fas fa-arrow-left"></i>
         <span class="text-muted">Back To Orders </span>
         
     </button>
 </div>
+<script>
 
+    document.querySelectorAll('.reorder-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const orderId = button.getAttribute('data-order-id');
+            fetch(`/order/reorder/${orderId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/cart/view_cart';
+                } else {
+                    console.error('Failed to reorder');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+</script>
     <!-- Bootstrap JS and Popper.js -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

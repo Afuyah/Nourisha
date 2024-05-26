@@ -455,7 +455,7 @@ def product_listing_by_category(category_id):
 @login_required
 def view_order(order_id):
   order = Order.query.get_or_404(order_id)
-  return render_template('view_order.html', order=order)
+  return render_template('user_view_order.html', order=order)
 
 @bp.route('/search', methods=['GET', 'POST'])
 def search():

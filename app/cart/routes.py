@@ -356,6 +356,39 @@ def checkout():
     return render_template('checkout.html', form=form, cart_items=cart_items, total_price=total_price)
 
 
+@cart_bp.route('/order/reorder/<int:order_id>', methods=['POST'])
+@login_required
+def reorder(order_id):
+    user_id = current_user.id
+    order = Order.query.get_or_404(order_id)
+
+    if order.user_id != user_id:
+        flash('Unauthorized access to the order.', 'danger')
+        return redirect(url_for('main.view_orders'))
+
+    # Clear the user's current cart
+    Cart.query.filter_by(user_id=user_id).delete()
+
+    # Add items from the previous order to the current cart
+    for item in order.items:
+        product = Product.query.get(item.product_id)
+        if product:
+            cart_item = Cart(
+                user_id=user_id,
+                product_id=product.id,
+                quantity=item.quantity,
+                custom_description=item.custom_description
+            )
+            db.session.add(cart_item)
+
+    db.session.commit()
+    return redirect(url_for('cart.view_cart'))
+
+
+
+
+
+
 # Function to send order confirmation emails
 def  send_order_confirmation_email(user_email, admin_email, order):
     user_subject = 'Order Confirmation - Your Order was Successful'

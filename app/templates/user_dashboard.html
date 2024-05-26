@@ -3,9 +3,8 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            
+           
         }
-
         .sidebar {
             position: fixed;
             top: 0;
@@ -172,7 +171,7 @@
                     {% for order in orders %}
                     <div class="order-card">
                         <a href="{{ url_for('main.view_order', order_id=order.id) }}" class="order-link">
-                            <span class="order-id">#{{ order.id }}</span> 
+                            <span class="order-id">#N-G-0{{ order.id }}</span> 
                             <span class="status {% if order.status == 'pending' %}text-danger{% elif order.status == 'confirmed' %}text-success{% else %}text-muted{% endif %} ms-3">
                              Date:   {{ order.order_date.strftime('%Y-%m-%d')  }}
                             </span>

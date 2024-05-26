@@ -1,9 +1,6 @@
 
-
-
-
 main {
-    padding: 20px;
+    padding: 0px;
 }
 
 footer {
@@ -40,7 +37,7 @@ form {
 }
 
 .btn {
-    background-color: #4CAF50;
+    background-color: #80b380;
     color: white;
     padding: 10px 15px;
     border: none;
@@ -71,11 +68,7 @@ form {
 h1,h2,h3,h4,h5,h6{
     font-family: "inter", sans-serif;
     font-weight: 600;
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f8f9fa;
-    margin: 0;
-}
+
 
 .container {
     padding-top: 20px;
