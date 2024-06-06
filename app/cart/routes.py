@@ -10,6 +10,8 @@ from flask_mail import Message
 from app.main import bp
 from functools import wraps
 
+
+
 # Decorator for login-required routes
 def login_required(func):
     @wraps(func)
@@ -356,37 +358,44 @@ def checkout():
     return render_template('checkout.html', form=form, cart_items=cart_items, total_price=total_price)
 
 
-@cart_bp.route('/order/reorder/<int:order_id>', methods=['POST'])
+@cart_bp.route('/reorder/<int:order_id>', methods=['POST'])
 @login_required
 def reorder(order_id):
-    user_id = current_user.id
-    order = Order.query.get_or_404(order_id)
+    try:
+        order = Order.query.get_or_404(order_id)
+        if order.user_id != current_user.id:
+            return jsonify({'error': 'Unauthorized'}), 403
 
-    if order.user_id != user_id:
-        flash('Unauthorized access to the order.', 'danger')
-        return redirect(url_for('main.view_orders'))
+        for item in order.order_items:
+            product = Product.query.get(item.product_id)
+            if not product:
+                return jsonify({'error': f'Product with id {item.product_id} not found'}), 404
 
-    # Clear the user's current cart
-    Cart.query.filter_by(user_id=user_id).delete()
+            # Update the price to the current price
+            current_price = product.unit_price
 
-    # Add items from the previous order to the current cart
-    for item in order.items:
-        product = Product.query.get(item.product_id)
-        if product:
-            cart_item = Cart(
-                user_id=user_id,
-                product_id=product.id,
-                quantity=item.quantity,
-                custom_description=item.custom_description
-            )
-            db.session.add(cart_item)
+            # Check if item already exists in the cart
+            cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product.id).first()
+            if cart_item:
+                cart_item.quantity += item.quantity
+                cart_item.unit_price = current_price  # Update to current price
+            else:
+                # Add to cart
+                new_cart_item = Cart(
+                    user_id=current_user.id,
+                    product_id=product.id,
+                    quantity=item.quantity,
+                    
+                    custom_description=item.custom_description
+                )
+                db.session.add(new_cart_item)
 
-    db.session.commit()
-    return redirect(url_for('cart.view_cart'))
+        db.session.commit()
+        return redirect(url_for('cart.view_cart'))
 
-
-
-
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 
 # Function to send order confirmation emails

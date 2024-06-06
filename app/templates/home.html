@@ -93,10 +93,11 @@
         }
 
         .hero p.lead {
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: #E6B0AA;
             padding-top: 16px;
             font-family: 'Arial', sans-serif;
+
         }
 
         .full-height {
@@ -105,6 +106,13 @@
             position: relative;
             overflow: hidden;
             background: url('/static/cover_1.jpeg') no-repeat center center/cover; /* Set background image */
+        }
+        .hero .btn {
+            position: relative;
+            top: 90%;
+            left: 10%;
+            transform: translate(-50%, -50%);
+            z-index: 3; /* Ensure the button appears above the overlay */
         }
 
        
