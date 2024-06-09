@@ -7,7 +7,6 @@ from itsdangerous import URLSafeTimedSerializer as Serializer
 from app import db
 from sqlalchemy import event
 
-
 # Role model for user roles
 class Role(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -122,8 +121,8 @@ class Product(db.Model):
                           db.ForeignKey('supplier.id'),
                           nullable=False)
   date_added = db.Column(db.Date, nullable=False)
- 
-  
+
+
   # Define relationships with Supplier and ProductCategory and images
   supplier = db.relationship('Supplier', back_populates='products')
   category = db.relationship('ProductCategory', back_populates='products')
@@ -167,7 +166,7 @@ class Order(db.Model):
       db.String(50),
       default='pending')  # Status can be 'pending', 'confirmed', etc.
   order_date = db.Column(db.DateTime, default=datetime.utcnow)
-  
+
   expected_delivery_date = db.Column(db.Date)
   total_price = db.Column(db.Float, nullable=False)
   custom_description = db.Column(db.Text)
@@ -205,24 +204,19 @@ class Order(db.Model):
   # Relationship with OrderItem
   order_items = db.relationship('OrderItem', back_populates='order')
 
-  
-# OrderItem model for handling order items
+
 class OrderItem(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
-  product_id = db.Column(db.Integer,
-                         db.ForeignKey('product.id'),
-                         nullable=False)
+  product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
   quantity = db.Column(db.Integer, nullable=False)
   unit_price = db.Column(db.Float, nullable=False)
   custom_description = db.Column(db.Text)
+  fulfillment_status = db.Column(db.String(20), nullable=False, default='Not fulfilled')  # Add default value
+
   # Define the relationship with Order
   order = db.relationship('Order', back_populates='order_items')
   product = db.relationship('Product', back_populates='order_items')
-
-  def update_product_quantity_sold(self):
-    # Update the quantity_sold field for the associated product
-    self.product.quantity_sold += self.quantity
 
 
 class Location(db.Model):

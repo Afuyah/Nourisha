@@ -136,3 +136,26 @@ class CheckoutForm(FlaskForm):
   def set_nearest_place_choices(self, nearest_places):
     self.nearest_place.choices = [(place.id, place.name)
                                   for place in nearest_places]
+
+
+
+class DateSelectionForm(FlaskForm):
+    order_date = DateField('Select Order Date', format='%Y-%m-%d', validators=[DataRequired()])
+    submit = SubmitField('View Orders')
+
+class FulfillmentForm(FlaskForm):
+  hidden_tag = HiddenField()
+  expected_delivery_date = DateField('Expected Delivery Date', format='%Y-%m-%d', validators=[DataRequired()])
+
+class ConfirmOrderForm(FlaskForm):
+  expected_delivery_date = DateField('Expected Delivery Date', validators=[DataRequired()])
+  submit = SubmitField('Confirm Order')
+
+
+class ExpectedDeliveryDateForm(FlaskForm):
+    expected_delivery_date = DateField('Expected Delivery Date', validators=[DataRequired()], format='%Y-%m-%d')
+    submit = SubmitField('Confirm Order')
+
+def validate_expected_delivery_date(self, field):
+        if field.data < date.today():
+            raise ValidationError('Invalid Delivery date')

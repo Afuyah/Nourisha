@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Order Details</h1>
+    <div class="card mb-4 shadow">
+        <div class="card-header">
+            <h3>Order ID: {{ order.id }}</h3>
+        </div>
+        <div class="card-body">
+            <!-- Order Details Section -->
+            <p><strong>Customer:</strong> {{ order.user.name }}</p>
+            <p><strong>Order Date:</strong> {{ order.order_date.strftime('%Y-%m-%d') }}</p>
+            <p><strong>Total Amount:</strong> Ksh. {{ order.total_price }}</p>
+            <p><strong>Status:</strong> <span class="badge bg-info text-dark">{{ order.status }}</span></p>
+            <p><strong>Expected Delivery Date:</strong> {{ order.expected_delivery_date.strftime('%Y-%m-%d') if order.expected_delivery_date else 'N/A' }}</p>
+            <p><strong>Payment Status:</strong> {{ order.payment_status }}</p>
+            <p><strong>Address:</strong> {{ order.address_line }}</p>
+            <p><strong>Additional Info:</strong> {{ order.additional_info }}</p>
+
+            <h3 class="mt-4">Order Items</h3>
+            <ul class="list-group">
+                {% for item in order.order_items %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ item.product.name }} - Quantity: {{ item.quantity }} - Unit Price: Ksh. {{ item.unit_price }}
+                        <span class="badge {% if item.fulfillment_status == 'Fulfilled' %}bg-success{% else %}bg-secondary{% endif %}">{{ item.fulfillment_status }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="card-footer">
+            <!-- Actions based on order status -->
+            {% if order.status == 'pending' %}
+                <!-- Confirm Order -->
+                <form method="POST" action="{{ url_for('admin.confirm_order', order_id=order.id) }}" id="confirmOrderForm">
+                    {{ form.hidden_tag() }} {{ form.csrf_token }}
+                    <div class="form-group">
+                        <label for="expected_delivery_date" class="form-label">Expected Delivery Date</label>
+                        {{ form.expected_delivery_date(class="form-control", placeholder="YYYY-MM-DD") }}
+                    </div>
+                    <button type="submit" class="btn btn-success">Confirm Order</button>
+                </form>
+            {% elif order.status == 'confirmed' %}
+                <!-- Fulfill Order -->
+                <button class="btn btn-primary" data-toggle="modal" data-target="#fulfillModal">Fulfill Order</button>
+            {% elif order.status == 'out for delivery' %}
+                <!-- Mark as Delivered -->
+                <form method="POST" action="{{ url_for('admin.mark_delivered', order_id=order.id) }}" id="markDeliveredForm">
+                    {{ form.hidden_tag() }} {{ form.csrf_token }}
+                    <h5>Mark Delivered Items</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.order_items %}
+                                {% if item.fulfillment_status == 'Fulfilled' %}
+                                    <tr>
+                                        <td>{{ item.product.name }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>{{ item.unit_price }}</td>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="{{ item.id }}" id="deliveredItem{{ item.id }}" name="delivered_items">
+                                                <label class="form-check-label" for="deliveredItem{{ item.id }}">Delivered</label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-success">Mark as Delivered</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Fulfillment Modal -->
+<div class="modal fade" id="fulfillModal" tabindex="-1" aria-labelledby="fulfillModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin.fulfill_order', order_id=order.id) }}">
+                {{ form.hidden_tag() }} {{ form.csrf_token }}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fulfillModalLabel">Fulfill Order</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h5>Select items to Fulfill</h5>
+                    <table class="table-responsive">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.order_items %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ item.unit_price }}</td>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="{{ item.id }}" id="item{{ item.id }}" name="items">
+                                            <label class="form-check-label" for="item{{ item.id }}">Fulfill</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Fulfill Selected Items</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<style>
+    .container {
+        background-color: #f0f8ff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h2, h3 {
+        font-family: 'Arial', sans-serif;
+        color: #333;
+    }
+
+    .form-control {
+        border-radius: 5px;
+    }
+
+    .btn-primary,
+    .btn-success {
+        border-radius: 5px;
+    }
+
+    .modal-content {
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}

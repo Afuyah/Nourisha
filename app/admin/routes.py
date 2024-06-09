@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from flask import abort, flash, jsonify, redirect, render_template, request, url_for
+from flask import abort, flash, jsonify, redirect, render_template, request, url_for, Response, send_file, current_app
 from flask_login import current_user, login_required
 from flask_mail import Message
 from sqlalchemy import func
@@ -8,11 +8,27 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app import db, mail
 from app.admin import admin_bp
+
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch, mm
+import os
+from io import StringIO
+import csv
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
 from app.main.forms import (
     AddArealineForm,
     AddLocationForm,
     AddNearestPlaceForm,
     AddProductCategoryForm,
+    DateSelectionForm,
+    FulfillmentForm,
+ExpectedDeliveryDateForm,
 )
 from app.main.models import (
     Arealine,
@@ -102,6 +118,14 @@ def fetch_user_activity_timeline():
     )
 
     return user_activity_data
+
+
+@admin_bp.route('/all_users')
+def all_users():
+    users = User.query.all()
+    return render_template('system_users.html', users=users)
+
+
 
 @admin_bp.route('/admin_dashboard', methods=['GET', 'POST'])
 @login_required
@@ -377,15 +401,7 @@ def view_order_details(order_id):
 
     return handle_db_error_and_redirect(route)
 
-@admin_bp.route('/confirm_order/<int:order_id>', methods=['POST'])
-@login_required
-def confirm_order(order_id):
-    if not current_user.is_authenticated or (current_user.role and current_user.role.name != 'admin'):
-        abort(403)
 
-    order = Order.query.get_or_404(order_id)
-    order.status = 'confirmed'
-    db.session.commit()
 
     # Send confirmation email
     msg = Message('Order Confirmation', recipients=[order.user.email])
@@ -468,3 +484,227 @@ def sendmail(subject, recipients, body):
     msg = Message(subject, recipients=recipients)
     msg.body = body
     mail.send(msg)
+
+
+
+
+
+
+
+@admin_bp.route('/generate_pdf')
+@login_required  # Ensure this route is protected
+def generate_pdf():
+    users = User.query.all()  # Fetch all users
+
+    # Create a buffer to hold the PDF data
+    pdf_buffer = BytesIO()
+    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+
+    # Sample styles for paragraphs and table
+    styles = getSampleStyleSheet()
+    title_style = styles['Title']
+    subtitle_style = ParagraphStyle('Subtitle', fontSize=14, spaceAfter=12, alignment=1)
+    table_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#4BACC6")),  # Header background
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Header text color
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#D9EAD3")),  # Body background
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor("#D9EAD3"), colors.white]),  # Alternating rows
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+    ])
+
+    # Adding a logo to the document
+    elements = []
+    logo_path = os.path.join(current_app.static_folder, 'logoford.png')  # Path to the logo file
+
+    if os.path.exists(logo_path):  # Ensure the logo file exists
+        logo = Image(logo_path, width=2.5 * inch, height=1 * inch)  # Adjust size as needed
+        logo.hAlign = 'CENTER'  # Align the logo at the center
+        elements.append(logo)
+        elements.append(Spacer(1, 0.2 * inch))  # Add some space below the logo
+
+    # Adding a title and other elements
+    elements.append(Paragraph("User Report", title_style))
+    elements.append(Spacer(1, 0.2 * inch))  # Add some space after the title
+    elements.append(Paragraph("A detailed list of all users", subtitle_style))
+    elements.append(Spacer(1, 0.2 * inch))
+
+    # Define table headers and data
+    table_data = [['#', 'Username', 'Email', 'Phone', 'Name']]
+    for user in users:
+        table_data.append([
+            str(user.id),
+            user.username,
+            user.email,
+            user.phone,
+            user.name
+            
+        ])
+
+    # Create the table and apply styling
+    table = Table(table_data, hAlign='LEFT', colWidths=[0.7 * inch, 1.2 * inch, 1.8 * inch, 1.2 * inch, 1.5 * inch, 1.5 * inch, 1.5 * inch, 1.5 * inch, 1 * inch])
+    table.setStyle(table_style)
+    elements.append(table)
+
+    # Footer with page number (added during the build process)
+    def add_page_number(canvas, doc):
+        page_num = canvas.getPageNumber()
+        text = f"Page {page_num}"
+        canvas.drawRightString(200 * mm, 10 * mm, text)  # Positioned 200 mm from the left, and 10 mm from the bottom
+
+    # Build the PDF
+    pdf.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
+
+    # Move the buffer's cursor to the beginning
+    pdf_buffer.seek(0)
+
+    # Return the PDF file as a response
+    return send_file(
+        pdf_buffer,
+        as_attachment=True,  # Forces the browser to prompt a download
+        download_name='nourisha_users.pdf',  # Name of the downloaded file
+        mimetype='application/pdf'
+    )
+
+
+
+
+@admin_bp.route('/generate_csv')
+def generate_csv():
+    users = User.query.all()
+
+    # Create an in-memory file-like object to write CSV data
+    csv_data = StringIO()
+    writer = csv.writer(csv_data)
+
+    # Write the header row
+    writer.writerow([ 'Username', 'Email', 'Phone', 'Name', 'Registration Date', 'Last Login Date', 'Last Login IP' ])
+
+    # Write data rows
+    for user in users:
+        writer.writerow([
+           
+            user.username,
+            user.email,
+            user.phone,
+            user.name,
+            str(user.registration_date),
+            str(user.last_login_date),
+            user.last_login_ip,
+            
+        ])
+
+    # Seek to the beginning of the StringIO buffer
+    csv_data.seek(0)
+
+    # Return the CSV data as a response
+    return Response(
+        csv_data,
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=users.csv'}
+    )
+
+
+# View Orders by Date
+@admin_bp.route('/view_orders_by_date', methods=['GET', 'POST'])
+@login_required
+def view_orders_by_date():
+    form = DateSelectionForm()
+    orders = None
+    if form.validate_on_submit():
+        selected_date = form.order_date.data
+        start_date = datetime.combine(selected_date, datetime.min.time())
+        end_date = datetime.combine(selected_date, datetime.max.time())
+        orders = Order.query.filter(
+            Order.order_date >= start_date,
+            Order.order_date <= end_date
+        ).all()
+    return render_template('view_orders_by_date.html', form=form, orders=orders)
+
+# Order Details
+@admin_bp.route('/admin/order/<int:order_id>', methods=['GET'])
+@login_required
+def order_details(order_id):
+    order = Order.query.get_or_404(order_id)
+    form = FulfillmentForm()  # Create the form instance
+    return render_template('order_details.html', order=order, form=form)
+
+# Confirm Order
+@admin_bp.route('/admin/confirm_order/<int:order_id>', methods=['POST'])
+@login_required
+def confirm_order(order_id):
+        order = Order.query.get_or_404(order_id)
+        form = ExpectedDeliveryDateForm()
+
+        if form.validate_on_submit() and order.status == 'pending':
+            expected_delivery_date = form.expected_delivery_date.data
+            order.status = 'confirmed'
+            order.expected_delivery_date = expected_delivery_date  # Update the delivery date
+            db.session.commit()
+            flash('Order confirmed and expected delivery date updated successfully.', 'success')
+        else:
+            flash('Error confirming order or invalid data. Ensure the delivery date is not in the past.', 'danger')
+
+        return redirect(url_for('admin.order_details', order_id=order_id))
+    
+
+# Fulfill Order
+@admin_bp.route('/admin/fulfill_order/<int:order_id>', methods=['POST'])
+@login_required
+def fulfill_order(order_id):
+    order = Order.query.get_or_404(order_id)
+    form = request.form
+
+    if order.status == 'confirmed':
+        selected_items = form.getlist('items')
+        if selected_items:
+            for item_id in selected_items:
+                item = OrderItem.query.get_or_404(item_id)
+                item.fulfillment_status = 'Fulfilled'
+                product = item.product
+                product.quantity_sold += item.quantity
+
+            order.status = 'out for delivery'
+            db.session.commit()
+            flash('Selected items fulfilled successfully.', 'success')
+        else:
+            flash('No items selected for fulfillment.', 'warning')
+    else:
+        flash('Failed to fulfill order. Please ensure the order is confirmed.', 'danger')
+
+    return redirect(url_for('admin.order_details', order_id=order_id))
+
+@admin_bp.route('/admin/mark_item_fulfilled/<int:item_id>', methods=['POST'])
+@login_required
+def mark_item_fulfilled(item_id):
+    item = OrderItem.query.get_or_404(item_id)
+    if item.order.status == 'confirmed' and item.fulfillment_status != 'Fulfilled':
+        item.fulfillment_status = 'Fulfilled'
+        product = item.product
+        product.quantity_sold += item.quantity
+        db.session.commit()
+        flash('Item marked as fulfilled successfully.', 'success')
+    else:
+        flash('Failed to mark item as fulfilled. Please ensure the order is confirmed and the item is not already fulfilled.', 'danger')
+    return redirect(url_for('admin.order_details', order_id=item.order.id))
+
+
+
+
+# Mark Order as Delivered
+@admin_bp.route('/admin/mark_delivered/<int:order_id>', methods=['POST'])
+@login_required
+def mark_delivered(order_id):
+    order = Order.query.get_or_404(order_id)
+    if order.status == 'out for delivery':
+        order.status = 'delivered'
+        db.session.commit()
+        flash('Order marked as delivered.', 'success')
+    return redirect(url_for('admin.order_details', order_id=order_id))

@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">View Orders by Date</h1>
+
+    <!-- Order Date Form -->
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form method="POST" action="{{ url_for('admin.view_orders_by_date') }}" class="shadow p-4 rounded bg-light">
+                {{ form.hidden_tag() }}
+                <div class="form-group mb-3">
+                    <label for="order_date" class="form-label"><i class="fa fa-calendar"></i> {{ form.order_date.label }}</label>
+                    {{ form.order_date(class="form-control", placeholder="YYYY-MM-DD") }}
+                    <small class="form-text text-muted">Select a date to view the orders.</small>
+                </div>
+                <div class="text-center">
+                    {{ form.submit(class="btn btn-primary btn-block") }}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    {% if orders %}
+        <h2 class="text-center mt-5">Orders for {{ form.order_date.data }}</h2>
+        <div class="table-responsive mt-4">
+            <table class="table table-hover table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer Name</th>
+                        <th>Order Date</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Expected Delivery Date</th>
+                        <th>Payment Status</th>
+                        <th>Payment Date</th>
+                        <th>Transaction ID</th>
+                        <th>Phone Number</th>
+                        <th>Address Line</th>
+                        <th>Additional Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr class="clickable-row" data-href="{{ url_for('admin.order_details', order_id=order.id) }}">
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.user.name }}</td>
+                            <td>{{ order.order_date.strftime('%Y-%m-%d') }}</td>
+                            <td>Ksh. {{ order.total_price }}</td>
+                            <td><span class="badge bg-info text-dark">{{ order.status }}</span></td>
+                            <td>{{ order.expected_delivery_date.strftime('%Y-%m-%d') if order.expected_delivery_date else 'N/A' }}</td>
+                            <td>
+                                <span class="badge {{ 'bg-success' if order.payment_status == 'paid' else 'bg-warning' }}">
+                                    {{ order.payment_status.capitalize() }}
+                                </span>
+                            </td>
+                            <td>{{ order.payment_date.strftime('%Y-%m-%d') if order.payment_date else 'N/A' }}</td>
+                            <td>{{ order.transaction_id if order.transaction_id else 'N/A' }}</td>
+                            <td>{{ order.phone_number if order.phone_number else 'N/A' }}</td>
+                            <td>{{ order.address_line }}</td>
+                            <td>{{ order.additional_info if order.additional_info else 'N/A' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elif orders is not none %}
+        <p class="text-center mt-5">No orders found for the selected date.</p>
+    {% endif %}
+</div>
+
+<!-- Custom CSS for further enhancement -->
+<style>
+    .container {
+        background-color: #f0f8ff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    h1, h2 {
+        font-family: 'Arial', sans-serif;
+        color: #333;
+    }
+    .form-control {
+        border-radius: 5px;
+    }
+    .btn-primary {
+        border-radius: 5px;
+        width: 100%;
+    }
+    .table {
+        margin-top: 20px;
+    }
+    .table th, .table td {
+        text-align: center;
+        vertical-align: middle;
+    }
+    .table-hover tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+    .table-secondary {
+        background-color: #f9f9f9;
+    }
+    ul {
+        padding-left: 20px;
+    }
+    .list-unstyled {
+        margin: 0;
+    }
+    .badge {
+        padding: 5px 10px;
+    }
+    .badge.bg-success {
+        background-color: #28a745;
+    }
+    .badge.bg-warning {
+        background-color: #ffc107;
+    }
+    .badge.bg-info {
+        background-color: #17a2b8;
+    }
+    .fa {
+        margin-right: 5px;
+    }
+    .clickable-row {
+        cursor: pointer;
+    }
+</style>
+
+<!-- Bootstrap and FontAwesome for icons -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+<!-- JavaScript to handle row clicks -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.clickable-row').forEach(row => {
+            row.addEventListener('click', function() {
+                window.location = this.dataset.href;
+            });
+        });
+    });
+</script>
+{% endblock %}

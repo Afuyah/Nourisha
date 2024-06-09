@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container mb-5 p-5">
+        <h1>All Users</h1>
+        <div class="mb-3">
+            <a href="{{ url_for('admin.generate_pdf') }}" class="btn btn-primary">Generate PDF</a>
+            <a href="{{ url_for('admin.generate_csv') }}" class="btn btn-primary">Generate CSV</a>
+        </div>
+        <div class="table">
+            <table id="users-table" class="table table-striped table-bordered table-hover" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Name</th>
+                        <th>Registration Date</th>
+                        <th>Last Login Date</th>
+                        <th>Last Login IP</th>
+                        <th>Role</th>
+                        <th>Confirmed</th>
+                       
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.phone }}</td>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.registration_date }}</td>
+                            <td>{{ user.last_login_date }}</td>
+                            <td>{{ user.last_login_ip }}</td>
+                            <td>{{ user.role.name if user.role else 'N/A' }}</td>
+                            <td>{{ 'Yes' if user.confirmed else 'No' }}</td>
+                           
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<!-- Include jQuery and DataTables libraries -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
+<script>
+    $(document).ready( function () {
+        $('#users-table').DataTable();
+    });
+</script>
+
+{% endblock %}

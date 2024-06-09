@@ -11,3 +11,4 @@ flask_cors
 mysqlclient
 psycopg2
 pg8000
+reportlab

@@ -2,171 +2,140 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Naurisha Admin Dashboard</title>
 
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='styles/styles.css') }}"
-    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}" />
     <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-      crossorigin="anonymous"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
     <!-- Font Awesome -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
 
-    <script
-      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
-      crossorigin="anonymous"
-    ></script>
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
 
-<!-- Leaflet JavaScript -->
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Leaflet.heat JavaScript -->
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
 
-<!-- Leaflet.heat JavaScript -->
-<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-
-
-    <script
-      type="text/javascript"
-      charset="utf8"
-      src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"
-    ></script>
     <style>
+      /* General styling for the body */
+      body {
+          font-family: 'Arial', sans-serif;
+          margin: 0;
+          background-color: #f4f4f4;
+      }
+      .flash-message {
+          margin-bottom: 10px;
+      }
+      /* Sidebar initial closed state */
+      #sidebar {
+        width: 250px;
+        background: grey;
+        color: #fff;
+        position: fixed;
+        left: -250px; /* Start off-screen */
+        top: 0;
+        height: 100%;
+        transition: left 0.3s ease-in-out;
+      }
+
+      /* Content area default style */
+      #content {
+        margin-left: 0; /* Full width when sidebar is closed */
+        transition: margin-left 0.3s ease-in-out;
+      }
+
       /* CSS to remove underlines from sidebar links */
       #sidebar ul li a {
         text-decoration: none;
+        display: block;
+        padding: 5px 10px;
+        color: #000;
+      }
+
+      
+
+      .navbar .btn {
+        background-color: #000;
+        border: none;
+      }
+
+      .navbar .btn:hover {
+        background-color: #218838;
       }
     </style>
   </head>
 
   <body>
-    
     <div id="sidebar">
       <div class="sidebar-heading">Naurisha Groceries</div>
       <ul>
-        <li><a class="fas fa-tachometer-alt" href="{{ url_for('admin.admin_dashboard')}}"> Dashboard </a> </li>
+        <li><a class="fas fa-tachometer-alt" href="{{ url_for('admin.admin_dashboard') }}"> Dashboard </a></li>
         <li class="dropdown">
-          <a
-            class="dropdown-toggle"
-            href="#"
-            role="button"
-            id="productsDropdown"
-            data-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false"
-          >
+          <a class="dropdown-toggle" href="#" role="button" id="productsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="product-icon fas fa-shopping-basket"></i> Product Management
           </a>
           <div class="dropdown-menu" aria-labelledby="productsDropdown">
-            <a class="dropdown-item" href="{{ url_for('main.products')}}">Products</a>
-            <a class="dropdown-item" href="{{url_for('main.add_product')}}">Add Product</a>
-            <a class="dropdown-item" href="{{url_for('admin.product_categories')}}">Product Categories</a>
-            <a class="dropdown-item" href="{{url_for('main.add_product_image')}}">Add Product Images</a>
-            <a class="dropdown-item" href="{{ url_for('main.add_supplier')}}">Product Suppliers</a>
+            <a class="dropdown-item" href="{{ url_for('main.products') }}">Products</a>
+            <a class="dropdown-item" href="{{ url_for('main.add_product') }}">Add Product</a>
+            <a class="dropdown-item" href="{{ url_for('admin.product_categories') }}">Product Categories</a>
+            <a class="dropdown-item" href="{{ url_for('main.add_product_image') }}">Add Product Images</a>
+            <a class="dropdown-item" href="{{ url_for('main.add_supplier') }}">Product Suppliers</a>
           </div>
         </li>
         <li class="dropdown">
-          <a
-            class="dropdown-toggle"
-            href="#"
-            role="button"
-            id="ordersDropdown"
-            data-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false"
-          >
+          <a class="dropdown-toggle" href="#" role="button" id="ordersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="order-icon fas fa-shopping-cart"></i> Order Management
           </a>
           <div class="dropdown-menu" aria-labelledby="ordersDropdown">
-            <a class="dropdown-item" href="{{ url_for('admin.view_orders')}}">All Orders</a>
-            <a class="dropdown-item" href="#">Pending Orders</a>
+            <a class="dropdown-item" href="{{ url_for('admin.view_orders') }}">All Orders</a>
+            <a class="dropdown-item" href="{{ url_for('admin.view_orders_by_date') }}">Daily Orders</a>
           </div>
         </li>
 
-       <li class="dropdown">
-          <a
-            class="dropdown-toggle"
-            href="#"
-            role="button"
-            id="ordersDropdown"
-            data-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false"
-          >
+        <li class="dropdown">
+          <a class="dropdown-toggle" href="#" role="button" id="dataVizDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="order-icon fas fa-chart-line"></i> Data Visualization
           </a>
-          <div class="dropdown-menu" aria-labelledby="ordersDropdown">
+          <div class="dropdown-menu" aria-labelledby="dataVizDropdown">
             <a class="dropdown-item" href="#">Sales Overview</a>
             <a class="dropdown-item" href="#">More Data Visualization</a>
           </div>
         </li>
 
         <li class="dropdown">
-          <a
-            class="dropdown-toggle"
-            href="#"
-            role="button"
-            id="ordersDropdown"
-            data-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false"
-          >
+          <a class="dropdown-toggle" href="#" role="button" id="locationsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="order-icon fas fa-map-marker-alt"></i> Our Locations
           </a>
-          <div class="dropdown-menu" aria-labelledby="ordersDropdown">
-            <a class="dropdown-item" href="{{ url_for('admin.add_location')}}">Add Location</a>
+          <div class="dropdown-menu" aria-labelledby="locationsDropdown">
+            <a class="dropdown-item" href="{{ url_for('admin.add_location') }}">Add Location</a>
             <a class="dropdown-item" href="#">Customer Locations</a>
           </div>
         </li>
 
         <li class="dropdown">
-          <a
-            class="dropdown-toggle"
-            href="#"
-            role="button"
-            id="customersDropdown"
-            data-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false"
-          >
+          <a class="dropdown-toggle" href="#" role="button" id="usersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="customer-icon fas fa-users"></i> User Management
           </a>
-          <div class="dropdown-menu" aria-labelledby="customersDropdown">
-            <a class="dropdown-item" href="#">Our Clients</a>
+          <div class="dropdown-menu" aria-labelledby="usersDropdown">
+            <a class="dropdown-item" href="{{ url_for('admin.all_users') }}">Our Clients</a>
             <a class="dropdown-item" href="#">Sales Representatives</a>
           </div>
         </li>
 
         <li class="nav-item">
-              <a class="nav-link" href="{{url_for('main.logout')}}"><i class="fas fa-sign-out-alt"></i> Logout</a>
-               
-              
-            </li>
-        
+          <a class="nav-link" href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </li>
       </ul>
     </div>
-    
+
     <div id="content">
       <nav class="navbar navbar-expand navbar-dark">
         <button class="btn btn-success" id="sidebarToggle">
@@ -176,60 +145,58 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="#"
-                ><i class="fas fa-bell"></i> Notifications</a
-              >
+              <a class="nav-link" href="#"><i class="fas fa-bell"></i> Notifications</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#"
-                ><i class="fas fa-user"></i> Profile</a
-              >
+              <a class="nav-link" href="#"><i class="fas fa-user"></i> Profile</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{url_for('main.logout')}}"><i class="fas fa-sign-out-alt"></i> Logout</a>
-               
-              
+              <a class="nav-link" href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </li>
           </ul>
         </div>
       </nav>
 
-      
-    <!-- Flash Messages Section -->
-    {% with messages = get_flashed_messages() %} {% if messages %}
-    <div class="flash-messages">
-      {% for message in messages %}
-      <div class="flash-message alert alert-danger">{{ message }}</div>
-      {% endfor %}
-    </div>
-    {% endif %} {% endwith %}
-      
-      <!-- Main content-->
-      
-    <main>{% block content %}{% endblock %}</main>
- 
-
-     <footer class="mt-5">
-      <div class="container">
-        <!-- Footer Content -->
-        &copy; 2024 Nourisha Groceries
+      <!-- Flash Messages Section -->
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="flash-messages">
+        {% for message in messages %}
+        <div class="flash-message alert alert-danger">{{ message }}</div>
+        {% endfor %}
       </div>
-    </footer>
-      <script>
-      document
-        .getElementById("sidebarToggle")
-        .addEventListener("click", function () {
-          document.getElementById("sidebar").style.left =
-            document.getElementById("sidebar").style.left === "0px"
-              ? "-250px"
-              : "0";
-          document.getElementById("content").style.marginLeft =
-            document.getElementById("content").style.marginLeft === "250px"
-              ? "0"
-              : "250px";
-        });
-      </script>
+      {% endif %}
+      {% endwith %}
 
-      
+      <!-- Main content-->
+      <main>{% block content %}{% endblock %}</main>
+
+      <footer class="mt-5">
+        <div class="container">
+          <!-- Footer Content -->
+          &copy; 2024 Naurisha Groceries
+        </div>
+      </footer>
+
+      <script>
+        document.getElementById("sidebarToggle").addEventListener("click", function () {
+          const sidebar = document.getElementById("sidebar");
+          const content = document.getElementById("content");
+          if (sidebar.style.left === "0px") {
+            sidebar.style.left = "-250px";
+            content.style.marginLeft = "0";
+          } else {
+            sidebar.style.left = "0";
+            content.style.marginLeft = "250px";
+          }
+        });
+
+        // Set initial state on page load
+        window.onload = function() {
+          document.getElementById("sidebar").style.left = "-250px";
+          document.getElementById("content").style.marginLeft = "0";
+        };
+      </script>
+    </div>
   </body>
 </html>
