@@ -47,69 +47,102 @@
 </div>
 
 
+    <!-- Product Listing Section -->
+    <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+        {% for product in products %}
+        <div class="col">
+            <div class="card product-card border-0 shadow-sm" data-product-id="{{ product.id }}">
+                <div class="magnifier position-relative overflow-hidden">
+                    {% if product.images %}
+                    <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image" alt="Placeholder Image">
+                    {% endif %}
+                    <div class="product-overlay d-flex align-items-center justify-content-center">
+                        <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#productDetailsModal{{ product.id }}">Quick View</button>
+                    </div>
+                </div>
+                <div class="card-body text-center">
+                    <h6 class="card-title text-primary mb-2 text-truncate">{{ product.brand }}</h6>
+                    <p class="card-text text-muted fs-6 mb-3">{{ product.description | truncate(80) }}</p>
+                    <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
+                    <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
+                        Buy
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 
-              <!-- Product Listing Section -->
-              <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
-                  {% for product in products %}
-                  <div class="col">
-                      <div class="card product-card border-0">
-                          <div class="magnifier position-relative overflow-hidden">
-                            {% if product.images %}
-                              <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
-                            {% else %}
-                              <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image" alt="Placeholder Image">
-                            {% endif %}
-                          </div>
-
-                          <div class="card-body text-center">
-                              <h6 class="card-title text-primary mb-2">{{ product.brand }}</h6>
-                              <p class="card-text text-muted fs-6 mb-3">{{ product.description | truncate(120) }}</p>
-                              <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} </strong></p>
-
-                              <!-- Add to Cart Button -->
-                              <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
-                                   Buy
-                              </button>
-                         
-               
 
 
-                <!-- Product Modal -->
-                <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-primary text-light">
-                                <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p class="lead">Do you want to add this item to your cart?</p>
-
-                                <!-- Quantity and Custom Description Form -->
-                                <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}">
-                                    {{form.hidden_tag()}}
-                                    <div class="mb-3">
-                                        <label for="quantity" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
-                                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="custom_description" class="form-label">Custom Description:</label>
-                                        <textarea class="form-control" id="custom_description" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
-                                        <input type="hidden" id="hidden_custom_description" name="hidden_custom_description" value="">
-                                    </div>
-                                    <button class="btn btn-success" type="submit">Add to Cart</button>
-                                </form>
-                            </div>
+    
+    <!-- Modal Template for Quick View (Repeat for each product with dynamic content) -->
+    {% for product in products %}
+    <div class="modal fade" id="productDetailsModal{{ product.id }}" tabindex="-1" aria-labelledby="productDetailsModalLabel{{ product.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productDetailsModalLabel{{ product.id }}">{{ product.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img src="{{ url_for('static', filename='uploads/' + (product.images[0].cover_image if product.images else 'placeholder.jpg')) }}" class="img-fluid" alt="{{ product.name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">{{ product.brand }}</h6>
+                            <p>{{ product.description }}</p>
+                            <p><strong>Price: Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
+                            <p>{{ product.nutritional_information }}</p>
                         </div>
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">Buy</button>
                 </div>
             </div>
         </div>
     </div>
-    {% endfor %}
-</div>
 
-</div>
+
+
+
+
+
+    <!-- Product Modal -->
+      <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                  <div class="modal-header bg-primary text-light">
+                      <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                      <p class="lead">Do you want to add this item to your cart?</p>
+                      <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}">
+                          {{ form.hidden_tag() }}
+                          <div class="mb-3">
+                              <label for="quantity" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
+                              <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
+                          </div>
+                          <div class="mb-3">
+                              <label for="custom_description" class="form-label">Custom Description:</label>
+                              <textarea class="form-control" id="custom_description" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
+                              <input type="hidden" id="hidden_custom_description" name="hidden_custom_description" value="">
+                          </div>
+                          <button class="btn btn-success" type="submit">Add to Cart</button>
+                      </form>
+                  </div>
+              </div>
+          </div>
+      </div>
+    {% endfor %}
+
+
 
 <!-- Floating Cart Icon -->
 <div class="floating-cart-icon">
@@ -186,7 +219,7 @@
 }
 
 .shake {
-    animation: shake 0.5s ease-in-out;
+    animation: shake 1s ease-in-out;
 }
 
 </style>
@@ -368,6 +401,122 @@
           };
           xhr.send();
       }
-</script>
+
+
+    function trackProductEvent(productId, eventType) {
+        // Fetch the CSRF token from the meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch('/api/track-product-event', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken  // Include CSRF token
+            },
+            body: JSON.stringify({
+                productId: productId,
+                eventType: eventType,
+                timestamp: new Date().toISOString()  // Use current ISO timestamp
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!response.ok) {
+                throw new Error(data.error || 'Unknown error');
+            }
+            console.log('Event tracked:', data);
+        })
+        .catch(error => {
+            console.error('Error tracking event:', error);
+        });
+    }
+
+    // Example usage for product view event
+    document.querySelectorAll('.product-card').forEach(card => {
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const productId = entry.target.getAttribute('data-product-id');
+                    trackProductEvent(productId, 'view');
+                    observer.unobserve(entry.target);  // Stop observing once viewed
+                }
+            });
+        });
+        observer.observe(card);
+    });
+
+
+    
+      document.addEventListener("DOMContentLoaded", function () {
+        // Load Recommendations for the user
+        loadRecommendations();
+
+        // Add to Cart interaction
+        document.querySelectorAll(".add-to-cart-btn").forEach(function (button) {
+          button.addEventListener("click", function (event) {
+            event.preventDefault();
+            const productId = button.getAttribute("data-product-id");
+            addToCart(productId);
+          });
+        });
+      });
+
+      async function loadRecommendations() {
+        try {
+          const response = await fetch('/api/recommendations');
+          const recommendedProducts = await response.json();
+
+          if (recommendedProducts.length > 0) {
+            const recommendationsSection = document.querySelector(".recommended-products");
+            recommendedProducts.forEach(product => {
+              const productCard = `
+                <div class="col-md-4 mb-4">
+                  <div class="card h-100">
+                    <img src="${url_for('static', filename='uploads/' + product.image)}" class="card-img-top" alt="${product.name}">
+                    <div class="card-body">
+                      <h5 class="card-title">${product.name}</h5>
+                      <p class="card-text">Price: Ksh ${product.price}</p>
+                      <a href="#" class="btn btn-primary add-to-cart-btn" data-product-id="${product.id}">Add to Cart</a>
+                    </div>
+                  </div>
+                </div>`;
+              recommendationsSection.insertAdjacentHTML('beforeend', productCard);
+            });
+          }
+        } catch (error) {
+          console.error('Error loading recommendations:', error);
+        }
+      }
+
+      async function addToCart(productId) {
+        try {
+          const response = await fetch(`/cart/api/add`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCSRFToken(),
+            },
+            body: JSON.stringify({ productId }),
+          });
+
+          const data = await response.json();
+
+          if (data.status === "success") {
+            toastr.success("Product added to cart");
+          } else {
+            toastr.error("Failed to add product to cart");
+            console.error("Error adding product to cart:", data.message);
+          }
+        } catch (error) {
+          toastr.error("An error occurred");
+          console.error("Fetch error:", error);
+        }
+      }
+
+      function getCSRFToken() {
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        return metaTag ? metaTag.content : "";
+      }
+    </script>
 
 {% endblock%}

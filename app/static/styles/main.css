@@ -1,8 +1,119 @@
 
-main {
-    padding: 0px;
+/* Navbar Container */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #fff; 
+    z-index: 1000; /* Ensure the navbar is above other content */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out;
+    padding: 15px 30px; /* Ample padding for a spacious look */
+    display: flex; /* Flexbox for alignment */
+    justify-content: space-between; /* Space between brand and links */
+    align-items: center; /* Center items vertically */
 }
 
+/* Transparent Navbar State */
+.navbar.transparent {
+    background-color: transparent !important;
+    backdrop-filter: blur(20px); /* Adds a strong blur effect for polish */
+    box-shadow: none; /* Remove shadow for a cleaner look */
+
+}
+
+ .navbar.transparent a {
+   color: #333; /* Text color for links in transparent state */
+
+ }
+
+
+
+/* Navbar Links */
+.navbar-nav {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-nav li {
+    margin-left: 30px; /* Spacing between links */
+}
+
+.navbar-nav a {
+    text-decoration: none; /* Remove underline */
+    color: #333; /* Dark text color */
+    font-weight: 600;
+    padding: 5px 0; /* Vertical padding for click area */
+    position: relative; /* For pseudo-element */
+    transition: color 0.3s ease, transform 0.3s ease; /* Smooth transitions */
+}
+
+/* Hover effect for links */
+.navbar-nav a:hover {
+    color: #007BFF; /* Blue color on hover */
+    transform: translateY(-3px); /* Slight upward movement on hover */
+}
+
+/* Underline effect */
+.navbar-nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #007BFF;
+    transition: width 0.3s, left 0.3s;
+}
+
+.navbar-nav a:hover::after {
+    width: 100%;
+    left: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column; /* Stack items vertically */
+        align-items: flex-start; /* Align items to the start */
+        padding: 10px 20px; /* Adjust padding */
+    }
+
+    .navbar-nav {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar-nav li {
+        margin: 10px 0; /* Space between links in vertical layout */
+    }
+
+    .navbar-toggle {
+        display: block; /* Show the toggle button */
+        cursor: pointer;
+        font-size: 1.5em;
+    }
+
+
+
+    .navbar-nav.active {
+        display: flex; /* Show links when toggle is active */
+        flex-direction: column;
+    }
+}
+
+
+
+.hamburger {
+    display: inline-block;
+    width: 30px;
+    height: 3px;
+    background-color: #333;
+    margin: 6px 0;
+}
 footer {
     background-color: #f9f9f9;
     color: #000;
@@ -82,24 +193,7 @@ h1,h2,h3,h4,h5,h6{
     color: #333;
 }
 
-.navbar {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    background-color: #fff !important;
-}
 
-.navbar a {
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    margin-left: 20px;
-    transition: color 0.3s ease;
-}
-
-.navbar a:hover {
-    color: #ff7f50;
-}
 
 
 
@@ -335,60 +429,12 @@ h1,h2,h3,h4,h5,h6{
         filter: brightness(100%);
     }
 
-    /* Optional: Add a subtle box-shadow to the carousel for a polished look */
     #specialOffersCarousel {
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
     }
       
-     .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 250px;
-            background-color: #fff;
-            padding-top: 60px;
-            transition: all 0.3s;
-            z-index: 1000;
-        }
-
-        .sidebar-nav {
-            list-style-type: none;
-            padding-left: 0;
-        }
-
-        .sidebar-nav-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            color: #343a40;
-            transition: background-color 0.3s;
-            cursor: pointer;
-        }
-
-        .sidebar-nav-item:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar-nav-item i {
-            margin-right: 10px;
-        }
-
-        .sidebar-brand {
-            font-size: 24px;
-            font-weight: bold;
-            color: #343a40;
-            padding: 20px 20px 10px 20px;
-            text-align: center;
-            background-color: #fff;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            z-index: 1100;
-        }
-
-        .sidebar-brand:hover {
-            text-decoration: none;
-            color: #343a40;
-        }
+    
 
         .main-content {
             padding: 20px;
@@ -442,5 +488,7 @@ h1,h2,h3,h4,h5,h6{
                 margin-left: 0;
             }
         }
+
+    
 
     

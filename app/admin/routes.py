@@ -1,14 +1,11 @@
 from datetime import datetime, timedelta
-
 from flask import abort, flash, jsonify, redirect, render_template, request, url_for, Response, send_file, current_app
 from flask_login import current_user, login_required
 from flask_mail import Message
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
-
 from app import db, mail
 from app.admin import admin_bp
-
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
@@ -28,7 +25,6 @@ from app.main.forms import (
     AddProductCategoryForm,
     DateSelectionForm,
     FulfillmentForm,
-ExpectedDeliveryDateForm,
 )
 from app.main.models import (
     Arealine,
@@ -233,6 +229,117 @@ def get_top_selling_products():
     # Fetch top-selling products based on quantity sold
     top_selling_products = Product.query.order_by(Product.quantity_sold.desc()).limit(5).all()
     return top_selling_products
+
+
+
+
+@admin_bp.route('/data_visualization', methods=['GET', 'POST'])
+@login_required
+def data_visualization():
+    def route():
+        if current_user is None or not current_user.is_authenticated or current_user.role is None or current_user.role.name != 'admin':
+          flash('You do not have permission to access the admin dashboard.', 'danger')
+          return redirect(url_for('main.index'))
+ # Fetch product categories
+        categories = ProductCategory.query.all()
+
+        # Fetch sales data
+        sales_data = fetch_sales_data()
+        #labels = [datetime.strptime(data.order_date, '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
+        labels = [datetime.strptime(str(data.order_date), '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
+
+        data = [float(data.total_sales) for data in sales_data]
+
+        # Fetch user registrations for user growth chart
+        user_registrations = User.query.with_entities(User.registration_date).all()
+
+        # Process the data to get counts per month
+        registrations_by_month = {}
+        for user_registration in user_registrations:
+            registration_date = user_registration.registration_date
+
+            # Ensure registration_date is a datetime object
+            if isinstance(registration_date, datetime):
+                month_year = registration_date.strftime('%b %Y')
+                registrations_by_month[month_year] = registrations_by_month.get(month_year, 0) + 1
+
+        # Create lists for chart labels and data
+        chart_labels = list(registrations_by_month.keys())
+        chart_data = list(registrations_by_month.values())
+
+        # Create user growth chart
+        user_growth_chart = create_user_growth_chart(chart_labels, chart_data)
+        user_growth_chart_image = generate_chart_image(user_growth_chart)
+
+        # Call the function to get top-selling products
+        top_selling_products = db.session.query(
+            Product,
+            db.func.sum(OrderItem.quantity).label('total_quantity_sold'),
+            db.func.sum(OrderItem.unit_price * OrderItem.quantity).label('total_revenue')
+        ).join(OrderItem, Product.id == OrderItem.product_id).group_by(Product).order_by(db.desc('total_quantity_sold')).limit(4).all()
+
+        admin_data = {
+            'total_users': User.query.count(),
+            'recent_users': User.query.order_by(User.registration_date.desc()).limit(5).all(),
+            'sales_data': {'labels': labels, 'data': data},
+            'total_products': Product.query.count(),
+            'active_products': 0,  # You need to define how to calculate active products
+            'out_of_stock': Product.query.filter(Product.quantity_in_stock == 0).count(),
+            'recent_orders': Order.query.order_by(Order.order_date.desc()).limit(3).all(),
+            'total_customers': User.query.count(),
+            'new_customers_last_7_days': User.query.filter(User.registration_date >= (datetime.utcnow() - timedelta(days=7))).count(),
+            'returning_customers': User.query.filter(User.registration_date < (datetime.utcnow() - timedelta(days=7))).count(),
+            'top_selling_products': top_selling_products,
+            'user_growth_data': {'labels': chart_labels, 'data': chart_data},
+        }
+
+        users = User.query.all()
+        roles = Role.query.all()
+
+        if request.method == 'POST':
+            flash('POST request received.', 'info')
+
+        return render_template('system_analytics.html', users=users, roles=roles, admin_data=admin_data, user_growth_chart_image=user_growth_chart_image, categories=categories)
+
+    return handle_db_error_and_redirect(route)
+
+
+
+def create_user_growth_chart(labels, data):
+    # Create a user growth chart using Chart.js
+    user_growth_chart = {
+        'type': 'line',
+        'data': {
+            'labels': labels,
+            'datasets': [{
+                'label': 'User Growth',
+                'data': data,
+                'borderColor': '#5bc0de',  # Adjust color as needed
+                'borderWidth': 2,
+                'pointRadius': 5,
+                'pointBackgroundColor': '#5bc0de',  # Adjust color as needed
+                'fill': False,
+            }],
+        },
+        'options': {
+            'scales': {
+                'y': {'beginAtZero': True},
+            },
+        },
+    }
+
+    return user_growth_chart
+def generate_chart_image(chart_data):
+    # Generate chart image using the appropriate method (e.g., Chart.js image generation library)
+    # Implement the logic based on your chosen method
+    # Return the image URL or data
+    pass
+
+def get_top_selling_products():
+    # Fetch top-selling products based on quantity sold
+    top_selling_products = Product.query.order_by(Product.quantity_sold.desc()).limit(5).all()
+    return top_selling_products
+
 
 
 
@@ -637,25 +744,28 @@ def order_details(order_id):
     return render_template('order_details.html', order=order, form=form)
 
 # Confirm Order
+
 @admin_bp.route('/admin/confirm_order/<int:order_id>', methods=['POST'])
 @login_required
 def confirm_order(order_id):
-        order = Order.query.get_or_404(order_id)
-        form = ExpectedDeliveryDateForm()
+    order = Order.query.get_or_404(order_id)
+    form = request.form
 
-        if form.validate_on_submit() and order.status == 'pending':
-            expected_delivery_date = form.expected_delivery_date.data
+    if order.status == 'pending':
+        expected_delivery_date = form.get('expected_delivery_date')
+        if expected_delivery_date:
+            order.expected_delivery_date = datetime.strptime(expected_delivery_date, '%Y-%m-%d')
             order.status = 'confirmed'
-            order.expected_delivery_date = expected_delivery_date  # Update the delivery date
             db.session.commit()
-            flash('Order confirmed and expected delivery date updated successfully.', 'success')
+            flash('Order confirmed successfully.', 'success')
         else:
-            flash('Error confirming order or invalid data. Ensure the delivery date is not in the past.', 'danger')
+            flash('Expected delivery date is required to confirm the order.', 'danger')
+    else:
+        flash('Order cannot be confirmed. It may already be confirmed or in a different status.', 'danger')
 
-        return redirect(url_for('admin.order_details', order_id=order_id))
-    
+    return redirect(url_for('admin.order_details', order_id=order_id))
 
-# Fulfill Order
+# Fulfill Order route
 @admin_bp.route('/admin/fulfill_order/<int:order_id>', methods=['POST'])
 @login_required
 def fulfill_order(order_id):
@@ -681,30 +791,109 @@ def fulfill_order(order_id):
 
     return redirect(url_for('admin.order_details', order_id=order_id))
 
-@admin_bp.route('/admin/mark_item_fulfilled/<int:item_id>', methods=['POST'])
-@login_required
-def mark_item_fulfilled(item_id):
-    item = OrderItem.query.get_or_404(item_id)
-    if item.order.status == 'confirmed' and item.fulfillment_status != 'Fulfilled':
-        item.fulfillment_status = 'Fulfilled'
-        product = item.product
-        product.quantity_sold += item.quantity
-        db.session.commit()
-        flash('Item marked as fulfilled successfully.', 'success')
-    else:
-        flash('Failed to mark item as fulfilled. Please ensure the order is confirmed and the item is not already fulfilled.', 'danger')
-    return redirect(url_for('admin.order_details', order_id=item.order.id))
 
 
-
-
-# Mark Order as Delivered
 @admin_bp.route('/admin/mark_delivered/<int:order_id>', methods=['POST'])
 @login_required
 def mark_delivered(order_id):
     order = Order.query.get_or_404(order_id)
+    form = request.form
+
     if order.status == 'out for delivery':
-        order.status = 'delivered'
-        db.session.commit()
-        flash('Order marked as delivered.', 'success')
+        delivery_remarks = form.get('delivery_remarks')
+
+        # Ensure delivery remarks are provided and not just whitespace
+        if delivery_remarks and delivery_remarks.strip():
+            order.status = 'delivered'
+            order.delivery_remarks = delivery_remarks.strip()  # Save the delivery remarks
+            db.session.commit()
+            flash('Order marked as delivered successfully with remarks.', 'success')
+        else:
+            flash('Delivery remarks are required to mark the order as delivered.', 'warning')
+    else:
+        flash('Failed to mark as delivered. Please ensure the order is out for delivery.', 'danger')
+
     return redirect(url_for('admin.order_details', order_id=order_id))
+
+# View Orders by Status
+@admin_bp.route('/admin/orders/<status>', methods=['GET'])
+@login_required
+def view_orders_by_status(status):
+    # List of valid statuses, including 'completed'
+    valid_statuses = ['pending', 'confirmed', 'out for delivery', 'delivered', 'canceled', 'completed']
+
+    # Check if the provided status is valid
+    if status not in valid_statuses:
+        flash('Invalid status provided.', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+    # Query orders by the given status
+    orders = Order.query.filter_by(status=status).all()
+
+    return render_template('view_orders_by_status.html', orders=orders, status=status)
+
+
+
+
+# fetching orders by status
+@admin_bp.route('/admin/api/orders/<status>', methods=['GET'])
+@login_required
+def api_get_orders_by_status(status):
+    # Define valid statuses, including 'completed'
+    valid_statuses = ['pending', 'confirmed', 'out for delivery', 'delivered', 'canceled', 'completed']
+
+    # Validate the status
+    if status not in valid_statuses:
+        return jsonify({'error': 'Invalid status'}), 400
+
+    try:
+        # Base query
+        query = Order.query.filter_by(status=status)
+
+        # Apply filters
+        order_id = request.args.get('order_id', type=int)
+        if order_id:
+            query = query.filter(Order.id == order_id)
+
+        user_name = request.args.get('user_name', type=str)
+        if user_name:
+            query = query.join(User).filter(User.name.ilike(f'%{user_name}%'))
+
+        order_date = request.args.get('order_date', type=str)
+        if order_date:
+            query = query.filter(db.func.date(Order.order_date) == order_date)
+
+        # Apply sorting
+        sort_by = request.args.get('sort_by', type=str)
+        if sort_by == 'total_price':
+            query = query.order_by(Order.total_price)
+        elif sort_by == 'status':
+            query = query.order_by(Order.status)
+        else:
+            query = query.order_by(Order.order_date)
+
+        # Fetch orders
+        orders = query.all()
+
+        # Serialize the orders to JSON format
+        orders_data = []
+        for order in orders:
+            orders_data.append({
+                'id': order.id,
+                'user': order.user.name,
+                'order_date': order.order_date.strftime('%Y-%m-%d'),
+                'total_price': order.total_price,
+                'status': order.status,
+                'expected_delivery_date': order.expected_delivery_date.strftime('%Y-%m-%d') if order.expected_delivery_date else 'N/A'
+            })
+
+        return jsonify(orders_data)
+
+    except Exception as e:
+        app.logger.error(f"Error fetching orders by status: {e}")
+        return jsonify({'error': 'An error occurred while fetching orders.'}), 500
+
+
+
+        
+

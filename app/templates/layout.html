@@ -61,7 +61,7 @@
             rel="stylesheet"
         />
 
-       
+
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -71,24 +71,16 @@
             charset="utf8"
             src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"
         ></script>
-        <style>
-            .navbar {
-                display: flex;
-                justify-content: flex-end;
-                align-items: center;
-                background-color: #fff !important;
-                
-            }
-        </style>
+      
     </head>
     <body style="text-align: center">
         <!-- Navbar -->
-        <nav class="navbar navbar-expand-md navbar-light bg-light shadow-sm sticky-top">
+        <nav class="navbar navbar-expand-md navbar-light bg-light  sticky-top">
             <div class="container">
                 <a class="navbar-brand" href="{{ url_for('main.index') }}">
                     <img
                         src="{{ url_for('static', filename='logoford.png') }}") }}"
-                        alt="Nourisha Groceries Logo"
+                        alt="Nourisha Groceries"
                         class="d-inline-block align-text-top"
                         style="height: 70px; width: 200px"
                     />
@@ -272,7 +264,27 @@
             </div>
         </footer>
 
-        <!-- JavaScript -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbar = document.querySelector('.navbar');
+            const toggleButton = document.querySelector('.navbar-toggle');
+            const navbarNav = document.querySelector('.navbar-nav');
+
+            // Scroll event to toggle transparent class
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 100) {
+                    navbar.classList.remove('transparent');
+                } else {
+                    navbar.classList.add('transparent');
+                }
+            });
+
+          
+        });
+        </script>
+
+
+        
         <script
             defer
             src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -295,6 +307,7 @@
             defer
             src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"
         ></script>
-        
+
+        </script>
     </body>
 </html>

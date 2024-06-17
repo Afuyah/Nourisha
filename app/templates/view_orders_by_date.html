@@ -39,6 +39,7 @@
                         <th>Phone Number</th>
                         <th>Address Line</th>
                         <th>Additional Info</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -52,7 +53,7 @@
                             <td>{{ order.expected_delivery_date.strftime('%Y-%m-%d') if order.expected_delivery_date else 'N/A' }}</td>
                             <td>
                                 <span class="badge {{ 'bg-success' if order.payment_status == 'paid' else 'bg-warning' }}">
-                                    {{ order.payment_status.capitalize() }}
+                                    {{ order.payment_status }}
                                 </span>
                             </td>
                             <td>{{ order.payment_date.strftime('%Y-%m-%d') if order.payment_date else 'N/A' }}</td>

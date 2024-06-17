@@ -1,26 +1,27 @@
-
+ 
 from app import db, mail
-from flask import render_template, abort, Blueprint, flash, redirect, url_for, request, jsonify, send_file, session, current_app
+from flask import render_template, abort, flash, redirect, url_for, request, jsonify, session,Flask
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
-from app.admin import admin_bp
-from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, CheckoutForm, RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm
-from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, OrderItem, Location, Cart
+from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm
+from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick
 from datetime import datetime, timedelta, timezone
-
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
-import os
-from flask import Flask
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sqlalchemy.orm.exc import NoResultFound
 from app.cart.routes import cart_bp
 from .send_email import send_confirmation_email
+
 from flask_mail import Message
-import logging
 from functools import wraps
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from sqlalchemy.orm.exc import NoResultFound
 import re
+import os
+import logging
+
 
 
 @bp.route('/refresh_csrf_token', methods=['GET'])
@@ -463,3 +464,177 @@ def search():
     products = Product.query.filter(Product.name.ilike(f"%{query}%")).all()
     form= AddProductForm()
     return render_template('product_listing.html', products=products, form=form)
+
+#product recommendation section
+#Collaborative Filtering (User-Based)
+def get_similar_users(user_id, top_n=5):
+    # Get the list of products the current user has interacted with
+    user_interactions = db.session.query(Product.id).join(OrderItem).join(Order).filter(Order.user_id == user_id).all()
+    user_interactions = [product.id for product in user_interactions]
+
+    # Find other users who interacted with the same products
+    similar_users = db.session.query(Order.user_id).join(OrderItem).filter(OrderItem.product_id.in_(user_interactions)).filter(Order.user_id != user_id).group_by(Order.user_id).all()
+
+    # Optionally, we could score users based on the number of shared interactions
+    user_scores = []
+    for similar_user_id in similar_users:
+        shared_interactions = db.session.query(func.count(OrderItem.product_id)).join(Order).filter(Order.user_id == similar_user_id[0]).filter(OrderItem.product_id.in_(user_interactions)).scalar()
+        user_scores.append((similar_user_id[0], shared_interactions))
+
+    # Sort by shared interactions and return the top N similar users
+    user_scores.sort(key=lambda x: x[1], reverse=True)
+    top_similar_users = [user[0] for user in user_scores[:top_n]]
+
+    return top_similar_users
+
+#Collaborative Filtering (Item-Based)
+
+def get_similar_products(product, top_n=5):
+   
+    # Get all products' descriptions (or other attributes)
+    products = db.session.query(Product).all()
+    product_descriptions = [p.description for p in products]
+    product_ids = [p.id for p in products]
+
+    # Create a TF-IDF vectorizer and fit it on product descriptions
+    tfidf = TfidfVectorizer(stop_words='english')
+    tfidf_matrix = tfidf.fit_transform(product_descriptions)
+
+    # Get the TF-IDF vector for the current product
+    product_idx = product_ids.index(product.id)
+    product_vector = tfidf_matrix[product_idx]
+
+    # Compute cosine similarity between the current product and all other products
+    cosine_sim = cosine_similarity(product_vector, tfidf_matrix)
+    similar_indices = cosine_sim.argsort().flatten()[-(top_n+1):-1]  # Exclude the product itself
+
+    similar_products = [product_ids[i] for i in similar_indices]
+    return similar_products
+
+#Content-Based Recommendations
+
+def get_content_based_recommendations(product, top_n=5):
+    # Example: Finding similar products based on category and tags
+    similar_products = db.session.query(Product).filter(
+        (Product.category_id == product.category_id) | 
+        (Product.promotional_tag == product.promotional_tag)
+    ).filter(Product.id != product.id).limit(top_n).all()
+
+    return similar_products
+
+#Popularity-Based Recommendations
+
+def get_most_popular_products(top_n=10):
+    popular_products = db.session.query(Product).order_by(Product.click_count.desc()).limit(top_n).all()
+    return popular_products
+
+#persoanlized recommendations
+def get_personalized_recommendations(user, top_n=10):
+    # Personalized recommendations might include products in the user's frequently purchased categories
+    favorite_categories = db.session.query(Product.category_id, func.count(Product.category_id).label('count')).join(OrderItem).join(Order).filter(Order.user_id == user.id).group_by(Product.category_id).order_by('count DESC').limit(3).all()
+
+    recommendations = []
+    for category, _ in favorite_categories:
+        recommendations.extend(db.session.query(Product).filter(Product.category_id == category).limit(top_n).all())
+
+    return recommendations[:top_n]
+
+#final recommender system    
+
+def recommend_products(user_id, num_recommendations=10):
+    user = User.query.get(user_id)
+    if not user:
+        return []
+
+    recommendations = []
+
+    # 1. Collaborative Filtering (User-Based)
+    similar_users = get_similar_users(user_id)
+    for similar_user_id in similar_users:
+        recommendations.extend(get_user_purchased_products(similar_user_id))
+
+    # 2. Collaborative Filtering (Item-Based)
+    user_purchased_products = get_user_purchased_products(user_id)
+    for product in user_purchased_products:
+        recommendations.extend(get_similar_products(product))
+
+    # 3. Content-Based Recommendations
+    for product in user_purchased_products:
+        recommendations.extend(get_content_based_recommendations(product))
+
+    # 4. Popularity-Based Recommendations
+    popular_products = get_most_popular_products()
+    recommendations.extend(popular_products)
+
+    # 5. Personalized Recommendations
+    personalized_recommendations = get_personalized_recommendations(user)
+    recommendations.extend(personalized_recommendations)
+
+    # Deduplicate and limit to the number of recommendations required
+    recommendations = list(set(recommendations))
+    recommendations = recommendations[:num_recommendations]
+
+    return recommendations
+
+
+@bp.route('/api/track-product-event', methods=['POST'])
+def track_product_event():
+    try:
+        data = request.json
+
+        product_id = data.get('productId')
+        event_type = data.get('eventType')
+        timestamp = data.get('timestamp')
+
+        if not product_id or not event_type or not timestamp:
+            return jsonify({'error': 'Missing data in request'}), 400
+
+        user_id = get_current_user_id()  # Determine user ID or default to 0
+
+        if event_type == 'click':
+            record_click_event(user_id, product_id, timestamp)
+        elif event_type == 'view':
+            record_view_event(user_id, product_id, timestamp)
+        else:
+            return jsonify({'error': 'Invalid event type'}), 400
+
+        return jsonify({'message': 'Event tracked successfully'}), 200
+    except Exception as e:
+        app.logger.error(f"Error tracking event: {e}")
+        return jsonify({'error': 'Server error'}), 500
+
+
+
+def record_click_event(user_id, product_id, timestamp):
+    try:
+        new_click = ProductClick(user_id=user_id, product_id=product_id, timestamp=datetime.fromisoformat(timestamp))
+        db.session.add(new_click)
+        product = Product.query.get(product_id)
+        if product:
+            product.click_count += 1
+        db.session.commit()
+    except Exception as e:
+        app.logger.error(f"Error recording click event: {e}")
+        db.session.rollback()
+
+def record_view_event(user_id, product_id, timestamp):
+            try:
+                new_view = ProductView(user_id=user_id, product_id=product_id, timestamp=datetime.fromisoformat(timestamp))
+                db.session.add(new_view)
+                product = Product.query.get(product_id)
+                if product:
+                    product.view_count += 1
+                    db.session.commit()
+            except Exception as e:
+                # Handle exceptions appropriately
+                print(f"Error recording view event: {e}")
+                db.session.rollback()  # Rollback changes in case of an exception
+
+
+def get_current_user_id():
+    if current_user.is_authenticated:
+        return current_user.id
+    else:
+        return 0  # Return 0 for guest users
+
+

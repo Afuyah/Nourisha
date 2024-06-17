@@ -1,0 +1,341 @@
+{% extends 'base.html'%}
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">Total Products</div>
+        <div class="card-body">
+          <h2 class="text-primary">{{ admin_data.total_products }}</h2>
+          <p class="text-success">Active Products: {{ admin_data.active_products }}</p>
+          <p class="text-danger">Out of Stock: {{ admin_data.out_of_stock }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add the loop to display individual product information if needed -->
+    {% for product in products %}
+    <p>{{ product.name }}</p>
+    <!-- Add other product information as needed -->
+    {% endfor %}
+
+    <div class="col-lg-4">
+      <div class="card shadow">
+        <div class="card-header bg-info text-white">Recent Orders</div>
+        <div class="card-body">
+          <ul class="list-group">
+            {% for order in admin_data.recent_orders %}
+            <li class="list-group-item">
+              Order #{{ order.id }} - Placed on {{ order.order_date.strftime('%Y-%m-%d') }}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card shadow">
+        <div class="card-header bg-secondary text-white">Customer Stats</div>
+        <div class="card-body">
+          <p class="text-primary">Total Customers: {{ admin_data.total_customers }}</p>
+          <p class="text-success">New Customers (Last 7 Days): {{ admin_data.new_customers_last_7_days }}</p>
+          <p class="text-info">Returning Customers: {{ admin_data.returning_customers }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-lg-6">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">Sales Overview</div>
+        <div class="card-body">
+          <canvas id="salesChart" width="400" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card shadow">
+        <div class="card-header bg-success text-white">Top Selling Products</div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead class="thead-dark">
+                <tr>
+                  <th>Product</th>
+                  <th>Quantity Sold</th>
+                  <th>Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for product, total_quantity_sold, total_revenue in admin_data.top_selling_products %}
+                <tr>
+                  <td>{{ product.brand }}</td>
+                  <td>{{ total_quantity_sold }}</td>
+                  <td>Ksh. {{ total_revenue }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="card shadow">
+        <div class="card-header bg-info text-white">User Growth</div>
+        <div class="card-body">
+          <canvas id="userGrowthChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card shadow">
+        <div class="card-header bg-secondary text-white">Average Order Value</div>
+        <div class="card-body">
+          <canvas id="averageOrderValueChart" width="400" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+
+    <div class="col-lg-4">
+      <div class="card shadow">
+        <div class="card-header bg-warning text-white">Inventory Status</div>
+        <div class="card-body">
+          {% if admin_data.total_products > 0 %}
+          {% set percentage_out_of_stock = (admin_data.out_of_stock / admin_data.total_products) * 100 %}
+          {% else %}
+          {% set percentage_out_of_stock = 0 %}
+          {% endif %}
+
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: {{ percentage_out_of_stock }}%;">
+              {{ percentage_out_of_stock }}%
+            </div>
+          </div>
+          <p class="mt-2">Total Products: {{ admin_data.total_products }}</p>
+          <p>Out of Stock: {{ admin_data.out_of_stock }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-8">
+      <div class="card shadow">
+        <div class="card-header bg-dark text-white">Order Processing</div>
+        <div class="btn-group" role="group" aria-label="Order Status">
+            <a href="{{ url_for('admin.view_orders_by_status', status='pending') }}" class="btn btn-secondary">Pending Orders</a>
+            <a href="{{ url_for('admin.view_orders_by_status', status='confirmed') }}" class="btn btn-secondary">Confirmed Orders</a>
+            <a href="{{ url_for('admin.view_orders_by_status', status='out for delivery') }}" class="btn btn-secondary">Out for Delivery</a>
+            <a href="{{ url_for('admin.view_orders_by_status', status='delivered') }}" class="btn btn-secondary">Delivered Orders</a>
+            <a href="{{ url_for('admin.view_orders_by_status', status='canceled') }}" class="btn btn-secondary">Canceled Orders</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+
+
+  // User Growth Chart
+  var userGrowthCtx = document.getElementById("userGrowthChart").getContext("2d");
+  var userGrowthChart = new Chart(userGrowthCtx, {
+    type: "bar",
+    data: {
+      labels: {{ admin_data.user_growth_data.labels|tojson|safe }},
+      datasets: [{
+        label: "User Growth",
+        data: {{ admin_data.user_growth_data.data|tojson|safe }},
+        borderColor: "#5bc0de",
+        borderWidth: 2,
+        pointRadius: 5,
+        pointBackgroundColor: "#5bc0de",
+        fill: false,
+      }],
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true },
+      },
+      animation: {
+        duration: 1000,
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              var label = context.dataset.label || "";
+              if (label) {
+                label += ": ";
+              }
+              label += context.formattedValue;
+              return label;
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Total Sales Chart
+  document.addEventListener('DOMContentLoaded', function () {
+    fetch('/admin/get_sales_chart_data')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        const labels = data.labels;
+        const salesData = data.data;
+
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const salesChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Total Sales',
+              data: salesData,
+              backgroundColor: '#cdc',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1,
+            }],
+          },
+          options: {
+            animation: {
+              duration: 1000,
+            },
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    var label = context.dataset.label || "";
+                    if (label) {
+                      label += ": ";
+                    }
+                    label += context.formattedValue;
+                    return label;
+                  },
+                },
+              },
+            },
+          },
+        });
+      })
+      .catch(error => console.error('Error fetching sales chart data:', error));
+  });
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Wait for the DOM content to be fully loaded
+
+    // Fetch average order value by day of the week
+    fetch('/admin/get_average_order_value_by_day')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Extract labels (days) and data (total order values) from the received JSON data
+            const labels = Object.keys(data).map(day => {
+                // Convert day number to day name or abbreviation without external libraries
+                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const dayNumber = parseInt(day, 10);
+                return dayNames[dayNumber % 7];  // Ensure the day number is within the range
+            });
+
+            // Calculate the average for each day
+            const averages = Object.values(data).map((totalValue, index) => {
+                const occurrences = labels.filter(label => label === labels[index]).length;
+                return occurrences > 0 ? totalValue / occurrences : 0;
+            });
+
+            // Update or create the bar chart using Chart.js
+            const ctx = document.getElementById('averageOrderValueChart').getContext('2d');
+            const averageOrderValueChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Average Order Value',
+                        data: averages,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                    }],
+                },
+                options: {
+                    scales: {
+                        x: { 
+                            title: {
+                                display: true,
+                                text: 'Day of the Week',
+                            },
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Average Order Value',
+                            },
+                            beginAtZero: true,
+                        },
+                    },
+                },
+            });
+        })
+        .catch(error => console.error('Error fetching average order values by day:', error));
+});
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Fetch average session duration from the session
+    const averageSessionDuration = {{ session.get('average_session_duration', 0) }};
+
+    // Update or create the bar chart using Chart.js
+    const ctx = document.getElementById('averageSessionDurationChart').getContext('2d');
+    const averageSessionDurationChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Average Session Duration'],
+            datasets: [{
+                data: [averageSessionDuration],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+            }],
+        },
+        options: {
+            scales: {
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Seconds',
+                    },
+                    beginAtZero: true,
+                },
+            },
+        },
+    });
+});
+
+</script>
+
+{% endblock %}

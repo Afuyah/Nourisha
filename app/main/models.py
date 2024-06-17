@@ -29,6 +29,14 @@ class User(db.Model, UserMixin):
   role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
   confirmed = db.Column(db.Boolean, default=False)
   confirmation_token = db.Column(db.String(64), unique=True)
+
+  
+  preferred_categories = db.Column(db.Text)  # JSON or CSV of preferred category IDs
+  average_spending = db.Column(db.Float)  # Average spending per order
+  purchase_frequency = db.Column(db.Integer)  # Number of orders per month
+  last_active = db.Column(db.DateTime)  # Last activity timestamp
+
+    
   delivery_info = db.relationship('UserDeliveryInfo',
                                   back_populates='user',
                                   lazy='dynamic')
@@ -37,6 +45,12 @@ class User(db.Model, UserMixin):
   role = db.relationship('Role', backref=db.backref('users', lazy=True))
   orders = db.relationship('Order', back_populates='user')
 
+  clicks = db.relationship('ProductClick', back_populates='user')
+  views = db.relationship('ProductView', back_populates='user')
+  search_queries = db.relationship('UserSearchQuery', back_populates='user')
+
+
+  
   def set_password(self, password):
     self.password_hash = generate_password_hash(password)
 
@@ -101,34 +115,68 @@ class Supplier(db.Model):
   products = db.relationship('Product', back_populates='supplier')
 
 
-# Product model for handling product information
+
 class Product(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(100), nullable=False)
-  category_id = db.Column(db.Integer,
-                          db.ForeignKey('product_category.id'),
-                          nullable=False)
-  brand = db.Column(db.String(50), nullable=True)
-  unit_price = db.Column(db.Float, nullable=False)
-  unit_measurement = db.Column(db.String(20), nullable=True)
-  quantity_in_stock = db.Column(db.Integer, nullable=False)
-  quantity_sold = db.Column(db.Integer, default=0)
-  discount_percentage = db.Column(db.Float, nullable=True)
-  promotional_tag = db.Column(db.String(50), nullable=True)
-  nutritional_information = db.Column(db.Text, nullable=True)
-  country_of_origin = db.Column(db.String(50), nullable=True)
-  supplier_id = db.Column(db.Integer,
-                          db.ForeignKey('supplier.id'),
-                          nullable=False)
-  date_added = db.Column(db.Date, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('product_category.id'), nullable=False)
+    brand = db.Column(db.String(50), nullable=True)
+    unit_price = db.Column(db.Float, nullable=False)
+    unit_measurement = db.Column(db.String(20), nullable=True)
+    quantity_in_stock = db.Column(db.Integer, nullable=False)
+    quantity_sold = db.Column(db.Integer, default=0)
+    discount_percentage = db.Column(db.Float, nullable=True)
+    promotional_tag = db.Column(db.String(50), nullable=True)
+    nutritional_information = db.Column(db.Text, nullable=True)
+    country_of_origin = db.Column(db.String(50), nullable=True)
+    average_rating = db.Column(db.Float)  # Average user rating
+    click_count = db.Column(db.Integer, default=0)  # Number of times the product was clicked
+    view_count = db.Column(db.Integer, default=0)  # Number of times the product was viewed
+    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False)
+    date_added = db.Column(db.Date, nullable=False)
+
+    # Define relationships with Supplier, ProductCategory, and images
+    supplier = db.relationship('Supplier', back_populates='products')
+    category = db.relationship('ProductCategory', back_populates='products')
+    images = db.relationship('ProductImage', back_populates='product')
+    carts = db.relationship('Cart', back_populates='product')
+    order_items = db.relationship('OrderItem', back_populates='product')
+
+    # Add relationships to the interaction models
+    clicks = db.relationship('ProductClick', back_populates='product')
+    views = db.relationship('ProductView', back_populates='product')
+
+class ProductClick(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = db.relationship('User', back_populates='clicks')
+    product = db.relationship('Product', back_populates='clicks')
+
+class ProductView(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = db.relationship('User', back_populates='views')
+    product = db.relationship('Product', back_populates='views')
+
+class UserSearchQuery(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    query_text = db.Column(db.String(255), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationship with the user
+    user = db.relationship('User', back_populates='search_queries')
 
 
-  # Define relationships with Supplier and ProductCategory and images
-  supplier = db.relationship('Supplier', back_populates='products')
-  category = db.relationship('ProductCategory', back_populates='products')
-  images = db.relationship('ProductImage', back_populates='product')
-  carts = db.relationship('Cart', back_populates='product')
-  order_items = db.relationship('OrderItem', back_populates='product')
+
 
 
 # ProductImage model for handling product images
@@ -192,7 +240,7 @@ class Order(db.Model):
 
   # Phone number used for payment
   phone_number = db.Column(db.String(20), nullable=True)
-
+  delivery_remarks = db.Column(db.Text)  # Column to store delivery remarks
   # Define the relationship with User
   user = db.relationship('User', back_populates='orders')
 
@@ -213,6 +261,7 @@ class OrderItem(db.Model):
   unit_price = db.Column(db.Float, nullable=False)
   custom_description = db.Column(db.Text)
   fulfillment_status = db.Column(db.String(20), nullable=False, default='Not fulfilled')  # Add default value
+ 
 
   # Define the relationship with Order
   order = db.relationship('Order', back_populates='order_items')
