@@ -30,13 +30,13 @@ class User(db.Model, UserMixin):
   confirmed = db.Column(db.Boolean, default=False)
   confirmation_token = db.Column(db.String(64), unique=True)
 
-  
+
   preferred_categories = db.Column(db.Text)  # JSON or CSV of preferred category IDs
   average_spending = db.Column(db.Float)  # Average spending per order
   purchase_frequency = db.Column(db.Integer)  # Number of orders per month
   last_active = db.Column(db.DateTime)  # Last activity timestamp
 
-    
+
   delivery_info = db.relationship('UserDeliveryInfo',
                                   back_populates='user',
                                   lazy='dynamic')
@@ -50,7 +50,7 @@ class User(db.Model, UserMixin):
   search_queries = db.relationship('UserSearchQuery', back_populates='user')
 
 
-  
+
   def set_password(self, password):
     self.password_hash = generate_password_hash(password)
 
@@ -261,7 +261,7 @@ class OrderItem(db.Model):
   unit_price = db.Column(db.Float, nullable=False)
   custom_description = db.Column(db.Text)
   fulfillment_status = db.Column(db.String(20), nullable=False, default='Not fulfilled')  # Add default value
- 
+
 
   # Define the relationship with Order
   order = db.relationship('Order', back_populates='order_items')

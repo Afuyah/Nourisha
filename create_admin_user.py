@@ -16,13 +16,13 @@ def create_admin_user():
         admin_user = User.query.filter_by(username='jsync').first()
         if not admin_user:
             admin_user = User(
-                username='jhsync',
-                email='jsync@bha.com',
-                phone='1044314',
-                name='Henry A',
+                username='Rykie',
+                email='erickmuchiri26@gmail.com',
+                phone='0710625177',
+                name='Muchiri Erick',
                 confirmed=True,
             )
-            admin_user.set_password('12x')  # Replace with a secure password
+            admin_user.set_password('1964#')  # Replace with a secure password
             admin_user.role = admin_role
             db.session.add(admin_user)
             db.session.commit()
