@@ -634,3 +634,61 @@ def get_current_user_id():
         return 0  # Return 0 for guest users
 
 
+
+
+@bp.route('/api/recommendations', methods=['GET'])
+def get_recommendations():
+    try:
+        user_id = request.args.get('user_id')  # Retrieve user_id from query parameters
+        num_recommendations = int(request.args.get('num', 10))  # Default to 10 recommendations if not specified
+
+        if user_id:
+            # User is logged in, include recent order products in recommendations
+            recommendations = get_personalized_recommendations(user_id, num_recommendations)
+        else:
+            # User is not logged in, recommend most popular products
+            recommendations = get_most_popular_products(num_recommendations)
+
+        # Prepare the response as a list of JSON objects representing products
+        recommended_products = []
+        for product in recommendations:
+            recommended_products.append({
+                'id': product.id,
+                'name': product.name,
+                'description': product.nutritional_information if product.nutritional_information else "",
+                'price': product.unit_price,
+                'category': product.category.name if product.category else None,
+                'click_count': product.click_count,
+                'view_count': product.view_count,
+                'average_rating': product.average_rating,
+                'supplier': product.supplier.name if product.supplier else None
+                # Add more fields as needed
+            })
+
+        return jsonify(recommended_products), 200
+
+    except Exception as e:
+        # Log the error and return an appropriate error response
+        print(f"Error fetching recommendations: {e}")
+        return jsonify({'error': 'Server error'}), 500
+
+def get_personalized_recommendations(user_id, num_recommendations):
+    # Placeholder function, customize this based on your personalized recommendation logic
+    # Example: Recommendations based on user's past orders or interactions
+    user_orders = Order.query.filter_by(user_id=user_id).order_by(Order.date_added.desc()).limit(5).all()
+
+    ordered_product_ids = []
+    for order in user_orders:
+        ordered_product_ids.extend([item.product_id for item in order.order_items])
+
+    # Fetch products related to ordered_product_ids or use collaborative filtering methods
+    # Example: Fetching products based on ordered_product_ids
+    recommended_products = Product.query.filter(Product.id.in_(ordered_product_ids)).limit(num_recommendations).all()
+
+    return recommended_products
+
+def get_most_popular_products(num_products):
+    # Placeholder function, customize this based on your popularity-based recommendation logic
+    popular_products = Product.query.order_by(Product.click_count.desc()).limit(num_products).all()
+
+    return popular_products
