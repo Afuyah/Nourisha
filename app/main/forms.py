@@ -3,7 +3,7 @@ from wtforms import StringField, PasswordField, FloatField, IntegerField, TextAr
 from wtforms.validators import DataRequired, Email, Length
 from flask_wtf.file import FileField, FileRequired, DataRequired
 from wtforms import HiddenField, TextAreaField, BooleanField
-from wtforms.validators import InputRequired
+from wtforms.validators import InputRequired, Optional, Length, NumberRange
 
 
 class RegistrationForm(FlaskForm):
@@ -61,20 +61,18 @@ class AddSupplierForm(FlaskForm):
 
 
 class AddProductForm(FlaskForm):
-  name = StringField('Product Name', validators=[DataRequired()])
+  name = StringField('Product Name', validators=[DataRequired(), Length(max=100)])
   category = SelectField('Category', coerce=int, validators=[DataRequired()])
-  brand = StringField('Brand')
-  unit_price = FloatField('Unit Price', validators=[DataRequired()])
-  unit_measurement = StringField('Unit of Measurement')
-  quantity_in_stock = IntegerField('Quantity in Stock',
-                                   validators=[DataRequired()])
-  discount_percentage = FloatField('Discount Percentage')
-  promotional_tag = StringField('Promotional Tag')
-  nutritional_information = TextAreaField('Nutritional Information')
-  country_of_origin = StringField('Country of Origin')
+  brand = StringField('Brand', validators=[Optional(), Length(max=100)])
+  unit_price = FloatField('Unit Price', validators=[DataRequired(), NumberRange(min=0)])
+  unit_measurement = StringField('Unit of Measurement', validators=[Optional(), Length(max=50)])
+  quantity_in_stock = IntegerField('Quantity in Stock', validators=[DataRequired(), NumberRange(min=0)])
+  discount_percentage = FloatField('Discount Percentage', validators=[Optional(), NumberRange(min=0, max=100)])
+  promotional_tag = StringField('Promotional Tag', validators=[Optional(), Length(max=50)])
+  nutritional_information = TextAreaField('Nutritional Information', validators=[Optional()])
+  country_of_origin = StringField('Country of Origin', validators=[Optional(), Length(max=50)])
   supplier = SelectField('Supplier', coerce=int, validators=[DataRequired()])
-  date_added = DateField('Date Added to Inventory',
-                         validators=[DataRequired()])
+  date_added = DateField('Date Added to Inventory', validators=[DataRequired()])
   submit = SubmitField('Add Product')
 
 

@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app import db, mail
 from app.admin import admin_bp
 from io import BytesIO
+
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib import colors
@@ -16,8 +17,8 @@ import os
 from io import StringIO
 import csv
 from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 
+from reportlab.pdfgen import canvas
 from app.main.forms import (
     AddArealineForm,
     AddLocationForm,
@@ -503,20 +504,12 @@ def get_nearest_places(arealine_id):
 @admin_bp.route('/view_order_details/<int:order_id>')
 def view_order_details(order_id):
     def route():
-        order = Order.query.get_or_404(order_id)
+        order = Order.query.get_or_40704(order_id)
         return render_template('view_order_details.html', order=order)
 
     return handle_db_error_and_redirect(route)
 
 
-
-    # Send confirmation email
-    msg = Message('Order Confirmation', recipients=[order.user.email])
-    msg.body = f"Dear {order.user.username},\n\n We're thrilled to inform you that your order #{order.id} has been successfully confirmed! 🎉. \n\n If you have any questions or need assistance with your order, feel free to reach out to our customer support team at support@nourishagroceries.com or by replying to this email.!\n\nThank you once again for choosing Nourisha Groceries. We truly appreciate your support!\nBest regards,\n\nThe Nourisha Team"
-    mail.send(msg)
-
-    flash('Order confirmed successfully!', 'success')
-    return redirect(url_for('admin.view_orders'))
   
 @admin_bp.route('/cancel_order/<int:order_id>', methods=['POST'])
 @login_required
@@ -592,56 +585,74 @@ def sendmail(subject, recipients, body):
     msg.body = body
     mail.send(msg)
 
-
-
-
-
-
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Image
+from reportlab.lib.units import inch, cm
+from reportlab.lib import colors
+from reportlab.pdfgen import canvas
+import os
 
 @admin_bp.route('/generate_pdf')
-@login_required  # Ensure this route is protected
+@login_required
 def generate_pdf():
-    users = User.query.all()  # Fetch all users
+    # Fetch all users
+    users = User.query.all()
 
     # Create a buffer to hold the PDF data
     pdf_buffer = BytesIO()
-    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter, topMargin=1*inch, bottomMargin=1*inch, leftMargin=1*inch, rightMargin=1*inch)
 
     # Sample styles for paragraphs and table
     styles = getSampleStyleSheet()
-    title_style = styles['Title']
-    subtitle_style = ParagraphStyle('Subtitle', fontSize=14, spaceAfter=12, alignment=1)
+    title_style = ParagraphStyle(
+        'Title',
+        fontSize=18,
+        leading=22,
+        fontName='Helvetica-Bold',
+        alignment=1,
+        textColor=colors.HexColor("#003366"),
+        spaceAfter=12
+    )
+    subtitle_style = ParagraphStyle(
+        'Subtitle',
+        fontSize=12,
+        leading=15,
+        fontName='Helvetica',
+        alignment=1,
+        textColor=colors.HexColor("#666666"),
+        spaceAfter=6
+    )
     table_style = TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#4BACC6")),  # Header background
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#003366")),  # Header background
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Header text color
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 10),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#D9EAD3")),  # Body background
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor("#D9EAD3"), colors.white]),  # Alternating rows
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#E6F2FF")),  # Body background
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor("#E6F2FF"), colors.white]),  # Alternating rows
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
         ('LEFTPADDING', (0, 0), (-1, -1), 8),
         ('RIGHTPADDING', (0, 0), (-1, -1), 8),
         ('TOPPADDING', (0, 0), (-1, -1), 8),
     ])
 
-    # Adding a logo to the document
+    # Elements to add to the PDF
     elements = []
+
+    # Adding header with logo and title
     logo_path = os.path.join(current_app.static_folder, 'logoford.png')  # Path to the logo file
-
-    if os.path.exists(logo_path):  # Ensure the logo file exists
-        logo = Image(logo_path, width=2.5 * inch, height=1 * inch)  # Adjust size as needed
-        logo.hAlign = 'CENTER'  # Align the logo at the center
+    if os.path.exists(logo_path):
+        logo = Image(logo_path, width=2.5*inch, height=1*inch)
         elements.append(logo)
-        elements.append(Spacer(1, 0.2 * inch))  # Add some space below the logo
 
-    # Adding a title and other elements
-    elements.append(Paragraph("User Report", title_style))
-    elements.append(Spacer(1, 0.2 * inch))  # Add some space after the title
-    elements.append(Paragraph("A detailed list of all users", subtitle_style))
-    elements.append(Spacer(1, 0.2 * inch))
+    # Add title and subtitle
+    elements.append(Spacer(1, 0.2*inch))
+    elements.append(Paragraph("<b>User Report</b>", title_style))
+    elements.append(Spacer(1, 0.1*inch))
+    elements.append(Paragraph("<i>A detailed list of all users</i>", subtitle_style))
+    elements.append(Spacer(1, 0.4*inch))
 
     # Define table headers and data
     table_data = [['#', 'Username', 'Email', 'Phone', 'Name']]
@@ -652,22 +663,44 @@ def generate_pdf():
             user.email,
             user.phone,
             user.name
-            
         ])
 
-    # Create the table and apply styling
-    table = Table(table_data, hAlign='LEFT', colWidths=[0.7 * inch, 1.2 * inch, 1.8 * inch, 1.2 * inch, 1.5 * inch, 1.5 * inch, 1.5 * inch, 1.5 * inch, 1 * inch])
+    # Create the table with improved styling
+    table = Table(table_data, hAlign='CENTER', colWidths=[0.7*inch, 1.2*inch, 2.2*inch, 1.5*inch, 2.0*inch])
     table.setStyle(table_style)
     elements.append(table)
+    elements.append(PageBreak())
 
-    # Footer with page number (added during the build process)
-    def add_page_number(canvas, doc):
-        page_num = canvas.getPageNumber()
-        text = f"Page {page_num}"
-        canvas.drawRightString(200 * mm, 10 * mm, text)  # Positioned 200 mm from the left, and 10 mm from the bottom
+    # Add a border around each page
+    def draw_page_border(canvas, doc):
+        canvas.saveState()
+        width, height = letter
+        border_margin = 0.5 * cm
+        canvas.setLineWidth(0.5)
+        canvas.setStrokeColor(colors.HexColor("#003366"))
+        canvas.rect(border_margin, border_margin, width - 2 * border_margin, height - 2 * border_margin)
+        canvas.restoreState()
 
-    # Build the PDF
-    pdf.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
+    # Add header and footer
+    def add_header_footer(canvas, doc):
+        canvas.saveState()
+        width, height = letter
+        border_margin = 0.5 * cm
+
+
+        # Footer
+        footer_text = f"Page {doc.page}"
+        canvas.setFont('Helvetica', 8)
+        canvas.setFillColor(colors.HexColor("#666666"))
+        canvas.drawRightString(width - border_margin, border_margin - 10, footer_text)
+        canvas.restoreState()
+
+    # Build the PDF with the new border and header/footer
+    pdf.build(
+        elements,
+        onFirstPage=lambda c, d: (draw_page_border(c, d), add_header_footer(c, d)),
+        onLaterPages=lambda c, d: (draw_page_border(c, d), add_header_footer(c, d))
+    )
 
     # Move the buffer's cursor to the beginning
     pdf_buffer.seek(0)
@@ -680,43 +713,6 @@ def generate_pdf():
         mimetype='application/pdf'
     )
 
-
-
-
-@admin_bp.route('/generate_csv')
-def generate_csv():
-    users = User.query.all()
-
-    # Create an in-memory file-like object to write CSV data
-    csv_data = StringIO()
-    writer = csv.writer(csv_data)
-
-    # Write the header row
-    writer.writerow([ 'Username', 'Email', 'Phone', 'Name', 'Registration Date', 'Last Login Date', 'Last Login IP' ])
-
-    # Write data rows
-    for user in users:
-        writer.writerow([
-           
-            user.username,
-            user.email,
-            user.phone,
-            user.name,
-            str(user.registration_date),
-            str(user.last_login_date),
-            user.last_login_ip,
-            
-        ])
-
-    # Seek to the beginning of the StringIO buffer
-    csv_data.seek(0)
-
-    # Return the CSV data as a response
-    return Response(
-        csv_data,
-        mimetype='text/csv',
-        headers={'Content-Disposition': 'attachment; filename=users.csv'}
-    )
 
 
 # View Orders by Date
@@ -892,6 +888,7 @@ def api_get_orders_by_status(status):
     except Exception as e:
         app.logger.error(f"Error fetching orders by status: {e}")
         return jsonify({'error': 'An error occurred while fetching orders.'}), 500
+
 
 
 

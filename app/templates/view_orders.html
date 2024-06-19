@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <div class="container mt-5">
     <h3 class="text-center mb-4">Manage Orders</h3>
@@ -60,6 +61,8 @@
     </div>
 </div>
 
+
+
 <!-- Include Bootstrap 5 CSS and JS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
@@ -93,7 +96,9 @@
                     ordersHtml += '<td>' + order.order_date + '</td>';
                     ordersHtml += '<td>Ksh. ' + order.total_price + '</td>';
                     ordersHtml += '<td><span class="badge bg-info text-dark">' + order.status + '</span></td>';
-                    ordersHtml += '<td><a href="admin/order/' + order.id + '" class="btn btn-info btn-sm"><i class="bi bi-eye"></i> View</a></td>';
+                    ordersHtml += '<td>';               
+                    ordersHtml += '<a href="admin/order/' + order.id + '" class="btn btn-info btn-sm"><i class="bi bi-eye"></i> View</a>';
+                    ordersHtml += '</td>';
                     ordersHtml += '</tr>';
                 });
 
@@ -105,77 +110,6 @@
             $('#' + status).html('<p class="text-center text-danger">Failed to load orders. Please try again later.</p>');
         });
     }
+
 </script>
-
-<!-- Custom CSS -->
-<style>
-    .container {
-        background-color: #fff;
-        padding: 5px;
-        border-radius: 8px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-        font-family: 'Arial', sans-serif;
-        color: #333;
-    }
-
-    .nav-tabs .nav-link {
-        border-radius: 0;
-        font-weight: 600;
-    }
-
-    .nav-tabs .nav-link i {
-        margin-right: 5px;
-    }
-
-    .nav-tabs .nav-link.active {
-        background-color: #007bff;
-        color: white;
-    }
-
-    .tab-content {
-        margin-top: 20px;
-    }
-
-    .table {
-        margin-top: 10px;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    .table thead th {
-        background-color: #f8f9fa;
-    }
-
-    .badge {
-        padding: 0.5em 1em;
-    }
-
-    .btn-info {
-        border-radius: 5px;
-    }
-
-    .table-responsive {
-        margin-top: 20px;
-    }
-
-    @media (max-width: 768px) {
-        .nav-tabs {
-            flex-wrap: wrap;
-        
-            
-        }
-        .nav-tabs .nav-item {
-            flex: 1 1 100%;
-            text-align: center;
-        
-        }
-        .btn-info {
-            width: 100%;
-            margin-top: 10px;
-        }
-    }
-</style>
 {% endblock %}

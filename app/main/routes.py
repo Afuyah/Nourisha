@@ -40,15 +40,17 @@ def refresh_csrf_token():
 
 
 def login_required(func):
-
-  @wraps(func)
-  def decorated_function(*args, **kwargs):
-    if not current_user.is_authenticated:
-      flash('Please login to access this page.', 'warning')
-      return redirect(url_for('main.login', next=request.url))
-    return func(*args, **kwargs)
-
-  return decorated_function
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            # Store the requested page URL in the session
+            session['next'] = request.url
+            flash('Please login to access this page.', 'warning')
+            return redirect(url_for('main.login'))
+        
+        return func(*args, **kwargs)
+    
+    return decorated_function
 
 
 # Instantiate the URLSafeTimedSerializer with a secret key
@@ -303,50 +305,44 @@ def add_supplier():
 @bp.route('/add_product', methods=['GET', 'POST'])
 @login_required
 def add_product():
-  form = AddProductForm()
-  image_form = ProductImageForm()
-  # Populate choices for select fields
-  image_form.product.choices = [(product.id, product.name)
-                                for product in Product.query.all()]
-  form.supplier.choices = [(supplier.id, supplier.name)
-                           for supplier in Supplier.query.all()]
-  form.category.choices = [(category.id, category.name)
-                           for category in ProductCategory.query.all()]
+    form = AddProductForm()
+    image_form = ProductImageForm()
 
-  if form.validate_on_submit():
-    # Create a new product using the form data
-    product = Product(
-        name=form.name.data,
-        category_id=form.category.data,
-        brand=form.brand.data,
-        unit_price=form.unit_price.data,
-        unit_measurement=form.unit_measurement.data,
-        quantity_in_stock=form.quantity_in_stock.data,
-        discount_percentage=form.discount_percentage.data,
-        promotional_tag=form.promotional_tag.data,
-        nutritional_information=form.nutritional_information.data,
-        country_of_origin=form.country_of_origin.data,
-        supplier_id=form.supplier.data,
-        date_added=form.date_added.data)
+    # Populate choices for select fields
+    image_form.product.choices = [(product.id, product.name) for product in Product.query.all()]
+    form.supplier.choices = [(supplier.id, supplier.name) for supplier in Supplier.query.all()]
+    form.category.choices = [(category.id, category.name) for category in ProductCategory.query.all()]
 
-    # Add and commit the new product to the database
-    db.session.add(product)
-    db.session.commit()
+    if form.validate_on_submit():
+        # Create a new product using the form data
+        product = Product(
+            name=form.name.data,
+            category_id=form.category.data,
+            brand=form.brand.data,
+            unit_price=form.unit_price.data,
+            unit_measurement=form.unit_measurement.data,
+            quantity_in_stock=form.quantity_in_stock.data,
+            discount_percentage=form.discount_percentage.data,
+            promotional_tag=form.promotional_tag.data,
+            nutritional_information=form.nutritional_information.data,
+            country_of_origin=form.country_of_origin.data,
+            supplier_id=form.supplier.data,
+            date_added=form.date_added.data or datetime.utcnow()
+        )
 
-    flash('Product added successfully!', 'success')
-    return redirect(url_for('main.add_product'))
+        # Add and commit the new product to the database
+        db.session.add(product)
+        db.session.commit()
 
-  # Fetch all products for display
-  products = Product.query.all()
+        flash('Product added successfully!', 'success')
+        return redirect(url_for('main.add_product'))
 
-  return render_template('add_product.html',
-                         form=form,
-                         products=products,
-                         image_form=image_form)
+    # Fetch all products for display (you may not need this for this view)
+    # products = Product.query.all()
+
+    return render_template('add_product.html', form=form, image_form=image_form)
 
 
-# Additional routes for viewing, editing, and deleting products can be added here
-# Example:
 @bp.route('/view_product/<int:product_id>')
 @login_required
 def view_product(product_id):
@@ -605,18 +601,18 @@ def track_product_event():
 
 
 
+from dateutil import parser
+
 def record_click_event(user_id, product_id, timestamp):
     try:
-        new_click = ProductClick(user_id=user_id, product_id=product_id, timestamp=datetime.fromisoformat(timestamp))
+        # Parse the timestamp using dateutil.parser to handle the 'Z' UTC designator
+        parsed_timestamp = parser.parse(timestamp)
+        new_click = ProductClick(user_id=user_id, product_id=product_id, timestamp=parsed_timestamp)
         db.session.add(new_click)
-        product = Product.query.get(product_id)
-        if product:
-            product.click_count += 1
         db.session.commit()
     except Exception as e:
         app.logger.error(f"Error recording click event: {e}")
-        db.session.rollback()
-
+        raise e  # Re-raise the exception after logging it
 def record_view_event(user_id, product_id, timestamp):
             try:
                 new_view = ProductView(user_id=user_id, product_id=product_id, timestamp=datetime.fromisoformat(timestamp))
