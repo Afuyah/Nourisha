@@ -605,13 +605,26 @@ from dateutil import parser
 
 def record_click_event(user_id, product_id, timestamp):
     try:
-        # Parse the timestamp using dateutil.parser to handle the 'Z' UTC designator
+        # Parse the timestamp using dateutil.parser
         parsed_timestamp = parser.parse(timestamp)
+        
+        # Create a new ProductClick instance
         new_click = ProductClick(user_id=user_id, product_id=product_id, timestamp=parsed_timestamp)
+        
+        # Add to the session
         db.session.add(new_click)
+        
+        # Retrieve the product and increment the click count
+        product = Product.query.get(product_id)
+        if product:
+            product.click_count += 1
+        
+        # Commit the changes
         db.session.commit()
     except Exception as e:
-        app.logger.error(f"Error recording click event: {e}")
+        # Log the error and rollback the session
+        app.logger.error(f"Error recording click event for user {user_id}, product {product_id}: {e}")
+        db.session.rollback()
         raise e  # Re-raise the exception after logging it
 def record_view_event(user_id, product_id, timestamp):
             try:
