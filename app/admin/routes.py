@@ -1089,7 +1089,7 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
         [Paragraph("Shipping:", bold_style), f"Ksh {shipping_fee:.2f}"],
         [Paragraph("Total:", bold_style), f"Ksh {total_price:.2f}"]
     ]
-    summary_table = Table(summary_data, colWidths=[2*inch, 4*inch])
+    summary_table = Table(summary_data, colWidths=[3*inch, 4*inch])
     summary_table.setStyle(table_style)
     elements.append(summary_table)
     elements.append(Spacer(1, 0.4*inch))
