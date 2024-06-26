@@ -90,6 +90,7 @@ class AddLocationForm(FlaskForm):
   submit = SubmitField('Add Location')
 
 
+
 class AddArealineForm(FlaskForm):
   name = StringField('Arealine Name', validators=[DataRequired()])
   location = SelectField('Location', coerce=int, validators=[DataRequired()])

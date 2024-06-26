@@ -9,7 +9,7 @@ from app.admin import admin_bp
 from io import BytesIO
 
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, HRFlowable, Flowable
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, mm
@@ -473,6 +473,7 @@ def get_locations():
     locations = Location.query.all()
     locations_data = [{'id': location.id, 'name': location.name} for location in locations]
     return jsonify({'locations': locations_data})
+
   
 
 @admin_bp.route('/get_arealines/<location_id>', methods=['GET'])
@@ -499,6 +500,7 @@ def get_nearest_places(arealine_id):
     nearest_places = [{'id': place.id, 'name': place.name} for place in arealine.nearest_places]
 
     return jsonify({'nearest_places': nearest_places})
+
 
 
 @admin_bp.route('/view_order_details/<int:order_id>')
@@ -592,9 +594,9 @@ from reportlab.lib import colors
 from reportlab.pdfgen import canvas
 import os
 
-@admin_bp.route('/generate_pdf')
+@admin_bp.route('/generate_allusers_pdf')
 @login_required
-def generate_pdf():
+def generate_allusers_pdf():
     # Fetch all users
     users = User.query.all()
 
@@ -891,6 +893,218 @@ def api_get_orders_by_status(status):
 
 
 
+@admin_bp.route('/order/<int:order_id>/generate_invoice')
+def generate_invoice(order_id):
+    order = Order.query.get_or_404(order_id)
+    fulfilled_items = [item for item in order.order_items if item.fulfillment_status == 'Fulfilled']
 
-        
+    if not fulfilled_items:
+        flash('No fulfilled items to generate an invoice.', 'warning')
+        return redirect(url_for('admin.order_details', order_id=order_id))
 
+    subtotal = sum(item.total_price for item in fulfilled_items)
+    shipping_fee = 200
+    total_price = subtotal + shipping_fee
+
+    pdf_buffer = generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_price)
+
+    return send_file(pdf_buffer, as_attachment=True, download_name=f'Invoice_{order.id}.pdf', mimetype='application/pdf')
+
+
+
+def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_price):
+    buffer = BytesIO()
+    pdf = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=18)
+    elements = []
+
+    styles = getSampleStyleSheet()
+
+    # Define styles for various text elements
+    company_name_style = ParagraphStyle(
+        'CompanyName',
+        fontSize=20,
+        leading=24,
+        fontName='Helvetica-Bold',
+        textColor=colors.HexColor("#2E7D32"),  # Deep green color for the company name
+        alignment=0  # Left alignment
+    )
+    header_info_style = ParagraphStyle(
+        'HeaderInfo',
+        fontSize=10,
+        leading=12,
+        fontName='Helvetica',
+        textColor=colors.HexColor("#333333"),  # Dark gray color for header text
+    )
+    tagline_style = ParagraphStyle(
+        'Tagline',
+        fontSize=10,
+        leading=12,
+        fontName='Helvetica-Oblique',
+        textColor=colors.HexColor("#388E3C"),  # Slightly brighter green for the tagline
+        alignment=0  # Left alignment
+    )
+    title_style = ParagraphStyle(
+        'Title',
+        fontSize=18,
+        leading=22,
+        fontName='Helvetica-Bold',
+        alignment=1,
+        textColor=colors.HexColor("#003366"),
+        spaceAfter=12
+    )
+    header_style = ParagraphStyle(
+        'Header',
+        fontSize=14,
+        leading=16,
+        fontName='Helvetica-Bold',
+        textColor=colors.HexColor("#003366"),
+        spaceAfter=10
+    )
+    subheader_style = ParagraphStyle(
+        'SubHeader',
+        fontSize=12,
+        leading=14,
+        fontName='Helvetica-Bold',
+        textColor=colors.HexColor("#003366"),
+        spaceAfter=8
+    )
+    bold_style = ParagraphStyle(
+        'Bold',
+        fontSize=10,
+        fontName='Helvetica-Bold'
+    )
+    footer_style = ParagraphStyle(
+        'Footer',
+        fontSize=10,
+        fontName='Helvetica-Oblique',  # Use regular Helvetica and apply italic styling directly
+        alignment=1,
+        textColor=colors.HexColor("#4CAF50"),  # Green color to match the company theme
+        spaceAfter=12
+    )
+
+    normal_style = styles['Normal']
+    normal_style.spaceAfter = 6
+
+    table_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#00539C")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#F0F4F8")),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor("#F0F4F8"), colors.white]),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+    ])
+
+    # Header with logo and company information
+    logo_path = os.path.join(current_app.static_folder, 'logoford.png')
+    if os.path.exists(logo_path):
+        logo = Image(logo_path, width=1.2*inch, height=0.6*inch)  # Reduced size
+        logo.hAlign = 'LEFT'
+
+    company_info = Table([
+        [logo,
+         Paragraph(
+             "Nourisha Groceries",
+             company_name_style),
+         Paragraph(
+             "Fidel Odinga street, Mombasa, Kenya<br/>Phone: +254 707 632230<br/>Email: info@nourishagroceries.com",
+             header_info_style)
+        ]
+    ], colWidths=[1.5*inch, 2.5*inch, 3*inch])
+
+    header_background_color = colors.HexColor("#E0F7FA")
+    header_background = Table(
+        [[company_info]],
+        style=[('BACKGROUND', (0, 0), (-1, -1), header_background_color)]
+    )
+
+    elements.append(header_background)
+    elements.append(Spacer(1, 0.1*inch))
+
+    # Add a horizontal line below the header
+    elements.append(HRFlowable(width="100%", thickness=1, lineCap='round', color=colors.HexColor("#CCCCCC"), spaceBefore=0.5*inch, spaceAfter=0.2*inch))
+
+    # Invoice title
+    elements.append(Paragraph("Invoice", title_style))
+    elements.append(Spacer(1, 0.1*inch))
+
+    # Invoice info and customer info side by side
+    invoice_and_customer_info = Table([
+        [
+            Table([
+                [Paragraph("Invoice Number:", bold_style), f"INV-{order.id}"],
+                [Paragraph("Invoice Date:", bold_style), order.order_date.strftime('%Y-%m-%d')],
+                [Paragraph("Order ID:", bold_style), str(order.id)]
+            ], colWidths=[2*inch, 2.5*inch]),
+            Table([
+                [Paragraph("Customer Name:", bold_style), order.user.name],
+                [Paragraph("Phone:", bold_style), order.user.phone],
+                [Paragraph("Email:", bold_style), order.user.email]
+            ], colWidths=[2*inch, 2.5*inch])
+        ]
+    ])
+    elements.append(invoice_and_customer_info)
+    elements.append(Spacer(1, 0.2*inch))
+
+    # Order details
+    elements.append(Paragraph("Order Details", subheader_style))
+    order_info = [
+        [Paragraph("Payment Method:", bold_style), order.payment_method],
+        [Paragraph("Payment Status:", bold_style), order.payment_status],
+        [Paragraph("Lipa na Mpesa:", bold_style), "Buy Goods"]
+       
+    ]
+    elements.append(Table(order_info, colWidths=[2*inch, 4*inch], hAlign='LEFT'))
+    elements.append(Spacer(1, 0.3*inch))
+
+    # Items purchased
+    elements.append(Paragraph("Items Purchased", subheader_style))
+    invoice_data = [
+        [Paragraph("Item Description", bold_style), Paragraph("Quantity", bold_style), Paragraph("Unit Price", bold_style), Paragraph("Total", bold_style)]
+    ]
+
+    for item in fulfilled_items:
+        invoice_data.append([
+            item.product.name,
+            str(item.quantity),
+            f"Ksh {item.unit_price:.2f}",
+            f"Ksh {item.total_price:.2f}"
+        ])
+
+    invoice_table = Table(invoice_data, colWidths=[4*inch, 1*inch, 1*inch, 1*inch])
+    invoice_table.setStyle(table_style)
+    elements.append(invoice_table)
+    elements.append(Spacer(1, 0.4*inch))
+
+    # Summary
+    elements.append(Paragraph("Summary", subheader_style))
+    summary_data = [
+        [Paragraph("Subtotal:", bold_style), f"Ksh {subtotal:.2f}"],
+        [Paragraph("Shipping:", bold_style), f"Ksh {shipping_fee:.2f}"],
+        [Paragraph("Total:", bold_style), f"Ksh {total_price:.2f}"]
+    ]
+    summary_table = Table(summary_data, colWidths=[2*inch, 4*inch])
+    summary_table.setStyle(table_style)
+    elements.append(summary_table)
+    elements.append(Spacer(1, 0.4*inch))
+
+    # Footer with terms and conditions
+    elements.append(Paragraph(" Thank you for your business!", normal_style))
+    elements.append(Spacer(1, 0.2*inch))
+
+    elements.append(Paragraph("For any queries, please contact us at info@nourishagroceries.com or +254 707 632230.", normal_style))
+    elements.append(Spacer(1, 0.4*inch))
+
+    # Add the company tagline at the footer
+    elements.append(Paragraph("Promoting Healthy Living Through Healthy Eating", footer_style))
+
+    pdf.build(elements)
+
+    buffer.seek(0)
+    return buffer

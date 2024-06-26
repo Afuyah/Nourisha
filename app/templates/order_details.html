@@ -71,6 +71,14 @@
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#fulfillModal">Fulfill Order</button>
             {% elif order.status == 'out for delivery' %}
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#deliveryRemarksModal">Mark as Delivered</button>
+
+
+            
+            {% endif %}
+
+             <!-- Generate Invoice Button -->
+            {% if order.status in ['confirmed', 'out for delivery', 'delivered'] %}
+                <a href="{{ url_for('admin.generate_invoice', order_id=order.id) }}" class="btn btn-primary">Generate Invoice</a>
             {% endif %}
         </div>
     </div>
@@ -115,7 +123,7 @@
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Fulfill Selected Items</button>
                 </div>
             </form>
@@ -180,7 +188,7 @@
 
     @media (max-width: 768px) {
         .card-body .row {
-            flex-direction: coumn;
+            flex-direction: column;
         }
         .card-footer .btn {
             width: 100%;

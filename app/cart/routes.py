@@ -1,8 +1,8 @@
 # Import necessary modules and classes
-from flask import render_template, flash, redirect, url_for, request, jsonify, current_app
+from flask import render_template, flash, redirect, url_for, request, jsonify, current_app, session
 from flask_login import current_user, login_required
 from app.main.models import User, Location, Order, OrderItem
-from app.main.models import Cart, Product, Location, Order, Arealine, NearestPlace, UserDeliveryInfo
+from app.main.models import Cart, Product, Location, Order, Arealine, NearestPlace, UserDeliveryInfo, Location
 from app.cart import cart_bp
 from app.main.forms import CheckoutForm, AddProductForm
 from app import db, mail
@@ -267,15 +267,13 @@ def _in_stock(product_id):
 @cart_bp.route('/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():
-    # Initialize the checkout form
     form = CheckoutForm()
 
     # Retrieve cart items for the current user
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
 
     # Calculate the total price of all cart items
-    total_price = sum(cart_item.product.unit_price * cart_item.quantity
-                      for cart_item in cart_items)+200
+    total_price = sum(cart_item.product.unit_price * cart_item.quantity for cart_item in cart_items) + 200
 
     # Fetch delivery addresses for the user
     user_delivery_info = UserDeliveryInfo.query.filter_by(user_id=current_user.id).all()
@@ -290,40 +288,111 @@ def checkout():
     nearest_places = NearestPlace.query.all()
     form.set_nearest_place_choices(nearest_places)
 
-    # Handle form submission
     if form.validate_on_submit():
-        # User is entering a new address, save it
-        delivery_info = UserDeliveryInfo(
-            user_id=current_user.id,
-            location_id=form.location.data,
-            arealine_id=form.arealine.data,
-            nearest_place_id=form.nearest_place.data,
-            address_line=form.address_line.data,
-            full_name=form.full_name.data,
-            phone_number=form.phone_number.data,
-            alt_phone_number=form.alt_phone_number.data,
-            additional_info=form.additional_info.data
-        )
+        # Temporarily store the delivery information in session to show on summary
+        session['delivery_info'] = {
+            'location_id': form.location.data,
+            'arealine_id': form.arealine.data,
+            'nearest_place_id': form.nearest_place.data,
+            'address_line': form.address_line.data,
+            'full_name': form.full_name.data,
+            'phone_number': form.phone_number.data,
+            'alt_phone_number': form.alt_phone_number.data,
+            'additional_info': form.additional_info.data,
+            'payment_method': form.payment_method.data,
+            'custom_description': form.custom_description.data
+        }
 
-        # Add new delivery information to the database
-        db.session.add(delivery_info)
-        db.session.commit()
+        # Redirect to the order summary page
+        return redirect(url_for('cart.order_summary'))
 
-        # Create a new order
+    return render_template('checkout.html', form=form, cart_items=cart_items, total_price=total_price)
+
+@cart_bp.route('/latest_delivery_info', methods=['GET'])
+@login_required
+def latest_delivery_info():
+    latest_info = UserDeliveryInfo.query.filter_by(user_id=current_user.id).order_by(UserDeliveryInfo.timestamp.desc()).first()
+    if latest_info:
+        return jsonify({
+            'success': True,
+            'delivery_info': {
+                'location_id': latest_info.location_id,
+                'arealine_id': latest_info.arealine_id,
+                'nearest_place_id': latest_info.nearest_place_id,
+                'address_line': latest_info.address_line,
+                'full_name': latest_info.full_name,
+                'phone_number': latest_info.phone_number,
+                'alt_phone_number': latest_info.alt_phone_number,
+                'additional_info': latest_info.additional_info,
+            }
+        })
+    return jsonify({'success': False, 'message': 'No delivery info found'}), 404
+
+
+@cart_bp.route('/update_delivery_info', methods=['POST'])
+@login_required
+def update_delivery_info():
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Invalid data'}), 400
+
+    # Fetch or create new delivery info
+    delivery_info = UserDeliveryInfo.query.filter_by(user_id=current_user.id).order_by(UserDeliveryInfo.timestamp.desc()).first()
+    if not delivery_info:
+        delivery_info = UserDeliveryInfo(user_id=current_user.id)
+
+    # Update with new data
+    delivery_info.location_id = data.get('location_id')
+    delivery_info.arealine_id = data.get('arealine_id')
+    delivery_info.nearest_place_id = data.get('nearest_place_id')
+    delivery_info.address_line = data.get('address_line')
+    delivery_info.full_name = data.get('full_name')
+    delivery_info.phone_number = data.get('phone_number')
+    delivery_info.alt_phone_number = data.get('alt_phone_number')
+    delivery_info.additional_info = data.get('additional_info')
+
+    # Save to database
+    db.session.add(delivery_info)
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Delivery info updated successfully'})
+
+
+@cart_bp.route('/order_summary', methods=['GET', 'POST'])
+@login_required
+def order_summary():
+    form = CheckoutForm()
+    # Fetch stored delivery information from session
+    delivery_info = session.get('delivery_info', {})
+
+    if not delivery_info:
+        flash('No delivery information found. Please fill the checkout form again.', 'warning')
+        return redirect(url_for('cart.checkout'))
+
+    # Retrieve cart items for the current user
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+
+    # Calculate the total price of all cart items
+    total_price = sum(cart_item.product.unit_price * cart_item.quantity for cart_item in cart_items) + 200
+
+    # Get details for the location, arealine, and nearest place
+    location = Location.query.get(delivery_info['location_id'])
+    arealine = Arealine.query.get(delivery_info['arealine_id'])
+    nearest_place = NearestPlace.query.get(delivery_info['nearest_place_id'])
+
+    if request.method == 'POST':
+        # Place the order
         order = Order(
             user_id=current_user.id,
             status='pending',
             total_price=total_price,
-            location_id=form.location.data,
-            arealine_id=form.arealine.data,
-            nearest_place_id=form.nearest_place.data,
-            address_line=form.address_line.data,
-            #full_name=form.full_name.data,
-            #phone_number=form.phone_number.data,
-            #alt_phone_number=form.alt_phone_number.data,
-            additional_info=form.additional_info.data,
-            payment_method=form.payment_method.data,
-            custom_description=form.custom_description.data
+            location_id=delivery_info['location_id'],
+            arealine_id=delivery_info['arealine_id'],
+            nearest_place_id=delivery_info['nearest_place_id'],
+            address_line=delivery_info['address_line'],
+            additional_info=delivery_info['additional_info'],
+            payment_method=delivery_info['payment_method'],
+            custom_description=delivery_info['custom_description']
         )
 
         # Add order items to the order
@@ -341,8 +410,6 @@ def checkout():
         db.session.add(order)
         db.session.commit()
 
-       
-
         # Clear the user's cart
         Cart.query.filter_by(user_id=current_user.id).delete()
         db.session.commit()
@@ -350,12 +417,24 @@ def checkout():
         # Send order confirmation email to the user
         send_order_confirmation_email(current_user.email, 'afuyaah@gmail.com', order)
 
+        # Clear the session information after the order is placed
+        session.pop('delivery_info', None)
+
         # Flash success message and redirect to payment page
         flash('Order placed successfully! Redirecting to the payment page...', 'success')
         return redirect(url_for('payments.mpesa_payment', order_id=order.id))
 
-    # Render the checkout template with form and cart items
-    return render_template('checkout.html', form=form, cart_items=cart_items, total_price=total_price)
+    return render_template('order_summary.html', 
+                           cart_items=cart_items, 
+                           total_price=total_price, 
+                           delivery_info=delivery_info,
+                           location=location,
+                           arealine=arealine,
+                           nearest_place=nearest_place,
+                           form=form)
+
+
+
 
 
 @cart_bp.route('/reorder/<int:order_id>', methods=['POST'])

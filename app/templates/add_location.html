@@ -1,106 +1,122 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div class="container mt-5">
+<div class="container mt-5">
     <!-- Heading for Adding Location -->
     <h2>Add Location</h2>
-    <form method="post" action="{{ url_for('admin.add_location') }}">
-      {{ form_location.hidden_tag() }}
-      <!-- Input for Location Name -->
-      <div class="mb-3">
-        <label for="locationName" class="form-label">Location Name</label>
-        {{ form_location.location_name(class="form-control", id="locationName", required=true) }}
-      </div>
-      <!-- Submit Button for Adding Location -->
-      {{ form_location.submit(class="btn btn-primary") }}
+    <form method="post" action="{{ url_for('admin.add_location') }}" id="addLocationForm">
+        {{ form_location.hidden_tag() }}
+        <!-- Input for Location Name -->
+        <div class="mb-3">
+            <label for="locationName" class="form-label">Location Name</label>
+            {{ form_location.location_name(class="form-control", id="locationName", required=true) }}
+        </div>
+        <!-- Submit Button for Adding Location -->
+        {{ form_location.submit(class="btn btn-primary") }}
     </form>
-
-    <script>
-      // Reload the page after submitting the location form
-      document.forms[0].addEventListener('submit', function() {
-        location.reload();
-      });
-    </script>
 
     <!-- Heading for Adding Arealine -->
     <h2 class="mt-4">Add Arealine</h2>
-    <form method="post" action="{{ url_for('admin.add_location') }}">
-      {{ form_arealine.hidden_tag() }}
-      <!-- Dropdown for Selecting Location -->
-      <div class="mb-3">
-        <label for="locationDropdown" class="form-label">Select Location</label>
-        {{ form_arealine.location(class="form-control", id="locationDropdown", required=true) }}
-      </div>
-      <!-- Input for Arealine -->
-      <div class="mb-3">
-        <label for="areaLine" class="form-label">Arealine</label>
-        {{ form_arealine.name(class="form-control", id="areaLine", required=true) }}
-      </div>
-      <!-- Submit Button for Adding Arealine -->
-      {{ form_arealine.submit(class="btn btn-primary") }}
+    <form method="post" action="{{ url_for('admin.add_location') }}" id="addArealineForm">
+        {{ form_arealine.hidden_tag() }}
+        <!-- Dropdown for Selecting Location -->
+        <div class="mb-3">
+            <label for="locationDropdown" class="form-label">Select Location</label>
+            {{ form_arealine.location(class="form-control", id="locationDropdown", required=true) }}
+        </div>
+        <!-- Input for Arealine -->
+        <div class="mb-3">
+            <label for="areaLine" class="form-label">Arealine</label>
+            {{ form_arealine.name(class="form-control", id="areaLine", required=true) }}
+        </div>
+        <!-- Submit Button for Adding Arealine -->
+        {{ form_arealine.submit(class="btn btn-primary") }}
     </form>
-
-    <script>
-      // Reload the page after submitting the arealine form
-      document.forms[1].addEventListener('submit', function() {
-        location.reload();
-      });
-    </script>
 
     <!-- Heading for Adding Nearest Place -->
     <h2 class="mt-4">Add Nearest Place</h2>
-    <form method="post" action="{{ url_for('admin.add_location') }}">
-      {{ form_nearest_place.hidden_tag() }}
-      <!-- Dropdown for Selecting Arealine -->
-      <div class="mb-3">
-        <label for="arealineDropdown" class="form-label">Select Arealine</label>
-        {{ form_nearest_place.arealine(class="form-control", id="arealineDropdown", required=true) }}
-      </div>
-      <!-- Input for Nearest Place -->
-      <div class="mb-3">
-        <label for="nearestPlace" class="form-label">Nearest Place</label>
-        {{ form_nearest_place.name(class="form-control", id="nearestPlace", required=true) }}
-      </div>
-      <!-- Submit Button for Adding Nearest Place -->
-      {{ form_nearest_place.submit(class="btn btn-primary") }}
+    <form method="post" action="{{ url_for('admin.add_location') }}" id="addNearestPlaceForm">
+        {{ form_nearest_place.hidden_tag() }}
+        <!-- Dropdown for Selecting Arealine -->
+        <div class="mb-3">
+            <label for="arealineDropdown" class="form-label">Select Arealine</label>
+            {{ form_nearest_place.arealine(class="form-control", id="arealineDropdown", required=true) }}
+        </div>
+        <!-- Input for Nearest Place -->
+        <div class="mb-3">
+            <label for="nearestPlace" class="form-label">Nearest Place</label>
+            {{ form_nearest_place.name(class="form-control", id="nearestPlace", required=true) }}
+        </div>
+        <!-- Submit Button for Adding Nearest Place -->
+        {{ form_nearest_place.submit(class="btn btn-primary") }}
     </form>
 
-    <script>
-      // Reload the page after submitting the nearest place form
-      document.forms[2].addEventListener('submit', function() {
-        location.reload();
-      });
-    </script>
-<!-- Table for Displaying Locations with Arealines and Nearest Places -->
+    <!-- Table for Displaying Locations with Arealines and Nearest Places -->
     <h2 class="mt-4">Locations, Arealines, and Nearest Places</h2>
     <table class="table table-bordered">
-      <thead class="table-dark">
-        <tr>
-          <th>Location</th>
-          <th>Arealines</th>
-          <th>Nearest Places</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for location in locations %}
-          {% for arealine in location.arealines %}
+        <thead class="table-dark">
             <tr>
-              {% if loop.first %}
-                <td rowspan="{{ location.arealines|length }}">
-                  {{ location.name }}
-                </td>
-              {% endif %}
-              <td>{{ arealine.name }}</td>
-              <td>
-                {% for nearest_place in arealine.nearest_places %}
-                  {{ nearest_place.name }}
-                {% endfor %}
-              </td>
+                <th>Location</th>
+                <th>Arealines</th>
+                <th>Nearest Places</th>
             </tr>
-          {% endfor %}
-        {% endfor %}
-      </tbody>
+        </thead>
+        <tbody>
+            {% for location in locations %}
+            {% for arealine in location.arealines %}
+            <tr>
+                {% if loop.first %}
+                <td rowspan="{{ location.arealines|length }}">
+                    {{ location.name }}
+                </td>
+                {% endif %}
+                <td>{{ arealine.name }}</td>
+                <td>
+                    {% for nearest_place in arealine.nearest_places %}
+                    {{ nearest_place.name }}
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </tbody>
     </table>
 </div>
+
+<script>
+    
+fetch('/admin/get_locations')
+    .then(response => response.json())
+    .then(data => {
+        // Handle the response data (array of locations)
+        console.log(data.locations);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+
+// Example fetch request to get arealines for a location
+fetch('/admin/get_arealines/' + locationId)
+    .then(response => response.json())
+    .then(data => {
+        // Handle the response data (array of arealines)
+        console.log(data.arealines);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+
+// Example fetch request to get nearest places for an arealine
+fetch('/admin/get_nearest_places/' + arealineId)
+    .then(response => response.json())
+    .then(data => {
+        // Handle the response data (array of nearest places)
+        console.log(data.nearest_places);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+
+</script>
 
 {% endblock %}
