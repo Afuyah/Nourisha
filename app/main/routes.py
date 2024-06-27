@@ -277,29 +277,85 @@ def add_product_category():
 @bp.route('/add_supplier', methods=['GET', 'POST'])
 @login_required
 def add_supplier():
-  form = AddSupplierForm()
+    form = AddSupplierForm()
 
-  if form.validate_on_submit():
-    # Create a new supplier using the form data
-    supplier = Supplier(supplier_id=form.supplier_id.data,
-                        name=form.name.data,
-                        contact_person=form.contact_person.data,
-                        contact_email=form.contact_email.data,
-                        contact_phone=form.contact_phone.data,
-                        address=form.address.data,
-                        city=form.city.data)
+    if form.validate_on_submit():
+        supplier = Supplier(
+            supplier_id=form.supplier_id.data,
+            name=form.name.data,
+            contact_person=form.contact_person.data,
+            contact_email=form.contact_email.data,
+            contact_phone=form.contact_phone.data,
+            address=form.address.data,
+            city=form.city.data
+        )
+        try:
+            db.session.add(supplier)
+            db.session.commit()
+            flash('Supplier added successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding supplier: {str(e)}', 'danger')
+        return redirect(url_for('main.add_supplier'))
 
-    # Add and commit the new supplier to the database
-    db.session.add(supplier)
-    db.session.commit()
+    suppliers = Supplier.query.all()
+    return render_template('add_supplier.html', form=form, suppliers=suppliers)
 
-    flash('Supplier added successfully!', 'success')
+
+@bp.route('/edit_supplier/<int:supplier_id>', methods=['GET', 'POST'])
+@login_required
+def edit_supplier(supplier_id):
+    supplier = Supplier.query.get_or_404(supplier_id)
+    form = AddSupplierForm(obj=supplier)
+
+    if form.validate_on_submit():
+        supplier.supplier_id = form.supplier_id.data
+        supplier.name = form.name.data
+        supplier.contact_person = form.contact_person.data
+        supplier.contact_email = form.contact_email.data
+        supplier.contact_phone = form.contact_phone.data
+        supplier.address = form.address.data
+        supplier.city = form.city.data
+
+        try:
+            db.session.commit()
+            flash('Supplier updated successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating supplier: {str(e)}', 'danger')
+        return redirect(url_for('main.add_supplier'))
+
+    return render_template('edit_supplier.html', form=form, supplier=supplier)
+
+
+@bp.route('/get_supplier_details', methods=['GET'])
+@login_required
+def get_supplier_details():
+    supplier_id = request.args.get('supplier_id', type=int)
+    supplier = Supplier.query.get_or_404(supplier_id)
+    supplier_data = {
+        'supplier_id': supplier.supplier_id,
+        'name': supplier.name,
+        'contact_person': supplier.contact_person,
+        'contact_email': supplier.contact_email,
+        'contact_phone': supplier.contact_phone,
+        'address': supplier.address,
+        'city': supplier.city,
+    }
+    return jsonify(supplier_data)
+
+@bp.route('/delete_supplier/<int:supplier_id>', methods=['POST'])
+@login_required
+def delete_supplier(supplier_id):
+    supplier = Supplier.query.get_or_404(supplier_id)
+    try:
+        db.session.delete(supplier)
+        db.session.commit()
+        flash('Supplier deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting supplier: {str(e)}', 'danger')
     return redirect(url_for('main.add_supplier'))
-
-  # Fetch all suppliers
-  suppliers = Supplier.query.all()
-
-  return render_template('add_supplier.html', form=form, suppliers=suppliers)
 
 
 @bp.route('/add_product', methods=['GET', 'POST'])
@@ -341,6 +397,16 @@ def add_product():
     # products = Product.query.all()
 
     return render_template('add_product.html', form=form, image_form=image_form)
+
+
+@bp.route('/delete_product/<int:product_id>', methods=['POST'])
+@login_required
+def delete_product(product_id):
+    product = Product.query.get_or_404(product_id)
+    db.session.delete(product)
+    db.session.commit()
+    flash('Product deleted successfully!', 'success')
+    return redirect(url_for('main.products'))
 
 
 @bp.route('/view_product/<int:product_id>')

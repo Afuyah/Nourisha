@@ -1,90 +1,159 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="container mt-4">
-    <h1 class="mb-4">Add Supplier</h1>
+<div class="container mt-4">
+  <h1 class="mb-4">Suppliers</h1>
 
-    <form method="POST" action="{{ url_for('main.add_supplier') }}">
-      {{ form.hidden_tag() }}
+  <!-- Add Supplier Button (Moved to the top) -->
+  <button type="button" class="btn btn-success mb-3 d-block d-md-none" onclick="openAddModal()">
+    Add Supplier
+  </button>
 
-      <!-- Supplier ID Input -->
-      <div class="mb-3">
-        {{ form.supplier_id.label(class='form-label') }}
-        {{ form.supplier_id(class='form-control', placeholder='Enter Supplier ID Number', required=true) }}
-      </div>
-
-      <!-- Supplier Name Input -->
-      <div class="mb-3">
-        {{ form.name.label(class='form-label') }}
-        {{ form.name(class='form-control', placeholder='Enter Supplier Name', required=true) }}
-      </div>
-
-      <!-- Contact Person Input -->
-      <div class="mb-3">
-        {{ form.contact_person.label(class='form-label') }}
-        {{ form.contact_person(class='form-control', placeholder='Enter Contact Person', required=true) }}
-      </div>
-
-      <!-- Contact Email Input -->
-      <div class="mb-3">
-        {{ form.contact_email.label(class='form-label') }}
-        {{ form.contact_email(class='form-control', placeholder='Contact Email', required=true) }}
-      </div>
-
-      <!-- Contact Phone Input -->
-      <div class="mb-3">
-        {{ form.contact_phone.label(class='form-label') }}
-        {{ form.contact_phone(class='form-control', placeholder='Contact Phone', required=true) }}
-      </div>
-
-      <!-- Address Input -->
-      <div class="mb-3">
-        {{ form.address.label(class='form-label') }}
-        {{ form.address(class='form-control', placeholder='Enter Address', required=true) }}
-      </div>
-
-      <!-- City Input -->
-      <div class="mb-3">
-        {{ form.city.label(class='form-label') }}
-        {{ form.city(class='form-control', placeholder='Enter City', required=true) }}
-      </div>
-
-      <!-- Submit Button -->
-      <button type="submit" class="btn btn-primary">Add Supplier</button>
-    </form>
-
-    <hr>
-
-    <h2 class="mt-4">Suppliers</h2>
-    {% if suppliers %}
-      <table id="suppliersTable" class="table table-striped table-bordered mt-3">
-        <thead class="thead-dark">
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Contact Person</th>
-            <th>Contact Email</th>
-            <th>Contact Phone</th>
-            <th>Address</th>
-            <th>City</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for supplier in suppliers %}
-            <tr>
-              <td>{{ supplier.supplier_id }}</td>
-              <td>{{ supplier.name }}</td>
-              <td>{{ supplier.contact_person }}</td>
-              <td>{{ supplier.contact_email }}</td>
-              <td>{{ supplier.contact_phone }}</td>
-              <td>{{ supplier.address }}</td>
-              <td>{{ supplier.city }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>No suppliers available.</p>
-    {% endif %}
+  <!-- Suppliers Table -->
+  <div class="table-responsive">
+    <table id="suppliersTable" class="table table-striped table-bordered mt-3">
+      <thead class="thead-dark">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Contact Person</th>
+          <th>Contact Email</th>
+          <th>Contact Phone</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for supplier in suppliers %}
+        <tr>
+          <td>{{ supplier.supplier_id }}</td>
+          <td>{{ supplier.name }}</td>
+          <td>{{ supplier.contact_person }}</td>
+          <td>{{ supplier.contact_email }}</td>
+          <td>{{ supplier.contact_phone }}</td>
+          <td>
+                                    <!-- Edit Button -->
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="openEditModal({{ supplier.id }})">
+                                        Edit
+                                    </button>
+                                    <!-- Delete Form -->
+                                    <form method="POST" action="{{ url_for('main.delete_supplier', supplier_id=supplier.id) }}" style="display: inline;">
+                                       {{form.csrf_token}}
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this supplier?')">Delete</button>
+                                    </form>
+                                 
+                                </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
+
+  <!-- Add Supplier Button (Moved to the top, visible on desktop) -->
+  <button type="button" class="btn btn-success mb-3 d-none d-md-block" onclick="openAddModal()">
+    Add Supplier
+  </button>
+
+  <!-- Supplier Modal -->
+  <div class="modal fade" id="supplierModal" tabindex="-1" aria-labelledby="supplierModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="supplierModalLabel">Add Supplier</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="supplierForm" method="POST" action="{{ url_for('main.add_supplier') }}">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                          <label for="name">Supplier Id</label>
+                          <input type="text"  class="form-control"  id="supplierIdField" name="supplier_id">
+                        </div>
+
+            <!-- Supplier Name Input -->
+            <div class="mb-3">
+              {{ form.name.label(class='form-label') }}
+              {{ form.name(class='form-control', placeholder='Enter Supplier Name', required=true) }}
+            </div>
+
+            <!-- Contact Person Input -->
+            <div class="mb-3">
+              {{ form.contact_person.label(class='form-label') }}
+              {{ form.contact_person(class='form-control', placeholder='Enter Contact Person', required=true) }}
+            </div>
+
+            <!-- Contact Email Input -->
+            <div class="mb-3">
+              {{ form.contact_email.label(class='form-label') }}
+              {{ form.contact_email(class='form-control', placeholder='Contact Email', required=true) }}
+            </div>
+
+            <!-- Contact Phone Input -->
+            <div class="mb-3">
+              {{ form.contact_phone.label(class='form-label') }}
+              {{ form.contact_phone(class='form-control', placeholder='Contact Phone', required=true) }}
+            </div>
+
+            <!-- Address Input -->
+            <div class="mb-3">
+              {{ form.address.label(class='form-label') }}
+              {{ form.address(class='form-control', placeholder='Enter Address', required=true) }}
+            </div>
+
+            <!-- City Input -->
+            <div class="mb-3">
+              {{ form.city.label(class='form-label') }}
+              {{ form.city(class='form-control', placeholder='Enter City', required=true) }}
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary">Save</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+
+<!-- Custom JavaScript to handle modals and fetch data -->
+<script>
+  // Function to open modal for adding a new supplier
+  function openAddModal() {
+    document.getElementById('supplierModalLabel').textContent = 'Add New Supplier';
+    document.getElementById('supplierForm').action = "{{ url_for('main.add_supplier') }}";
+    document.getElementById('supplierForm').reset(); // Clear the form
+    var supplierModal = new bootstrap.Modal(document.getElementById('supplierModal'));
+    supplierModal.show();
+  }
+
+  // Function to open modal for editing an existing supplier
+  function openEditModal(supplierId) {
+    fetch(`{{ url_for('main.get_supplier_details') }}?supplier_id=${supplierId}`)
+      .then(response => response.json())
+      .then(data => {
+        // Populate the form fields with the supplier data
+        document.getElementById('supplierIdField').value = data.supplier_id;
+        document.getElementById('supplierModalLabel').textContent = 'Edit Supplier';
+        document.querySelector('[name="name"]').value = data.name;
+        document.querySelector('[name="contact_person"]').value = data.contact_person;
+        document.querySelector('[name="contact_email"]').value = data.contact_email;
+        document.querySelector('[name="contact_phone"]').value = data.contact_phone;
+        document.querySelector('[name="address"]').value = data.address;
+        document.querySelector('[name="city"]').value = data.city;
+
+        // Change form action for updating
+        document.getElementById('supplierForm').action = `{{ url_for('main.edit_supplier', supplier_id=0) }}`.replace('0', supplierId);
+
+        // Show the modal
+        var supplierModal = new bootstrap.Modal(document.getElementById('supplierModal'));
+        supplierModal.show();
+      })
+      .catch(error => console.error('Error fetching supplier details:', error));
+  }
+</script>
+
 {% endblock %}
