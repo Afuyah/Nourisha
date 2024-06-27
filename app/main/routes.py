@@ -616,16 +616,20 @@ def record_click_event(user_id, product_id, timestamp):
         
         # Retrieve the product and increment the click count
         product = Product.query.get(product_id)
-        if product:
+        if product is not None:
             product.click_count += 1
-        
-        # Commit the changes
-        db.session.commit()
+            
+            # Commit the changes
+            db.session.commit()
+        else:
+            app.logger.error(f"Product with ID {product_id} not found.")
+            # Handle case where product is not found, perhaps raise an exception or log the error
     except Exception as e:
         # Log the error and rollback the session
         app.logger.error(f"Error recording click event for user {user_id}, product {product_id}: {e}")
         db.session.rollback()
         raise e  # Re-raise the exception after logging it
+
 def record_view_event(user_id, product_id, timestamp):
             try:
                 new_view = ProductView(user_id=user_id, product_id=product_id, timestamp=datetime.fromisoformat(timestamp))

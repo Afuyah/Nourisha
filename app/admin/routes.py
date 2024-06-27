@@ -9,6 +9,7 @@ from app.admin import admin_bp
 from io import BytesIO
 
 from reportlab.lib.pagesizes import letter
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, HRFlowable, Flowable
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -926,7 +927,7 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
         leading=24,
         fontName='Helvetica-Bold',
         textColor=colors.HexColor("#2E7D32"),  # Deep green color for the company name
-        alignment=0  # Left alignment
+        alignment=TA_LEFT
     )
     header_info_style = ParagraphStyle(
         'HeaderInfo',
@@ -934,6 +935,7 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
         leading=12,
         fontName='Helvetica',
         textColor=colors.HexColor("#333333"),  # Dark gray color for header text
+        alignment=TA_LEFT
     )
     tagline_style = ParagraphStyle(
         'Tagline',
@@ -941,24 +943,16 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
         leading=12,
         fontName='Helvetica-Oblique',
         textColor=colors.HexColor("#388E3C"),  # Slightly brighter green for the tagline
-        alignment=0  # Left alignment
+        alignment=TA_LEFT
     )
     title_style = ParagraphStyle(
         'Title',
         fontSize=18,
         leading=22,
         fontName='Helvetica-Bold',
-        alignment=1,
+        alignment=TA_CENTER,
         textColor=colors.HexColor("#003366"),
         spaceAfter=12
-    )
-    header_style = ParagraphStyle(
-        'Header',
-        fontSize=14,
-        leading=16,
-        fontName='Helvetica-Bold',
-        textColor=colors.HexColor("#003366"),
-        spaceAfter=10
     )
     subheader_style = ParagraphStyle(
         'SubHeader',
@@ -976,9 +970,9 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     footer_style = ParagraphStyle(
         'Footer',
         fontSize=10,
-        fontName='Helvetica-Oblique',  # Use regular Helvetica and apply italic styling directly
-        alignment=1,
-        textColor=colors.HexColor("#4CAF50"),  # Green color to match the company theme
+        fontName='Helvetica-Oblique',
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#4CAF50"),
         spaceAfter=12
     )
 
@@ -1053,12 +1047,10 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     elements.append(Spacer(1, 0.2*inch))
 
     # Order details
-    elements.append(Paragraph("Order Details", subheader_style))
     order_info = [
         [Paragraph("Payment Method:", bold_style), order.payment_method],
         [Paragraph("Payment Status:", bold_style), order.payment_status],
         [Paragraph("Lipa na Mpesa:", bold_style), "Buy Goods"]
-       
     ]
     elements.append(Table(order_info, colWidths=[2*inch, 4*inch], hAlign='LEFT'))
     elements.append(Spacer(1, 0.3*inch))
@@ -1077,25 +1069,26 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
             f"Ksh {item.total_price:.2f}"
         ])
 
-    invoice_table = Table(invoice_data, colWidths=[4*inch, 1*inch, 1*inch, 1*inch])
-    invoice_table.setStyle(table_style)
-    elements.append(invoice_table)
-    elements.append(Spacer(1, 0.4*inch))
+    invoice_data.append(["", "", "", ""])  # Empty row for spacing
 
     # Summary
-    elements.append(Paragraph("Summary", subheader_style))
     summary_data = [
         [Paragraph("Subtotal:", bold_style), f"Ksh {subtotal:.2f}"],
         [Paragraph("Shipping:", bold_style), f"Ksh {shipping_fee:.2f}"],
-        [Paragraph("Total:", bold_style), f"Ksh {total_price:.2f}"]
+        [Paragraph("Total:", bold_style), Paragraph(f"Ksh {total_price:.2f}", bold_style)]
     ]
     summary_table = Table(summary_data, colWidths=[3*inch, 4*inch])
     summary_table.setStyle(table_style)
-    elements.append(summary_table)
+
+    # Combine items table and summary table
+    combined_table_data = invoice_data + summary_data
+    combined_table = Table(combined_table_data, colWidths=[4*inch, 1*inch, 1*inch, 1*inch])
+    combined_table.setStyle(table_style)
+    elements.append(combined_table)
     elements.append(Spacer(1, 0.4*inch))
 
     # Footer with terms and conditions
-    elements.append(Paragraph(" Thank you for your business!", normal_style))
+    elements.append(Paragraph("Thank you for your business!", normal_style))
     elements.append(Spacer(1, 0.2*inch))
 
     elements.append(Paragraph("For any queries, please contact us at info@nourishagroceries.com or +254 707 632230.", normal_style))
