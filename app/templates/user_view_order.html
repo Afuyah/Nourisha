@@ -1,181 +1,402 @@
 {% extends 'layout.html' %}
 {% block content %}
-<style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
 
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 250px;
-        background-color: #fff;
-        padding-top: 60px;
-        transition: all 0.3s;
-        z-index: 1000;
-    }
+        /* Navbar Styles */
+        .navbar {
+            background-color: #28a745;
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
 
-    .sidebar-nav {
-        list-style-type: none;
-        padding-left: 0;
-    }
+        .navbar .btn {
+            color: #fff;
+        }
 
-    .sidebar-nav-item {
-        padding: 15px 20px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        color: #333;
-        transition: background-color 0.3s;
-        cursor: pointer;
-    }
-
-    .sidebar-nav-item:hover {
-        background-color: #f8f9fa;
-    }
-
-    .sidebar-nav-item i {
-        margin-right: 10px;
-    }
-
-    .sidebar-brand {
-        font-size: 24px;
-        font-weight: bold;
-        color: #333;
-        padding: 20px 20px 10px 20px;
-        text-align: center;
-        background-color: #fff;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        z-index: 1100;
-    }
-
-    .sidebar-brand:hover {
-        text-decoration: none;
-        color: #333;
-    }
-
-    .main-content {
-        padding: 20px;
-        margin-left: 250px;
-        background-color: #fff;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        border-radius: 10px;
-    }
-
-    .order-card {
-        background-color: #fff;
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-        transition: box-shadow 0.3s;
-    }
-
-    .order-card:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .order-link {
-        color: #333;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .order-id {
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        color: #555;
-    }
-
-    .status {
-        font-size: 16px;
-        margin-bottom: 10px;
-        font-weight: bold;
-        color: #007bff;
-    }
-
-    .total {
-        font-size: 16px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        color: #555;
-    }
-
-    .date {
-        font-size: 14px;
-        color: #999;
-    }
-
-    @media (max-width: 992px) {
+        /* Sidebar Styles */
         .sidebar {
             position: fixed;
             top: 0;
-            left: -250px;
-            width: 250px;
-            height: 100%;
-            z-index: 1000;
-            transition: left 0.3s ease-in-out;
-        }
-
-        .sidebar.show {
             left: 0;
+            height: 100%;
+            width: 250px;
+            background-color: #343a40;
+            padding-top: 60px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            overflow-y: auto;
         }
 
+        .sidebar .sidebar-brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            background-color: #495057;
+        }
+
+        .sidebar-nav {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s;
+            position: relative;
+        }
+
+        .sidebar-nav-item a {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-nav-item i {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #28a745;
+        }
+
+        .sidebar-nav-item:hover {
+            background-color: #495057;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            visibility: hidden;
+            background-color: #6c757d;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            left: 110%;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            width: max-content;
+        }
+
+        .sidebar-nav-item:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Main Content Styles */
         .main-content {
-            margin-left: 0;
-            border-radius: 0;
+            margin-left: 270px;
+            padding: 20px;
+            background-color: #fff;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
         }
-    }
-</style>
 
-<!-- Navbar with Sidebar Toggle Button -->
-<nav class="navbar navbar-expand-md navbar-light bg-light">
-    <div class="container-fluid d-flex flex-column align-items-center">
-        <button class="btn btn-outline-primary mb-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
-            <i class="fas fa-cog fa-spin"></i>
-            <span class="text-muted">Hi {{ current_user.username }}</span>
-            <i class="fas fa-caret-down text-muted"></i>
-        </button>
-    </div>
-</nav>
+        /* Dashboard Header */
+        .dashboard-header {
+            background: linear-gradient(135deg, #28a745, #218838);
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeInUp 0.6s ease-out;
+        }
 
-<!-- Sidebar -->
-<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title">Menu</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        <ul class="sidebar-nav">
-            <li class="sidebar-nav-item"><a href="#" class="text-primary"><i class="fas fa-user"></i> Profile Settings</li>
-            <li class="sidebar-nav-item"><a href="#" class="text-primary"><i class="fas fa-clipboard-list"></i> Orders</li>
-            <li class="sidebar-nav-item"><a href="#" class="text-primary"><i class="fas fa-envelope"></i> Messages</li>
-            <li class="sidebar-nav-item"><a href="#" class="text-primary"><i class="fas fa-star"></i> Reviews</li>
-            <li class="sidebar-nav-item"><a href="#" class="text-primary"><i class="fas fa-envelope-square"></i>Private Messages</a></li>
-            <li class="sidebar-nav-item">
-                <a href="{{ url_for('main.logout') }}" class="text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            </li>
-        </ul>
-    </div>
-</div>
+        .dashboard-header h3 {
+            margin: 0;
+            font-size: 24px;
+        }
 
-<!-- Main Content -->
+        /* Redesigned Order Cards */
+        .order-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .order-card {
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            transition: box-shadow 0.3s, transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .order-card:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .order-id {
+            font-size: 18px;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .order-status {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .order-status i {
+            margin-right: 5px;
+        }
+
+        .order-status.pending {
+            color: #ffc107;
+        }
+
+        .order-status.confirmed {
+            color: #28a745;
+        }
+
+        .order-status.cancelled {
+            color: #dc3545;
+        }
+
+        .order-body {
+            margin-bottom: 15px;
+        }
+
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .order-info span {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .order-total {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .order-date {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-reorder,
+        .btn-view-details {
+            background-color: #28a745;
+            color: #fff;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-reorder:hover,
+        .btn-view-details:hover {
+            background-color: #218838;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar {
+                left: -250px;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+        }
+        
+            /* Page Loader Styles */
+            #page-loader {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(255, 255, 255, 0.9);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 9999;
+              flex-direction: column;
+              text-align: center;
+            }
+
+            .loader-container {
+              text-align: center;
+            }
+
+            .loader-step {
+              font-size: 20px;
+              margin: 10px 0;
+              animation: fade 1.5s infinite;
+            }
+
+            @keyframes fade {
+              0%, 100% { opacity: 0; }
+              50% { opacity: 1; }
+            }
+
+            .d-none {
+              display: none;
+            }
+        </style>
+
+
+        `    
+
+
+        
+
+    <!-- Navbar with Sidebar Toggle Button -->
+    <nav class="navbar navbar-expand-md navbar-light">
+        <div class="container-fluid">
+            <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+                <i class="fas fa-bars"></i>
+                <span class="text-light ms-2">Hi {{ current_user.username }}</span>
+            </button>
+            <!-- Dark Mode Toggle -->
+            <button class="btn btn-outline-light" type="button">
+        <a href="{{ url_for('main.user_dashboard') }}" >
+           
+            <span class="text-light ms-2" >Dashboard</span>
+        </a>
+    </button>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Menu</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="sidebar-brand">Nourisha Groceries</div>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="#" class="text-primary">
+                        <i class="fas fa-user"></i> Profile Settings
+                    </a>
+                    <span class="tooltip">Manage your profile settings</span>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="text-primary">
+                        <i class="fas fa-clipboard-list"></i> Orders
+                    </a>
+                    <span class="tooltip">View your order history</span>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="text-primary">
+                        <i class="fas fa-envelope"></i> Messages
+                    </a>
+                    <span class="tooltip">Check your messages</span>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="text-primary">
+                        <i class="fas fa-star"></i> Reviews
+                    </a>
+                    <span class="tooltip">Read and write reviews</span>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="text-primary">
+                        <i class="fas fa-envelope-square"></i> Private Messages
+                    </a>
+                    <span class="tooltip">View private messages</span>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="{{ url_for('main.logout') }}" class="text-danger">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                    <span class="tooltip">Log out from your account</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="dashboard-header" style= "background: linear-gradient(135deg, #28a745, #218838);"">
+            <h3>Order #0{{ order.id }}</h3>
+              <strong></b>{{ order.status }}</strong>
+        </div>
+
 <div class="container">
     <div class="row">
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">Order Details</div>
                 <div class="card-body">
-                    <h5>Order #N-G-0{{ order.id }}</h5>
-                    <p><strong>Status:</strong> {{ order.status }}</p>
-                    <p><strong>Order Date:</strong> {{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-                    <p><strong>Delivery Address:</strong> {{ order.address_line }}</p>
+                    
+            
+                    <p><strong>Date:</strong> {{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    <p><strong>Address:</strong> {{ order.address_line }}</p>
                     <p><strong>Total Price:</strong> Ksh.{{ order.total_price }}</p>
 
                     <div class="order">
                         <!-- Order details here -->
-                        <button class="btn btn-primary" onclick="reorder({{ order.id }})">Reorder</button>
+                        <button class="btn btn-primary " onclick="reorder({{ order.id }})">Reorder</button>
 
                     </div>
                 </div>
@@ -301,12 +522,7 @@
     </div>
 </div>
 <div class="container">
-    <button class="btn btn-outline-primary mt-4 mb-4">
-        <a href="{{ url_for('main.user_dashboard') }}" class="text-primary">
-            <i class="fas fa-arrow-left"></i>
-            <span class="text-muted">Back To Orders</span>
-        </a>
-    </button>
+    
 </div>
 
 <script>
