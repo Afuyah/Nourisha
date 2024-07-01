@@ -61,9 +61,9 @@ class AddSupplierForm(FlaskForm):
 
 
 class AddProductForm(FlaskForm):
-  name = StringField('Product Name', validators=[DataRequired(), Length(max=100)])
+  name = StringField('Product Brand', validators=[DataRequired(), Length(max=100)])
   category = SelectField('Category', coerce=int, validators=[DataRequired()])
-  brand = StringField('Brand', validators=[Optional(), Length(max=100)])
+  brand = StringField('Product name', validators=[Optional(), Length(max=100)])
   unit_price = FloatField('Unit Price', validators=[DataRequired(), NumberRange(min=0)])
   unit_measurement = StringField('Unit of Measurement', validators=[Optional(), Length(max=50)])
   quantity_in_stock = IntegerField('Quantity in Stock', validators=[DataRequired(), NumberRange(min=0)])

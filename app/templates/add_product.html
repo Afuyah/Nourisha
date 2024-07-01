@@ -29,10 +29,10 @@
                     <form method="POST" action="{{ url_for('main.add_product') }}" novalidate>
                         {{ form.hidden_tag() }}
                         
-                        <!-- Product Name -->
+                        <!-- ProcategBrand -->
                         <div class="mb-3">
                             {{ form.name.label(class='form-label') }}
-                            {{ form.name(class='form-control', placeholder='Enter Product Name', required=true) }}
+                            {{ form.name(class='form-control', placeholder='Enter product Brand', required=true) }}
                             {% if form.name.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.name.errors[0] }}
@@ -51,10 +51,10 @@
                             {% endif %}
                         </div>
                         
-                        <!-- Brand -->
+                        <!-- Product name -->
                         <div class="mb-3">
                             {{ form.brand.label(class='form-label') }}
-                            {{ form.brand(class='form-control', placeholder='Enter Brand Name') }}
+                            {{ form.brand(class='form-control', placeholder='Enter Product Name' required = true) }}
                             {% if form.brand.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.brand.errors[0] }}
