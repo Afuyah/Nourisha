@@ -29,6 +29,7 @@ from app.main.forms import (
     FulfillmentForm,
     ShopForUserForm,
     AddUserForm,
+    CheckoutForm,
 )
 from app.main.models import (
     Arealine,
@@ -41,6 +42,7 @@ from app.main.models import (
     Role,
     User,
     Cart,
+    UserDeliveryInfo,
 )
 
 
@@ -1265,28 +1267,38 @@ def place_order_for_user():
     if current_user.role.name != 'admin':
         return jsonify({'message': 'Unauthorized'}), 403
 
-    data = request.get_json()
-    user_id = data.get('user_id')
-    cart = data.get('cart', [])
-
     try:
-        # Example calculation of total_price based on cart items
-        total_price = calculate_total_price(cart)
+        data = request.get_json()
+        user_id = data.get('user_id')
+
+        if not user_id:
+            return jsonify({'message': 'User ID is required'}), 400
+
+        # Fetch cart items from the database for the specified user
+        cart_items = Cart.query.filter_by(user_id=user_id).all()
+
+        # Debug: Log the cart items
+        print("Fetched Cart Items: ", [item.product_id for item in cart_items])
+
+        if not cart_items:
+            return jsonify({'message': 'No items in the cart for the user'}), 400
+
+        # Calculate the total price for the order
+        total_price = calculate_total_price(cart_items)
 
         # Add additional services and shipping fee
-        additional_services = 0  # Calculate additional services cost if applicable
+        additional_services = 0  # Adjust this value if applicable
         shipping_fee = 200  # Standard shipping fee
 
-        # Calculate total price including additional services and shipping fee
         total_price += additional_services + shipping_fee
 
         # Ensure location_id, arealine_id, and nearest_place_id are provided or set defaults
-        location_id = data.get('location_id', 1)  # Default to ID 1 if not provided
-        arealine_id = data.get('arealine_id', 1)  # Default to ID 1 if not provided
-        nearest_place_id = data.get('nearest_place_id', 1)  # Default to ID 1 if not provided
+        location_id = data.get('location_id', 1)  # Default value if not provided
+        arealine_id = data.get('arealine_id', 1)  # Default value if not provided
+        nearest_place_id = data.get('nearest_place_id', 1)  # Default value if not provided
 
         # Ensure address_line is provided, otherwise raise an error
-        address_line = data.get('address_line','address')
+        address_line = data.get('address_line', 'Example Address')
         if not address_line:
             return jsonify({'message': 'Address line is required'}), 400
 
@@ -1306,30 +1318,33 @@ def place_order_for_user():
             custom_description=data.get('custom_description')
         )
 
-        # Add order to the session and commit to get order.id
+        # Add the new order to the session and commit to get the order ID
         db.session.add(order)
         db.session.commit()
 
-        # Add order items to the order
-        for item in cart:
-            product = Product.query.get(item.get('product_id'))
+        # Debug: Log the new order ID
+        print(f"New Order ID: {order.id}")
+
+        # Add each cart item as an order item
+        for cart_item in cart_items:
+            product = cart_item.product
             if product:
                 order_item = OrderItem(
                     order_id=order.id,
                     product_id=product.id,
-                    quantity=item.get('quantity'),
+                    quantity=cart_item.quantity,
                     unit_price=product.unit_price,
-                    custom_description=item.get('custom_description', '')
+                    custom_description=cart_item.custom_description
                 )
                 db.session.add(order_item)
-            else:
-                # Handle case where product is not found (optional)
-                pass
 
-        # Commit changes to the database
+        # Commit all changes to the database
         db.session.commit()
 
-        # Return data for order summary modal
+        # Clear the cart for the user after placing the order
+        clear_cart_for_user(user_id)
+
+        # Prepare data for the order summary
         order_data = {
             'order_id': order.id,
             'user_id': order.user_id,
@@ -1346,15 +1361,49 @@ def place_order_for_user():
             } for item in order.order_items]
         }
 
-        return jsonify({'message': 'Order placed successfully!', 'order_data': order_data}), 200
+        return jsonify({'message': 'Order placed successfully!', 'order': order_data}), 200
 
     except Exception as e:
-        # Rollback in case of any error
+        # Rollback the session in case of error
         db.session.rollback()
         return jsonify({'message': f'Failed to place order: {str(e)}'}), 500
 
-def calculate_total_price(cart):
-    total_price = 0.0
-    for item in cart:
-        total_price += item.get('quantity') * item.get('unit_price')  # Adjust based on your model structure
+def calculate_total_price(cart_items):
+    total_price = 0
+    for item in cart_items:
+        product = item.product
+        if product:
+            total_price += item.quantity * product.unit_price
     return total_price
+
+def clear_cart_for_user(user_id):
+    Cart.query.filter_by(user_id=user_id).delete()
+    db.session.commit()
+
+
+@admin_bp.route('/admin/complete_order/<int:order_id>', methods=['POST'])
+@login_required
+def complete_order(order_id):
+    if current_user.role.name != 'admin':
+        flash('Unauthorized access!', 'error')
+        return redirect(url_for('admin.some_redirect_route'))
+
+    # Fetch the order
+    order = Order.query.get(order_id)
+    if not order:
+        flash('Order not found', 'error')
+        return redirect(url_for('admin.some_redirect_route'))
+
+    try:
+        # Update the order status to 'completed'
+        order.status = 'completed'
+        db.session.commit()
+
+        flash('Order completed successfully!', 'success')
+        return redirect(url_for('admin.order_summary', order_id=order_id))
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Failed to complete order: {str(e)}', 'error')
+        return redirect(url_for('admin.order_summary', order_id=order_id))
+
