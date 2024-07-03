@@ -27,6 +27,8 @@ from app.main.forms import (
     AddProductCategoryForm,
     DateSelectionForm,
     FulfillmentForm,
+    ShopForUserForm,
+    AddUserForm,
 )
 from app.main.models import (
     Arealine,
@@ -38,6 +40,7 @@ from app.main.models import (
     ProductCategory,
     Role,
     User,
+    Cart,
 )
 
 
@@ -923,18 +926,18 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     # Define styles for various text elements
     company_name_style = ParagraphStyle(
         'CompanyName',
-        fontSize=20,
-        leading=24,
+        fontSize=18,
+        leading=22,
         fontName='Helvetica-Bold',
-        textColor=colors.HexColor("#2E7D32"),  # Deep green color for the company name
+        textColor=colors.HexColor("#2E7D32"),
         alignment=TA_LEFT
     )
     header_info_style = ParagraphStyle(
         'HeaderInfo',
-        fontSize=10,
-        leading=12,
+        fontSize=8,
+        leading=10,
         fontName='Helvetica',
-        textColor=colors.HexColor("#333333"),  # Dark gray color for header text
+        textColor=colors.HexColor("#333333"),
         alignment=TA_LEFT
     )
     tagline_style = ParagraphStyle(
@@ -942,25 +945,25 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
         fontSize=10,
         leading=12,
         fontName='Helvetica-Oblique',
-        textColor=colors.HexColor("#388E3C"),  # Slightly brighter green for the tagline
+        textColor=colors.HexColor("#388E3C"),
         alignment=TA_LEFT
     )
     title_style = ParagraphStyle(
         'Title',
-        fontSize=18,
-        leading=22,
+        fontSize=16,
+        leading=20,
         fontName='Helvetica-Bold',
         alignment=TA_CENTER,
         textColor=colors.HexColor("#003366"),
-        spaceAfter=12
+        spaceAfter=8
     )
     subheader_style = ParagraphStyle(
         'SubHeader',
-        fontSize=12,
-        leading=14,
+        fontSize=10,
+        leading=12,
         fontName='Helvetica-Bold',
         textColor=colors.HexColor("#003366"),
-        spaceAfter=8
+        spaceAfter=6
     )
     bold_style = ParagraphStyle(
         'Bold',
@@ -973,23 +976,21 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
         fontName='Helvetica-Oblique',
         alignment=TA_CENTER,
         textColor=colors.HexColor("#4CAF50"),
-        spaceAfter=12
+        spaceAfter=8
     )
-
     normal_style = styles['Normal']
-    normal_style.spaceAfter = 6
+    normal_style.spaceAfter = 4
 
     table_style = TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#00539C")),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#F0F4F8")),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor("#F0F4F8"), colors.white]),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
         ('LEFTPADDING', (0, 0), (-1, -1), 8),
         ('RIGHTPADDING', (0, 0), (-1, -1), 8),
         ('TOPPADDING', (0, 0), (-1, -1), 8),
@@ -997,102 +998,102 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
 
     # Header with logo and company information
     logo_path = os.path.join(current_app.static_folder, 'logoford.png')
-    if os.path.exists(logo_path):
-        logo = Image(logo_path, width=1.2*inch, height=0.6*inch)  # Reduced size
-        logo.hAlign = 'LEFT'
+    logo = Image(logo_path, width=1.2*inch, height=0.6*inch) if os.path.exists(logo_path) else None
 
-    company_info = Table([
-        [logo,
-         Paragraph(
-             "Nourisha Groceries",
-             company_name_style),
-         Paragraph(
-             "Fidel Odinga street, Mombasa, Kenya<br/>Phone: +254 707 632230<br/>Email: info@nourishagroceries.com",
-             header_info_style)
-        ]
-    ], colWidths=[1.5*inch, 2.5*inch, 3*inch])
+    company_info = [
+        [logo if logo else "",
+         Paragraph("Nourisha Groceries", company_name_style),
+         Paragraph("Fidel Odinga street, Mombasa, Kenya<br/>Phone: +254 707 632230<br/>Email: info@nourishagroceries.com", header_info_style)]
+    ]
 
-    header_background_color = colors.HexColor("#E0F7FA")
-    header_background = Table(
-        [[company_info]],
-        style=[('BACKGROUND', (0, 0), (-1, -1), header_background_color)]
-    )
-
-    elements.append(header_background)
-    elements.append(Spacer(1, 0.1*inch))
+    company_info_table = Table(company_info, colWidths=[1.5*inch, 2.5*inch, 3*inch])
+    elements.append(company_info_table)
+    elements.append(Spacer(1, 0.05*inch))  # Reduced spacing
 
     # Add a horizontal line below the header
-    elements.append(HRFlowable(width="100%", thickness=1, lineCap='round', color=colors.HexColor("#CCCCCC"), spaceBefore=0.5*inch, spaceAfter=0.2*inch))
+    elements.append(HRFlowable(width="100%", thickness=1, lineCap='round', color=colors.HexColor("#CCCCCC"), spaceBefore=0.2*inch, spaceAfter=0.1*inch))
 
     # Invoice title
     elements.append(Paragraph("Invoice", title_style))
-    elements.append(Spacer(1, 0.1*inch))
+    elements.append(Spacer(1, 0.05*inch))  # Reduced spacing
 
     # Invoice info and customer info side by side
+    invoice_info = [
+        [Paragraph("Invoice Number:", bold_style), f"INV-{order.id}"],
+        [Paragraph("Invoice Date:", bold_style), order.order_date.strftime('%Y-%m-%d')],
+        [Paragraph("Order ID:", bold_style), str(order.id)]
+    ]
+    
+    customer_info = [
+        [Paragraph("Customer Name:", bold_style), order.user.name],
+        [Paragraph("Phone:", bold_style), order.user.phone],
+        [Paragraph("Email:", bold_style), order.user.email]
+    ]
+
     invoice_and_customer_info = Table([
         [
-            Table([
-                [Paragraph("Invoice Number:", bold_style), f"INV-{order.id}"],
-                [Paragraph("Invoice Date:", bold_style), order.order_date.strftime('%Y-%m-%d')],
-                [Paragraph("Order ID:", bold_style), str(order.id)]
-            ], colWidths=[2*inch, 2.5*inch]),
-            Table([
-                [Paragraph("Customer Name:", bold_style), order.user.name],
-                [Paragraph("Phone:", bold_style), order.user.phone],
-                [Paragraph("Email:", bold_style), order.user.email]
-            ], colWidths=[2*inch, 2.5*inch])
+            Table(invoice_info, colWidths=[2*inch, 2.5*inch]),
+            Table(customer_info, colWidths=[2*inch, 2.5*inch])
         ]
     ])
     elements.append(invoice_and_customer_info)
-    elements.append(Spacer(1, 0.2*inch))
+    elements.append(Spacer(1, 0.1*inch))  # Reduced spacing
 
-    # Order details
-    order_info = [
-        [Paragraph("Payment Method:", bold_style), order.payment_method],
-        [Paragraph("Payment Status:", bold_style), order.payment_status],
-        [Paragraph("Lipa na Mpesa:", bold_style), "Buy Goods"]
-    ]
-    elements.append(Table(order_info, colWidths=[2*inch, 4*inch], hAlign='LEFT'))
-    elements.append(Spacer(1, 0.3*inch))
+    
 
     # Items purchased
     elements.append(Paragraph("Items Purchased", subheader_style))
     invoice_data = [
-        [Paragraph("Item Description", bold_style), Paragraph("Quantity", bold_style), Paragraph("Unit Price", bold_style), Paragraph("Total", bold_style)]
+        [Paragraph("#", bold_style), Paragraph("Item Description", bold_style), Paragraph("Quantity", bold_style), Paragraph("Unit Price", bold_style), Paragraph("Total", bold_style)]
     ]
 
+    item_counter = 1
     for item in fulfilled_items:
         invoice_data.append([
+            str(item_counter),
             item.product.name,
             str(item.quantity),
             f"Ksh {item.unit_price:.2f}",
             f"Ksh {item.total_price:.2f}"
         ])
+        item_counter += 1
 
-    invoice_data.append(["", "", "", ""])  # Empty row for spacing
+    # Adding summary
+    invoice_data.append(["", "", "", "", ""])  # Empty row for spacing
 
-    # Summary
+    # Totals
     summary_data = [
-        [Paragraph("Subtotal:", bold_style), f"Ksh {subtotal:.2f}"],
-        [Paragraph("Shipping:", bold_style), f"Ksh {shipping_fee:.2f}"],
-        [Paragraph("Total:", bold_style), Paragraph(f"Ksh {total_price:.2f}", bold_style)]
+        ["", "", Paragraph("Subtotal:", bold_style), f"Ksh {subtotal:.2f}"],
+        ["", "", Paragraph("Shipping:", bold_style), f"Ksh {shipping_fee:.2f}"],
+        ["", "", Paragraph("Total:", bold_style), f"Ksh {total_price:.2f}"]
     ]
-    summary_table = Table(summary_data, colWidths=[3*inch, 4*inch])
-    summary_table.setStyle(table_style)
+
+    # Apply the new table style without borders
+    combined_table_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#00539C")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor("#F0F4F8"), colors.white]),
+    ])
 
     # Combine items table and summary table
     combined_table_data = invoice_data + summary_data
-    combined_table = Table(combined_table_data, colWidths=[4*inch, 1*inch, 1*inch, 1*inch])
-    combined_table.setStyle(table_style)
+    combined_table = Table(combined_table_data, colWidths=[0.5*inch, 3.5*inch, 1*inch, 1*inch, 1*inch])
+    combined_table.setStyle(combined_table_style)
     elements.append(combined_table)
-    elements.append(Spacer(1, 0.4*inch))
+    elements.append(Spacer(1, 0.3*inch))  # Reduced spacing
 
-    # Footer with terms and conditions
+    # Footer
     elements.append(Paragraph("Thank you for your business!", normal_style))
-    elements.append(Spacer(1, 0.2*inch))
-
-    elements.append(Paragraph("For any queries, please contact us at info@nourishagroceries.com or +254 707 632230.", normal_style))
-    elements.append(Spacer(1, 0.4*inch))
+    elements.append(Spacer(1, 0.2*inch))  # Reduced spacing
 
     # Add the company tagline at the footer
     elements.append(Paragraph("Promoting Healthy Living Through Healthy Eating", footer_style))
@@ -1101,3 +1102,239 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
 
     buffer.seek(0)
     return buffer
+    return buffer
+
+@admin_bp.route('/admin/add_user', methods=['GET', 'POST'])
+def add_user():
+    form = AddUserForm()
+    if form.validate_on_submit():
+        # Create a new user object
+        new_user = User(
+            username=form.username.data,
+            email=form.email.data,
+            phone=form.phone.data,
+            name=form.name.data
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        flash('User added successfully!', 'success')
+        return redirect(url_for('admin_shop_for_user', user_id=new_user.id))
+    return render_template('add_user.html', form=form)
+
+
+
+@admin_bp.route('/admin/shop_for_user', methods=['GET', 'POST'])
+def admin_shop_for_user():
+    form = ShopForUserForm()
+
+    # Populate user and product choices
+    users = User.query.all()
+    form.user.choices = [(user.id, user.username) for user in users]
+    categories = ProductCategory.query.all()
+
+    if form.validate_on_submit():
+        user_id = form.user.data
+        product_id = form.product.data
+        quantity = form.quantity.data
+        custom_description = form.custom_description.data
+
+        product = Product.query.get(product_id)
+        if not product:
+            flash('Product not found!', 'error')
+            return redirect(url_for('admin.admin_shop_for_user'))
+
+        user = User.query.get(user_id)
+        if not user:
+            flash('User not found!', 'error')
+            return redirect(url_for('admin.admin_shop_for_user'))
+
+        unit_price = product.unit_price
+
+        # Create order item
+        new_order_item = OrderItem(
+            order_id=None,  # No order_id yet since the order isn't placed
+            user_id=user_id,
+            product_id=product_id,
+            quantity=quantity,
+            unit_price=unit_price,
+            custom_description=custom_description
+        )
+        db.session.add(new_order_item)
+        db.session.commit()
+        flash('Item added to order!', 'success')
+
+    return render_template('admin_shop_for_user.html', form=form, users=users, categories=categories)
+
+@admin_bp.route('/admin/get_products')
+def get_products():
+    category_id = request.args.get('category_id')
+    if category_id:
+        products = Product.query.filter_by(category_id=category_id).all()
+        product_list = [{'id': product.id, 'name': product.name} for product in products]
+        return jsonify({'products': product_list})
+    return jsonify({'products': []})
+
+
+@admin_bp.route('/admin/get_user_cart')
+def get_user_cart():
+    user_id = request.args.get('user_id')
+    if user_id:
+        cart_items = Cart.query.filter_by(user_id=user_id).all()
+        cart_data = []
+        total_price = 0.0
+        
+        for item in cart_items:
+            product = Product.query.get(item.product_id)
+            if product:
+                subtotal = item.quantity * product.unit_price
+                cart_data.append({
+                    'product_id': item.product_id,
+                    'product_name': product.name,
+                    'unit_price': product.unit_price,
+                    'quantity': item.quantity,
+                    'subtotal': subtotal,
+                    'custom_description': item.custom_description
+                })
+                total_price += subtotal
+            else:
+                # Handle case where product is not found (optional)
+                pass
+        
+        return jsonify({
+            'cart_items': cart_data,
+            'total_price': total_price
+        }), 200
+    return jsonify({'cart_items': []}), 400  # Return proper status code for bad requests
+
+@admin_bp.route('/admin/add_to_cart', methods=['POST'])
+def add_to_cart():
+    data = request.json
+    user_id = data.get('user_id')
+    product_id = data.get('product_id')
+    quantity = data.get('quantity')
+    custom_description = data.get('custom_description')
+
+    if not all([user_id, product_id, quantity]):
+        return jsonify({'status': 'error', 'message': 'Incomplete data provided'}), 400
+
+    product = Product.query.get(product_id)
+    if not product:
+        return jsonify({'status': 'error', 'message': 'Product not found'}), 404
+
+    try:
+        new_cart_item = Cart(
+            user_id=user_id,
+            product_id=product_id,
+            quantity=quantity,
+            custom_description=custom_description
+        )
+        db.session.add(new_cart_item)
+        db.session.commit()
+        flash('Item added to cart successfully!', 'success')
+        return jsonify({'status': 'success'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': f'Failed to add item to cart: {str(e)}'}), 500
+
+
+
+@admin_bp.route('/admin/place_order_for_user', methods=['POST'])
+@login_required
+def place_order_for_user():
+    if current_user.role.name != 'admin':
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    data = request.get_json()
+    user_id = data.get('user_id')
+    cart = data.get('cart', [])
+
+    try:
+        # Example calculation of total_price based on cart items
+        total_price = calculate_total_price(cart)
+        
+        # Add additional services and shipping fee
+        additional_services = 0  # Calculate additional services cost if applicable
+        shipping_fee = 200  # Standard shipping fee
+
+        # Calculate total price including additional services and shipping fee
+        total_price += additional_services + shipping_fee
+
+        # Ensure location_id, arealine_id, and nearest_place_id are provided or set defaults
+        location_id = data.get('location_id', 1)  # Default to ID 1 if not provided
+        arealine_id = data.get('arealine_id', 1)  # Default to ID 1 if not provided
+        nearest_place_id = data.get('nearest_place_id', 1)  # Default to ID 1 if not provided
+
+        # Ensure address_line is provided, otherwise raise an error
+        address_line = data.get('address_line','address')
+        if not address_line:
+            return jsonify({'message': 'Address line is required'}), 400
+
+        # Create a new order instance
+        order = Order(
+            user_id=user_id,
+            status='pending',
+            order_date=datetime.utcnow(),
+            total_price=total_price,
+            location_id=location_id,
+            arealine_id=arealine_id,
+            nearest_place_id=nearest_place_id,
+            address_line=address_line,
+            additional_info=data.get('additional_info'),
+            payment_method=data.get('payment_method', 'pay on delivery'),
+            phone_number=data.get('phone_number'),
+            custom_description=data.get('custom_description')
+        )
+
+        # Add order to the session and commit to get order.id
+        db.session.add(order)
+        db.session.commit()
+
+        # Add order items to the order
+        for item in cart:
+            product = Product.query.get(item.get('product_id'))
+            if product:
+                order_item = OrderItem(
+                    order_id=order.id,
+                    product_id=product.id,
+                    quantity=item.get('quantity'),
+                    unit_price=product.unit_price,
+                    custom_description=item.get('custom_description', '')
+                )
+                db.session.add(order_item)
+            else:
+                # Handle case where product is not found (optional)
+                pass
+
+        # Commit changes to the database
+        db.session.commit()
+
+        # Return data for order summary modal
+        order_data = {
+            'order_id': order.id,
+            'user_id': order.user_id,
+            'order_date': order.order_date.strftime('%a, %d %b %Y %H:%M:%S GMT'),
+            'total_price': order.total_price,
+            'additional_services': additional_services,
+            'shipping_fee': shipping_fee,
+            'order_items': [{
+                'product_name': item.product.name,
+                'quantity': item.quantity,
+                'unit_price': item.unit_price,
+                'subtotal': item.quantity * item.unit_price,
+                'custom_description': item.custom_description
+            } for item in order.order_items]
+        }
+
+        return jsonify({'message': 'Order placed successfully!', 'order_data': order_data}), 200
+
+    except Exception as e:
+        # Rollback in case of any error
+        db.session.rollback()
+        return jsonify({'message': f'Failed to place order: {str(e)}'}), 500
+
+def calculate_total_price(cart):
+    total_price = 0.0
+    for item in cart:
+        total_price += item.get('quantity') * item.get('unit_price')  # Adjust based on your model structure
+    return total_price

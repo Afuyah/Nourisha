@@ -14,6 +14,12 @@ class RegistrationForm(FlaskForm):
   password = PasswordField('Password', validators=[DataRequired()])
   submit = SubmitField('Register')
 
+class AddUserForm(FlaskForm):
+  username = StringField('Username', validators=[DataRequired()])
+  email = StringField('Email', validators=[DataRequired()])
+  phone = StringField('Phone', validators=[DataRequired()])
+  name = StringField('Full Name')
+  submit = SubmitField('Add User')
 
 class LoginForm(FlaskForm):
     # Add the identifier field for username, email, or phone number
@@ -150,11 +156,17 @@ class ConfirmOrderForm(FlaskForm):
   expected_delivery_date = DateField('Expected Delivery Date', validators=[DataRequired()])
   submit = SubmitField('Confirm Order')
 
-
 class ExpectedDeliveryDateForm(FlaskForm):
-    expected_delivery_date = DateField('Expected Delivery Date', validators=[DataRequired()], format='%Y-%m-%d')
-    submit = SubmitField('Confirm Order')
+  expected_delivery_date = DateField('Expected Delivery Date', validators=[DataRequired()], format='%Y-%m-%d')
+  submit = SubmitField('Confirm Order')
 
 def validate_expected_delivery_date(self, field):
         if field.data < date.today():
             raise ValidationError('Invalid Delivery date')
+
+
+class ShopForUserForm(FlaskForm):
+    user = SelectField('Select User', coerce=int, validators=[DataRequired()])
+    product = SelectField('Select Product', coerce=int, validators=[DataRequired()])
+    quantity = IntegerField('Quantity', validators=[DataRequired()])
+    custom_description = StringField('Custom Description')

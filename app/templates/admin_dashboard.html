@@ -13,10 +13,18 @@
       </div>
     </div>
 
-    <!-- Add the loop to display individual product information if needed -->
+    <!-- Loop through products if needed -->
     {% for product in products %}
-    <p>{{ product.name }}</p>
-    <!-- Add other product information as needed -->
+    <div class="col-lg-4">
+      <div class="card shadow">
+        <div class="card-header">{{ product.name }}</div>
+        <div class="card-body">
+          <!-- Display other product information -->
+          <p>Price: {{ product.price }}</p>
+          <p>Stock: {{ product.stock }}</p>
+        </div>
+      </div>
+    </div>
     {% endfor %}
 
     <div class="col-lg-4">
@@ -33,6 +41,7 @@
         </div>
       </div>
     </div>
+
     <div class="col-lg-4">
       <div class="card shadow">
         <div class="card-header bg-secondary text-white">Customer Stats</div>
@@ -44,13 +53,5 @@
       </div>
     </div>
   </div>
-
- 
-      </div>
-  
-
-
-
-
-
+</div>
 {% endblock %}
