@@ -55,7 +55,7 @@ def handle_db_error_and_redirect(route):
 
 def fetch_sales_data():
     # Fetch and process sales data from the database
-    
+
     sales_data = db.session.query(
         func.date(Order.order_date).label('order_date'),
         func.sum(Order.total_price).label('total_sales')
@@ -109,7 +109,7 @@ def get_average_order_value_by_day():
 
 
 def fetch_user_activity_timeline():
-    
+
     # Example: Assuming you have a 'UserActivity' model with 'timestamp' and 'activity_type' fields
     user_activity_data = (
         db.session.query(UserActivity.timestamp, UserActivity.activity_type)
@@ -124,7 +124,8 @@ def fetch_user_activity_timeline():
 @admin_bp.route('/all_users')
 def all_users():
     users = User.query.all()
-    return render_template('system_users.html', users=users)
+    form = AddUserForm()
+    return render_template('system_users.html', users=users, form=form)
 
 
 
@@ -137,14 +138,14 @@ def admin_dashboard():
           return redirect(url_for('main.index'))
  # Fetch product categories
         categories = ProductCategory.query.all()
-        
+
         # Fetch sales data
         sales_data = fetch_sales_data()
         #labels = [datetime.strptime(data.order_date, '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
         labels = [datetime.strptime(str(data.order_date), '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
 
         data = [float(data.total_sales) for data in sales_data]
-        
+
         # Fetch user registrations for user growth chart
         user_registrations = User.query.with_entities(User.registration_date).all()
 
@@ -198,7 +199,7 @@ def admin_dashboard():
 
     return handle_db_error_and_redirect(route)
 
-  
+
 
 def create_user_growth_chart(labels, data):
     # Create a user growth chart using Chart.js
@@ -478,7 +479,7 @@ def get_locations():
     locations_data = [{'id': location.id, 'name': location.name} for location in locations]
     return jsonify({'locations': locations_data})
 
-  
+
 
 @admin_bp.route('/get_arealines/<location_id>', methods=['GET'])
 def get_arealines(location_id):
@@ -488,11 +489,11 @@ def get_arealines(location_id):
         return jsonify({'error': 'Invalid location ID'}), 400
 
     arealines = [{'id': arealine.id, 'name': arealine.name} for arealine in location.arealines]
-    
+
     return jsonify({'arealines': arealines})
 
 
-    
+
 
 @admin_bp.route('/get_nearest_places/<arealine_id>', methods=['GET'])
 def get_nearest_places(arealine_id):
@@ -516,7 +517,7 @@ def view_order_details(order_id):
     return handle_db_error_and_redirect(route)
 
 
-  
+
 @admin_bp.route('/cancel_order/<int:order_id>', methods=['POST'])
 @login_required
 def cancel_order(order_id):
@@ -603,7 +604,7 @@ import os
 def generate_allusers_pdf():
     # Fetch all users
     users = User.query.all()
-
+    form = AddUserForm()
     # Create a buffer to hold the PDF data
     pdf_buffer = BytesIO()
     pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter, topMargin=1*inch, bottomMargin=1*inch, leftMargin=1*inch, rightMargin=1*inch)
@@ -631,7 +632,7 @@ def generate_allusers_pdf():
     table_style = TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#003366")),  # Header background
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Header text color
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 10),
@@ -672,7 +673,7 @@ def generate_allusers_pdf():
         ])
 
     # Create the table with improved styling
-    table = Table(table_data, hAlign='CENTER', colWidths=[0.7*inch, 1.2*inch, 2.2*inch, 1.5*inch, 2.0*inch])
+    table = Table(table_data, hAlign='CENTRE', colWidths=[0.7*inch, 1.2*inch, 2.2*inch, 1.5*inch, 2.0*inch])
     table.setStyle(table_style)
     elements.append(table)
     elements.append(PageBreak())
@@ -1023,7 +1024,7 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
         [Paragraph("Invoice Date:", bold_style), order.order_date.strftime('%Y-%m-%d')],
         [Paragraph("Order ID:", bold_style), str(order.id)]
     ]
-    
+
     customer_info = [
         [Paragraph("Customer Name:", bold_style), order.user.name],
         [Paragraph("Phone:", bold_style), order.user.phone],
@@ -1039,7 +1040,7 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     elements.append(invoice_and_customer_info)
     elements.append(Spacer(1, 0.1*inch))  # Reduced spacing
 
-    
+
 
     # Items purchased
     elements.append(Paragraph("Items Purchased", subheader_style))
@@ -1103,23 +1104,42 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     buffer.seek(0)
     return buffer
     return buffer
+    
+from datetime import datetime
+from werkzeug.security import generate_password_hash
 
 @admin_bp.route('/admin/add_user', methods=['GET', 'POST'])
 def add_user():
-    form = AddUserForm()
-    if form.validate_on_submit():
-        # Create a new user object
-        new_user = User(
-            username=form.username.data,
-            email=form.email.data,
-            phone=form.phone.data,
-            name=form.name.data
-        )
-        db.session.add(new_user)
-        db.session.commit()
-        flash('User added successfully!', 'success')
-        return redirect(url_for('admin_shop_for_user', user_id=new_user.id))
-    return render_template('add_user.html', form=form)
+        form = AddUserForm()
+        if form.validate_on_submit():
+            # Use phone number as the default password and hash it
+            hashed_password = generate_password_hash(form.phone.data)
+            
+
+            # Create a new user object with the hashed password
+            new_user = User(
+                username=form.username.data,
+                email=form.email.data,
+                phone=form.phone.data,
+                name=form.name.data,
+                
+confirmed=True,
+                password_hash=hashed_password,  # Storing the hashed phone number
+#Allow user confirmation automatically 
+registration_date=datetime.utcnow()  # Capture current date and time
+            )
+
+            try:
+                db.session.add(new_user)
+                db.session.commit()
+                flash('User added successfully!', 'success')
+                return redirect(url_for('admin.admin_shop_for_user', user_id=new_user.id))
+            except Exception as e:
+                db.session.rollback()
+                flash('Error adding user: ' + str(e), 'danger')
+
+        return render_template('system_users.html', form=form)
+
 
 
 
@@ -1182,7 +1202,7 @@ def get_user_cart():
         cart_items = Cart.query.filter_by(user_id=user_id).all()
         cart_data = []
         total_price = 0.0
-        
+
         for item in cart_items:
             product = Product.query.get(item.product_id)
             if product:
@@ -1199,7 +1219,7 @@ def get_user_cart():
             else:
                 # Handle case where product is not found (optional)
                 pass
-        
+
         return jsonify({
             'cart_items': cart_data,
             'total_price': total_price
@@ -1252,7 +1272,7 @@ def place_order_for_user():
     try:
         # Example calculation of total_price based on cart items
         total_price = calculate_total_price(cart)
-        
+
         # Add additional services and shipping fee
         additional_services = 0  # Calculate additional services cost if applicable
         shipping_fee = 200  # Standard shipping fee

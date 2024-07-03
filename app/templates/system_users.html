@@ -1,58 +1,99 @@
 {% extends 'base.html' %}
 {% block content %}
-    <div class="container mb-5 p-5">
-        <h1>All Users</h1>
-        <div class="mb-3">
-            <a href="{{ url_for('admin.generate_allusers_pdf') }}" class="btn btn-primary">Generate PDF</a>
-            
-        </div>
-        <div class="table">
-            <table id="users-table" class="table table-striped table-bordered table-hover" style="width:100%">
-                <thead>
+<div class="container mb-5 p-5">
+    <h1>All Users</h1>
+    <div class="mb-3">
+        <a href="{{ url_for('admin.generate_allusers_pdf') }}" class="btn btn-primary">Generate PDF</a>
+        <!-- Add User Button -->
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            New User
+        </button>
+    </div>
+    <div class="table">
+        <table id="users-table" class="table table-striped table-bordered table-hover" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Name</th>
+                    <th>Registration Date</th>
+                    <th>Last Login Date</th>
+                    <th>Last Login IP</th>
+                    <th>Role</th>
+                    <th>Confirmed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
                     <tr>
-                        <th>ID</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Name</th>
-                        <th>Registration Date</th>
-                        <th>Last Login Date</th>
-                        <th>Last Login IP</th>
-                        <th>Role</th>
-                        <th>Confirmed</th>
-                       
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.phone }}</td>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.registration_date }}</td>
+                        <td>{{ user.last_login_date }}</td>
+                        <td>{{ user.last_login_ip }}</td>
+                        <td>{{ user.role.name if user.role else 'N/A' }}</td>
+                        <td>{{ 'Yes' if user.confirmed else 'No' }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                        <tr>
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.username }}</td>
-                            <td>{{ user.email }}</td>
-                            <td>{{ user.phone }}</td>
-                            <td>{{ user.name }}</td>
-                            <td>{{ user.registration_date }}</td>
-                            <td>{{ user.last_login_date }}</td>
-                            <td>{{ user.last_login_ip }}</td>
-                            <td>{{ user.role.name if user.role else 'N/A' }}</td>
-                            <td>{{ 'Yes' if user.confirmed else 'No' }}</td>
-                           
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('admin.add_user') }}">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        {{ form.username(class_='form-control') }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        {{ form.email(class_='form-control') }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        {{ form.phone(class_='form-control') }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        {{ form.name(class_='form-control') }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add User</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+</div>
 
 <!-- Include jQuery and DataTables libraries -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
-
 <script>
-    $(document).ready( function () {
+    $(document).ready(function () {
         $('#users-table').DataTable();
     });
 </script>
+
+<!-- Bootstrap Modal JS and CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 {% endblock %}
