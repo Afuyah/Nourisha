@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Market Purchases</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='socket.io.min.js') }}"></script>
+</head>
+<body>
+    <header>
+        <h1>Market Purchases</h1>
+    </header>
+    <main>
+        <table id="purchase-list">
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Quantity</th>
+                    <th>Customer</th>
+                    <th>Purchase Price</th>
+                    <th>Bought By</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr data-id="{{ item.id }}">
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.total_quantity }}</td>
+                    <td>{{ item.customer_name }}</td>
+                    <td class="purchase-price">{{ item.purchase_price or '' }}</td>
+                    <td class="bought-by">{{ item.bought_by_admin_id or '' }}</td>
+                    <td>
+                        <input type="checkbox" class="buy-checkbox" data-id="{{ item.id }}" {% if item.purchase_status == 'Bought' %}disabled{% endif %}>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+    <!-- Modal for entering purchase price -->
+    <div id="price-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="purchase-form">
+                <label for="purchase-price">Enter Purchase Price:</label>
+                <input type="number" id="purchase-price" name="purchase-price" required>
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            let currentItemId;
+            // Show modal on checkbox click
+            $('#purchase-list').on('change', '.buy-checkbox', function() {
+                if (this.checked) {
+                    currentItemId = $(this).data('id');
+                    $('#price-modal').show();
+                }
+            });
+
+            // Handle form submission
+            $('#purchase-form').on('submit', function(e) {
+                e.preventDefault();
+                let purchasePrice = $('#purchase-price').val();
+                $.ajax({
+                    url: '{{ url_for('admin.update_purchase') }}',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        item_id: currentItemId,
+                        purchase_price: purchasePrice
+                    }),
+                    success: function(response) {
+                        // Update the table and hide modal
+                        $(`tr[data-id="${currentItemId}"] .purchase-price`).text(purchasePrice);
+                        $(`tr[data-id="${currentItemId}"] .bought-by`).text('{{ current_user.id }}'); // Replace with the current admin's name if available
+                        $(`tr[data-id="${currentItemId}"] .buy-checkbox`).prop('disabled', true);
+                        $('#price-modal').hide();
+                    }
+                });
+            });
+
+            // Close modal
+            $('.close').on('click', function() {
+                $('#price-modal').hide();
+            });
+
+            // Real-time updates (using WebSocket)
+            const socket = io.connect('http://localhost:5000');
+            socket.on('purchase_update', function(data) {
+                $(`tr[data-id="${data.item_id}"] .purchase-price`).text(data.purchase_price);
+                $(`tr[data-id="${data.item_id}"] .bought-by`).text(data.bought_by_admin_id);
+                $(`tr[data-id="${data.item_id}"] .buy-checkbox`).prop('disabled', true);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -54,7 +54,7 @@
                         <!-- Product name -->
                         <div class="mb-3">
                             {{ form.brand.label(class='form-label') }}
-                            {{ form.brand(class='form-control', placeholder='Enter Product Name' required = true) }}
+                            {{ form.brand(class='form-control', placeholder='Enter Product Name', required = true) }}
                             {% if form.brand.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.brand.errors[0] }}

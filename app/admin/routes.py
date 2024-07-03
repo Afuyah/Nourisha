@@ -820,6 +820,57 @@ def mark_delivered(order_id):
 
     return redirect(url_for('admin.order_details', order_id=order_id))
 
+
+@admin_bp.route('/market-purchases', methods=['GET'])
+@login_required
+def market_purchases():
+    items = db.session.query(
+        OrderItem.product_id,
+        Product.name.label('product_name'),
+        func.sum(OrderItem.quantity).label('total_quantity'),
+        OrderItem.custom_description,
+        OrderItem.purchase_price,
+        User.name.label('customer_name'),
+        OrderItem.bought_by_admin_id,
+        OrderItem.purchase_status
+    ).join(Product, Product.id == OrderItem.product_id) \
+     .join(Order, Order.id == OrderItem.order_id) \
+     .join(User, User.id == Order.user_id) \
+     .group_by(OrderItem.product_id, Product.name, User.name, OrderItem.custom_description, OrderItem.purchase_price, OrderItem.bought_by_admin_id, OrderItem.purchase_status) \
+     .all()
+
+    return render_template('market_purchases.html', items=items)
+
+
+
+
+@admin_bp.route('/update-purchase', methods=['POST'])
+@login_required
+def update_purchase():
+    data = request.json
+    item_id = data.get('item_id')
+    purchase_price = data.get('purchase_price')
+    admin_id = current_user.id  # Assuming current_user gives you the logged-in admin's ID
+    
+    item = OrderItem.query.get_or_404(item_id)
+    item.purchase_price = purchase_price
+    item.bought_by_admin_id = admin_id
+    item.purchase_status = 'Bought'
+    db.session.commit()
+    
+    # Emit a real-time update if using WebSocket or similar
+    socketio.emit('purchase_update', {
+        'item_id': item_id,
+        'purchase_price': purchase_price,
+        'bought_by_admin_id': admin_id,
+        'purchase_status': 'Bought'
+    })
+    
+    return jsonify({"status": "success"})
+
+
+
+
 # View Orders by Status
 @admin_bp.route('/admin/orders/<status>', methods=['GET'])
 @login_required
