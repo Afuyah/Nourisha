@@ -87,6 +87,9 @@
     </div>
 </div>
 
+
+
+
 <!-- Hidden CSRF Token -->
 <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
 
@@ -108,7 +111,7 @@
 
     // Function to fetch and display user's cart items
     function fetchUserCart(userId) {
-        fetch(`/admin/get_user_cart?user_id=${userId}`)
+        fetch(`/admin/admin/get_user_cart?user_id=${userId}`)
             .then(response => response.json())
             .then(data => {
                 // Clear existing cart items
@@ -130,7 +133,7 @@
                 });
 
                 // Display total price
-                document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> KSH ${totalPrice.toFixed(2)}`;
+                document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> Ksh. ${totalPrice.toFixed(2)}`;
             })
             .catch(error => console.error('Error fetching user cart:', error));
     }
@@ -141,7 +144,7 @@
         productSelect.innerHTML = '<option value="">-- Select a Product --</option>';
 
         if (categoryId) {
-            fetch(`/admin/get_products?category_id=${categoryId}`)
+            fetch(`/admin/admin/get_products?category_id=${categoryId}`)
                 .then(response => response.json())
                 .then(data => {
                     data.products.forEach(product => {
@@ -163,7 +166,7 @@
         var userId = document.getElementById('user').value;
         var csrfToken = document.getElementById('csrf_token').value;
 
-        fetch('/admin/add_to_cart', {
+        fetch('/admin/admin/add_to_cart', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -197,7 +200,7 @@
         var userId = document.getElementById('user').value;
         var csrfToken = document.getElementById('csrf_token').value;
 
-        fetch('/admin/add_to_cart', {
+        fetch('/admin/admin/add_to_cart', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -224,55 +227,64 @@
     }
 
     // Function to handle order placement
-    function placeOrder() {
-        var userId = document.getElementById('user').value;
-        var csrfToken = document.getElementById('csrf_token').value;
+function placeOrder() {
+    var userId = document.getElementById('user').value;
+    var csrfToken = document.getElementById('csrf_token').value;
 
-        fetch('/admin/place_order_for_user', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                cart: [], // Pass the cart items if needed, but handle processing in the backend
-                location_id: 1, // Example, replace with actual location ID
-                arealine_id: 1, // Example, replace with actual arealine ID
-                nearest_place_id: 1, // Example, replace with actual nearest place ID
-                address_line: 'Example Address', // Example, replace with actual address line
-                additional_info: 'Additional info', // Example, replace with actual additional info
-                payment_method: 'pay on delivery', // Example, replace with actual payment method
-                phone_number: '123456789', // Example, replace with actual phone number
-                custom_description: 'Custom order description' // Example, replace with actual custom description
-            })
+    fetch('/admin/admin/place_order_for_user', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            user_id: userId,
+            cart: [], // Pass the cart items if needed, but handle processing in the backend
+            location_id: 1, // Example, replace with actual location ID
+            arealine_id: 1, // Example, replace with actual arealine ID
+            nearest_place_id: 1, // Example, replace with actual nearest place ID
+            address_line: 'Example Address', // Example, replace with actual address line
+            additional_info: 'Additional info', // Example, replace with actual additional info
+            payment_method: 'pay on delivery', // Example, replace with actual payment method
+            phone_number: '123456789', // Example, replace with actual phone number
+            custom_description: 'Custom order description' // Example, replace with actual custom description
         })
-        .then(response => response.json())
-        .then(data => {
-            // Handle success or display message
-            alert(data.message);
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Handle success or display message
+        alert(data.message);
 
-            // Update UI with order total and details
-            fetchUserCart(userId); // Update cart display after placing order
-            displayOrderSummary(data.order); // Assuming 'data.order' contains updated order details
+        // Update UI with order total and details
+        fetchUserCart(userId); // Update cart display after placing order
+        displayOrderSummary(data.order); // Assuming 'data.order' contains updated order details
 
-            // Optionally, clear the cart items UI here
-            document.getElementById('cartItems').innerHTML = '';
-            document.getElementById('totalPrice').innerHTML = '';
+        // Optionally, clear the cart items UI here
+        document.getElementById('cartItems').innerHTML = '';
+        document.getElementById('totalPrice').innerHTML = '';
 
-            // Close modal or update UI accordingly
-            $('#orderSummaryModal').modal('show'); // Show order summary modal
-        })
-        .catch(error => console.error('Error placing order:', error));
+        // Close modal or update UI accordingly
+        $('#orderSummaryModal').modal('show'); // Show order summary modal
+    })
+    .catch(error => console.error('Error placing order:', error));
+}
+
+
+    // Function to display order summary
+    function displayOrderSummary(order) {
+        // Update total price display
+        var totalPriceElement = document.getElementById('totalPrice');
+        totalPriceElement.innerHTML = `<strong>Total Price:</strong> ${order.total_amount} KSH`; // Assuming 'total_amount' is provided by the server
     }
-
- // Function to display order summary
+// Function to display order summary
 function displayOrderSummary(order) {
     // Example: Display order details in a modal or another UI element
     var orderSummaryDetails = document.getElementById('orderSummaryDetails');
     orderSummaryDetails.innerHTML = `
         <p><strong>Order ID:</strong> ${order.order_id}</p>
+        <p><strong>User ID:</strong> ${order.user_id}</p>
         <p><strong>Order Date:</strong> ${order.order_date}</p>
+        <p><strong>Total Price:</strong> KSH ${order.total_price.toFixed(2)}</p>
         <h5>Order Items:</h5>
         <ul>
             ${order.order_items.map(item => `
@@ -285,12 +297,12 @@ function displayOrderSummary(order) {
                 </li>
             `).join('')}
         </ul>
-        <p><strong>Additional Services:</strong> KSH ${order.additional_services.toFixed(2)}</p>
-        <p><strong>Total Price:</strong> KSH ${(order.total_price).toFixed(2)}</p>
     `;
     
     $('#orderSummaryModal').modal('show'); // Show order summary modal
 }
+
+    
 
 </script>
 {% endblock %}
