@@ -22,9 +22,9 @@
             <thead>
                 <tr>
                     <th>Product</th>
-                    <th>Unit Price (USD)</th> <!-- Adjust to KSH if necessary -->
+                    <th>Unit Price (KSH)</th> <!-- Adjust to KSH if necessary -->
                     <th>Quantity</th>
-                    <th>Subtotal (USD)</th> <!-- Adjust to KSH if necessary -->
+                    <th>Subtotal (KSH)</th> <!-- Adjust to KSH if necessary -->
                     <th>Custom Description</th>
                 </tr>
             </thead>
@@ -130,7 +130,7 @@
                 });
 
                 // Display total price
-                document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> $${totalPrice.toFixed(2)}`;
+                document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> Ksh. ${totalPrice.toFixed(2)}`;
             })
             .catch(error => console.error('Error fetching user cart:', error));
     }
