@@ -803,7 +803,7 @@ def mark_delivered(order_id):
     order = Order.query.get_or_404(order_id)
     form = request.form
 
-    if order.status == 'out for delivery':
+    if order.status == 'disparched':
         delivery_remarks = form.get('delivery_remarks')
 
         # Ensure delivery remarks are provided and not just whitespace
