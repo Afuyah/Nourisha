@@ -1243,7 +1243,7 @@ def get_products():
     category_id = request.args.get('category_id')
     if category_id:
         products = Product.query.filter_by(category_id=category_id).all()
-        product_list = [{'id': product.id, 'name': product.name} for product in products]
+        product_list = [{'id': product.id, 'name': product.name, 'brand': product.brand} for product in products]
         return jsonify({'products': product_list})
     return jsonify({'products': []})
 
