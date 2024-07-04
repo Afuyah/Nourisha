@@ -1468,3 +1468,57 @@ def complete_order(order_id):
         flash(f'Failed to complete order: {str(e)}', 'error')
         return redirect(url_for('admin.order_summary', order_id=order_id))
 
+
+# Route to remove an item from the cart
+@admin_bp.route('/admin/remove_from_cart', methods=['POST'])
+@login_required
+def remove_from_cart():
+    data = request.json
+    cart_item_id = data.get('cart_item_id')
+
+    if not cart_item_id:
+        return jsonify({'status': 'error', 'message': 'Cart item ID is required'}), 400
+
+    try:
+        cart_item = Cart.query.get(cart_item_id)
+        if not cart_item:
+            return jsonify({'status': 'error', 'message': 'Cart item not found'}), 404
+
+        db.session.delete(cart_item)
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Item removed from cart successfully'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': f'Failed to remove item from cart: {str(e)}'}), 500
+
+# Route to clear the entire cart for a user
+@admin_bp.route('/admin/clear_cart', methods=['POST'])
+@login_required
+def clear_cart():
+    data = request.json
+    user_id = data.get('user_id')
+
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'User ID is required'}), 400
+
+    try:
+        Cart.query.filter_by(user_id=user_id).delete()
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Cart cleared successfully'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': f'Failed to clear cart: {str(e)}'}), 500
+
+def calculate_total_price(cart_items):
+    total_price = 0
+    for item in cart_items:
+        product = Product.query.get(item.product_id)
+        if product:
+            total_price += item.quantity * product.unit_price
+    return total_price
+
+def clear_cart_for_user(user_id):
+    Cart.query.filter_by(user_id=user_id).delete()
+    db.session.commit()

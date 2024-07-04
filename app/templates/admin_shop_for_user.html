@@ -15,26 +15,32 @@
         </select>
     </div>
 
-    <!-- Cart Display -->
-    <div id="cart" class="mt-4">
-        <h3>Cart for Selected User</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Unit Price (KSH)</th> <!-- Adjust to KSH if necessary -->
-                    <th>Quantity</th>
-                    <th>Subtotal (KSH)</th> <!-- Adjust to KSH if necessary -->
-                    <th>Custom Description</th>
-                </tr>
-            </thead>
-            <tbody id="cartItems">
-                <!-- Cart items will be dynamically added here -->
-            </tbody>
-        </table>
-        <div id="totalPrice"></div> <!-- Total price will be dynamically updated -->
-        <button type="button" class="btn btn-success mt-2" onclick="placeOrder()">Place Order</button>
-    </div>
+   <!-- Cart Display -->
+<div id="cart" class="mt-4">
+    <h3>Cart for Selected User</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Unit Price (KSH)</th>
+                <th>Quantity</th>
+                <th>Subtotal (KSH)</th>
+                <th>Custom Description</th>
+                <th>Action</th> <!-- New column for Remove button -->
+            </tr>
+        </thead>
+        <tbody id="cartItems">
+            <!-- Cart items will be dynamically added here -->
+        </tbody>
+    </table>
+    <div id="totalPrice"></div>
+
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#productModal">Add Item</button>
+
+    <button type="button" class="btn btn-danger mt-2" onclick="clearCart()">Clear Cart</button> <!-- Clear Cart button -->
+    <button type="button" class="btn btn-success mt-2" onclick="placeOrder()">Place Order</button>
+</div>
+
 </div>
 
 <!-- Modal for Product Selection -->
@@ -66,12 +72,13 @@
                         <!-- Options populated dynamically via JavaScript -->
                     </select>
                 </div>
-
+load
                 <!-- Quantity and Custom Description -->
                 <div class="form-group">
-                    <label for="quantity">Quantity:</label>
-                    <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
-                </div>
+    <label for="quantity">Quantity:</label>
+    <input type="number" class="form-control" id="quantity" name="quantity" min="0.25" step="0.25" value="1">
+</div>
+
                 <div class="form-group">
                     <label for="custom_description">Custom Description:</label>
                     <textarea class="form-control" id="custom_description" name="custom_description"></textarea>
@@ -110,10 +117,7 @@
 <!-- Hidden CSRF Token -->
 <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
 
-<!-- Loading Spinner -->
-<div id="loadingSpinner" class="spinner-border text-primary" role="status" style="display:none;">
-    <span class="sr-only">Loading...</span>
-</div>
+
 
 <script>
     // Function to handle user selection
@@ -135,41 +139,85 @@
     }
 
     // Function to fetch and display user's cart items
-    function fetchUserCart(userId) {
-        fetch(`/admin/admin/get_user_cart?user_id=${userId}`)
-            .then(response => response.json())
-            .then(data => {
-                // Clear existing cart items
-                document.getElementById('cartItems').innerHTML = '';
-                var totalPrice = 0;
+function fetchUserCart(userId) {
+    fetch(`/admin/admin/get_user_cart?user_id=${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Clear existing cart items
+            document.getElementById('cartItems').innerHTML = '';
+            var totalPrice = 0;
 
-                // Populate cart items table
-                data.cart_items.forEach(item => {
-                    var newRow = document.createElement('tr');
-                    newRow.innerHTML = `
-                        <td>${item.product_brand}</td>
-                        <td>${item.unit_price}</td>
-                        <td>${item.quantity}</td>
-                        <td>${item.subtotal}</td>
-                        <td>${item.custom_description}</td>
-                    `;
-                    document.getElementById('cartItems').appendChild(newRow);
-                    totalPrice += item.subtotal;
-                });
-
-                // Display total price
-                document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> Ksh. ${totalPrice.toFixed(2)}`;
-
-                // Hide loading spinner
-                document.getElementById('loadingSpinner').style.display = 'none';
-            })
-            .catch(error => {
-                console.error('Error fetching user cart:', error);
-                document.getElementById('loadingSpinner').style.display = 'none';
-                // Optionally, show an error alert here
+            // Populate cart items table
+            data.cart_items.forEach(item => {
+                var newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${item.product_brand}</td>
+                    <td>${item.unit_price}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.subtotal}</td>
+                    <td>${item.custom_description}</td>
+                    <td><button type="button" class="btn btn-sm btn-danger" onclick="removeCartItem(${item.cart_item_id})">Remove</button></td> <!-- Remove button -->
+                `;
+                document.getElementById('cartItems').appendChild(newRow);
+                totalPrice += item.subtotal;
             });
-    }
 
+            // Display total price
+            document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> Ksh. ${totalPrice.toFixed(2)}`;
+        })
+        .catch(error => {
+            console.error('Error fetching user cart:', error);
+            // Optionally, show an error alert here
+        });
+}
+
+// Function to remove an item from the cart
+function removeCartItem(cartItemId) {
+    var userId = document.getElementById('user').value;
+    var csrfToken = document.getElementById('csrf_token').value;
+
+    fetch('/admin/admin/remove_from_cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            cart_item_id: cartItemId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Update cart display after removing item
+        fetchUserCart(userId);
+    })
+    .catch(error => console.error('Error removing item from cart:', error));
+}
+
+// Function to clear the entire cart
+function clearCart() {
+    var userId = document.getElementById('user').value;
+    var csrfToken = document.getElementById('csrf_token').value;
+
+    if (confirm('Are you sure you want to clear the cart?')) {
+        fetch('/admin/admin/clear_cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                user_id: userId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Update cart display after clearing cart
+            fetchUserCart(userId);
+        })
+        .catch(error => console.error('Error clearing cart:', error));
+    }
+}
     // Function to load products based on selected category
     function loadProducts(categoryId) {
         var productSelect = document.getElementById('product');
@@ -190,45 +238,44 @@
         }
     }
 
-    // Function to add item to the cart
-    function addToCart() {
-        var productId = document.getElementById('product').value;
-        var quantity = document.getElementById('quantity').value;
-        var customDescription = document.getElementById('custom_description').value;
-        var userId = document.getElementById('user').value;
-        var csrfToken = document.getElementById('csrf_token').value;
+function addToCart() {
+    var productId = document.getElementById('product').value;
+    var quantity = document.getElementById('quantity').value;
+    var customDescription = document.getElementById('custom_description').value;
+    var userId = document.getElementById('user').value;
+    var csrfToken = document.getElementById('csrf_token').value;
 
-        // Validate form inputs
-        if (!productId || quantity < 1) {
-            alert('Please select a product and enter a valid quantity.');
-            return;
-        }
-
-        fetch('/admin/admin/add_to_cart', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken  // Include CSRF token in the headers
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                product_id: productId,
-                quantity: quantity,
-                custom_description: customDescription
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Update cart display
-            fetchUserCart(userId);
-
-            // Clear input fields for next item
-            document.getElementById('product').value = '';
-            document.getElementById('quantity').value = '1';
-            document.getElementById('custom_description').value = '';
-        })
-        .catch(error => console.error('Error adding to cart:', error));
+    // Validate form inputs
+    if (!productId || quantity <= 0) { // Adjusted to allow 0 as well
+        alert('Please select a product and enter a valid quantity.');
+        return;
     }
+
+    fetch('/admin/admin/add_to_cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken  // Include CSRF token in the headers
+        },
+        body: JSON.stringify({
+            user_id: userId,
+            product_id: productId,
+            quantity: quantity,
+            custom_description: customDescription
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Update cart display
+        fetchUserCart(userId);
+
+        // Clear input fields for next item
+        document.getElementById('product').value = '';
+        document.getElementById('quantity').value = '1'; // Reset to default value if needed
+        document.getElementById('custom_description').value = '';
+    })
+    .catch(error => console.error('Error adding to cart:', error));
+}
 
     // Function to add another item without closing the modal
     function addAnotherItem() {
@@ -270,66 +317,72 @@
         .catch(error => console.error('Error adding to cart:', error));
     }
 
-    // Function to handle order placement
-    function placeOrder() {
-        var userId = document.getElementById('user').value;
-        var csrfToken = document.getElementById('csrf_token').value;
+ // Function to handle order placement
+function placeOrder() {
+    var userId = document.getElementById('user').value;
+    var csrfToken = document.getElementById('csrf_token').value;
 
-        fetch('/admin/admin/place_order_for_user', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                // Add other required details if needed
-            })
-        })
+    fetch('/admin/admin/get_user_cart?user_id=' + userId)
         .then(response => response.json())
         .then(data => {
-            // Handle success or display message
-            alert(data.message);
-
-            // Update UI with order total and details
-            fetchUserCart(userId); // Update cart display after placing order
-            displayOrderSummary(data.order); // Assuming 'data.order' contains updated order details
-
-            // Optionally, clear the cart items UI here
+            // Clear existing cart items
             document.getElementById('cartItems').innerHTML = '';
-            document.getElementById('totalPrice').innerHTML = '';
+            var totalPrice = 0;
 
-            // Close modal or update UI accordingly
-            $('#orderSummaryModal').modal('show'); // Show order summary modal
+            // Populate cart items table
+            data.cart_items.forEach(item => {
+                var newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${item.product_brand}</td>
+                    <td>${item.unit_price}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.subtotal}</td>
+                    <td>${item.custom_description}</td>
+                `;
+                document.getElementById('cartItems').appendChild(newRow);
+                totalPrice += item.subtotal;
+            });
+
+            // Display total price
+            document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> Ksh. ${totalPrice.toFixed(2)}`;
+
+            // Prompt confirmation before placing the order
+            if (confirm(`Confirm order for user ${userId}?\nTotal Price: Ksh. ${totalPrice.toFixed(2)}`)) {
+                // Proceed to place the order
+                fetch('/admin/admin/place_order_for_user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        // Add other required details if needed
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle success or display message
+                    alert(data.message);
+
+                    // Update UI with order total and details
+                    fetchUserCart(userId); // Update cart display after placing order
+
+                    // Optionally, clear the cart items UI here
+                    document.getElementById('cartItems').innerHTML = '';
+                    document.getElementById('totalPrice').innerHTML = '';
+                })
+                .catch(error => console.error('Error placing order:', error));
+            } else {
+                // User canceled the order
+                console.log('Order canceled.');
+            }
         })
-        .catch(error => console.error('Error placing order:', error));
-    }
-
-    // Function to display order summary
-    function displayOrderSummary(order) {
-        // Example: Display order details in a modal or another UI element
-        var orderSummaryDetails = document.getElementById('orderSummaryDetails');
-        orderSummaryDetails.innerHTML = `
-            <p><strong>Order ID:</strong> ${order.order_id}</p>
-            <p><strong>User ID:</strong> ${order.user_id}</p>
-            <p><strong>Order Date:</strong> ${order.order_date}</p>
-            <p><strong>Total Price:</strong> KSH ${order.total_price.toFixed(2)}</p>
-            <h5>Order Items:</h5>
-            <ul>
-                ${order.order_items.map(item => `
-                    <li>
-                        <p><strong>Product Name:</strong> ${item.product_name}</p>
-                        <p><strong>Quantity:</strong> ${item.quantity}</p>
-                        <p><strong>Unit Price:</strong> KSH ${item.unit_price.toFixed(2)}</p>
-                        <p><strong>Subtotal:</strong> KSH ${(item.quantity * item.unit_price).toFixed(2)}</p>
-                        <p><strong>Custom Description:</strong> ${item.custom_description}</p>
-                    </li>
-                `).join('')}
-            </ul>
-        `;
-        
-        $('#orderSummaryModal').modal('show'); // Show order summary modal
-    }
+        .catch(error => {
+            console.error('Error fetching user cart:', error);
+            // Optionally, show an error alert here
+        });
+}
 
     // Function to continue shopping after viewing order summary
     function continueShopping() {
