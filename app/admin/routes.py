@@ -770,7 +770,6 @@ def confirm_order(order_id):
 
     return redirect(url_for('admin.order_details', order_id=order_id))
 
-# Fulfill Order route
 @admin_bp.route('/admin/fulfill_order/<int:order_id>', methods=['POST'])
 @login_required
 def fulfill_order(order_id):
@@ -786,7 +785,7 @@ def fulfill_order(order_id):
                 product = item.product
                 product.quantity_sold += item.quantity
 
-            order.status = 'out for delivery'
+            order.status = 'disparched'
             db.session.commit()
             flash('Selected items fulfilled successfully.', 'success')
         else:
@@ -886,6 +885,15 @@ def view_orders_by_status(status):
     # Query orders by the given status
     orders = Order.query.filter_by(status=status).all()
 
+    status_counts = {
+            'pending': len([order for order in orders if order.status == 'pending']),
+            'confirmed': len([order for order in orders if order.status == 'confirmed']),
+            'out for delivery': len([order for order in orders if order.status == 'out for delivery']),
+            'delivered': len([order for order in orders if order.status == 'delivered']),
+            'canceled': len([order for order in orders if order.status == 'canceled']),
+            'completed': len([order for order in orders if order.status == 'completed'])
+        }
+
     return render_template('view_orders_by_status.html', orders=orders, status=status)
 
 
@@ -896,7 +904,7 @@ def view_orders_by_status(status):
 @login_required
 def api_get_orders_by_status(status):
     # Define valid statuses, including 'completed'
-    valid_statuses = ['pending', 'confirmed', 'out for delivery', 'delivered', 'canceled', 'completed']
+    valid_statuses = ['pending', 'confirmed', 'disparched', 'delivered', 'canceled', 'completed']
 
     # Validate the status
     if status not in valid_statuses:
@@ -1004,12 +1012,12 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     )
     title_style = ParagraphStyle(
         'Title',
-        fontSize=16,
+        fontSize=14,
         leading=20,
         fontName='Helvetica-Bold',
         alignment=TA_CENTER,
         textColor=colors.HexColor("#003366"),
-        spaceAfter=8
+        spaceAfter=10
     )
     subheader_style = ParagraphStyle(
         'SubHeader',
@@ -1057,7 +1065,7 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     company_info = [
         [logo if logo else "",
          Paragraph("Nourisha Groceries", company_name_style),
-         Paragraph("Fidel Odinga street, Mombasa, Kenya<br/>Phone: +254 707 632230<br/>Email: info@nourishagroceries.com", header_info_style)]
+         Paragraph("Fidel Odinga Rd, Mombasa, Kenya<br/>Phone: +254 707 632230<br/>Email: info@nourishagroceries.com", header_info_style)]
     ]
 
     company_info_table = Table(company_info, colWidths=[1.5*inch, 2.5*inch, 3*inch])
@@ -1065,7 +1073,7 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     elements.append(Spacer(1, 0.05*inch))  # Reduced spacing
 
     # Add a horizontal line below the header
-    elements.append(HRFlowable(width="100%", thickness=1, lineCap='round', color=colors.HexColor("#CCCCCC"), spaceBefore=0.2*inch, spaceAfter=0.1*inch))
+    elements.append(HRFlowable(width="100%", thickness=1, lineCap='round', color=colors.HexColor("#CCCCCC"), spaceBefore=0.1*inch, spaceAfter=0.1*inch))
 
     # Invoice title
     elements.append(Paragraph("Invoice", title_style))
@@ -1081,7 +1089,7 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     customer_info = [
         [Paragraph("Customer Name:", bold_style), order.user.name],
         [Paragraph("Phone:", bold_style), order.user.phone],
-        [Paragraph("Email:", bold_style), order.user.email]
+        
     ]
 
     invoice_and_customer_info = Table([
@@ -1091,7 +1099,7 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
         ]
     ])
     elements.append(invoice_and_customer_info)
-    elements.append(Spacer(1, 0.1*inch))  # Reduced spacing
+    elements.append(Spacer(1, 0.1*inch))  
 
 
 
@@ -1119,7 +1127,8 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     summary_data = [
         ["", "", Paragraph("Subtotal:", bold_style), f"Ksh {subtotal:.2f}"],
         ["", "", Paragraph("Shipping:", bold_style), f"Ksh {shipping_fee:.2f}"],
-        ["", "", Paragraph("Total:", bold_style), f"Ksh {total_price:.2f}"]
+        ["", "", Paragraph("Tax:", bold_style),  0.00],
+        ["", "", Paragraph("Total:", title_style), Paragraph(f"{total_price:.2f}", title_style)]
     ]
 
     # Apply the new table style without borders

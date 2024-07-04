@@ -69,7 +69,7 @@
                 </form>
             {% elif order.status == 'confirmed' %}
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#fulfillModal">Fulfill Order</button>
-            {% elif order.status == 'out for delivery' %}
+            {% elif order.status == 'disparched' %}
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#deliveryRemarksModal">Mark as Delivered</button>
 
 
@@ -77,7 +77,7 @@
             {% endif %}
 
              <!-- Generate Invoice Button -->
-            {% if order.status in ['confirmed', 'out for delivery', 'delivered'] %}
+            {% if order.status in ['confirmed', 'disparched', 'delivered'] %}
                 <a href="{{ url_for('admin.generate_invoice', order_id=order.id) }}" class="btn btn-primary">Generate Invoice</a>
             {% endif %}
         </div>
