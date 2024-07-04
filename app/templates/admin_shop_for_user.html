@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="container mt-4">
+    <!-- Page Header -->
     <h2>Shop for User</h2>
 
     <!-- User Dropdown for selecting the user -->
@@ -15,309 +16,171 @@
         </select>
     </div>
 
-   <!-- Cart Display -->
-<div id="cart" class="mt-4">
-    <h3>Cart for Selected User</h3>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Unit Price (KSH)</th>
-                <th>Quantity</th>
-                <th>Subtotal (KSH)</th>
-                <th>Custom Description</th>
-                <th>Action</th> <!-- New column for Remove button -->
-            </tr>
-        </thead>
-        <tbody id="cartItems">
-            <!-- Cart items will be dynamically added here -->
-        </tbody>
-    </table>
-    <div id="totalPrice"></div>
+    <!-- Cart Display Section -->
+    <div id="cart" class="mt-4">
+        <h3>Cart for Selected User</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Unit Price (KSH)</th>
+                    <th>Quantity</th>
+                    <th>Subtotal (KSH)</th>
+                    <th>Custom Description</th>
+                    
+                </tr>
+            </thead>
+            <tbody id="cartItems">
+                <!-- Cart items will be dynamically added here -->
+            </tbody>
+        </table>
+        <div id="totalPrice"></div>
 
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#productModal">Add Item</button>
+        <!-- Add Item Button to open product selection modal -->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#productModal">Add Item</button>
 
-    <button type="button" class="btn btn-danger mt-2" onclick="clearCart()">Clear Cart</button> <!-- Clear Cart button -->
-    <button type="button" class="btn btn-success mt-2" onclick="placeOrder()">Place Order</button>
-</div>
+        <!-- Buttons to clear the cart and place an order -->
+        <button type="button" class="btn btn-danger mt-2" onclick="clearCart()">Clear Cart</button>
+        <button type="button" class="btn btn-success mt-2" onclick="placeOrder()">Place Order</button>
+    </div>
 
-</div>
+    <!-- Loading Spinner (Initially Hidden) -->
+    <div id="loadingSpinner" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
 
-<!-- Modal for Product Selection -->
-<div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="productModalLabel">Select Product for User</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Product Category Dropdown -->
-                <div class="form-group">
-                    <label for="category">Select Category:</label>
-                    <select class="form-control" id="category" name="category" onchange="loadProducts(this.value)">
-                        <option value="">-- Select a Category --</option>
-                        {% for category in categories %}
-                        <option value="{{ category.id }}">{{ category.name }}</option>
-                        {% endfor %}
-                    </select>
+    <!-- Modal for Product Selection -->
+    <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalLabel">Select Product for User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
+                <div class="modal-body">
+                    <!-- Product Category Dropdown -->
+                    <div class="form-group">
+                        <label for="category">Select Category:</label>
+                        <select class="form-control" id="category" name="category" onchange="loadProducts(this.value)">
+                            <option value="">-- Select a Category --</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                <!-- Product Dropdown (Populated via AJAX) -->
-                <div class="form-group">
-                    <label for="product">Select Product:</label>
-                    <select class="form-control" id="product" name="product">
-                        <!-- Options populated dynamically via JavaScript -->
-                    </select>
-                </div>
-load
-                <!-- Quantity and Custom Description -->
-                <div class="form-group">
-    <label for="quantity">Quantity:</label>
-    <input type="number" class="form-control" id="quantity" name="quantity" min="0.25" step="0.25" value="1">
-</div>
+                    <!-- Product Dropdown (Populated dynamically) -->
+                    <div class="form-group">
+                        <label for="product">Select Product:</label>
+                        <select class="form-control" id="product" name="product">
+                            <!-- Options populated via JavaScript -->
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label for="custom_description">Custom Description:</label>
-                    <textarea class="form-control" id="custom_description" name="custom_description"></textarea>
+                    <!-- Quantity Input -->
+                    <div class="form-group">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" min="0.25" step="0.25" value="1">
+                    </div>
+
+                    <!-- Custom Description Textarea -->
+                    <div class="form-group">
+                        <label for="custom_description">Custom Description:</label>
+                        <textarea class="form-control" id="custom_description" name="custom_description"></textarea>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="addToCart()">Add to Cart</button>
-                <button type="button" class="btn btn-primary" onclick="addAnotherItem()">Add Another Item</button>
+                <div class="modal-footer">
+                    <!-- Modal Footer Buttons -->
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="addToCart()">Add to Cart</button>
+                    <button type="button" class="btn btn-primary" onclick="addAnotherItem()">Add Another Item</button>
+                </div>
             </div>
         </div>
     </div>
+
+
+    <!-- Hidden CSRF Token for secure requests -->
+    <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
 </div>
 
-<!-- Order Summary Modal -->
-<div class="modal fade" id="orderSummaryModal" tabindex="-1" role="dialog" aria-labelledby="orderSummaryModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="orderSummaryModalLabel">Order Summary</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div id="orderSummaryDetails"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="continueShopping()">Continue Shopping</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Hidden CSRF Token -->
-<input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
-
-
-
+<!-- JavaScript for dynamic functionality -->
 <script>
     // Function to handle user selection
     function selectUser() {
         var userId = document.getElementById('user').value;
         if (userId) {
-            // Show the product selection modal
-            $('#productModal').modal('show');
-
-            // Show loading spinner
-            document.getElementById('loadingSpinner').style.display = 'block';
-
-            // Fetch and display user's cart items
-            fetchUserCart(userId);
+            document.getElementById('loadingSpinner').style.display = 'block'; // Show loading spinner
+            fetchUserCart(userId); // Fetch and display user's cart
         } else {
-            // Hide the modal if no user is selected
-            $('#productModal').modal('hide');
+            document.getElementById('loadingSpinner').style.display = 'none'; // Hide spinner if no user is selected
         }
     }
 
     // Function to fetch and display user's cart items
-function fetchUserCart(userId) {
-    fetch(`/admin/admin/get_user_cart?user_id=${userId}`)
-        .then(response => response.json())
-        .then(data => {
-            // Clear existing cart items
-            document.getElementById('cartItems').innerHTML = '';
-            var totalPrice = 0;
+    function fetchUserCart(userId) {
+        fetch(`/admin/admin/get_user_cart?user_id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingSpinner').style.display = 'none'; // Hide loading spinner
+                document.getElementById('cartItems').innerHTML = ''; // Clear existing cart items
+                var totalPrice = 0;
 
-            // Populate cart items table
-            data.cart_items.forEach(item => {
-                var newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td>${item.product_brand}</td>
-                    <td>${item.unit_price}</td>
-                    <td>${item.quantity}</td>
-                    <td>${item.subtotal}</td>
-                    <td>${item.custom_description}</td>
-                    <td><button type="button" class="btn btn-sm btn-danger" onclick="removeCartItem(${item.cart_item_id})">Remove</button></td> <!-- Remove button -->
-                `;
-                document.getElementById('cartItems').appendChild(newRow);
-                totalPrice += item.subtotal;
-            });
+                // Populate cart items table
+                data.cart_items.forEach(item => {
+                    var newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td>${item.product_brand}</td>
+                        <td>${item.unit_price}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.subtotal}</td>
+                        <td>${item.custom_description}</td>
+                        
+                    `;
+                    document.getElementById('cartItems').appendChild(newRow);
+                    totalPrice += item.subtotal;
+                });
 
-            // Display total price
-            document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> Ksh. ${totalPrice.toFixed(2)}`;
-        })
-        .catch(error => {
-            console.error('Error fetching user cart:', error);
-            // Optionally, show an error alert here
-        });
-}
-
-// Function to remove an item from the cart
-function removeCartItem(cartItemId) {
-    var userId = document.getElementById('user').value;
-    var csrfToken = document.getElementById('csrf_token').value;
-
-    fetch('/admin/admin/remove_from_cart', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify({
-            cart_item_id: cartItemId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Update cart display after removing item
-        fetchUserCart(userId);
-    })
-    .catch(error => console.error('Error removing item from cart:', error));
-}
-
-// Function to clear the entire cart
-function clearCart() {
-    var userId = document.getElementById('user').value;
-    var csrfToken = document.getElementById('csrf_token').value;
-
-    if (confirm('Are you sure you want to clear the cart?')) {
-        fetch('/admin/admin/clear_cart', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                user_id: userId
+                // Display total price
+                document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> Ksh. ${totalPrice.toFixed(2)}`;
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Update cart display after clearing cart
-            fetchUserCart(userId);
-        })
-        .catch(error => console.error('Error clearing cart:', error));
-    }
-}
-    // Function to load products based on selected category
-    function loadProducts(categoryId) {
-        var productSelect = document.getElementById('product');
-        productSelect.innerHTML = '<option value="">-- Select a Product --</option>';
-
-        if (categoryId) {
-            fetch(`/admin/admin/get_products?category_id=${categoryId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.products.forEach(product => {
-                        var option = document.createElement('option');
-                        option.value = product.id;
-                        option.text = product.brand;
-                        productSelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error fetching products:', error));
-        }
+            .catch(error => {
+                document.getElementById('loadingSpinner').style.display = 'none'; // Hide spinner on error
+                console.error('Error fetching user cart:', error);
+                // Optionally, show an error alert here
+            });
     }
 
-function addToCart() {
-    var productId = document.getElementById('product').value;
-    var quantity = document.getElementById('quantity').value;
-    var customDescription = document.getElementById('custom_description').value;
-    var userId = document.getElementById('user').value;
-    var csrfToken = document.getElementById('csrf_token').value;
 
-    // Validate form inputs
-    if (!productId || quantity <= 0) { // Adjusted to allow 0 as well
-        alert('Please select a product and enter a valid quantity.');
-        return;
-    }
-
-    fetch('/admin/admin/add_to_cart', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken  // Include CSRF token in the headers
-        },
-        body: JSON.stringify({
-            user_id: userId,
-            product_id: productId,
-            quantity: quantity,
-            custom_description: customDescription
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Update cart display
-        fetchUserCart(userId);
-
-        // Clear input fields for next item
-        document.getElementById('product').value = '';
-        document.getElementById('quantity').value = '1'; // Reset to default value if needed
-        document.getElementById('custom_description').value = '';
-    })
-    .catch(error => console.error('Error adding to cart:', error));
-}
-
-    // Function to add another item without closing the modal
-    function addAnotherItem() {
-        var productId = document.getElementById('product').value;
-        var quantity = document.getElementById('quantity').value;
-        var customDescription = document.getElementById('custom_description').value;
+    // Function to clear the entire cart
+    function clearCart() {
         var userId = document.getElementById('user').value;
         var csrfToken = document.getElementById('csrf_token').value;
 
-        // Validate form inputs
-        if (!productId || quantity < 1) {
-            alert('Please select a product and enter a valid quantity.');
-            return;
-        }
-
-        fetch('/admin/admin/add_to_cart', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken  // Include CSRF token in the headers
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                product_id: productId,
-                quantity: quantity,
-                custom_description: customDescription
+        if (confirm('Are you sure you want to clear the cart?')) {
+            fetch('/admin/admin/clear_cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    user_id: userId
+                })
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Update cart display
-            fetchUserCart(userId);
-
-            // Clear input fields for next item
-            document.getElementById('product').value = '';
-            document.getElementById('quantity').value = '1';
-            document.getElementById('custom_description').value = '';
-        })
-        .catch(error => console.error('Error adding to cart:', error));
+            .then(response => response.json())
+            .then(data => {
+                fetchUserCart(userId); // Refresh cart display after clearing cart
+            })
+            .catch(error => console.error('Error clearing cart:', error));
+        }
     }
 
- // Function to handle order placement
+     // Function to handle order placement
 function placeOrder() {
     var userId = document.getElementById('user').value;
     var csrfToken = document.getElementById('csrf_token').value;
@@ -384,12 +247,104 @@ function placeOrder() {
         });
 }
 
-    // Function to continue shopping after viewing order summary
+    // Function to load products based on selected category
+    function loadProducts(categoryId) {
+        if (!categoryId) {
+            document.getElementById('product').innerHTML = '<option value="">-- Select a Product --</option>';
+            return;
+        }
+
+        fetch(`/admin/admin/get_products?category_id=${categoryId}`)
+            .then(response => response.json())
+            .then(data => {
+                var productDropdown = document.getElementById('product');
+                productDropdown.innerHTML = '<option value="">-- Select a Product --</option>';
+                data.products.forEach(product => {
+                    var option = document.createElement('option');
+                    option.value = product.id;
+                    option.textContent = `${product.name} - Ksh. ${product.unit_price}`;
+                    productDropdown.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error loading products:', error));
+    }
+
+    // Function to add selected product to the cart
+    function addToCart() {
+        var userId = document.getElementById('user').value;
+        var productId = document.getElementById('product').value;
+        var quantity = document.getElementById('quantity').value;
+        var customDescription = document.getElementById('custom_description').value;
+        var csrfToken = document.getElementById('csrf_token').value;
+
+        if (!userId || !productId || !quantity) {
+            alert('Please select a user, product, and specify quantity.');
+            return;
+        }
+
+        fetch('/admin/admin/add_to_cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                product_id: productId,
+                quantity: quantity,
+                custom_description: customDescription
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            $('#productModal').modal('hide'); // Close the modal
+            fetchUserCart(userId); // Refresh cart display
+        })
+        .catch(error => console.error('Error adding product to cart:', error));
+    }
+
+    // Function to add another item without closing the modal
+    function addAnotherItem() {
+        var userId = document.getElementById('user').value;
+        var productId = document.getElementById('product').value;
+        var quantity = document.getElementById('quantity').value;
+        var customDescription = document.getElementById('custom_description').value;
+        var csrfToken = document.getElementById('csrf_token').value;
+
+        if (!userId || !productId || !quantity) {
+            alert('Please select a user, product, and specify quantity.');
+            return;
+        }
+
+        fetch('/admin/admin/add_to_cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                product_id: productId,
+                quantity: quantity,
+                custom_description: customDescription
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('product').value = ''; // Clear product selection
+            document.getElementById('quantity').value = '1'; // Reset quantity
+            document.getElementById('custom_description').value = ''; // Clear custom description
+            fetchUserCart(userId); // Refresh cart display
+        })
+        .catch(error => console.error('Error adding product to cart:', error));
+    }
+
+    // Function to continue shopping after placing an order
     function continueShopping() {
-        // Close the order summary modal
-        $('#orderSummaryModal').modal('hide');
-        
-        // Optionally, reset UI or perform other actions to prepare for the next shopping session
+        document.getElementById('cartItems').innerHTML = ''; // Clear cart items
+        document.getElementById('totalPrice').innerHTML = ''; // Clear total price
+        document.getElementById('user').value = ''; // Reset user selection
+        $('#orderSummaryModal').modal('hide'); // Hide order summary modal
     }
 </script>
 {% endblock %}

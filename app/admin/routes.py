@@ -1252,7 +1252,7 @@ def get_products():
     category_id = request.args.get('category_id')
     if category_id:
         products = Product.query.filter_by(category_id=category_id).all()
-        product_list = [{'id': product.id, 'name': product.name, 'brand': product.brand} for product in products]
+        product_list = [{'id': product.id, 'name': product.name, 'brand': product.brand, 'unit_price': product.unit_price} for product in products]
         return jsonify({'products': product_list})
     return jsonify({'products': []})
 
@@ -1469,29 +1469,6 @@ def complete_order(order_id):
         return redirect(url_for('admin.order_summary', order_id=order_id))
 
 
-# Route to remove an item from the cart
-@admin_bp.route('/admin/remove_from_cart', methods=['POST'])
-@login_required
-def remove_from_cart():
-    data = request.json
-    cart_item_id = data.get('cart_item_id')
-
-    if not cart_item_id:
-        return jsonify({'status': 'error', 'message': 'Cart item ID is required'}), 400
-
-    try:
-        cart_item = Cart.query.get(cart_item_id)
-        if not cart_item:
-            return jsonify({'status': 'error', 'message': 'Cart item not found'}), 404
-
-        db.session.delete(cart_item)
-        db.session.commit()
-        return jsonify({'status': 'success', 'message': 'Item removed from cart successfully'}), 200
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'status': 'error', 'message': f'Failed to remove item from cart: {str(e)}'}), 500
-
 # Route to clear the entire cart for a user
 @admin_bp.route('/admin/clear_cart', methods=['POST'])
 @login_required
@@ -1522,3 +1499,42 @@ def calculate_total_price(cart_items):
 def clear_cart_for_user(user_id):
     Cart.query.filter_by(user_id=user_id).delete()
     db.session.commit()
+
+
+@admin_bp.route('/admin/remove_cart_item', methods=['POST'])
+@login_required
+def remove_cart_item():
+    """
+    Route to remove an item from the cart.
+    """
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        product_id = data.get('product_id')
+
+        # Validate the input data
+        if not user_id or not product_id:
+            return jsonify({'message': 'User ID and Product ID are required'}), 400
+
+        # Check if the current user is an admin
+        if current_user.role.name != 'admin':
+            return jsonify({'message': 'Unauthorized'}), 403
+
+        # Find the cart item for the specified user and product
+        cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+
+        # If the item does not exist, return an error
+        if not cart_item:
+            return jsonify({'message': 'Item not found in the cart'}), 404
+
+        # Remove the item from the cart
+        db.session.delete(cart_item)
+        db.session.commit()
+
+        return jsonify({'message': 'Item removed from the cart successfully'}), 200
+
+    except Exception as e:
+        # Rollback the session in case of error
+        db.session.rollback()
+        print(f"Error removing item from cart: {str(e)}")  # Debug log
+        return jsonify({'message': f'Failed to remove item: {str(e)}'}), 500
