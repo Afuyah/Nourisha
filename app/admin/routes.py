@@ -1105,7 +1105,7 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     for item in fulfilled_items:
         invoice_data.append([
             str(item_counter),
-            item.product.name,
+            item.product.brand,
             str(item.quantity),
             f"Ksh {item.unit_price:.2f}",
             f"Ksh {item.total_price:.2f}"
