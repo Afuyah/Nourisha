@@ -262,7 +262,7 @@ function placeOrder() {
                 data.products.forEach(product => {
                     var option = document.createElement('option');
                     option.value = product.id;
-                    option.textContent = `${product.name} - Ksh. ${product.unit_price}`;
+                    option.textContent = `${product.brand} - Ksh. ${product.unit_price}`;
                     productDropdown.appendChild(option);
                 });
             })
