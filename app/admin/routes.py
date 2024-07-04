@@ -1262,6 +1262,7 @@ def get_user_cart():
                 subtotal = item.quantity * product.unit_price
                 cart_data.append({
                     'product_id': item.product_id,
+                    'product_brand': product.brand,
                     'product_name': product.name,
                     'unit_price': product.unit_price,
                     'quantity': item.quantity,
