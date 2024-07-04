@@ -46,7 +46,7 @@
                 {% for item in order.order_items %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <div class="d-flex flex-column">
-                            <strong>{{ item.product.name }}</strong>
+                            <strong>{{ item.product.brand }}</strong>
                             <small>Quantity: {{ item.quantity }} | Unit Price: Ksh. {{ item.unit_price }}</small>
                         </div>
                         <span class="badge {% if item.fulfillment_status == 'fulfilled' %}bg-success{% else %}bg-secondary{% endif %}">
