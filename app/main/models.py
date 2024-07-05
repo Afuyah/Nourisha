@@ -7,7 +7,7 @@ from itsdangerous import URLSafeTimedSerializer as Serializer
 from app import db
 from sqlalchemy import event
 from sqlalchemy.ext.hybrid import hybrid_property
-
+from sqlalchemy import Numeric
 
 # Role model for user roles
 class Role(db.Model):
@@ -203,7 +203,7 @@ class Cart(db.Model):
   product_id = db.Column(db.Integer,
                          db.ForeignKey('product.id'),
                          nullable=False)
-  quantity = db.Column(db.Integer, nullable=False)
+  quantity = db.Column(Numeric, nullable=False)  # Updated to Numeric
   product = db.relationship('Product', back_populates='carts')
   custom_description = db.Column(db.Text)
 
@@ -245,7 +245,7 @@ class OrderItem(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
   product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-  quantity = db.Column(db.Integer, nullable=False)
+  quantity = db.Column(Numeric, nullable=False)  # Updated to Numeric
   unit_price = db.Column(db.Float, nullable=False)
   custom_description = db.Column(db.Text)
   fulfillment_status = db.Column(db.String(20), nullable=False, default='Not fulfilled')

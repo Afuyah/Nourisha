@@ -22,7 +22,8 @@ def upgrade():
         batch_op.add_column(sa.Column('purchase_status', sa.String(length=20), nullable=True))
         batch_op.add_column(sa.Column('purchase_price', sa.Float(), nullable=True))
         batch_op.add_column(sa.Column('bought_by_admin_id', sa.Integer(), nullable=True))
-        batch_op.create_foreign_key(None, 'user', ['bought_by_admin_id'], ['id'])
+        op.create_foreign_key('fk_order_item_user_id', 'order_item', 'user', ['user_id'], ['id'])
+
 
     # ### end Alembic commands ###
 
