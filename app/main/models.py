@@ -196,14 +196,13 @@ class ProductImage(db.Model):
   product = db.relationship('Product', back_populates='images')
 
 
-# Cart model for handling user shopping carts
 class Cart(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
   product_id = db.Column(db.Integer,
                          db.ForeignKey('product.id'),
                          nullable=False)
-  quantity = db.Column(Numeric, nullable=False)  # Updated to Numeric
+  quantity = db.Column(db.Integer, nullable=False)
   product = db.relationship('Product', back_populates='carts')
   custom_description = db.Column(db.Text)
 
@@ -239,20 +238,20 @@ class Order(db.Model):
         fulfilled_items_total = sum(item.total_price for item in self.order_items if item.fulfillment_status == 'fulfilled')
         return fulfilled_items_total + 200  # Adding the shipping fee
 
-   
+
 
 class OrderItem(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
   product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-  quantity = db.Column(Numeric, nullable=False)  # Updated to Numeric
+  quantity = db.Column(db.Integer, nullable=False)
   unit_price = db.Column(db.Float, nullable=False)
   custom_description = db.Column(db.Text)
   fulfillment_status = db.Column(db.String(20), nullable=False, default='Not fulfilled')
 
   order = db.relationship('Order', back_populates='order_items')
   product = db.relationship('Product', back_populates='order_items')
-    
+
   @hybrid_property
   def total_price(self):
         return self.quantity * self.unit_price
