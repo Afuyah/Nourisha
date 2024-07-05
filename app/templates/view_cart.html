@@ -1,6 +1,4 @@
-{% extends 'layout.html' %}
-
-{% block content %}
+{% extends 'layout.html' %} {% block content %}
 <div class="container mt-4 mb-5 p-2">
   <!-- Animated Welcome Banner -->
   <div class="alert alert-primary alert-dismissible fade show" role="alert">
@@ -31,34 +29,63 @@
         {% for item in cart_items %}
         <tr class="fade-in">
           <td class="align-middle">
-            {% if item.product.images %}
-            <img src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image) }}"
-              class="img-thumbnail" alt="{{ item.product.brand }}" style="max-width: 80px" />
-            {% else %}
-            <p>No image available</p>
-            {% endif %}
-            <br />
-            <strong>{{ item.product.brand }}</strong>
-          </td>
+    {% if item.product.images %}
+        <img
+          src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image) }}"
+          class="img-thumbnail"
+          alt="{{ item.product.brand }}"
+          style="max-width: 80px"
+        />
+    {% else %}
+        <p>No image available</p>
+    {% endif %}
+    <br />
+    <strong>{{ item.product.brand }}</strong>
+</td>
+
 
           <td class="align-middle">Ksh {{ item.product.unit_price }}</td>
           <td class="align-middle">
-            <button class="btn btn-secondary btn-sm decrement-btn" data-product-id="{{ item.product.id }}">-</button>
-            <span class="quantity-display" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
-            <button class="btn btn-secondary btn-sm increment-btn" data-product-id="{{ item.product.id }}">+</button>
-            <div class="spinner-border text-primary d-none loading-spinner" role="status"
-              data-product-id="{{ item.product.id }}">
+            <button
+              class="btn btn-secondary btn-sm decrement-btn"
+              data-product-id="{{ item.product.id }}"
+            >
+              -
+            </button>
+            <span
+              class="quantity-display"
+              data-product-id="{{ item.product.id }}"
+              >{{ item.quantity }}</span
+            >
+            <button
+              class="btn btn-secondary btn-sm increment-btn"
+              data-product-id="{{ item.product.id }}"
+            >
+              +
+            </button>
+            <div
+              class="spinner-border text-primary d-none loading-spinner"
+              role="status"
+              data-product-id="{{ item.product.id }}"
+            >
               <span class="sr-only"></span>
             </div>
           </td>
           <td class="align-middle">
-            Ksh<span id="subtotal-{{ item.product.id }}">{{ item.product.unit_price * item.quantity }}</span>
+            Ksh<span id="subtotal-{{ item.product.id }}"
+              >{{ item.product.unit_price * item.quantity }}</span
+            >
           </td>
 
           <td class="align-middle">{{ item.custom_description }}</td>
 
           <td class="align-middle">
-            <button class="btn btn-danger btn-sm remove-item-btn" data-product-id="{{ item.product.id }}">Remove</button>
+            <button
+              class="btn btn-danger btn-sm remove-item-btn"
+              data-product-id="{{ item.product.id }}"
+            >
+              Remove
+            </button>
           </td>
         </tr>
         {% endfor %}
@@ -71,33 +98,47 @@
     Total Price: Ksh<span id="total-price">{{ total_price }}</span>
   </p>
   <div class="text-center">
-    <button class="btn btn-primary btn-sm proceed-to-checkout-btn" onclick="window.location.href='/cart/checkout'">
+    <button
+      class="btn btn-primary btn-sm proceed-to-checkout-btn"
+      onclick="window.location.href='/cart/checkout'"
+    >
       Proceed to Checkout
     </button>
   </div>
 
   <!-- Clear Cart Button -->
   <div class="text-center mt-4">
-    <button class="btn btn-danger btn-sm clear-cart-btn" onclick="confirmClearCart('{{ csrf_token() }}')">
+    <button
+      class="btn btn-danger btn-sm clear-cart-btn"
+      onclick="confirmClearCart('{{ csrf_token() }}')"
+    >
       Clear Cart
     </button>
   </div>
 
-  <div class="text-center mt-4">
-    <a href="{{ url_for('main.product_listing') }}" class="btn btn-outline-primary btn-sm">
-      Continue Shopping
-    </a>
-  </div>
+<div class="text-center mt-4">
+  <a href="{{ url_for('main.product_listing') }}" class="btn btn-outline-primary btn-sm">
+    Continue Shopping
+  </a>
+</div>
+
+
 
   {% else %}
   <!-- Display a message and suggest some items -->
   <div class="text-center">
     <p>Your cart is empty. Why not explore our products?</p>
-    <a href="{{ url_for('main.product_listing') }}" class="btn btn-primary btn-sm">Explore Products</a>
+    <a href="{{url_for('main.product_listing')}}" class="btn btn-primary btn-sm"
+      >Explore Products</a
+    >
   </div>
   {% endif %}
 
-  <div class="spinner-border text-primary d-none" role="status" id="loading-spinner">
+  <div
+    class="spinner-border text-primary d-none"
+    role="status"
+    id="loading-spinner"
+  >
     <span class="sr-only"></span>
   </div>
 </div>
@@ -112,7 +153,6 @@
     0% {
       opacity: 0;
     }
-
     100% {
       opacity: 1;
     }
@@ -124,19 +164,23 @@
     text-align: center;
     font-size: 18px;
   }
-
-  /* Styles for small devices */
+ /* Styles for small devices */
   @media (max-width: 576px) {
     .decrement-btn,
     .increment-btn {
       font-size: 8px;
       padding: 5px 10px;
+
     }
   }
-</style>
 
+
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"
+/>
 
 <script>
   function confirmClearCart(csrfToken) {
@@ -151,7 +195,9 @@
     document.querySelectorAll(".decrement-btn").forEach(function (button) {
       button.addEventListener("click", function () {
         const productId = button.getAttribute("data-product-id");
-        const csrfToken = document.querySelector("meta[name=csrf-token]").content;
+        const csrfToken = document.querySelector(
+          "meta[name=csrf-token]",
+        ).content;
         updateCartItem(productId, "decrement", csrfToken);
       });
     });
@@ -159,14 +205,18 @@
     document.querySelectorAll(".increment-btn").forEach(function (button) {
       button.addEventListener("click", function () {
         const productId = button.getAttribute("data-product-id");
-        const csrfToken = document.querySelector("meta[name=csrf-token]").content;
+        const csrfToken = document.querySelector(
+          "meta[name=csrf-token]",
+        ).content;
         updateCartItem(productId, "increment", csrfToken);
       });
     });
 
     document.querySelectorAll(".clear-cart-btn").forEach(function (button) {
       button.addEventListener("click", function () {
-        const csrfToken = document.querySelector("meta[name=csrf-token]").content;
+        const csrfToken = document.querySelector(
+          "meta[name=csrf-token]",
+        ).content;
         clearCart(csrfToken);
         // Reload the page after clearing the cart
         location.reload();
@@ -176,7 +226,9 @@
     document.querySelectorAll(".remove-item-btn").forEach(function (button) {
       button.addEventListener("click", function () {
         const productId = button.getAttribute("data-product-id");
-        const csrfToken = document.querySelector("meta[name=csrf-token]").content;
+        const csrfToken = document.querySelector(
+          "meta[name=csrf-token]",
+        ).content;
         removeCartItem(productId, csrfToken);
       });
     });
@@ -203,8 +255,12 @@
       if (data.status === "success") {
         // Update each cart item in the UI
         data.data.cartItems.forEach((cartItem) => {
-          const quantityDisplay = document.querySelector(`.quantity-display[data-product-id="${cartItem.productId}"]`);
-          const subtotalElement = document.getElementById(`subtotal-${cartItem.productId}`);
+          const quantityDisplay = document.querySelector(
+            `.quantity-display[data-product-id="${cartItem.productId}"]`,
+          );
+          const subtotalElement = document.getElementById(
+            `subtotal-${cartItem.productId}`,
+          );
 
           // Update quantity and subtotal for each item
           if (quantityDisplay && subtotalElement) {
@@ -300,7 +356,9 @@
 
       if (data.status === "success") {
         // Remove the item from the UI with a fade-out animation
-        const removedItem = document.querySelector(`.remove-item-btn[data-product-id="${productId}"]`).closest("tr");
+        const removedItem = document
+          .querySelector(`.remove-item-btn[data-product-id="${productId}"]`)
+          .closest("tr");
         if (removedItem) {
           // Fade-out animation
           removedItem.style.transition = "opacity 0.5s";
@@ -343,16 +401,19 @@
     document.querySelectorAll(".remove-item-btn").forEach(function (button) {
       button.addEventListener("click", function () {
         const productId = button.getAttribute("data-product-id");
-        const csrfToken = document.querySelector("meta[name=csrf-token]").content;
+        const csrfToken = document.querySelector(
+          "meta[name=csrf-token]",
+        ).content;
         removeCartItem(productId, csrfToken);
       });
     });
   });
 
-  async function updateQuantityInStock() {
-    // Implement the logic to update the quantity in stock in the UI
-    // This function should be customized based on your specific requirements
-    console.log("Updating quantity in stock...");
-  }
+async function updateQuantityInStock() {
+  // Implement the logic to update the quantity in stock in the UI
+  // This function should be customized based on your specific requirements
+  console.log('Updating quantity in stock...');
+
+}  
 </script>
 {% endblock %}
