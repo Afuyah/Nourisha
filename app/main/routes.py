@@ -429,7 +429,7 @@ def add_product_image():
   form = ProductImageForm()
 
   # Populate the product choices in the form
-  form.product.choices = [(product.id, product.name)
+  form.product.choices = [(product.id, product.brand)
                           for product in Product.query.all()]
 
   if form.validate_on_submit():
