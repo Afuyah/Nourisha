@@ -16,10 +16,10 @@ def create_admin_user():
         admin_user = User.query.filter_by(username='jsync').first()
         if not admin_user:
             admin_user = User(
-                username='Rykie',
-                email='erickmuchiri26@gmail.com',
-                phone='0710625177',
-                name='Muchiri Erick',
+                username='1044314',
+                email='1044314@gmail.com',
+                phone='1044314',
+                name='bha bha',
                 confirmed=True,
             )
             admin_user.set_password('1964#')  # Replace with a secure password

@@ -15,7 +15,6 @@ class Role(db.Model):
   name = db.Column(db.String(50), unique=True, nullable=False)
 
 
-# User model for handling user information
 class User(db.Model, UserMixin):
   __tablename__ = 'user'
 
@@ -32,63 +31,91 @@ class User(db.Model, UserMixin):
   confirmed = db.Column(db.Boolean, default=False)
   confirmation_token = db.Column(db.String(64), unique=True)
 
-
   preferred_categories = db.Column(db.Text)  # JSON or CSV of preferred category IDs
   average_spending = db.Column(db.Float)  # Average spending per order
   purchase_frequency = db.Column(db.Integer)  # Number of orders per month
   last_active = db.Column(db.DateTime)  # Last activity timestamp
 
-
   delivery_info = db.relationship('UserDeliveryInfo',
                                   back_populates='user',
                                   lazy='dynamic')
 
-  # Define the relationship with the Role model
   role = db.relationship('Role', backref=db.backref('users', lazy=True))
   orders = db.relationship('Order', back_populates='user')
-
   clicks = db.relationship('ProductClick', back_populates='user')
   views = db.relationship('ProductView', back_populates='user')
   search_queries = db.relationship('UserSearchQuery', back_populates='user')
-
-
+  ratings = db.relationship('Rating', back_populates='user')  # New relationship for ratings
 
   def set_password(self, password):
-    self.password_hash = generate_password_hash(password)
+      self.password_hash = generate_password_hash(password)
 
   def check_password(self, password):
-    return check_password_hash(self.password_hash, password)
+      return check_password_hash(self.password_hash, password)
 
   def set_last_login_info(self):
-    self.last_login_date = datetime.utcnow()
-    self.last_login_ip = request.remote_addr if request and request.remote_addr else None
+      self.last_login_date = datetime.utcnow()
+      self.last_login_ip = request.remote_addr if request and request.remote_addr else None
 
   def generate_confirmation_token(self, expiration=3600):
-    s = Serializer(current_app.config['SECRET_KEY'])
-    self.confirmation_token = s.dumps({
-        'confirm': int(self.id),
-        'exp': int(time() + expiration)
-    })
+      s = Serializer(current_app.config['SECRET_KEY'])
+      self.confirmation_token = s.dumps({
+          'confirm': int(self.id),
+          'exp': int(time() + expiration)
+      })
 
   def confirm(self, token):
-    s = Serializer(current_app.config['SECRET_KEY'])
-    try:
-      data = s.loads(token)
-    except:
-      return False
+      s = Serializer(current_app.config['SECRET_KEY'])
+      try:
+          data = s.loads(token)
+      except:
+          return False
 
-    if 'exp' in data and data['exp'] < time():
-      # Token has expired
-      return False
+      if 'exp' in data and data['exp'] < time():
+          # Token has expired
+          return False
 
-    if data.get('confirm') != self.id:
-      return False
+      if data.get('confirm') != self.id:
+          return False
 
-    self.confirmed = True
-    db.session.add(self)
-    db.session.commit()
-    return True
+      self.confirmed = True
+      db.session.add(self)
+      db.session.commit()
+      return True
 
+    # Method to calculate and update average spending per order
+  def update_average_spending(self):
+      orders = Order.query.filter_by(user_id=self.id).all()
+      if orders:
+          total_spent = sum(order.total_price for order in orders)
+          self.average_spending = total_spent / len(orders)
+      else:
+          self.average_spending = 0.0
+
+    # Method to update purchase frequency
+  def update_purchase_frequency(self):
+      orders = Order.query.filter_by(user_id=self.id).all()
+      if orders:
+          self.purchase_frequency = len(orders)
+      else:
+          self.purchase_frequency = 0
+   # Method to update last active timestamp
+  def update_last_active(self):
+      self.last_active = datetime.utcnow()
+   # Method to fetch user ratings for collaborative filtering
+  def fetch_ratings(self):
+      return Rating.query.filter_by(user_id=self.id).all()
+# Rating model to capture user ratings for products
+class Rating(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+  product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+  rating = db.Column(db.Float, nullable=False)
+  user = db.relationship('User', back_populates='ratings')
+  product = db.relationship('Product', back_populates='ratings')
+
+  def __repr__(self):
+      return f'<Rating {self.rating}>'
 
 # ProductCategory model for product categories
 class ProductCategory(db.Model):
@@ -147,7 +174,7 @@ class Product(db.Model):
     # Add relationships to the interaction models
     clicks = db.relationship('ProductClick', back_populates='product')
     views = db.relationship('ProductView', back_populates='product')
-
+    ratings = db.relationship('Rating', back_populates='product')
 class ProductClick(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
