@@ -3,12 +3,15 @@
 {% block content %}
 <div class="container mt-4">
     <!-- Page Header -->
-    <h2>Shop for User</h2>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-primary">Shop for User</h2>
+       
+    </div>
 
     <!-- User Dropdown for selecting the user -->
     <div class="form-group">
         <label for="user">Select User:</label>
-        <select class="form-control" id="user" name="user" onchange="selectUser()">
+        <select class="form-control select2" id="user" name="user" onchange="selectUser()">
             <option value="">-- Select a User --</option>
             {% for user in users %}
             <option value="{{ user.id }}">{{ user.username }}</option>
@@ -17,38 +20,42 @@
     </div>
 
     <!-- Cart Display Section -->
-    <div id="cart" class="mt-4">
-        <h3>Cart for Selected User</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Unit Price (KSH)</th>
-                    <th>Quantity</th>
-                    <th>Subtotal (KSH)</th>
-                    <th>Custom Description</th>
+    <div id="cart" class="mt-4 card p-3 shadow-sm">
+        <h3 class="text-secondary">Cart for Selected User</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Unit Price (KSH)</th>
+                        <th>Quantity</th>
+                        <th>Subtotal (KSH)</th>
+                        <th>Custom Description</th>
+                    </tr>
+                </thead>
+                <tbody id="cartItems">
+                    <!-- Cart items will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+        <div id="totalPrice" class="font-weight-bold text-right"></div>
 
-                </tr>
-            </thead>
-            <tbody id="cartItems">
-                <!-- Cart items will be dynamically added here -->
-            </tbody>
-        </table>
-        <div id="totalPrice"></div>
-
-        <!-- Add Item Button to open product selection modal -->
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#productModal">Add Item</button>
-
-        <!-- Buttons to clear the cart and place an order -->
-        <button type="button" class="btn btn-danger mt-2" onclick="clearCart()">Clear Cart</button>
-        <button type="button" class="btn btn-success mt-2" onclick="placeOrder()">Place Order</button>
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#productModal">Add Item</button>
+            <div>
+                <button type="button" class="btn btn-danger" onclick="clearCart()">Clear Cart</button>
+                <button type="button" class="btn btn-success" onclick="placeOrder()">Place Order</button>
+            </div>
+        </div>
     </div>
 
     <!-- Loading Spinner (Initially Hidden) -->
-    <div id="loadingSpinner" style="display: none;">
+    <div id="loadingSpinner" class="text-center mt-4" style="display: none;">
         <div class="spinner-border text-primary" role="status">
             <span class="sr-only">Loading...</span>
         </div>
+        <p>Loading...</p>
     </div>
 
     <!-- Modal for Product Selection -->
@@ -65,7 +72,7 @@
                     <!-- Product Category Dropdown -->
                     <div class="form-group">
                         <label for="category">Select Category:</label>
-                        <select class="form-control" id="category" name="category" onchange="loadProducts(this.value)">
+                        <select class="form-control select2" id="category" name="category" onchange="loadProducts(this.value)">
                             <option value="">-- Select a Category --</option>
                             {% for category in categories %}
                             <option value="{{ category.id }}">{{ category.name }}</option>
@@ -76,7 +83,7 @@
                     <!-- Product Dropdown (Populated dynamically) -->
                     <div class="form-group">
                         <label for="product">Select Product:</label>
-                        <select class="form-control" id="product" name="product">
+                        <select class="form-control select2" id="product" name="product">
                             <!-- Options populated via JavaScript -->
                         </select>
                     </div>
@@ -96,18 +103,89 @@
                 <div class="modal-footer">
                     <!-- Modal Footer Buttons -->
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="addToCart()">Add to Cart</button>
-                    <button type="button" class="btn btn-primary" onclick="addAnotherItem()">Add Another Item</button>
+                    <button type="button" class="btn btn-primary" onclick="addAnotherItem()">Add To Cart</button>
                 </div>
             </div>
         </div>
     </div>
 
-
     <!-- Hidden CSRF Token for secure requests -->
     <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
-</div>
 
+<style>
+
+/* Enhanced Custom CSS */
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f7f9fc;
+}
+
+h2, h3 {
+    font-weight: 700;
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content {
+    border-radius: 8px;
+    border: none;
+}
+
+.modal-header, .modal-footer {
+    border: none;
+    background-color: #f8f9fa;
+}
+
+.table th, .table td {
+    vertical-align: middle;
+}
+
+.table thead th {
+    background-color: #f1f3f5;
+}
+
+.btn-primary, .btn-danger, .btn-success {
+    border-radius: 20px;
+}
+
+.btn-primary:hover, .btn-danger:hover, .btn-success:hover {
+    opacity: 0.85;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+.spinner-border + p {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-top: 1rem;
+}
+
+.select2-container .select2-selection--single {
+    height: 38px;
+    line-height: 38px;
+}
+
+.select2-container--bootstrap4 .select2-selection--single {
+    border-radius: 4px;
+    border-color: #ced4da;
+}
+
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+    padding: 0 1.5rem;
+    line-height: 36px;
+}
+
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
+    height: 38px;
+}
+
+</style>
 <!-- JavaScript for dynamic functionality -->
 <script>
     // Function to handle user selection
@@ -120,16 +198,25 @@
             document.getElementById('loadingSpinner').style.display = 'none'; // Hide spinner if no user is selected
         }
     }
+// Function to fetch and display user's cart items
+function fetchUserCart(userId) {
+    document.getElementById('loadingSpinner').style.display = 'block'; // Show loading spinner
 
-    // Function to fetch and display user's cart items
-    function fetchUserCart(userId) {
-        fetch(`/admin/admin/get_user_cart?user_id=${userId}`)
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('loadingSpinner').style.display = 'none'; // Hide loading spinner
-                document.getElementById('cartItems').innerHTML = ''; // Clear existing cart items
-                var totalPrice = 0;
+    fetch(`/admin/admin/get_user_cart?user_id=${userId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('loadingSpinner').style.display = 'none'; // Hide loading spinner
+            document.getElementById('cartItems').innerHTML = ''; // Clear existing cart items
+            var totalPrice = 0;
 
+            if (data.cart_items.length === 0) {
+                document.getElementById('cartItems').innerHTML = '<tr><td colspan="5">No items in cart.</td></tr>';
+            } else {
                 // Populate cart items table
                 data.cart_items.forEach(item => {
                     var newRow = document.createElement('tr');
@@ -139,21 +226,22 @@
                         <td>${item.quantity}</td>
                         <td>${item.subtotal}</td>
                         <td>${item.custom_description}</td>
-
                     `;
                     document.getElementById('cartItems').appendChild(newRow);
                     totalPrice += item.subtotal;
                 });
+            }
 
-                // Display total price
-                document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> Ksh. ${totalPrice.toFixed(2)}`;
-            })
-            .catch(error => {
-                document.getElementById('loadingSpinner').style.display = 'none'; // Hide spinner on error
-                console.error('Error fetching user cart:', error);
-                // Optionally, show an error alert here
-            });
-    }
+            // Display total price
+            document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> Ksh. ${totalPrice.toFixed(2)}`;
+        })
+        .catch(error => {
+            document.getElementById('loadingSpinner').style.display = 'none'; // Hide spinner on error
+            console.error('Error fetching user cart:', error);
+            alert('There was an error fetching the cart. Please try again later.'); // Provide user feedback
+        });
+}
+
 
 
     // Function to clear the entire cart
