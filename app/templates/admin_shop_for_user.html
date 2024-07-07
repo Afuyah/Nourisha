@@ -5,7 +5,6 @@
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="text-primary">Shop for User</h2>
-       
     </div>
 
     <!-- User Dropdown for selecting the user -->
@@ -103,7 +102,7 @@
                 <div class="modal-footer">
                     <!-- Modal Footer Buttons -->
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="addAnotherItem()">Add To Cart</button>
+                    <button type="button" class="btn btn-primary" onclick="addToCart()">Add To Cart</button>
                 </div>
             </div>
         </div>
@@ -112,15 +111,24 @@
     <!-- Hidden CSRF Token for secure requests -->
     <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
 
-<style>
+</div>
 
+<!-- Toast Notification -->
+<div id="toastNotification" class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; bottom: 20px; right: 20px; display: none;">
+    <div class="toast-body">
+        Successfully added to cart!
+    </div>
+</div>
+
+<style>
 /* Enhanced Custom CSS */
 body {
     font-family: 'Nunito', sans-serif;
     background-color: #f7f9fc;
 }
 
-h2, h3 {
+h2,
+h3 {
     font-weight: 700;
 }
 
@@ -134,12 +142,14 @@ h2, h3 {
     border: none;
 }
 
-.modal-header, .modal-footer {
+.modal-header,
+.modal-footer {
     border: none;
     background-color: #f8f9fa;
 }
 
-.table th, .table td {
+.table th,
+.table td {
     vertical-align: middle;
 }
 
@@ -147,11 +157,15 @@ h2, h3 {
     background-color: #f1f3f5;
 }
 
-.btn-primary, .btn-danger, .btn-success {
+.btn-primary,
+.btn-danger,
+.btn-success {
     border-radius: 20px;
 }
 
-.btn-primary:hover, .btn-danger:hover, .btn-success:hover {
+.btn-primary:hover,
+.btn-danger:hover,
+.btn-success:hover {
     opacity: 0.85;
 }
 
@@ -160,7 +174,7 @@ h2, h3 {
     height: 3rem;
 }
 
-.spinner-border + p {
+.spinner-border+p {
     font-size: 1.2rem;
     font-weight: 500;
     margin-top: 1rem;
@@ -185,6 +199,12 @@ h2, h3 {
     height: 38px;
 }
 
+@media (max-width: 576px) {
+    .modal-dialog {
+        max-width: 100%;
+        margin: 1rem;
+    }
+}
 </style>
 <!-- JavaScript for dynamic functionality -->
 <script>
@@ -434,5 +454,7 @@ function placeOrder() {
         document.getElementById('user').value = ''; // Reset user selection
         $('#orderSummaryModal').modal('hide'); // Hide order summary modal
     }
+
+    
 </script>
 {% endblock %}
