@@ -421,8 +421,8 @@ def order_summary():
         session.pop('delivery_info', None)
 
         # Flash success message and redirect to payment page
-        flash('Order placed successfully! Redirecting to the payment page...', 'success')
-        return redirect(url_for('payments.mpesa_payment', order_id=order.id))
+        flash('Your order has been successfully placed!', 'success')
+        return redirect(url_for('main.api/recommendations', order_id=order.id))
 
     return render_template('order_summary.html', 
                            cart_items=cart_items, 

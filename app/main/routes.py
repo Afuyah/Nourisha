@@ -529,9 +529,6 @@ def search():
 
 # Get user interactions
 def get_user_interactions(user_id):
-    """
-    Get the products that a user has interacted with (e.g., purchased).
-    """
     interactions = db.session.query(Product).join(OrderItem).join(Order).filter(Order.user_id == user_id).all()
     return interactions
 
@@ -569,7 +566,7 @@ def get_similar_products(product, top_n=5):
     cosine_sim = cosine_similarity(product_vector, tfidf_matrix)
     similar_indices = cosine_sim.argsort().flatten()[-(top_n + 1):-1]
 
-    return [product_ids[i] for i in similar_indices]
+    return [products[i] for i in similar_indices]
 
 # Content-Based Recommendations
 def get_content_based_recommendations(product, top_n=5):
@@ -629,7 +626,8 @@ def recommend_products(user_id, num_recommendations=10):
     # Personalized Recommendations
     recommendations.extend(get_personalized_recommendations(user))
 
-    recommendations = list({p.id: p for p in recommendations}.values())
+    # Ensure recommendations are unique based on product ID and are product objects
+    recommendations = list({p.id: p for p in recommendations if hasattr(p, 'id')}.values())
     return recommendations[:num_recommendations]
 
 # Route for getting product recommendations
@@ -657,7 +655,7 @@ def get_recommendations():
         app.logger.error(f"Error fetching recommendations: {e}", exc_info=True)
         return jsonify({'error': 'Server error'}), 500
 
-
+# Route for tracking product events
 @bp.route('/api/track-product-event', methods=['POST'])
 def track_product_event():
     try:
@@ -683,8 +681,6 @@ def track_product_event():
     except Exception as e:
         app.logger.error(f"Error tracking event: {e}")
         return jsonify({'error': 'Server error'}), 500
-
-
 
 from dateutil import parser
 
@@ -729,3 +725,11 @@ def get_current_user_id():
         return current_user.id
     else:
         return 0  # Return 0 for guest users
+
+# Route for rendering recommendations page
+@bp.route('/recommendations')
+@login_required
+def recommendations():
+    user_id = current_user.id
+    recommendations = recommend_products(user_id, 10)  # Get top 10 recommendations
+    return render_template('recommendations.html', recommendations=recommendations)

@@ -1,0 +1,136 @@
+{% extends "layout.html" %}
+{% block title %}Recommendations{% endblock %}
+{% block content %}
+
+<div class="container">
+  <h1 class="my-4">Recommended Products</h1>
+  <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+      {% for product in recommendations %}
+      <div class="col">
+          <div class="card product-card border-0 shadow-sm" data-product-id="{{ product.id }}">
+              <div class="magnifier position-relative overflow-hidden">
+                  {% if product.images %}
+                  <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
+                  {% else %}
+                  <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image" alt="Placeholder Image">
+                  {% endif %}
+                  <div class="product-overlay d-flex align-items-center justify-content-center">
+                      <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="{{ product.id }}" data-bs-toggle="modal" data-bs-target="#productDetailsModal{{ product.id }}">Quick View</button>
+                  </div>
+              </div>
+              <div class="card-body text-center">
+                  <h6 class="card-title text-primary mb-2 product-name" data-product-id="{{ product.id }}">{{ product.brand }}</h6>
+                  <p class="card-text text-muted fs-6 mb-3">{{ product.nutritional_information | truncate(80) }}</p>
+                  <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
+                  <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
+                      Buy
+                  </button>
+              </div>
+          </div>
+      </div>
+      {% endfor %}
+  </div>
+</div>
+
+<!-- Modals for quick view and add to cart -->
+{% for product in recommendations %}
+<div class="modal fade" id="productDetailsModal{{ product.id }}" tabindex="-1" role="dialog" aria-labelledby="productDetailsModalLabel{{ product.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="productDetailsModalLabel{{ product.id }}">{{ product.name }}</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <!-- Product details here -->
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" role="dialog" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">Add to Cart</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <!-- Add to cart form here -->
+          </div>
+      </div>
+  </div>
+</div>
+{% endfor %}
+
+
+
+<style>
+
+  /* Add custom styles for product cards and modals */
+  .product-card {
+      transition: transform 0.2s;
+  }
+
+  .product-card:hover {
+      transform: scale(1.05);
+  }
+
+  .product-overlay {
+      opacity: 0;
+      transition: opacity 0.2s;
+  }
+
+  .product-card:hover .product-overlay {
+      opacity: 1;
+  }
+
+  /* Toast styles */
+  .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+  }
+
+  /* Custom styles for modals */
+  .modal .modal-content {
+      border-radius: 10px;
+      overflow: hidden;
+      animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+      from {
+          transform: translateY(-50px);
+          opacity: 0;
+      }
+      to {
+          transform: translateY(0);
+          opacity: 1;
+      }
+  }
+
+</style>
+
+<script>
+
+  document.addEventListener('DOMContentLoaded', () => {
+      // Initialize modals
+      $('.modal').modal();
+
+      // Initialize toasts
+      $('.toast').toast();
+
+      // Show order success toast
+      if ({{ get_flashed_messages() }}) {
+          showOrderSuccessToast();
+      }
+  });
+
+</script>
+{% endblock %}
