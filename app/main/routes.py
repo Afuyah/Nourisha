@@ -647,6 +647,7 @@ def get_recommendations():
         return jsonify([{
             'id': product.id,
             'name': product.name,
+            'brand': product.brand,
             'price': product.unit_price,
             'image': product.images[0].cover_image if product.images else None,
             'description': product.nutritional_information
