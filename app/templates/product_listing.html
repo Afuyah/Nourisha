@@ -575,17 +575,19 @@ async function loadRecommendations() {
             recommendationsSection.innerHTML = ""; // Clear existing recommendations
             recommendedProducts.forEach(product => {
                 const productCard = `
-                    <div class="card mb-3">
+                   <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
                         <div class="row g-0">
                             <div class="col-md-4">
                                 <img src="{{ url_for('static', filename='uploads/') }}${product.image}" class="img-fluid rounded-start" alt="${product.name}">
                             </div>
                             <div class="col-md-8">
                                 <div class="card-body">
-                                    <h5 class="card-title">${product.name}</h5>
+                                    <h5 class="card-title">${product.brand}</h5>
                                     <p class="card-text">Price: Ksh ${product.price}</p>
-                                    <a href="#" class="btn btn-primary add-to-cart-btn" data-product-id="${product.id}">Add to Cart</a>
-                                    <button class="btn btn-secondary quick-view-btn" data-product-id="${product.id}">Quick View</button>
+                                     <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal${ product.id }">
+                      Buy
+                  </button>
+                                   <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="${ product.id }" data-bs-toggle="modal" data-bs-target="#productDetailsModal${product.id }">Quick View</button>
                                 </div>
                             </div>
                         </div>
