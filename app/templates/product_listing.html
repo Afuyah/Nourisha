@@ -134,14 +134,12 @@
   {% endfor %}
 </div>
 
-<!-- Recommended Products -->
-  <div class="col-md-4 mb-4 mt-4">
-    <h3>Recommended Products</h3>
-    <div class="recommended-products">
-      <!-- Recommendations will be loaded dynamically here -->
+ </div>
+
+        <!-- Recommended Products Section -->
+        <h3 class="mt-5">Recommended Products</h3>
+        <div class="recommended-products row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3"></div>
     </div>
-  </div>
-</div>
 
 
 <!-- Floating Cart Icon -->
@@ -564,51 +562,57 @@ function trackProductEvent(productId, eventType) {
 }
 
 
-// Function to load recommendations dynamically
-async function loadRecommendations() {
-    try {
-        const response = await fetch('/api/recommendations?user_id={{ current_user.id }}&num=5');
-        const recommendedProducts = await response.json();
+   // Function to load recommendations dynamically
+        async function loadRecommendations() {
+            try {
+                const response = await fetch('/api/recommendations?user_id={{ current_user.id }}&num=5');
+                const recommendedProducts = await response.json();
 
-        if (recommendedProducts.length > 0) {
-            const recommendationsSection = document.querySelector(".recommended-products");
-            recommendationsSection.innerHTML = ""; // Clear existing recommendations
-            recommendedProducts.forEach(product => {
-                const productCard = `
-                   <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
-                        <div class="col">
-          <div class="card product-card border-0 shadow-sm" data-product-id="${ product.id }">
-              <div class="magnifier position-relative overflow-hidden">
-                                <img src="{{ url_for('static', filename='uploads/') }}${product.image}" class="img-fluid rounded-start" alt="${product.name}">
-                            </div>
-                            <div class="col-md-8">
-                                <div class="card-body">
-                                    <h5 class="card-title">${product.brand}</h5>
-                                    <p class="card-text">Price: Ksh ${product.price}</p>
-                                     <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal${ product.id }">
-                      Buy
-                  </button>
-                                   <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="${ product.id }" data-bs-toggle="modal" data-bs-target="#productDetailsModal${product.id }">Quick View</button>
+                if (recommendedProducts.length > 0) {
+                    const recommendationsSection = document.querySelector(".recommended-products");
+                    recommendationsSection.innerHTML = ""; // Clear existing recommendations
+
+                    recommendedProducts.forEach(product => {
+                        const productCard = `
+                            <div class="col">
+                                <div class="card product-card border-0 shadow-sm" data-product-id="${product.id}">
+                                    <div class="magnifier position-relative overflow-hidden">
+                                        <img src="{{ url_for('static', filename='uploads/') }}${product.image}" class="img-fluid rounded-start" alt="${product.name}">
+                                    </div>
+                                    <div class="product-overlay d-flex align-items-center justify-content-center">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-primary mb-2 product-name" data-product-id="${product.id}">${product.brand}</h6>
+                                            <p class="card-text">Price: Ksh ${product.price}</p>
+                                            <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal${product.id}">
+                                                Buy
+                                            </button>
+                                            <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="${product.id}" data-bs-toggle="modal" data-bs-target="#productDetailsModal${product.id}">
+                                                Quick View
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>`;
-                recommendationsSection.insertAdjacentHTML('beforeend', productCard);
-            });
+                            </div>`;
 
-            initializeEventListeners();
+                        recommendationsSection.insertAdjacentHTML('beforeend', productCard);
+                    });
+
+                    initializeEventListeners();
+                }
+            } catch (error) {
+                console.error('Error loading recommendations:', error);
+            }
         }
-    } catch (error) {
-        console.error('Error loading recommendations:', error);
-    }
-}
 
-// Call loadRecommendations when the page is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    loadRecommendations();
-});
+        // Call loadRecommendations when the page is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRecommendations();
+        });
 
-    
+        function initializeEventListeners() {
+            // Initialize event listeners for the dynamically created elements
+        }
+    </script>
 
 // Function to add product to cart
 async function addToCart(productId) {
