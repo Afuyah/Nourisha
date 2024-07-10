@@ -1,10 +1,10 @@
  
 from app import db, mail
-from flask import render_template, abort, flash, redirect, url_for, request, jsonify, session,Flask
+from flask import render_template, abort, flash, redirect, url_for, request, jsonify, session,Flask, current_app as app
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm
-from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick
+from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick, OrderItem
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
@@ -13,7 +13,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sqlalchemy.orm.exc import NoResultFound
 from app.cart.routes import cart_bp
 from .send_email import send_confirmation_email
-
+from sqlalchemy import func, desc
 from flask_mail import Message
 from functools import wraps
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
@@ -517,83 +517,83 @@ def product_listing_by_category(category_id):
 @bp.route('/view_order/<int:order_id>')
 @login_required
 def view_order(order_id):
-  order = Order.query.get_or_404(order_id)
-  return render_template('user_view_order.html', order=order)
+    order = Order.query.get_or_404(order_id)
+    return render_template('user_view_order.html', order=order)
 
 @bp.route('/search', methods=['GET', 'POST'])
 def search():
     query = request.args.get('query', '')
     products = Product.query.filter(Product.name.ilike(f"%{query}%")).all()
-    form= AddProductForm()
+    form = AddProductForm()
     return render_template('product_listing.html', products=products, form=form)
 
-#product recommendation section
-#Collaborative Filtering (User-Based)
+# Get user interactions
+def get_user_interactions(user_id):
+    """
+    Get the products that a user has interacted with (e.g., purchased).
+    """
+    interactions = db.session.query(Product).join(OrderItem).join(Order).filter(Order.user_id == user_id).all()
+    return interactions
+
+# Collaborative Filtering (User-Based)
 def get_similar_users(user_id, top_n=5):
-    # Get the list of products the current user has interacted with
     user_interactions = db.session.query(Product.id).join(OrderItem).join(Order).filter(Order.user_id == user_id).all()
     user_interactions = [product.id for product in user_interactions]
 
-    # Find other users who interacted with the same products
     similar_users = db.session.query(Order.user_id).join(OrderItem).filter(OrderItem.product_id.in_(user_interactions)).filter(Order.user_id != user_id).group_by(Order.user_id).all()
 
-    # Optionally, we could score users based on the number of shared interactions
     user_scores = []
     for similar_user_id in similar_users:
         shared_interactions = db.session.query(func.count(OrderItem.product_id)).join(Order).filter(Order.user_id == similar_user_id[0]).filter(OrderItem.product_id.in_(user_interactions)).scalar()
         user_scores.append((similar_user_id[0], shared_interactions))
 
-    # Sort by shared interactions and return the top N similar users
     user_scores.sort(key=lambda x: x[1], reverse=True)
     top_similar_users = [user[0] for user in user_scores[:top_n]]
 
     return top_similar_users
 
-#Collaborative Filtering (Item-Based)
-
+# Collaborative Filtering (Item-Based)
 def get_similar_products(product, top_n=5):
-   
-    # Get all products' descriptions (or other attributes)
     products = db.session.query(Product).all()
-    product_descriptions = [p.description for p in products]
+    product_texts = [
+        (p.nutritional_information or '') + ' ' + (p.promotional_tag or '') for p in products
+    ]
     product_ids = [p.id for p in products]
 
-    # Create a TF-IDF vectorizer and fit it on product descriptions
     tfidf = TfidfVectorizer(stop_words='english')
-    tfidf_matrix = tfidf.fit_transform(product_descriptions)
+    tfidf_matrix = tfidf.fit_transform(product_texts)
 
-    # Get the TF-IDF vector for the current product
     product_idx = product_ids.index(product.id)
     product_vector = tfidf_matrix[product_idx]
 
-    # Compute cosine similarity between the current product and all other products
     cosine_sim = cosine_similarity(product_vector, tfidf_matrix)
-    similar_indices = cosine_sim.argsort().flatten()[-(top_n+1):-1]  # Exclude the product itself
+    similar_indices = cosine_sim.argsort().flatten()[-(top_n + 1):-1]
 
-    similar_products = [product_ids[i] for i in similar_indices]
-    return similar_products
+    return [product_ids[i] for i in similar_indices]
 
-#Content-Based Recommendations
-
+# Content-Based Recommendations
 def get_content_based_recommendations(product, top_n=5):
-    # Example: Finding similar products based on category and tags
     similar_products = db.session.query(Product).filter(
         (Product.category_id == product.category_id) | 
         (Product.promotional_tag == product.promotional_tag)
     ).filter(Product.id != product.id).limit(top_n).all()
-
     return similar_products
 
-#Popularity-Based Recommendations
-
+# Popularity-Based Recommendations
 def get_most_popular_products(top_n=10):
-    popular_products = db.session.query(Product).order_by(Product.click_count.desc()).limit(top_n).all()
-    return popular_products
+    return db.session.query(Product).order_by(Product.click_count.desc()).limit(top_n).all()
 
-#persoanlized recommendations
+# Personalized Recommendations
 def get_personalized_recommendations(user, top_n=10):
-    # Personalized recommendations might include products in the user's frequently purchased categories
-    favorite_categories = db.session.query(Product.category_id, func.count(Product.category_id).label('count')).join(OrderItem).join(Order).filter(Order.user_id == user.id).group_by(Product.category_id).order_by('count DESC').limit(3).all()
+    favorite_categories = (
+        db.session.query(Product.category_id, func.count(Product.category_id).label('count'))
+        .join(OrderItem)
+        .join(Order)
+        .filter(Order.user_id == user.id)
+        .group_by(Product.category_id)
+        .order_by(desc('count'))
+        .limit(3)
+    )
 
     recommendations = []
     for category, _ in favorite_categories:
@@ -601,8 +601,7 @@ def get_personalized_recommendations(user, top_n=10):
 
     return recommendations[:top_n]
 
-#final recommender system    
-
+# Final Recommender System
 def recommend_products(user_id, num_recommendations=10):
     user = User.query.get(user_id)
     if not user:
@@ -610,33 +609,52 @@ def recommend_products(user_id, num_recommendations=10):
 
     recommendations = []
 
-    # 1. Collaborative Filtering (User-Based)
+    # Collaborative Filtering (User-Based)
     similar_users = get_similar_users(user_id)
     for similar_user_id in similar_users:
-        recommendations.extend(get_user_purchased_products(similar_user_id))
+        recommendations.extend(get_user_interactions(similar_user_id))
 
-    # 2. Collaborative Filtering (Item-Based)
-    user_purchased_products = get_user_purchased_products(user_id)
+    # Collaborative Filtering (Item-Based)
+    user_purchased_products = get_user_interactions(user_id)
     for product in user_purchased_products:
         recommendations.extend(get_similar_products(product))
 
-    # 3. Content-Based Recommendations
+    # Content-Based Recommendations
     for product in user_purchased_products:
         recommendations.extend(get_content_based_recommendations(product))
 
-    # 4. Popularity-Based Recommendations
-    popular_products = get_most_popular_products()
-    recommendations.extend(popular_products)
+    # Popularity-Based Recommendations
+    recommendations.extend(get_most_popular_products())
 
-    # 5. Personalized Recommendations
-    personalized_recommendations = get_personalized_recommendations(user)
-    recommendations.extend(personalized_recommendations)
+    # Personalized Recommendations
+    recommendations.extend(get_personalized_recommendations(user))
 
-    # Deduplicate and limit to the number of recommendations required
-    recommendations = list(set(recommendations))
-    recommendations = recommendations[:num_recommendations]
+    recommendations = list({p.id: p for p in recommendations}.values())
+    return recommendations[:num_recommendations]
 
-    return recommendations
+# Route for getting product recommendations
+@bp.route('/api/recommendations', methods=['GET'])
+def get_recommendations():
+    try:
+        user_id = request.args.get('user_id')
+        num_recommendations = int(request.args.get('num', 10))
+
+        if user_id:
+            recommendations = recommend_products(int(user_id), num_recommendations)
+        else:
+            recommendations = get_most_popular_products(num_recommendations)
+
+        return jsonify([{
+            'id': product.id,
+            'name': product.name,
+            'price': product.unit_price,
+            'image': product.images[0].cover_image if product.images else None,
+            'description': product.nutritional_information
+        } for product in recommendations]), 200
+
+    except Exception as e:
+        app.logger.error(f"Error fetching recommendations: {e}", exc_info=True)
+        return jsonify({'error': 'Server error'}), 500
 
 
 @bp.route('/api/track-product-event', methods=['POST'])
@@ -651,7 +669,7 @@ def track_product_event():
         if not product_id or not event_type or not timestamp:
             return jsonify({'error': 'Missing data in request'}), 400
 
-        user_id = get_current_user_id()  # Determine user ID or default to 0
+        user_id = get_current_user_id()
 
         if event_type == 'click':
             record_click_event(user_id, product_id, timestamp)
@@ -671,107 +689,42 @@ from dateutil import parser
 
 def record_click_event(user_id, product_id, timestamp):
     try:
-        # Parse the timestamp using dateutil.parser
         parsed_timestamp = parser.parse(timestamp)
-        
-        # Create a new ProductClick instance
         new_click = ProductClick(user_id=user_id, product_id=product_id, timestamp=parsed_timestamp)
-        
-        # Add to the session
         db.session.add(new_click)
-        
-        # Retrieve the product and increment the click count
+
         product = Product.query.get(product_id)
-        if product is not None:
+        if product:
             product.click_count += 1
-            
-            # Commit the changes
             db.session.commit()
         else:
             app.logger.error(f"Product with ID {product_id} not found.")
-            # Handle case where product is not found, perhaps raise an exception or log the error
+            db.session.rollback()
     except Exception as e:
-        # Log the error and rollback the session
         app.logger.error(f"Error recording click event for user {user_id}, product {product_id}: {e}")
         db.session.rollback()
-        raise e  # Re-raise the exception after logging it
+        raise e
 
 def record_view_event(user_id, product_id, timestamp):
-            try:
-                new_view = ProductView(user_id=user_id, product_id=product_id, timestamp=datetime.fromisoformat(timestamp))
-                db.session.add(new_view)
-                product = Product.query.get(product_id)
-                if product:
-                    product.view_count += 1
-                    db.session.commit()
-            except Exception as e:
-                # Handle exceptions appropriately
-                print(f"Error recording view event: {e}")
-                db.session.rollback()  # Rollback changes in case of an exception
+    try:
+        parsed_timestamp = parser.parse(timestamp)
+        new_view = ProductView(user_id=user_id, product_id=product_id, timestamp=parsed_timestamp)
+        db.session.add(new_view)
 
+        product = Product.query.get(product_id)
+        if product:
+            product.view_count += 1
+            db.session.commit()
+        else:
+            app.logger.error(f"Product with ID {product_id} not found.")
+            db.session.rollback()
+    except Exception as e:
+        app.logger.error(f"Error recording view event for user {user_id}, product {product_id}: {e}")
+        db.session.rollback()
+        raise e
 
 def get_current_user_id():
     if current_user.is_authenticated:
         return current_user.id
     else:
         return 0  # Return 0 for guest users
-
-
-
-
-@bp.route('/api/recommendations', methods=['GET'])
-def get_recommendations():
-    try:
-        user_id = request.args.get('user_id')  # Retrieve user_id from query parameters
-        num_recommendations = int(request.args.get('num', 10))  # Default to 10 recommendations if not specified
-
-        if user_id:
-            # User is logged in, include recent order products in recommendations
-            recommendations = get_personalized_recommendations(user_id, num_recommendations)
-        else:
-            # User is not logged in, recommend most popular products
-            recommendations = get_most_popular_products(num_recommendations)
-
-        # Prepare the response as a list of JSON objects representing products
-        recommended_products = []
-        for product in recommendations:
-            recommended_products.append({
-                'id': product.id,
-                'name': product.name,
-                'description': product.nutritional_information if product.nutritional_information else "",
-                'price': product.unit_price,
-                'category': product.category.name if product.category else None,
-                'click_count': product.click_count,
-                'view_count': product.view_count,
-                'average_rating': product.average_rating,
-                'supplier': product.supplier.name if product.supplier else None
-                # Add more fields as needed
-            })
-
-        return jsonify(recommended_products), 200
-
-    except Exception as e:
-        # Log the error and return an appropriate error response
-        print(f"Error fetching recommendations: {e}")
-        return jsonify({'error': 'Server error'}), 500
-
-def get_personalized_recommendations(user_id, num_recommendations):
-    # Placeholder function, customize this based on your personalized recommendation logic
-    # Example: Recommendations based on user's past orders or interactions
-    user_orders = Order.query.filter_by(user_id=user_id).order_by(Order.date_added.desc()).limit(5).all()
-
-    ordered_product_ids = []
-    for order in user_orders:
-        ordered_product_ids.extend([item.product_id for item in order.order_items])
-
-    # Fetch products related to ordered_product_ids or use collaborative filtering methods
-    # Example: Fetching products based on ordered_product_ids
-    recommended_products = Product.query.filter(Product.id.in_(ordered_product_ids)).limit(num_recommendations).all()
-
-    return recommended_products
-
-def get_most_popular_products(num_products):
-    # Placeholder function, customize this based on your popularity-based recommendation logic
-    popular_products = Product.query.order_by(Product.click_count.desc()).limit(num_products).all()
-
-    return popular_products

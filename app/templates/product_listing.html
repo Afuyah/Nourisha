@@ -69,6 +69,9 @@
           </div>
       </div>
       {% endfor %}
+
+
+      
   </div>
 
   <!-- Modal Template for Quick View (Repeat for each product with dynamic content) -->
@@ -131,7 +134,14 @@
   {% endfor %}
 </div>
 
-
+<!-- Recommended Products -->
+  <div class="col-md-4 mb-4 mt-4">
+    <h3>Recommended Products</h3>
+    <div class="recommended-products">
+      <!-- Recommendations will be loaded dynamically here -->
+    </div>
+  </div>
+</div>
 
 
 <!-- Floating Cart Icon -->
@@ -520,7 +530,12 @@ function searchProducts() {
     xhr.send();
 }
 
-// Function to track product events (view or click)
+function getCSRFToken() {
+    // Function to retrieve the CSRF token from the cookie or meta tag
+    // Implement this function based on your CSRF token setup
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
 function trackProductEvent(productId, eventType) {
     const csrfToken = getCSRFToken();
 
@@ -538,7 +553,7 @@ function trackProductEvent(productId, eventType) {
     })
     .then(response => response.json())
     .then(data => {
-        if (!response.ok) {
+        if (!data.ok) {
             throw new Error(data.error || 'Unknown error');
         }
         console.log('Event tracked:', data);
@@ -548,10 +563,11 @@ function trackProductEvent(productId, eventType) {
     });
 }
 
+
 // Function to load recommendations dynamically
 async function loadRecommendations() {
     try {
-        const response = await fetch('/api/recommendations');
+        const response = await fetch('/api/recommendations?user_id={{ current_user.id }}&num=5');
         const recommendedProducts = await response.json();
 
         if (recommendedProducts.length > 0) {
@@ -559,27 +575,37 @@ async function loadRecommendations() {
             recommendationsSection.innerHTML = ""; // Clear existing recommendations
             recommendedProducts.forEach(product => {
                 const productCard = `
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100 product-card" data-product-id="${product.id}">
-                            <img src="${url_for('static', filename='uploads/' + product.image)}" class="card-img-top product-image" alt="${product.name}">
-                            <div class="card-body">
-                                <h5 class="card-title product-name" data-product-id="${product.id}">${product.name}</h5>
-                                <p class="card-text">Price: Ksh ${product.price}</p>
-                                <a href="#" class="btn btn-primary add-to-cart-btn" data-product-id="${product.id}">Add to Cart</a>
-                                <button class="btn btn-secondary quick-view-btn" data-product-id="${product.id}">Quick View</button>
+                    <div class="card mb-3">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img src="{{ url_for('static', filename='uploads/') }}${product.image}" class="img-fluid rounded-start" alt="${product.name}">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title">${product.name}</h5>
+                                    <p class="card-text">Price: Ksh ${product.price}</p>
+                                    <a href="#" class="btn btn-primary add-to-cart-btn" data-product-id="${product.id}">Add to Cart</a>
+                                    <button class="btn btn-secondary quick-view-btn" data-product-id="${product.id}">Quick View</button>
+                                </div>
                             </div>
                         </div>
                     </div>`;
                 recommendationsSection.insertAdjacentHTML('beforeend', productCard);
             });
 
-            // Reinitialize event listeners for the newly loaded recommendations
             initializeEventListeners();
         }
     } catch (error) {
         console.error('Error loading recommendations:', error);
     }
 }
+
+// Call loadRecommendations when the page is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    loadRecommendations();
+});
+
+    
 
 // Function to add product to cart
 async function addToCart(productId) {
