@@ -576,8 +576,9 @@ async function loadRecommendations() {
             recommendedProducts.forEach(product => {
                 const productCard = `
                    <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
-                        <div class="row g-0">
-                            <div class="col-md-4">
+                        <div class="col">
+          <div class="card product-card border-0 shadow-sm" data-product-id="${ product.id }">
+              <div class="magnifier position-relative overflow-hidden">
                                 <img src="{{ url_for('static', filename='uploads/') }}${product.image}" class="img-fluid rounded-start" alt="${product.name}">
                             </div>
                             <div class="col-md-8">
