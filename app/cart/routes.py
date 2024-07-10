@@ -422,7 +422,7 @@ def order_summary():
 
         # Flash success message and redirect to payment page
         flash('Your order has been successfully placed!', 'success')
-        return redirect(url_for('main.api/recommendations', order_id=order.id))
+        return redirect(url_for('main.recommendations', order_id=order.id))
 
     return render_template('order_summary.html', 
                            cart_items=cart_items, 
