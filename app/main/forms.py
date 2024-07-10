@@ -170,3 +170,6 @@ class ShopForUserForm(FlaskForm):
     product = SelectField('Select Product', coerce=int, validators=[DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     custom_description = StringField('Custom Description')
+
+class RecommendationForm(FlaskForm):
+    hidden_field = HiddenField()

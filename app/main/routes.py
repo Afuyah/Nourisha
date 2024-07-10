@@ -3,7 +3,7 @@ from app import db, mail
 from flask import render_template, abort, flash, redirect, url_for, request, jsonify, session,Flask, current_app as app
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
-from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm
+from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm,RecommendationForm
 from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick, OrderItem
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
@@ -731,5 +731,6 @@ def get_current_user_id():
 @login_required
 def recommendations():
     user_id = current_user.id
+    form = RecommendationForm()
     recommendations = recommend_products(user_id, 10)  # Get top 10 recommendations
-    return render_template('recommendations.html', recommendations=recommendations)
+    return render_template('recommendations.html', recommendations=recommendations, form=form)
