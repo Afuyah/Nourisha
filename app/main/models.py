@@ -36,16 +36,20 @@ class User(db.Model, UserMixin):
   purchase_frequency = db.Column(db.Integer)  # Number of orders per month
   last_active = db.Column(db.DateTime)  # Last activity timestamp
 
-  delivery_info = db.relationship('UserDeliveryInfo',
-                                  back_populates='user',
-                                  lazy='dynamic')
-
+    # Relationships adjusted to avoid conflict
+  purchases = db.relationship('Purchase', back_populates='user', lazy=True)  # Use back_populates instead of backref
+    # Define other relationships as before
+  delivery_info = db.relationship('UserDeliveryInfo', back_populates='user', lazy='dynamic')
   role = db.relationship('Role', backref=db.backref('users', lazy=True))
   orders = db.relationship('Order', back_populates='user')
   clicks = db.relationship('ProductClick', back_populates='user')
   views = db.relationship('ProductView', back_populates='user')
   search_queries = db.relationship('UserSearchQuery', back_populates='user')
-  ratings = db.relationship('Rating', back_populates='user')  # New relationship for ratings
+  ratings = db.relationship('Rating', back_populates='user')
+
+  def __repr__(self):
+      return f'<User {self.username}>'
+
 
   def set_password(self, password):
       self.password_hash = generate_password_hash(password)
@@ -278,12 +282,28 @@ class OrderItem(db.Model):
 
   order = db.relationship('Order', back_populates='order_items')
   product = db.relationship('Product', back_populates='order_items')
-
+  purchases = db.relationship('Purchase', back_populates='order_item')
   @hybrid_property
   def total_price(self):
         return self.quantity * self.unit_price
 
-  
+
+class Purchase(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  order_item_id = db.Column(db.Integer, db.ForeignKey('order_item.id'), nullable=False)
+  user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+  purchase_date = db.Column(db.DateTime, default=datetime.utcnow)
+  unit_price_bought = db.Column(db.Float, nullable=False)
+  quantity_bought = db.Column(db.Integer, nullable=False)
+  amount_paid = db.Column(db.Float, nullable=False)
+
+  # Define relationships
+  order_item = db.relationship('OrderItem', back_populates='purchases')
+  user = db.relationship('User', back_populates='purchases')  # Use back_populates instead of backref
+
+  def __repr__(self):
+      return f'<Purchase {self.id}>'
+
 
 class Location(db.Model):
   id = db.Column(db.Integer, primary_key=True)

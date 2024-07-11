@@ -43,6 +43,7 @@ from app.main.models import (
     User,
     Cart,
     UserDeliveryInfo,
+    Purchase,
 )
 
 
@@ -1538,3 +1539,48 @@ def remove_cart_item():
         db.session.rollback()
         print(f"Error removing item from cart: {str(e)}")  # Debug log
         return jsonify({'message': f'Failed to remove item: {str(e)}'}), 500
+
+
+@admin_bp.route('/admin/purchase', methods=['GET', 'POST'])
+@login_required
+def admin_purchase():
+    orders = Order.query.filter_by(status='pending').all()
+    return render_template('purchasing.html', orders=orders)
+
+
+@admin_bp.route('/admin/purchase/update', methods=['POST'])
+@login_required
+def admin_purchase_update():
+    try:
+        order_id = request.form.get('orderId')
+        product_id = request.form.get('productId')
+        purchase_amount = request.form.get('purchaseAmount')
+
+        # Validate inputs (e.g., check if all necessary data is received)
+        if not order_id or not product_id or not purchase_amount:
+            return jsonify({'error': 'Invalid request parameters'}), 400
+
+        # Fetch the order item and update its fulfillment status
+        order_item = OrderItem.query.filter_by(order_id=order_id, product_id=product_id).first()
+        if not order_item:
+            return jsonify({'error': 'Order item not found'}), 404
+
+        # Update the order item with purchase details
+        order_item.fulfillment_status = 'fulfilled'
+        order_item.custom_description = f'Purchased {purchase_amount} units'
+
+        # Example: Save purchase details in a separate purchase table or log
+        purchase = Purchase(
+            order_id=order_id,
+            product_id=product_id,
+            purchase_amount=purchase_amount,
+            user_id=current_user.id  # Assuming you want to log the current admin user
+        )
+        db.session.add(purchase)
+
+        db.session.commit()
+
+        return jsonify({'message': 'Purchase updated successfully'}), 200
+    except Exception as e:
+        app.logger.error(f"Error updating purchase: {e}")
+        return jsonify({'error': 'Server error'}), 500

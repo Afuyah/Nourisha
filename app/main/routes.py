@@ -734,3 +734,6 @@ def recommendations():
     form = RecommendationForm()
     recommendations = recommend_products(user_id, 10)  # Get top 10 recommendations
     return render_template('recommendations.html', recommendations=recommendations, form=form)
+
+
+

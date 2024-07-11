@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <h3 class="mt-4 mb-3">Purchase Orders</h3>
+    {% for order in orders %}
+    <div class="card mb-3">
+        <div class="card-header">
+            Order ID: {{ order.id }} - Customer: {{ order.user.username }} - Order Date: {{ order.order_date }}
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Order Items</h5>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Product Name</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Unit Price</th>
+                        
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.order_items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.unit_price }}</td>
+                        
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="purchaseCheckbox{{ item.id }}"
+                                    data-order="{{ order.id }}" data-product="{{ item.product.id }}">
+                                <label class="form-check-label" for="purchaseCheckbox{{ item.id }}">Purchase</label>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Purchase Modal -->
+<div class="modal fade" id="purchaseModal" tabindex="-1" role="dialog" aria-labelledby="purchaseModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="purchaseModalLabel">Enter Purchase Amount</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input type="hidden" id="purchaseModalProductId">
+                    <div class="form-group">
+                        <label for="purchaseAmountInput">Amount Purchased (per unit)</label>
+                        <input type="number" class="form-control" id="purchaseAmountInput" placeholder="Enter amount">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="purchaseModalSubmit">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('input[type="checkbox"]').change(function() {
+        var checkbox = $(this);
+        var orderId = checkbox.data('order');
+        var productId = checkbox.data('product');
+        
+        if (checkbox.is(':checked')) {
+            // Show modal to enter purchase amount
+            $('#purchaseAmountInput').val(''); // Clear previous input value
+            $('#purchaseModal').modal('show');
+
+            // Set the product ID in a hidden field within the modal
+            $('#purchaseModalProductId').val(productId);
+
+            // Focus on the input field
+            $('#purchaseAmountInput').focus();
+
+            // Handle submit button click
+            $('#purchaseModalSubmit').off('click').on('click', function() {
+                var purchaseAmount = $('#purchaseAmountInput').val();
+                
+                // Validate if purchase amount is entered
+                if (!purchaseAmount) {
+                    alert('Please enter the purchase amount.');
+                    return;
+                }
+
+                // Send AJAX request to update database and remove item from list
+                $.ajax({
+                    url: '/admin/admin/purchase/update',
+                    method: 'POST',
+                    data: {
+                        orderId: orderId,
+                        productId: productId,
+                        purchaseAmount: purchaseAmount
+                    },
+                    success: function(response) {
+                        // Update UI or remove item from list
+                        checkbox.prop('disabled', true);
+                        checkbox.closest('tr').fadeOut('slow'); // Optional: hide the row after purchase
+                        $('#purchaseModal').modal('hide');
+                    },
+                    error: function(error) {
+                        console.error('Error updating purchase:', error);
+                    }
+                });
+            });
+        }
+    });
+});
+
+
+</script>
+{% endblock %}
