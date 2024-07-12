@@ -845,7 +845,6 @@ def admin_purchase():
     return render_template('purchasing.html', orders=orders, order_items=order_items)
 
 
-
 @admin_bp.route('/purchase/update', methods=['POST'])
 @login_required
 def admin_purchase_update():
@@ -885,10 +884,6 @@ def admin_purchase_update():
         "admin_id": admin_id,
         "purchase_status": 'Bought'
     })
-
-
-
-
 
 
 # View Orders by Status
