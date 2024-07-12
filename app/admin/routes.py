@@ -846,7 +846,6 @@ def admin_purchase():
 
 
 
-
 @admin_bp.route('/purchase/update', methods=['POST'])
 @login_required
 def admin_purchase_update():
@@ -875,6 +874,8 @@ def admin_purchase_update():
     item.purchase_price = purchase_price
     item.bought_by_admin_id = admin_id
     item.purchase_status = 'Bought'
+
+    # Commit the session to save changes
     db.session.commit()
 
     return jsonify({
@@ -884,6 +885,8 @@ def admin_purchase_update():
         "admin_id": admin_id,
         "purchase_status": 'Bought'
     })
+
+
 
 
 
