@@ -22,7 +22,7 @@ def create_admin_user():
                 name='bha bha',
                 confirmed=True,
             )
-            admin_user.set_password('1964#')  # Replace with a secure password
+            admin_user.set_password('12x')  # Replace with a secure password
             admin_user.role = admin_role
             db.session.add(admin_user)
             db.session.commit()

@@ -276,16 +276,26 @@ class OrderItem(db.Model):
   order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
   product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
   quantity = db.Column(db.Integer, nullable=False)
+  custom_description = db.Column(db.String(255), nullable=True)
   unit_price = db.Column(db.Float, nullable=False)
-  custom_description = db.Column(db.Text)
-  fulfillment_status = db.Column(db.String(20), nullable=False, default='Not fulfilled')
-
+  purchase_price = db.Column(db.Float, nullable=True)  # New field for purchase price
+  bought_by_admin_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+  purchase_status = db.Column(db.String(50), nullable=True)
+  fulfillment_status = db.Column(db.String(20), nullable=True, default='Not fulfilled')
+    # Define relationships
   order = db.relationship('Order', back_populates='order_items')
   product = db.relationship('Product', back_populates='order_items')
   purchases = db.relationship('Purchase', back_populates='order_item')
+  
+
+  def __repr__(self):
+      return f'<OrderItem {self.id}>'
+
   @hybrid_property
   def total_price(self):
         return self.quantity * self.unit_price
+
+    
 
 
 class Purchase(db.Model):
@@ -297,9 +307,8 @@ class Purchase(db.Model):
   quantity_bought = db.Column(db.Integer, nullable=False)
   amount_paid = db.Column(db.Float, nullable=False)
 
-  # Define relationships
   order_item = db.relationship('OrderItem', back_populates='purchases')
-  user = db.relationship('User', back_populates='purchases')  # Use back_populates instead of backref
+  user = db.relationship('User', back_populates='purchases')
 
   def __repr__(self):
       return f'<Purchase {self.id}>'

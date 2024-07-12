@@ -52,7 +52,7 @@
 
 
 
-    
+
   <!-- Product Listing Section -->
   <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
       {% for product in products %}
@@ -81,10 +81,10 @@
       {% endfor %}
 
 
-      
+
   </div>
 
- 
+
   {% for product in products %}
   <div class="modal fade" id="productDetailsModal{{ product.id }}" tabindex="-1" aria-labelledby="productDetailsModalLabel{{ product.id }}" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -452,7 +452,7 @@
  document.addEventListener("DOMContentLoaded", function () {
     // Initialize event listeners for the existing products
     initializeEventListeners();
-    
+
     // Load Recommendations for the user
     loadRecommendations();
 
@@ -595,7 +595,7 @@ function trackProductEvent(productId, eventType) {
                                             <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal${product.id}">
                                                 Add To Cart
                                             </button>
-                                           
+
                                         </div>
                                     </div>
                                 </div>
@@ -619,7 +619,7 @@ function trackProductEvent(productId, eventType) {
         function initializeEventListeners() {
             // Initialize event listeners for the dynamically created elements
         }
-    
+
 
 // Function to add product to cart
 async function addToCart(productId) {

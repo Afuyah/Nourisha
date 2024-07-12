@@ -821,43 +821,33 @@ def mark_delivered(order_id):
     return redirect(url_for('admin.order_details', order_id=order_id))
 
 
-@admin_bp.route('/market-purchases', methods=['GET'])
+@admin_bp.route('/admin/purchase', methods=['GET', 'POST'])
 @login_required
-def market_purchases():
-    items = db.session.query(
-        OrderItem.product_id,
-        Product.name.label('product_name'),
-        func.sum(OrderItem.quantity).label('total_quantity'),
-        OrderItem.custom_description,
-        OrderItem.purchase_price,
-        User.name.label('customer_name'),
-        OrderItem.bought_by_admin_id,
-        OrderItem.purchase_status
-    ).join(Product, Product.id == OrderItem.product_id) \
-     .join(Order, Order.id == OrderItem.order_id) \
-     .join(User, User.id == Order.user_id) \
-     .group_by(OrderItem.product_id, Product.name, User.name, OrderItem.custom_description, OrderItem.purchase_price, OrderItem.bought_by_admin_id, OrderItem.purchase_status) \
-     .all()
+def admin_purchase():
+    # Query orders with associated order_items, products, and users
+    orders = Order.query \
+        .join(OrderItem, OrderItem.order_id == Order.id) \
+        .join(Product, Product.id == OrderItem.product_id) \
+        .join(User, User.id == Order.user_id) \
+        .order_by(Order.id.desc()) \
+        .all()
 
-    return render_template('market_purchases.html', items=items)
+    return render_template('purchasing.html', orders=orders)
 
-
-
-
-@admin_bp.route('/update-purchase', methods=['POST'])
+@admin_bp.route('/purchase/update', methods=['POST'])
 @login_required
-def update_purchase():
+def admin_purchase_update():
     data = request.json
     item_id = data.get('item_id')
     purchase_price = data.get('purchase_price')
     admin_id = current_user.id  # Assuming current_user gives you the logged-in admin's ID
-    
+
     item = OrderItem.query.get_or_404(item_id)
     item.purchase_price = purchase_price
     item.bought_by_admin_id = admin_id
     item.purchase_status = 'Bought'
     db.session.commit()
-    
+
     # Emit a real-time update if using WebSocket or similar
     socketio.emit('purchase_update', {
         'item_id': item_id,
@@ -865,7 +855,7 @@ def update_purchase():
         'bought_by_admin_id': admin_id,
         'purchase_status': 'Bought'
     })
-    
+
     return jsonify({"status": "success"})
 
 
@@ -1541,46 +1531,6 @@ def remove_cart_item():
         return jsonify({'message': f'Failed to remove item: {str(e)}'}), 500
 
 
-@admin_bp.route('/admin/purchase', methods=['GET', 'POST'])
-@login_required
-def admin_purchase():
-    orders = Order.query.filter_by(status='pending').all()
-    return render_template('purchasing.html', orders=orders)
 
 
-@admin_bp.route('/admin/purchase/update', methods=['POST'])
-@login_required
-def admin_purchase_update():
-    try:
-        order_id = request.form.get('orderId')
-        product_id = request.form.get('productId')
-        purchase_amount = request.form.get('purchaseAmount')
 
-        # Validate inputs (e.g., check if all necessary data is received)
-        if not order_id or not product_id or not purchase_amount:
-            return jsonify({'error': 'Invalid request parameters'}), 400
-
-        # Fetch the order item and update its fulfillment status
-        order_item = OrderItem.query.filter_by(order_id=order_id, product_id=product_id).first()
-        if not order_item:
-            return jsonify({'error': 'Order item not found'}), 404
-
-        # Update the order item with purchase details
-        order_item.fulfillment_status = 'fulfilled'
-        order_item.custom_description = f'Purchased {purchase_amount} units'
-
-        # Example: Save purchase details in a separate purchase table or log
-        purchase = Purchase(
-            order_id=order_id,
-            product_id=product_id,
-            purchase_amount=purchase_amount,
-            user_id=current_user.id  # Assuming you want to log the current admin user
-        )
-        db.session.add(purchase)
-
-        db.session.commit()
-
-        return jsonify({'message': 'Purchase updated successfully'}), 200
-    except Exception as e:
-        app.logger.error(f"Error updating purchase: {e}")
-        return jsonify({'error': 'Server error'}), 500

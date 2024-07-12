@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "base.html" %}
 {% block content %}
 <div class="container">
     <h3 class="mt-4 mb-3">Purchase Orders</h3>
@@ -9,13 +9,12 @@
         </div>
         <div class="card-body">
             <h5 class="card-title">Order Items</h5>
-            <table class="table">
+            <table class="table table-responsive">
                 <thead>
                     <tr>
                         <th scope="col">Product Name</th>
                         <th scope="col">Quantity</th>
                         <th scope="col">Unit Price</th>
-                        
                         <th scope="col">Action</th>
                     </tr>
                 </thead>
@@ -25,12 +24,12 @@
                         <td>{{ item.product.name }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>{{ item.unit_price }}</td>
-                        
                         <td>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="purchaseCheckbox{{ item.id }}"
                                     data-order="{{ order.id }}" data-product="{{ item.product.id }}">
-                                <label class="form-check-label" for="purchaseCheckbox{{ item.id }}">Purchase</label>
+                                <label class="form-check-label"
+                                    for="purchaseCheckbox{{ item.id }}">Purchase</label>
                             </div>
                         </td>
                     </tr>
@@ -58,7 +57,9 @@
                     <input type="hidden" id="purchaseModalProductId">
                     <div class="form-group">
                         <label for="purchaseAmountInput">Amount Purchased (per unit)</label>
-                        <input type="number" class="form-control" id="purchaseAmountInput" placeholder="Enter amount">
+                        <input type="number" class="form-control" id="purchaseAmountInput"
+                            placeholder="Enter amount">
+                        <div class="invalid-feedback">Please enter a valid amount.</div>
                     </div>
                 </form>
             </div>
@@ -70,13 +71,26 @@
     </div>
 </div>
 
+<!-- Toast Notification -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="toastNotification" class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+        data-delay="3000">
+        <div class="toast-header">
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            <!-- Notification message will be inserted here -->
+        </div>
+    </div>
+</div>
 <script>
 $(document).ready(function() {
     $('input[type="checkbox"]').change(function() {
         var checkbox = $(this);
         var orderId = checkbox.data('order');
         var productId = checkbox.data('product');
-        
+
         if (checkbox.is(':checked')) {
             // Show modal to enter purchase amount
             $('#purchaseAmountInput').val(''); // Clear previous input value
@@ -91,37 +105,61 @@ $(document).ready(function() {
             // Handle submit button click
             $('#purchaseModalSubmit').off('click').on('click', function() {
                 var purchaseAmount = $('#purchaseAmountInput').val();
-                
+
                 // Validate if purchase amount is entered
                 if (!purchaseAmount) {
-                    alert('Please enter the purchase amount.');
+                    $('#purchaseAmountInput').addClass('is-invalid');
                     return;
+                } else {
+                    $('#purchaseAmountInput').removeClass('is-invalid');
                 }
+
+                // Get CSRF token from meta tag
+                var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
                 // Send AJAX request to update database and remove item from list
                 $.ajax({
-                    url: '/admin/admin/purchase/update',
+                    url: '/admin/admin/purchase',
                     method: 'POST',
-                    data: {
+                    contentType: 'application/json',
+                    data: JSON.stringify({
                         orderId: orderId,
                         productId: productId,
                         purchaseAmount: purchaseAmount
+                    }),
+                    headers: {
+                        'X-CSRFToken': csrfToken
                     },
                     success: function(response) {
                         // Update UI or remove item from list
                         checkbox.prop('disabled', true);
                         checkbox.closest('tr').fadeOut('slow'); // Optional: hide the row after purchase
                         $('#purchaseModal').modal('hide');
+
+                        // Show success toast notification
+                        showToast('Purchase updated successfully.');
                     },
                     error: function(error) {
                         console.error('Error updating purchase:', error);
+                        // Show error toast notification
+                        showToast('Failed to update purchase. Please try again.', true);
                     }
                 });
             });
         }
     });
+
+    // Function to show toast notifications
+    function showToast(message, isError = false) {
+        var toast = $('#toastNotification');
+        toast.find('.toast-body').text(message);
+        if (isError) {
+            toast.removeClass('bg-success').addClass('bg-danger');
+        } else {
+            toast.removeClass('bg-danger').addClass('bg-success');
+        }
+        toast.toast('show');
+    }
 });
-
-
 </script>
 {% endblock %}
