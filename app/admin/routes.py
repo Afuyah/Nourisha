@@ -877,9 +877,13 @@ def admin_purchase_update():
     item.purchase_status = 'Bought'
     db.session.commit()
 
-    return jsonify({"status": "success"})
-
-
+    return jsonify({
+        "status": "success",
+        "item_id": item_id,
+        "purchase_price": purchase_price,
+        "admin_id": admin_id,
+        "purchase_status": 'Bought'
+    })
 
 
 

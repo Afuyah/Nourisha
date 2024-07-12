@@ -22,7 +22,7 @@
                         </thead>
                         <tbody>
                             {% for item in items %}
-                            <tr>
+                            <tr id="item-row-{{ item.id }}">
                                 <td>{{ item.order_id }}</td>
                                 <td>{{ item.order.user.username }}</td>
                                 <td>{{ item.quantity }}</td>
@@ -44,9 +44,20 @@
         </div>
         <div class="col-md-6">
             <h5>Items Bought</h5>
-            <div id="bought-items">
-                <!-- This section will be populated dynamically -->
-            </div>
+            <table class="table table-responsive" id="bought-items-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Order ID</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Qty</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Bought By</th>
+                    </tr>
+                </thead>
+                <tbody id="bought-items">
+                    <!-- This section will be populated dynamically -->
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -141,11 +152,13 @@ $(document).ready(function() {
                     },
                     success: function(response) {
                         // Update UI or remove item from list
-                        checkbox.prop('disabled', true);
-                        checkbox.closest('tr').fadeOut('slow', function() {
-                            var itemHtml = $(this).html();
+                        var itemRow = $('#item-row-' + itemId);
+                        itemRow.find('input[type="checkbox"]').prop('disabled', true);
+                        itemRow.fadeOut('slow', function() {
+                            var itemHtml = itemRow.html();
                             $('#bought-items').append('<tr>' + itemHtml + '</tr>');
                             $('#bought-items tr:last input[type="checkbox"]').prop('checked', true).prop('disabled', true);
+                            $('#bought-items tr:last').append('<td>' + response.purchase_price + '</td><td>' + response.admin_id + '</td>');
                         });
                         $('#purchaseModal').modal('hide');
 
