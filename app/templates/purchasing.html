@@ -12,8 +12,8 @@
             <table class="table table-responsive">
                 <thead>
                     <tr>
-                        <th scope="col">Product Name</th>
-                        <th scope="col">Quantity</th>
+                        <th scope="col">Product</th>
+                        <th scope="col">Qty</th>
                        
                         <th scope="col">Action</th>
                     </tr>
@@ -29,7 +29,7 @@
                                 <input class="form-check-input" type="checkbox" id="purchaseCheckbox{{ item.id }}"
                                     data-order="{{ order.id }}" data-product="{{ item.product.id }}">
                                 <label class="form-check-label"
-                                    for="purchaseCheckbox{{ item.id }}">Purchase</label>
+                                    for="purchaseCheckbox{{ item.id }}">Buy</label>
                             </div>
                         </td>
                     </tr>
