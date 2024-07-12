@@ -833,7 +833,17 @@ def admin_purchase():
         .order_by(Order.id.desc()) \
         .all()
 
-    return render_template('purchasing.html', orders=orders)
+    # Filter and group order items
+    order_items = {}
+    for order in orders:
+        for item in order.order_items:
+            if item.purchase_status != 'Bought':
+                if item.product.id not in order_items:
+                    order_items[item.product.id] = []
+                order_items[item.product.id].append(item)
+
+    return render_template('purchasing.html', orders=orders, order_items=order_items)
+
 
 
 
@@ -867,16 +877,8 @@ def admin_purchase_update():
     item.purchase_status = 'Bought'
     db.session.commit()
 
-    # Emit a real-time update if using WebSocket or similar
-    # Replace with your actual implementation based on your WebSocket setup
-    # socketio.emit('purchase_update', {
-    #     'item_id': item_id,
-    #     'purchase_price': purchase_price,
-    #     'bought_by_admin_id': admin_id,
-    #     'purchase_status': 'Bought'
-    # })
-
     return jsonify({"status": "success"})
+
 
 
 

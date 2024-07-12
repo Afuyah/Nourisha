@@ -2,62 +2,53 @@
 {% block content %}
 <div class="container">
     <h3 class="mt-4 mb-3">Purchase Orders</h3>
-    
-    <!-- Date selection form -->
-    <form id="dateForm" class="mb-3">
-        <div class="row">
-            <div class="col-auto">
-                <label for="purchaseDateInput" class="col-form-label">Select Purchase Date:</label>
-            </div>
-            <div class="col-auto">
-                <input type="date" class="form-control" id="purchaseDateInput" name="purchase_date">
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary">Fetch Orders</button>
-            </div>
-        </div>
-    </form>
-    
-    {% if orders %}
-    <div class="card mb-3">
-        <div class="card-body">
-            <h5 class="card-title">Order Items</h5>
-            <table class="table table-responsive">
-                <thead>
-                    <tr>
-                        <th scope="col">Order ID</th>
-                        <th scope="col">Customer</th>
-                        <th scope="col">Order Date</th>
-                        <th scope="col">Product</th>
-                        <th scope="col">Quantity</th>
-                        <th scope="col">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for order in orders %}
-                        {% for item in order.order_items %}
+    <div class="row">
+        <div class="col-md-6">
+            <h5>Items Available for Purchase</h5>
+            {% for product_id, items in order_items.items() %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    Product: {{ items[0].product.brand }}
+                </div>
+                <div class="card-body">
+                    <table class="table table-responsive">
+                        <thead>
                             <tr>
-                                <td>{{ order.id }}</td>
-                                <td>{{ order.user.username }}</td>
-                                <td>{{ order.order_date }}</td>
-                                <td>{{ item.product.brand }}</td>
+                                <th scope="col">Order ID</th>
+                                <th scope="col">Customer</th>
+                                <th scope="col">Qty</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ item.order_id }}</td>
+                                <td>{{ item.order.user.username }}</td>
                                 <td>{{ item.quantity }}</td>
                                 <td>
                                     <div class="form-check">
-                                        <input class="form-check-input purchaseCheckbox" type="checkbox" id="purchaseCheckbox{{ item.id }}"
-                                            data-order="{{ order.id }}" data-item="{{ item.id }}" data-product="{{ item.product.id }}">
+                                        <input class="form-check-input" type="checkbox" id="purchaseCheckbox{{ item.id }}"
+                                            data-item-id="{{ item.id }}">
                                         <label class="form-check-label"
                                             for="purchaseCheckbox{{ item.id }}">Buy</label>
                                     </div>
                                 </td>
                             </tr>
-                        {% endfor %}
-                    {% endfor %}
-                </tbody>
-            </table>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="col-md-6">
+            <h5>Items Bought</h5>
+            <div id="bought-items">
+                <!-- This section will be populated dynamically -->
+            </div>
         </div>
     </div>
-    {% endif %}
 </div>
 
 <!-- Purchase Modal -->
@@ -73,7 +64,6 @@
             </div>
             <div class="modal-body">
                 <form>
-                    <input type="hidden" id="purchaseModalProductId">
                     <input type="hidden" id="purchaseModalItemId">
                     <div class="form-group">
                         <label for="purchaseAmountInput">Amount Purchased (per unit)</label>
@@ -107,42 +97,16 @@
 
 <script>
 $(document).ready(function() {
-    // Date form submission handling
-    $('#dateForm').submit(function(event) {
-        event.preventDefault();
-        var purchaseDate = $('#purchaseDateInput').val();
-        fetchOrders(purchaseDate);
-    });
-
-    // Fetch orders function
-    function fetchOrders(purchaseDate) {
-        $.ajax({
-            url: '/admin/purchase',
-            method: 'GET',
-            data: { purchase_date: purchaseDate },
-            success: function(response) {
-                $('.card.mb-3').replaceWith($(response).find('.card.mb-3'));
-            },
-            error: function(error) {
-                console.error('Error fetching orders:', error);
-            }
-        });
-    }
-
-    // Purchase checkbox change handling
-    $(document).on('change', '.purchaseCheckbox', function() {
+    $('input[type="checkbox"]').change(function() {
         var checkbox = $(this);
-        var orderId = checkbox.data('order');
-        var itemId = checkbox.data('item');
-        var productId = checkbox.data('product');
+        var itemId = checkbox.data('item-id');
 
         if (checkbox.is(':checked')) {
             // Show modal to enter purchase amount
             $('#purchaseAmountInput').val(''); // Clear previous input value
             $('#purchaseModal').modal('show');
 
-            // Set the product and item IDs in hidden fields within the modal
-            $('#purchaseModalProductId').val(productId);
+            // Set the item ID in a hidden field within the modal
             $('#purchaseModalItemId').val(itemId);
 
             // Focus on the input field
@@ -178,7 +142,11 @@ $(document).ready(function() {
                     success: function(response) {
                         // Update UI or remove item from list
                         checkbox.prop('disabled', true);
-                        checkbox.closest('tr').fadeOut('slow');
+                        checkbox.closest('tr').fadeOut('slow', function() {
+                            var itemHtml = $(this).html();
+                            $('#bought-items').append('<tr>' + itemHtml + '</tr>');
+                            $('#bought-items tr:last input[type="checkbox"]').prop('checked', true).prop('disabled', true);
+                        });
                         $('#purchaseModal').modal('hide');
 
                         // Show success toast notification
