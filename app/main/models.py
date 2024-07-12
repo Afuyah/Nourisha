@@ -295,8 +295,6 @@ class OrderItem(db.Model):
   def total_price(self):
         return self.quantity * self.unit_price
 
-    
-
 
 class Purchase(db.Model):
   id = db.Column(db.Integer, primary_key=True)

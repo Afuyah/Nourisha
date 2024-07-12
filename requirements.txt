@@ -14,3 +14,4 @@ pg8000
 reportlab
 scikit-learn
 twilio
+flask-socketio

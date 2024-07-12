@@ -4,10 +4,9 @@ from flask_login import current_user, login_required
 from flask_mail import Message
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
-from app import db, mail
+from app import db, mail, socketio
 from app.admin import admin_bp
 from io import BytesIO
-
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, HRFlowable, Flowable
@@ -15,8 +14,7 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, mm
 import os
-from io import StringIO
-import csv
+
 from reportlab.lib.pagesizes import letter
 
 from reportlab.pdfgen import canvas
@@ -42,7 +40,6 @@ from app.main.models import (
     Role,
     User,
     Cart,
-    UserDeliveryInfo,
     Purchase,
 )
 
@@ -824,6 +821,10 @@ def mark_delivered(order_id):
 @admin_bp.route('/admin/purchase', methods=['GET', 'POST'])
 @login_required
 def admin_purchase():
+    if request.method == 'POST':
+        purchase_date = request.form.get('purchase_date')
+        # Implement logic to filter orders by the purchase date if needed
+
     # Query orders with associated order_items, products, and users
     orders = Order.query \
         .join(OrderItem, OrderItem.order_id == Order.id) \
@@ -834,6 +835,8 @@ def admin_purchase():
 
     return render_template('purchasing.html', orders=orders)
 
+
+
 @admin_bp.route('/purchase/update', methods=['POST'])
 @login_required
 def admin_purchase_update():
@@ -843,20 +846,38 @@ def admin_purchase_update():
     admin_id = current_user.id  # Assuming current_user gives you the logged-in admin's ID
 
     item = OrderItem.query.get_or_404(item_id)
+
+    # Calculate amount paid based on purchase price and quantity
+    quantity_bought = item.quantity  # Adjust this if quantity comes from the form
+    amount_paid = purchase_price * quantity_bought
+
+    # Create a new purchase record
+    new_purchase = Purchase(
+        order_item_id=item_id,
+        user_id=admin_id,
+        unit_price_bought=purchase_price,
+        quantity_bought=quantity_bought,
+        amount_paid=amount_paid
+    )
+    db.session.add(new_purchase)
+
+    # Update the order item status
     item.purchase_price = purchase_price
     item.bought_by_admin_id = admin_id
     item.purchase_status = 'Bought'
     db.session.commit()
 
     # Emit a real-time update if using WebSocket or similar
-    socketio.emit('purchase_update', {
-        'item_id': item_id,
-        'purchase_price': purchase_price,
-        'bought_by_admin_id': admin_id,
-        'purchase_status': 'Bought'
-    })
+    # Replace with your actual implementation based on your WebSocket setup
+    # socketio.emit('purchase_update', {
+    #     'item_id': item_id,
+    #     'purchase_price': purchase_price,
+    #     'bought_by_admin_id': admin_id,
+    #     'purchase_status': 'Bought'
+    # })
 
     return jsonify({"status": "success"})
+
 
 
 

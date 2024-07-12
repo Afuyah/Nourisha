@@ -1,4 +1,5 @@
 from flask import Flask, session
+from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
@@ -11,6 +12,7 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 mail = Mail()
 migrate = Migrate()
+socketio = SocketIO()
 
 def create_app():
     app = Flask(__name__)
@@ -28,10 +30,11 @@ def create_app():
     login_manager.init_app(app)
     mail.init_app(app)
     migrate.init_app(app, db)
-
+    socketio.init_app(app)
+    
     csrf = CSRFProtect(app)
     app.config['WTF_CSRF_TIME_LIMIT'] = None
-
+    
     # Blueprints registration
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
@@ -58,4 +61,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, ssl_context='adhoc')  # Ensure you run your app with SSL
+    socketio.run(app, debug=True, ssl_context='adhoc')  # Use socketio.run to run your app with SocketIO
