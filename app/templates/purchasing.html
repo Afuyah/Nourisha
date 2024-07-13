@@ -17,7 +17,7 @@
             {% for product_id, items in items_available|groupby('product_id') %}
             <div class="card mb-3">
                 <div class="card-header">
-                    Product: {{ items[0].product.name }}
+                    Product: {{ items[0].product.brand }}
                 </div>
                 <div class="card-body">
                     <table class="table table-responsive">
