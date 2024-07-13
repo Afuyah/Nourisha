@@ -2,13 +2,22 @@
 {% block content %}
 <div class="container">
     <h3 class="mt-4 mb-3">Purchase Orders</h3>
+
+    <!-- Date selection form -->
+    <form method="GET" action="{{ url_for('admin.admin_purchase') }}" class="mb-4">
+        <div class="form-group">
+            <label for="date">Select Date</label>
+            <input type="date" class="form-control" id="date" name="date" value="{{ selected_date }}" onchange="this.form.submit()">
+        </div>
+    </form>
+
     <div class="row">
         <div class="col-md-6">
             <h5>Items Available for Purchase</h5>
-            {% for product_id, items in order_items.items() %}
+            {% for product_id, items in items_available|groupby('product_id') %}
             <div class="card mb-3">
                 <div class="card-header">
-                    Product: {{ items[0].product.brand }}
+                    Product: {{ items[0].product.name }}
                 </div>
                 <div class="card-body">
                     <table class="table table-responsive">
@@ -30,8 +39,7 @@
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="purchaseCheckbox{{ item.id }}"
                                             data-item-id="{{ item.id }}">
-                                        <label class="form-check-label"
-                                            for="purchaseCheckbox{{ item.id }}">Buy</label>
+                                        <label class="form-check-label" for="purchaseCheckbox{{ item.id }}">Buy</label>
                                     </div>
                                 </td>
                             </tr>
@@ -50,12 +58,20 @@
                         <th scope="col">Order ID</th>
                         <th scope="col">Customer</th>
                         <th scope="col">Qty</th>
-                        <th scope="col">Price</th>
+                        <th scope="col">Unit Price</th>
                         <th scope="col">Bought By</th>
                     </tr>
                 </thead>
                 <tbody id="bought-items">
-                    <!-- This section will be populated dynamically -->
+                    {% for item in items_bought %}
+                    <tr>
+                        <td>{{ item.order_id }}</td>
+                        <td>{{ item.order.user.username }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.purchase_price }}</td>
+                        <td>{{ item.bought_by_admin.username }}</td> <!-- Display admin's username -->
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -63,8 +79,7 @@
 </div>
 
 <!-- Purchase Modal -->
-<div class="modal fade" id="purchaseModal" tabindex="-1" role="dialog" aria-labelledby="purchaseModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="purchaseModal" tabindex="-1" role="dialog" aria-labelledby="purchaseModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -78,11 +93,15 @@
                     <input type="hidden" id="purchaseModalItemId">
                     <div class="form-group">
                         <label for="purchaseAmountInput">Amount Purchased (per unit)</label>
-                        <input type="number" class="form-control" id="purchaseAmountInput"
-                            placeholder="Enter amount">
+                        <input type="number" class="form-control" id="purchaseAmountInput" placeholder="Enter amount">
                         <div class="invalid-feedback">Please enter a valid amount.</div>
                     </div>
                 </form>
+                <div id="purchaseLoading" class="text-center d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -94,8 +113,7 @@
 
 <!-- Toast Notification -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="toastNotification" class="toast" role="alert" aria-live="assertive" aria-atomic="true"
-        data-delay="3000">
+    <div id="toastNotification" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
         <div class="toast-header">
             <strong class="me-auto">Notification</strong>
             <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
@@ -108,85 +126,73 @@
 
 <script>
 $(document).ready(function() {
+    // Handle checkbox change event
     $('input[type="checkbox"]').change(function() {
         var checkbox = $(this);
         var itemId = checkbox.data('item-id');
 
         if (checkbox.is(':checked')) {
-            // Show modal to enter purchase amount
+            // Show purchase modal
             $('#purchaseAmountInput').val(''); // Clear previous input value
             $('#purchaseModal').modal('show');
-
-            // Set the item ID in a hidden field within the modal
-            $('#purchaseModalItemId').val(itemId);
-
-            // Focus on the input field
-            $('#purchaseAmountInput').focus();
-
-            // Handle submit button click
-            $('#purchaseModalSubmit').off('click').on('click', function() {
-                var purchaseAmount = $('#purchaseAmountInput').val();
-
-                // Validate if purchase amount is entered
-                if (!purchaseAmount) {
-                    $('#purchaseAmountInput').addClass('is-invalid');
-                    return;
-                } else {
-                    $('#purchaseAmountInput').removeClass('is-invalid');
-                }
-
-                // Get CSRF token from meta tag
-                var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-                // Send AJAX request to update database and remove item from list
-                $.ajax({
-                    url: '/admin/purchase/update',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        item_id: itemId,
-                        purchase_price: purchaseAmount
-                    }),
-                    headers: {
-                        'X-CSRFToken': csrfToken
-                    },
-                    success: function(response) {
-                        // Update UI or remove item from list
-                        var itemRow = $('#item-row-' + itemId);
-                        itemRow.find('input[type="checkbox"]').prop('disabled', true);
-                        itemRow.fadeOut('slow', function() {
-                            var itemHtml = itemRow.html();
-                            $('#bought-items').append('<tr>' + itemHtml + '</tr>');
-                            $('#bought-items tr:last input[type="checkbox"]').prop('checked', true).prop('disabled', true);
-                            $('#bought-items tr:last').append('<td>' + response.purchase_price + '</td><td>' + response.admin_id + '</td>');
-                        });
-                        $('#purchaseModal').modal('hide');
-
-                        // Show success toast notification
-                        showToast('Purchase updated successfully.');
-                    },
-                    error: function(error) {
-                        console.error('Error updating purchase:', error);
-                        // Show error toast notification
-                        showToast('Failed to update purchase. Please try again.', true);
-                    }
-                });
-            });
+            $('#purchaseModalItemId').val(itemId); // Set item ID in modal hidden field
+            $('#purchaseAmountInput').focus(); // Focus on input field
         }
     });
 
-    // Function to show toast notifications
-    function showToast(message, isError = false) {
-        var toast = $('#toastNotification');
-        toast.find('.toast-body').text(message);
-        if (isError) {
-            toast.removeClass('bg-success').addClass('bg-danger');
-        } else {
-            toast.removeClass('bg-danger').addClass('bg-success');
-        }
-        toast.toast('show');
-    }
-});
+    // Handle purchase modal submit button click
+    $('#purchaseModalSubmit').click(function() {
+        var purchaseAmount = $('#purchaseAmountInput').val();
+        var itemId = $('#purchaseModalItemId').val();
 
+        // Validate purchase amount
+        if (!purchaseAmount) {
+            $('#purchaseAmountInput').addClass('is-invalid');
+            return;
+        }
+
+        // Show loading spinner
+        $('#purchaseLoading').removeClass('d-none');
+
+        // Ajax request to update purchase item
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+        $.ajax({
+            url: '{{ url_for('admin.admin_purchase_update') }}',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                item_id: itemId,
+                purchase_price: purchaseAmount
+            }),
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            success: function(response) {
+                // Update UI or remove item from list
+                var itemRow = $('#item-row-' + itemId);
+                itemRow.fadeOut('slow', function() {
+                    var itemHtml = itemRow.html();
+                    $('#bought-items').append('<tr>' + itemHtml + '</tr>');
+                    $('#bought-items tr:last input[type="checkbox"]').prop('checked', true).prop('disabled', true);
+                    $('#bought-items tr:last').append('<td>' + response.purchase_price + '</td><td>' + response.bought_by_admin + '</td>');
+                });
+
+                // Show success toast notification
+                $('.toast-body').text('Item purchased successfully!');
+                $('#toastNotification').toast('show');
+            },
+            error: function(response) {
+                // Show error toast notification
+                $('.toast-body').text('Failed to purchase item.');
+                $('#toastNotification').toast('show');
+            },
+            complete: function() {
+                // Hide modal and loading spinner
+                $('#purchaseModal').modal('hide');
+                $('#purchaseLoading').addClass('d-none');
+            }
+        });
+    });
+});
 </script>
 {% endblock %}

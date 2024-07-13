@@ -821,29 +821,27 @@ def mark_delivered(order_id):
 @admin_bp.route('/admin/purchase', methods=['GET', 'POST'])
 @login_required
 def admin_purchase():
-    if request.method == 'POST':
-        purchase_date = request.form.get('purchase_date')
-        # Implement logic to filter orders by the purchase date if needed
+    # Get the selected date from the request parameters or use today's date as default
+    selected_date = request.args.get('date', datetime.today().strftime('%Y-%m-%d'))
 
-    # Query orders with associated order_items, products, and users
-    orders = Order.query \
-        .join(OrderItem, OrderItem.order_id == Order.id) \
-        .join(Product, Product.id == OrderItem.product_id) \
-        .join(User, User.id == Order.user_id) \
-        .order_by(Order.id.desc()) \
-        .all()
+    # Query for items that are not yet bought
+    items_available = db.session.query(OrderItem) \
+        .join(Order, OrderItem.order_id == Order.id) \
+        .join(Product, OrderItem.product_id == Product.id) \
+        .join(User, Order.user_id == User.id) \
+        .filter(OrderItem.purchase_status != 'Bought', db.func.date(Order.order_date) == selected_date) \
+        .order_by(Order.id.desc()).all()
 
-    # Filter and group order items
-    order_items = {}
-    for order in orders:
-        for item in order.order_items:
-            if item.purchase_status != 'Bought':
-                if item.product.id not in order_items:
-                    order_items[item.product.id] = []
-                order_items[item.product.id].append(item)
+    # Query for items that have been bought
+    items_bought = db.session.query(OrderItem) \
+        .join(Order, OrderItem.order_id == Order.id) \
+        .join(Product, OrderItem.product_id == Product.id) \
+        .join(User, OrderItem.bought_by_admin_id == User.id) \
+        .filter(OrderItem.purchase_status == 'Bought', db.func.date(Order.order_date) == selected_date) \
+        .order_by(Order.id.desc()).all()
 
-    return render_template('purchasing.html', orders=orders, order_items=order_items)
-
+    # Render the purchasing template with the available and bought items
+    return render_template('purchasing.html', items_available=items_available, items_bought=items_bought, selected_date=selected_date)
 
 @admin_bp.route('/purchase/update', methods=['POST'])
 @login_required

@@ -36,9 +36,9 @@ class User(db.Model, UserMixin):
   purchase_frequency = db.Column(db.Integer)  # Number of orders per month
   last_active = db.Column(db.DateTime)  # Last activity timestamp
 
-    # Relationships adjusted to avoid conflict
+      # Relationships adjusted to avoid conflict
   purchases = db.relationship('Purchase', back_populates='user', lazy=True)  # Use back_populates instead of backref
-    # Define other relationships as before
+      # Define other relationships as before
   delivery_info = db.relationship('UserDeliveryInfo', back_populates='user', lazy='dynamic')
   role = db.relationship('Role', backref=db.backref('users', lazy=True))
   orders = db.relationship('Order', back_populates='user')
@@ -47,8 +47,11 @@ class User(db.Model, UserMixin):
   search_queries = db.relationship('UserSearchQuery', back_populates='user')
   ratings = db.relationship('Rating', back_populates='user')
 
+  bought_items = db.relationship('OrderItem', back_populates='bought_by_admin', foreign_keys='OrderItem.bought_by_admin_id')
+  
   def __repr__(self):
       return f'<User {self.username}>'
+
 
 
   def set_password(self, password):
@@ -280,16 +283,17 @@ class OrderItem(db.Model):
   unit_price = db.Column(db.Float, nullable=False)
   purchase_price = db.Column(db.Float, nullable=True)  # New field for purchase price
   bought_by_admin_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-  purchase_status = db.Column(db.String(50), nullable=True)
+  purchase_status = db.Column(db.String(50), nullable=True, default='Not bought')
   fulfillment_status = db.Column(db.String(20), nullable=True, default='Not fulfilled')
-    # Define relationships
+
+    # Relationships
   order = db.relationship('Order', back_populates='order_items')
   product = db.relationship('Product', back_populates='order_items')
+  bought_by_admin = db.relationship('User', back_populates='bought_items', foreign_keys=[bought_by_admin_id])
   purchases = db.relationship('Purchase', back_populates='order_item')
-  
 
   def __repr__(self):
-      return f'<OrderItem {self.id}>'
+        return f'<OrderItem {self.id}>'  
 
   @hybrid_property
   def total_price(self):
