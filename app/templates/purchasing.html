@@ -1,26 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container">
-    <h3 class="mt-4 mb-3">Purchase Orders</h3>
+    <h3 class="mt-4 mb-3 text-center">Purchase Orders</h3>
 
     <!-- Date selection form -->
     <form method="GET" action="{{ url_for('admin.admin_purchase') }}" class="mb-4">
         <div class="form-group">
-            <label for="date">Select Date</label>
+            <label for="date" class="form-label">Select Date</label>
             <input type="date" class="form-control" id="date" name="date" value="{{ selected_date }}" onchange="this.form.submit()">
         </div>
     </form>
 
     <div class="row">
         <div class="col-md-6">
-            <h5>Items Available for Purchase</h5>
+            <h5 class="text-center">Items Available for Purchase</h5>
             {% for product_id, items in items_available|groupby('product_id') %}
-            <div class="card mb-3">
-                <div class="card-header">
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header bg-primary text-white">
                     Product: {{ items[0].product.brand }}
                 </div>
                 <div class="card-body">
-                    <table class="table table-responsive">
+                    <table class="table table-responsive table-hover">
                         <thead>
                             <tr>
                                 <th scope="col">Order ID</th>
@@ -37,8 +37,7 @@
                                 <td>{{ item.quantity }}</td>
                                 <td>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="purchaseCheckbox{{ item.id }}"
-                                            data-item-id="{{ item.id }}">
+                                        <input class="form-check-input" type="checkbox" id="purchaseCheckbox{{ item.id }}" data-item-id="{{ item.id }}">
                                         <label class="form-check-label" for="purchaseCheckbox{{ item.id }}">Buy</label>
                                     </div>
                                 </td>
@@ -51,21 +50,21 @@
             {% endfor %}
         </div>
         <div class="col-md-6">
-            <h5>Items Bought</h5>
-            <table class="table table-responsive" id="bought-items-table">
-                <thead>
+            <h5 class="text-center">Items Bought</h5>
+            <table class="table table-responsive table-hover" id="bought-items-table">
+                <thead class="bg-secondary text-white">
                     <tr>
-                        <th scope="col">Order ID</th>
+                        <th scope="col">Item</th>
                         <th scope="col">Customer</th>
                         <th scope="col">Qty</th>
-                        <th scope="col">Unit Price</th>
+                        <th scope="col">Price</th>
                         <th scope="col">Bought By</th>
                     </tr>
                 </thead>
                 <tbody id="bought-items">
                     {% for item in items_bought %}
                     <tr>
-                        <td>{{ item.order_id }}</td>
+                        <td>{{ item.product.brand }}</td>
                         <td>{{ item.order.user.username }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>{{ item.purchase_price }}</td>
@@ -79,14 +78,12 @@
 </div>
 
 <!-- Purchase Modal -->
-<div class="modal fade" id="purchaseModal" tabindex="-1" role="dialog" aria-labelledby="purchaseModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="purchaseModal" tabindex="-1" aria-labelledby="purchaseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="purchaseModalLabel">Enter Purchase Amount</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form>
@@ -104,7 +101,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" id="purchaseModalSubmit">Submit</button>
             </div>
         </div>
@@ -113,10 +110,10 @@
 
 <!-- Toast Notification -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="toastNotification" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+    <div id="toastNotification" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
         <div class="toast-header">
             <strong class="me-auto">Notification</strong>
-            <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">
             <!-- Notification message will be inserted here -->
@@ -179,12 +176,14 @@ $(document).ready(function() {
 
                 // Show success toast notification
                 $('.toast-body').text('Item purchased successfully!');
-                $('#toastNotification').toast('show');
+                var toast = new bootstrap.Toast($('#toastNotification'));
+                toast.show();
             },
             error: function(response) {
                 // Show error toast notification
                 $('.toast-body').text('Failed to purchase item.');
-                $('#toastNotification').toast('show');
+                var toast = new bootstrap.Toast($('#toastNotification'));
+                toast.show();
             },
             complete: function() {
                 // Hide modal and loading spinner
@@ -195,4 +194,38 @@ $(document).ready(function() {
     });
 });
 </script>
+{% endblock %}
+
+{% block styles %}
+<style>
+    body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+    .container {
+        margin-top: 50px;
+    }
+    .card-header {
+        font-size: 1.25rem;
+        font-weight: 500;
+    }
+    .form-label {
+        font-weight: 500;
+    }
+    .toast-container {
+        z-index: 1050;
+    }
+    .toast-header {
+        background-color: #007bff;
+        color: white;
+    }
+    .toast-body {
+        font-weight: 500;
+    }
+    .modal-content {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .table-hover tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+</style>
 {% endblock %}
