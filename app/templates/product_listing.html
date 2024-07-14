@@ -62,7 +62,7 @@
                   {% if product.images %}
                   <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
                   {% else %}
-                  <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image" alt="Placeholder Image">
+                  <img src="{{ url_for('static', filename='alt.png') }}" class="card-img-top product-image" alt="Placeholder Image">
                   {% endif %}
                   <div class="product-overlay d-flex align-items-center justify-content-center">
                       <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="{{ product.id }}" data-bs-toggle="modal" data-bs-target="#productDetailsModal{{ product.id }}">Quick View</button>
