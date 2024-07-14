@@ -1,4 +1,4 @@
- 
+
 from app import db, mail
 from flask import render_template, abort, flash, redirect, url_for, request, jsonify, session,Flask, current_app as app
 from flask_login import current_user, login_user, logout_user, login_required

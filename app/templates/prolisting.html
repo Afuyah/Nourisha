@@ -53,33 +53,36 @@
 
 
 
- <!-- Product Listing Section -->
-<div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 product-listing">
-    {% for product in products %}
-    <div class="col">
-        <div class="card product-card border-0 shadow-sm" data-product-id="{{ product.id }}">
-            <div class="magnifier position-relative overflow-hidden">
-                {% if product.images %}
-                <img data-src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image lazy" alt="{{ product.name }}">
-                {% else %}
-                <img data-src="{{ url_for('static', filename='alt_img.png') }}" class="card-img-top product-image lazy" alt="Placeholder Image">
-                {% endif %}
-                <div class="product-overlay d-flex align-items-center justify-content-center">
-                    <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="{{ product.id }}" data-bs-toggle="modal" data-bs-target="#productDetailsModal{{ product.id }}">Quick View</button>
-                </div>
-            </div>
-            <div class="card-body text-center">
-                <h6 class="card-title text-primary mb-2 product-name" data-product-id="{{ product.id }}">{{ product.brand }}</h6>
-                <p class="card-text text-muted fs-6 mb-3">{{ product.description | truncate(80) }}</p>
-                <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
-                <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
-                    Buy
-                </button>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-</div>
+  <!-- Product Listing Section -->
+  <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+      {% for product in products %}
+      <div class="col">
+          <div class="card product-card border-0 shadow-sm" data-product-id="{{ product.id }}">
+              <div class="magnifier position-relative overflow-hidden">
+                  {% if product.images %}
+                  <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
+                  {% else %}
+                  <img src="{{ url_for('static', filename='alt_img.png') }}" class="card-img-top product-image" alt="Placeholder Image">
+                  {% endif %}
+                  <div class="product-overlay d-flex align-items-center justify-content-center">
+                      <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="{{ product.id }}" data-bs-toggle="modal" data-bs-target="#productDetailsModal{{ product.id }}">Quick View</button>
+                  </div>
+              </div>
+              <div class="card-body text-center">
+                  <h6 class="card-title text-primary mb-2 product-name" data-product-id="{{ product.id }}">{{ product.brand }}</h6>
+                  <p class="card-text text-muted fs-6 mb-3">{{ product.description | truncate(80) }}</p>
+                  <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
+                  <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
+                      Buy
+                  </button>
+              </div>
+          </div>
+      </div>
+      {% endfor %}
+
+
+
+  </div>
 
 
   {% for product in products %}
@@ -221,161 +224,6 @@
 .shake {
     animation: shake 1s ease-in-out;
 }
-
-
-
-
-    /* Basic reset */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    /* Container for the product listing */
-    .product-listing {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        padding: 20px;
-    }
-
-    /* Product card styling */
-    .product-card {
-        flex: 1 1 300px;
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        overflow: hidden;
-        transition: transform 0.3s ease-in-out;
-    }
-
-    .product-card:hover {
-        transform: scale(1.05);
-    }
-
-    .product-card img {
-        width: 100%;
-        height: auto;
-    }
-
-    .product-card-content {
-        padding: 15px;
-    }
-
-    .product-card-title {
-        font-size: 1.2em;
-        margin-bottom: 10px;
-    }
-
-    .product-card-price {
-        color: #28a745;
-        font-size: 1.1em;
-        margin-bottom: 10px;
-    }
-
-    .product-card-description {
-        font-size: 0.9em;
-        color: #666;
-        margin-bottom: 10px;
-    }
-
-    .add-to-cart-btn {
-        display: inline-block;
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: #fff;
-        border-radius: 5px;
-        text-align: center;
-        cursor: pointer;
-        transition: background-color 0.3s ease-in-out;
-    }
-
-    .add-to-cart-btn:hover {
-        background-color: #0056b3;
-    }
-
-    /* Category navigation */
-    .category-nav {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-
-    .category-nav a {
-        padding: 10px 20px;
-        background-color: #f8f9fa;
-        color: #333;
-        border-radius: 5px;
-        text-decoration: none;
-        transition: background-color 0.3s ease-in-out;
-    }
-
-    .category-nav a:hover {
-        background-color: #e2e6ea;
-    }
-
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .product-card {
-            flex: 1 1 100%;
-        }
-
-        .category-nav {
-            flex-direction: column;
-        }
-    }
-
-
-    /* Basic styles for product listing and cards */
-    .product-listing {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-    }
-
-    .product-card {
-        flex: 1 1 300px;
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        overflow: hidden;
-        transition: transform 0.3s ease-in-out;
-    }
-
-    .product-card:hover {
-        transform: scale(1.05);
-    }
-
-    .product-image {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
-
-    .lazy {
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-    }
-
-    .lazy.loaded {
-        opacity: 1;
-    }
-
-    .product-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-    }
-
-    .magnifier:hover .product-overlay {
-        opacity: 1;
-    }
 
 </style>
 
@@ -804,50 +652,6 @@ function getCSRFToken() {
     const metaTag = document.querySelector('meta[name="csrf-token"]');
     return metaTag ? metaTag.content : "";
 }
-
-
-   document.addEventListener('DOMContentLoaded', () => {
-    const lazyImages = document.querySelectorAll('img.lazy');
-
-    if ('IntersectionObserver' in window) {
-        const lazyImageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const lazyImage = entry.target;
-                    lazyImage.src = lazyImage.dataset.src;
-                    lazyImage.classList.add('loaded');
-                    lazyImageObserver.unobserve(lazyImage);
-                }
-            });
-        });
-
-        lazyImages.forEach(lazyImage => {
-            lazyImageObserver.observe(lazyImage);
-        });
-    } else {
-        // Fallback for older browsers
-        const lazyLoad = () => {
-            lazyImages.forEach(lazyImage => {
-                if (lazyImage.getBoundingClientRect().top < window.innerHeight && lazyImage.getBoundingClientRect().bottom > 0) {
-                    lazyImage.src = lazyImage.dataset.src;
-                    lazyImage.classList.add('loaded');
-                }
-            });
-
-            if (lazyImages.length === 0) {
-                window.removeEventListener('scroll', lazyLoad);
-                window.removeEventListener('resize', lazyLoad);
-                window.removeEventListener('orientationchange', lazyLoad);
-            }
-        };
-
-        window.addEventListener('scroll', lazyLoad);
-        window.addEventListener('resize', lazyLoad);
-        window.addEventListener('orientationchange', lazyLoad);
-        lazyLoad();
-    }
-});
- 
 
     </script>
 
