@@ -4,7 +4,7 @@ from flask import render_template, abort, flash, redirect, url_for, request, jso
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm,RecommendationForm
-from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick, OrderItem
+from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick, OrderItem, Offer
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
@@ -66,10 +66,14 @@ def send_email(to, subject, body):
 @bp.route('/')
 def index():
   user_authenticated = current_user.is_authenticated
+  offers = Offer.query.filter_by(active=True).all()
+
   return render_template('home.html',
                          title='Home',
                          product_listing_url=url_for('main.product_listing'),
-                         user_authenticated=user_authenticated)
+                         user_authenticated=user_authenticated, offers=offers)
+
+
 
 
 @bp.route('/dashboard')
@@ -734,6 +738,4 @@ def recommendations():
     form = RecommendationForm()
     recommendations = recommend_products(user_id, 10)  # Get top 10 recommendations
     return render_template('recommendations.html', recommendations=recommendations, form=form)
-
-
 

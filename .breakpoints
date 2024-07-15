@@ -4,7 +4,15 @@
       {
         "id": "075450f0-6269-4903-838f-77a206870152",
         "line": 1,
-        "version": 1444,
+        "version": 1487,
+        "index": 0
+      }
+    ],
+    "app/site_setting/__init__.py": [
+      {
+        "id": "69e20084-9544-4880-b695-9d4b20084e00",
+        "line": 1,
+        "version": 77,
         "index": 0
       }
     ],

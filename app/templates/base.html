@@ -135,6 +135,19 @@
       </div>
     </li>
 
+      <li class="dropdown">
+          <a class="dropdown-toggle" href="#" role="button" id="locationsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="order-icon fas fa-map-marker-alt"></i> Site Setting
+          </a>
+          <div class="dropdown-menu" aria-labelledby="locationsDropdown">
+            <a class="dropdown-item" href="{{ url_for('site.offers') }}">Special offers</a>
+
+            <a class="dropdown-item" href="#"> Promotions</a>
+            <a class="dropdown-item" href="#"> Hero Section</a>
+          </div>
+        </li>
+
+        
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </li>

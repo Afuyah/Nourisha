@@ -3,9 +3,9 @@ from flask_login import current_user, login_required
 from app.payments import payment_bp
 from app.main.models import Order
 from app.main.forms import CheckoutForm
-import logging
+
 from datetime import datetime
-from app import db  # Assuming your db instance is in the app module
+from app import db  
 
 # Route for handling M-Pesa payment
 @payment_bp.route('/mpesa_payment/<int:order_id>', methods=['GET'])

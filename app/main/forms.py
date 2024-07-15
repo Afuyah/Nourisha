@@ -4,6 +4,7 @@ from wtforms.validators import DataRequired, Email, Length
 from flask_wtf.file import FileField, FileRequired, DataRequired
 from wtforms import HiddenField, TextAreaField, BooleanField
 from wtforms.validators import InputRequired, Optional, Length, NumberRange
+from wtforms.fields import DateTimeLocalField
 
 
 class RegistrationForm(FlaskForm):
@@ -173,3 +174,11 @@ class ShopForUserForm(FlaskForm):
 
 class RecommendationForm(FlaskForm):
     hidden_field = HiddenField()
+
+class OfferForm(FlaskForm):
+  title = StringField('Title', validators=[DataRequired()])
+  description = TextAreaField('Description')
+  start_date = DateTimeLocalField('Start Date', format='%Y-%m-%dT%H:%M', validators=[Optional()])
+  end_date = DateTimeLocalField('End Date', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
+  active = BooleanField('Active', default=True)
+  submit = SubmitField('Submit')

@@ -239,29 +239,59 @@
 
 
 
+/* Card Styles */
+.featured-products .card {
+    transition: transform 0.3s ease-in-out;
+}
+
+.featured-products .card:hover {
+    transform: scale(1.05); /* Scale up the card on hover */
+}
+
+/* Button Styles */
+.featured-products .btn {
+    background-color: #28a745; /* Green background */
+    border-color: #28a745; /* Green border */
+    color: #fff; /* White text */
+}
+
+.featured-products .btn:hover {
+    background-color: #218838; /* Darker green on hover */
+    border-color: #218838; /* Darker green border on hover */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .featured-products .card {
+        margin-bottom: 30px; /* Add spacing between cards on smaller screens */
+    }
+}
+
+    
+
 </style>
 
 
    <!-- Featured Products Section -->
 <section id="featured-products" class="featured-products py-5">
     <div class="container">
-        <h3 class="display-4 text-center mb-5">Featured Selections</h2>
-        <p class="section-description">Explore a wide range of products carefully curated for your needs. From fresh produce to pantry essentials, we've got you covered.</p>
+        <h3 class="display-4 text-center mb-5">Featured Selections</h3>
+        <p class="section-description text-center">Explore a wide range of products carefully curated for your needs. From fresh produce to pantry essentials, we've got you covered.</p>
 
         <div class="row row-cols-1 row-cols-md-3 g-4">
             <div class="col">
-                <div class="card h-100 border-0 ">
+                <div class="card h-100 border-0">
                     <img src="static/hero.png" alt="Handpicked Fresh Fruits" class="card-img-top">
                     <div class="card-body">
                         <h4 class="card-title">Handpicked Fresh Fruits</h4>
-                        <p class="card-text">Fresh Fruits, Fresh Flavors, Every Bite Delights!"</p>
+                        <p class="card-text">Fresh Fruits, Fresh Flavors, Every Bite Delights!</p>
                         <a href="#" class="btn btn-success btn-sm">Explore...</a>
                     </div>
                 </div>
             </div>
 
             <div class="col">
-                <div class="card h-100 border-0 ">
+                <div class="card h-100 border-0">
                     <img src="static/cerials.png" alt="Cereal Kingdom" class="card-img-top">
                     <div class="card-body">
                         <h5 class="card-title">Cereal Kingdom</h5>
@@ -272,8 +302,8 @@
             </div>
 
             <div class="col">
-                <div class="card h-100 border-0 ">
-                    <img src="static/meat1.png" alt="Product 1" class="card-img-top">
+                <div class="card h-100 border-0">
+                    <img src="static/meat1.png" alt="Butcher's Picks" class="card-img-top">
                     <div class="card-body">
                         <h5 class="card-title">Butcher's Picks</h5>
                         <p class="card-text">Naturally Raised Meats for Quality Conscious!</p>
@@ -363,51 +393,109 @@
                 </div>
                 <!-- Add more testimonials here -->
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
+            
         </div>
     </div>
 </section>
 
-<!-- Special Offers Section -->
 <section id="special-offers" class="special-offers py-5">
     <div class="container">
         <h2 class="display-4 text-center mb-5">Special Offers</h2>
         <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% for offer in offers %}
             <div class="col">
                 <div class="card h-100 border-0 shadow-sm">
-                    <img src="offer1.jpg" class="card-img-top" alt="Offer 1">
+                    <img src="{{ url_for('static', filename=offer.image) }}" class="card-img-top" alt="{{ offer.title }}">
                     <div class="card-body">
-                        <h5 class="card-title text-center">Limited Time Offer</h5>
-                        <p class="card-text">Get 20% off on all organic produce. Hurry, offer ends soon!</p>
+                        <h5 class="card-title text-center">{{ offer.title }}</h5>
+                        <p class="card-text">{{ offer.description }}</p>
+                        <p class="card-text"><small class="text-muted">Valid from {{ offer.start_date.strftime('%b %d, %Y') }} to {{ offer.end_date.strftime('%b %d, %Y') }}</small></p>
                         <div class="text-center">
                             <a href="#" class="btn btn-success">Shop Now</a>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="offer2.jpg" class="card-img-top" alt="Offer 2">
-                    <div class="card-body">
-                        <h5 class="card-title text-center">Flash Sale</h5>
-                        <p class="card-text">Save big on select items with our 24-hour flash sale. Don't miss out!</p>
-                        <div class="text-center">
-                            <a href="#" class="btn btn-success">Shop Now</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Add more special offer cards here -->
+            {% endfor %}
         </div>
     </div>
 </section>
+
+<!-- Carousel for Small Devices -->
+<div id="carouselExampleControls" class="carousel slide d-md-none" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        {% for offer in offers %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+            <img src="{{ url_for('static', filename=offer.image) }}" class="d-block w-100" alt="{{ offer.title }}">
+            <div class="carousel-caption d-none d-md-block">
+                <h5>{{ offer.title }}</h5>
+                <p>{{ offer.description }}</p>
+                <p><small class="text-muted">Valid from {{ offer.start_date.strftime('%b %d, %Y') }} to {{ offer.end_date.strftime('%b %d, %Y') }}</small></p>
+                <a href="#" class="btn btn-success">Shop Now</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+   
+</div>
+<style>
+    /* Card Styling */
+    .card {
+        transition: transform 0.3s ease;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* Card Image */
+    .card-img-top {
+        object-fit: cover;
+        height: 250px; /* Adjust height as needed */
+    }
+
+    /* Button Styling */
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+
+    /* Text Styling */
+    .card-title {
+        font-size: 1.5rem;
+        color: #333;
+    }
+
+    .card-text {
+        color: #555;
+    }
+
+    .text-muted {
+        color: #777;
+    }
+
+    /* Carousel Caption (visible on small devices) */
+    .carousel-caption {
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+        padding: 1rem;
+        color: #fff;
+    }
+
+    /* Carousel Navigation Icons */
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: #28a745; /* Control icons color */
+    }
+
+</style>
+
 
 
     <!-- About Us Section -->

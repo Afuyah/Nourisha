@@ -51,6 +51,9 @@ def create_app():
     from app.cart.routes import cart_bp
     app.register_blueprint(cart_bp)
 
+    from app.site_setting.routes import site_bp
+    app.register_blueprint(site_bp)
+    
     # User loader function
     from app.main.models import User
     @login_manager.user_loader
@@ -61,4 +64,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    socketio.run(app, debug=True, ssl_context='adhoc')  # Use socketio.run to run your app with SocketIO
+    socketio.run(app, debug=True, ssl_context='adhoc') 

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Special Offers</h2>
+    <form method="POST" action="{{ url_for('site.offers') }}">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.title.label(class="form-label") }}
+            {{ form.title(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.start_date.label(class="form-label") }}
+            {{ form.start_date(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.end_date.label(class="form-label") }}
+            {{ form.end_date(class="form-control") }}
+        </div>
+        <div class="form-group form-check">
+            {{ form.active(class="form-check-input") }}
+            {{ form.active.label(class="form-check-label") }}
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    <h3 class="mt-5">Existing Offers</h3>
+    <div class="list-group">
+        {% for offer in offers %}
+        <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1">{{ offer.title }}</h5>
+                    <p class="mb-1">{{ offer.description }}</p>
+                    <small>Start: {{ offer.start_date.strftime('%Y-%m-%d %H:%M') }}</small><br>
+                    <small>End: {{ offer.end_date.strftime('%Y-%m-%d %H:%M') }}</small><br>
+                    <small>Status: {{ 'Active' if offer.active else 'Inactive' }}</small>
+                </div>
+                <div class="btn-group">
+                    <a href="{{ url_for('site.edit_offer', offer_id=offer.id) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <form method="POST" action="{{ url_for('site.delete_offer', offer_id=offer.id) }}" style="display: inline;">
+                        {{ form.hidden_tag() }}
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

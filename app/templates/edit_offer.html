@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Edit Offer</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.title.label(class="form-control-label") }}
+            {{ form.title(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.description.label(class="form-control-label") }}
+            {{ form.description(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.start_date.label(class="form-control-label") }}
+            {{ form.start_date(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.end_date.label(class="form-control-label") }}
+            {{ form.end_date(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.active.label(class="form-control-label") }}
+            {{ form.active() }}
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+</div>
+{% endblock %}
