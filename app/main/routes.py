@@ -73,7 +73,10 @@ def index():
                          product_listing_url=url_for('main.product_listing'),
                          user_authenticated=user_authenticated, offers=offers)
 
-
+@bp.route('/about_us')
+def about_us():
+    return render_template('about_us.html', title='About Us')
+    
 
 
 @bp.route('/dashboard')
