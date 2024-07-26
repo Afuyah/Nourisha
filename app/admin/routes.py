@@ -1373,7 +1373,7 @@ def place_order_for_user():
         nearest_place_id = data.get('nearest_place_id', 1)  # Default value if not provided
 
         # Ensure address_line is provided, otherwise raise an error
-        address_line = data.get('address_line', 'Example Address')
+        address_line = data.get('address_line', 'Call Client')
         if not address_line:
             return jsonify({'message': 'Address line is required'}), 400
 
@@ -1515,12 +1515,9 @@ def clear_cart_for_user(user_id):
     db.session.commit()
 
 
-@admin_bp.route('/admin/remove_cart_item', methods=['POST'])
+@admin_bp.route('/admin/remove_from_cart', methods=['POST'])
 @login_required
-def remove_cart_item():
-    """
-    Route to remove an item from the cart.
-    """
+def remove_from_cart():
     try:
         data = request.get_json()
         user_id = data.get('user_id')
@@ -1528,7 +1525,7 @@ def remove_cart_item():
 
         # Validate the input data
         if not user_id or not product_id:
-            return jsonify({'message': 'User ID and Product ID are required'}), 400
+            return jsonify({'message': 'User ID and Product ID are missing'}), 400
 
         # Check if the current user is an admin
         if current_user.role.name != 'admin':
@@ -1552,7 +1549,6 @@ def remove_cart_item():
         db.session.rollback()
         print(f"Error removing item from cart: {str(e)}")  # Debug log
         return jsonify({'message': f'Failed to remove item: {str(e)}'}), 500
-
 
 
 

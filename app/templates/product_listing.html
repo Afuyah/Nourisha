@@ -6,7 +6,7 @@
     <form
       class="d-flex"
       id="searchForm"
-      method="post"
+      method="get"
       action="{{ url_for('main.search') }}"
     >
       <input
@@ -16,7 +16,7 @@
         placeholder="Search products..."
         onkeyup="searchProducts()"
       />
-      {{form.csrf_token}}
+      {{ form.csrf_token }}
       <button class="btn btn-outline-success" type="submit">Search</button>
     </form>
   </div>
@@ -848,6 +848,83 @@ function getCSRFToken() {
     }
 });
  
+function searchProducts() {
+    let query = $('#searchInput').val();
+    if (query.length > 0) {
+        $.ajax({
+            url: '/search', // Adjust this URL based on your route
+            method: 'GET',
+            data: { q: query },
+            success: function(data) {
+                $('#product-list').empty();
+                data.forEach(function(product) {
+                    let productCard = `
+                        <div class="col">
+                            <div class="card product-card border-0 shadow-sm" data-product-id="${product.id}">
+                                <div class="magnifier position-relative overflow-hidden">
+                                    ${product.images.length > 0 ? 
+                                        `<img data-src="/static/uploads/${product.images[0].cover_image}" class="card-img-top product-image lazy" alt="${product.name}">` : 
+                                        `<img data-src="/static/alt_img.png" class="card-img-top product-image lazy" alt="Placeholder Image">`}
+                                    <div class="product-overlay d-flex align-items-center justify-content-center">
+                                        <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="${product.id}" data-bs-toggle="modal" data-bs-target="#productDetailsModal${product.id}">Quick View</button>
+                                    </div>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h6 class="card-title text-primary mb-2 product-name" data-product-id="${product.id}">${product.brand}</h6>
+                                    <p class="card-text text-muted fs-6 mb-3">${product.description.substring(0, 80)}...</p>
+                                    <p class="card-text fs-6 mb-2"><strong>Ksh ${product.unit_price} / ${product.unit_measurement}</strong></p>
+                                    <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal${product.id}">
+                                        Buy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>`;
+                    $('#product-list').append(productCard);
+                });
+            }
+        });
+    } else {
+        // Optionally, you could reload the full product list if the search query is empty
+    }
+}
+
+// Optional: Use Intersection Observer to lazy load images
+$(document).ready(function() {
+    let lazyImages = [].slice.call(document.querySelectorAll('img.lazy'));
+    let active = false;
+
+    const lazyLoad = function() {
+        if (active === false) {
+            active = true;
+
+            setTimeout(function() {
+                lazyImages.forEach(function(img) {
+                    if (img.getBoundingClientRect().top < window.innerHeight && img.getBoundingClientRect().bottom > 0) {
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        lazyImages = lazyImages.filter(function(img) {
+                            return img.classList.contains('lazy');
+                        });
+
+                        if (lazyImages.length === 0) {
+                            document.removeEventListener('scroll', lazyLoad);
+                            window.removeEventListener('resize', lazyLoad);
+                            window.removeEventListener('orientationchange', lazyLoad);
+                        }
+                    }
+                });
+
+                active = false;
+            }, 200);
+        }
+    };
+
+    document.addEventListener('scroll', lazyLoad);
+    window.addEventListener('resize', lazyLoad);
+    window.addEventListener('orientationchange', lazyLoad);
+
+    lazyLoad();
+});
 
     </script>
 
