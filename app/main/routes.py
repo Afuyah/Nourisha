@@ -726,12 +726,13 @@ def record_view_event(user_id, product_id, timestamp):
         app.logger.error(f"Error recording view event for user {user_id}, product {product_id}: {e}")
         db.session.rollback()
         raise e
-
 def get_current_user_id():
     if current_user.is_authenticated:
         return current_user.id
     else:
-        return 0  # Return 0 for guest users
+        # Get the IP address and remove the dots
+        ip_address = request.remote_addr.replace('.', '')
+        return ip_address
 
 # Route for rendering recommendations page
 @bp.route('/recommendations')

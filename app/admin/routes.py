@@ -9,10 +9,10 @@ from app.admin import admin_bp
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, HRFlowable, Flowable
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, HRFlowable, Flowable, PageBreak
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch, mm
+from reportlab.lib.units import inch, mm, cm
 import os
 
 from reportlab.lib.pagesizes import letter
@@ -592,12 +592,7 @@ def sendmail(subject, recipients, body):
     msg.body = body
     mail.send(msg)
 
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Image
-from reportlab.lib.units import inch, cm
-from reportlab.lib import colors
-from reportlab.pdfgen import canvas
-import os
+
 
 @admin_bp.route('/generate_allusers_pdf')
 @login_required
@@ -1318,6 +1313,11 @@ def add_to_cart():
     if not product:
         return jsonify({'status': 'error', 'message': 'Product not found'}), 404
 
+    # Check if the item already exists in the cart
+    existing_cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+    if existing_cart_item:
+        return jsonify({'status': 'error', 'message': 'Product already exists in the cart'}), 400
+
     try:
         new_cart_item = Cart(
             user_id=user_id,
@@ -1523,32 +1523,33 @@ def remove_from_cart():
         user_id = data.get('user_id')
         product_id = data.get('product_id')
 
-        # Validate the input data
+        print(f"Received request to remove from cart: user_id={user_id}, product_id={product_id}")
+
         if not user_id or not product_id:
+            print('Error: User ID and Product ID are missing')
             return jsonify({'message': 'User ID and Product ID are missing'}), 400
 
-        # Check if the current user is an admin
         if current_user.role.name != 'admin':
+            print('Error: Unauthorized access attempt')
             return jsonify({'message': 'Unauthorized'}), 403
 
-        # Find the cart item for the specified user and product
         cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
 
-        # If the item does not exist, return an error
         if not cart_item:
+            print('Error: Item not found in the cart')
             return jsonify({'message': 'Item not found in the cart'}), 404
 
-        # Remove the item from the cart
         db.session.delete(cart_item)
         db.session.commit()
 
+        print('Item removed from the cart successfully')
         return jsonify({'message': 'Item removed from the cart successfully'}), 200
 
     except Exception as e:
-        # Rollback the session in case of error
         db.session.rollback()
-        print(f"Error removing item from cart: {str(e)}")  # Debug log
+        print(f"Error removing item from cart: {str(e)}")
         return jsonify({'message': f'Failed to remove item: {str(e)}'}), 500
+        
 
 
 

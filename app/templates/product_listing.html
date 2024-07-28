@@ -93,7 +93,7 @@
               <div class="modal-body">
                   <div class="row">
                       <div class="col-md-6">
-                          <img src="{{ url_for('static', filename='uploads/' + (product.images[0].cover_image if product.images else 'placeholder.jpg')) }}" class="img-fluid" alt="{{ product.name }}">
+                          <img src="{{ url_for('static', filename='uploads/' + (product.images[0].cover_image if product.images else 'alt_img.png')) }}" class="img-fluid" alt="{{ product.name }}">
                       </div>
                       <div class="col-md-6">
                           <h6 class="text-primary">{{ product.brand }}</h6>
@@ -433,57 +433,63 @@
     }
 
      // Update cart count using AJAX
-  $(document).ready(function () {
-    function updateCartCount() {
-      console.log('Updating cart count...'); // Debug statement
-      $.ajax({
-        url: 'cart/get_cart_count',
-        method: 'GET',
-        success: function (response) {
-          console.log('AJAX Response:', response); // Debug statement
-          if (response.status === 'success') {
-            console.log('Updating cart count:', response.cart_count); // Debug statement
-            // Update the badge with the actual cart count
-            const cartIcon = $('.floating-cart-icon');
-            const currentCount = parseInt(cartIcon.find('.badge').text(), 10);
-            const newCount = response.cart_count;
+ $(document).ready(function () {
+  function updateCartCount() {
+    console.log('Updating cart count...'); // Debug statement
+    $.ajax({
+      url: 'cart/get_cart_count',
+      method: 'GET',
+      success: function (response) {
+        console.log('AJAX Response:', response); // Debug statement
+        if (response.status === 'success') {
+          console.log('Updating cart count:', response.cart_count); // Debug statement
+          // Update the badge with the actual cart count
+          const cartIcon = $('.floating-cart-icon');
+          const currentCount = parseInt(cartIcon.find('.badge').text(), 10);
+          const newCount = response.cart_count;
 
-            cartIcon.find('.badge').text(newCount);
+          cartIcon.find('.badge').text(newCount);
 
-            // Toggle visibility of the entire cart icon based on the cart count
-            if (newCount > 0) {
-              cartIcon.removeClass('inactive');
-            } else {
-              cartIcon.addClass('inactive');
-            }
-
-            // Add shake class to the entire cart icon if the count has increased
-            if (newCount > currentCount) {
-              cartIcon.addClass('shake');
-
-              // Remove the shake class after a short delay (e.g., 1 second)
-              setTimeout(function () {
-                cartIcon.removeClass('shake');
-              }, 1000);
-            }
+          // Toggle visibility of the entire cart icon based on the cart count
+          if (newCount > 0) {
+            cartIcon.removeClass('inactive');
           } else {
-            console.error('Error fetching cart count:', response.message);
+            cartIcon.addClass('inactive');
           }
-        },
-        error: function (error) {
-          console.error('AJAX Error:', error);
-        },
-      });
-    }
 
+          // Add shake class to the entire cart icon if the count has increased
+          if (newCount > currentCount) {
+            cartIcon.addClass('shake');
+
+            // Remove the shake class after a short delay (e.g., 1 second)
+            setTimeout(function () {
+              cartIcon.removeClass('shake');
+            }, 1000);
+          }
+        } else if (response.status === 'not_logged_in') {
+          console.log('User is not logged in, setting cart count to 0'); // Debug statement
+          const cartIcon = $('.floating-cart-icon');
+          cartIcon.find('.badge').text(0);
+          cartIcon.addClass('inactive');
+        } else {
+          console.error('Error fetching cart count:', response.message);
+        }
+      },
+      error: function (error) {
+        console.error('AJAX Error:', error);
+      },
+    });
+  }
+
+  updateCartCount();
+
+  // Set an interval to periodically update the cart count (every 15 seconds as you mentioned)
+  setInterval(function () {
+    console.log('Periodic cart count update...'); // Debug statement
     updateCartCount();
+  }, 15000);
+});
 
-    // Set an interval to periodically update the cart count (every 15 seconds as you mentioned)
-    setInterval(function () {
-      console.log('Periodic cart count update...'); // Debug statement
-      updateCartCount();
-    }, 15000);
-  });
 
   // Trigger the Add to Cart modal when clicking on the floating cart icon
   $('.floating-cart-icon').click(function () {
@@ -606,7 +612,7 @@
     initializeEventListeners();
 
     // Load Recommendations for the user
-    loadRecommendations();
+    //loadRecommendations();
 
     // Add to Cart interaction
     document.querySelectorAll(".add-to-cart-btn").forEach(function (button) {
@@ -708,7 +714,7 @@ function trackProductEvent(productId, eventType) {
     })
     .then(response => response.json())
     .then(data => {
-        if (!data.ok) {
+        if (data.error) {
             throw new Error(data.error || 'Unknown error');
         }
         console.log('Event tracked:', data);
@@ -718,7 +724,7 @@ function trackProductEvent(productId, eventType) {
     });
 }
 
-
+/*
    // Function to load recommendations dynamically
         async function loadRecommendations() {
             try {
@@ -772,7 +778,7 @@ function trackProductEvent(productId, eventType) {
             // Initialize event listeners for the dynamically created elements
         }
 
-
+*/
 // Function to add product to cart
 async function addToCart(productId) {
     try {

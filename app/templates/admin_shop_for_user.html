@@ -20,25 +20,25 @@
 
     <!-- Cart Display Section -->
     <div id="cart" class="mt-4 card p-3 shadow-sm">
-        <h3 class="text-secondary">Cart for Selected User</h3>
-        <div class="table-responsive">
-             <table id="cartTable" class="table">
-                <thead class="thead-light">
-                    <tr>
-                        <th>Product</th>
-                        <th>Unit Price (KSH)</th>
-                        <th>Quantity</th>
-                        <th>Subtotal (KSH)</th>
-                        <th>Custom Description</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="cartItems">
-                    <!-- Cart items will be dynamically added here -->
-                </tbody>
-            </table>
-        </div>
-        <div id="totalPrice" class="font-weight-bold text-right"></div>
+    <h3 class="text-secondary">Cart for Selected User</h3>
+    <div class="table-responsive">
+         <table id="cartTable" class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th>Item</th>
+                    <th>Price (KSH)</th>
+                    <th>Qty</th>
+                    <th>Subtotal (KSH)</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="cartItems">
+                <!-- Cart items will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+    <div id="totalPrice" class="font-weight-bold text-right"></div>
 
         <!-- Action Buttons -->
         <div class="d-flex justify-content-between mt-3">
@@ -116,15 +116,7 @@
 
 <style>
 /* Enhanced Custom CSS */
-body {
-    font-family: 'Nunito', sans-serif;
-    background-color: #f7f9fc;
-}
 
-h2,
-h3 {
-    font-weight: 700;
-}
 
 .card {
     border-radius: 8px;
@@ -213,50 +205,50 @@ h3 {
         }
     }
 
-    // Function to fetch and display user's cart items
-    function fetchUserCart(userId) {
-        document.getElementById('loadingSpinner').style.display = 'block'; // Show loading spinner
+   // Function to fetch and display user's cart items
+function fetchUserCart(userId) {
+    document.getElementById('loadingSpinner').style.display = 'block'; // Show loading spinner
 
-        fetch(`/admin/admin/get_user_cart?user_id=${userId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById('loadingSpinner').style.display = 'none'; // Hide loading spinner
-                document.getElementById('cartItems').innerHTML = ''; // Clear existing cart items
-                var totalPrice = 0;
+    fetch(`/admin/admin/get_user_cart?user_id=${userId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('loadingSpinner').style.display = 'none'; // Hide loading spinner
+            document.getElementById('cartItems').innerHTML = ''; // Clear existing cart items
+            var totalPrice = 0;
 
-                if (data.cart_items.length === 0) {
-                    document.getElementById('cartItems').innerHTML = '<tr><td colspan="6">No items in cart.</td></tr>';
-                } else {
-                    // Populate cart items table
-                    data.cart_items.forEach(item => {
-                        var newRow = document.createElement('tr');
-                        newRow.innerHTML = `
-                            <td>${item.product_brand}</td>
-                            <td>${item.unit_price}</td>
-                            <td>${item.quantity}</td>
-                            <td>${item.subtotal}</td>
-                            <td>${item.custom_description}</td>
-                            <td><button class="btn btn-sm btn-danger" onclick="removeFromCart(${item.id})">Remove</button></td>
-                        `;
-                        document.getElementById('cartItems').appendChild(newRow);
-                        totalPrice += item.subtotal;
-                    });
-                }
+            if (data.cart_items.length === 0) {
+                document.getElementById('cartItems').innerHTML = '<tr><td colspan="6">No items in cart.</td></tr>';
+            } else {
+                // Populate cart items table
+                data.cart_items.forEach(item => {
+                    var newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td>${item.product_brand}</td>
+                        <td>${item.unit_price}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.subtotal}</td>
+                        <td>${item.custom_description}</td>
+                        <td><button class="btn btn-sm btn-danger" onclick="removeFromCart(${item.product_id})">Remove</button></td>
+                    `;
+                    document.getElementById('cartItems').appendChild(newRow);
+                    totalPrice += item.subtotal;
+                });
+            }
 
-                // Display total price
-                document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> Ksh. ${totalPrice.toFixed(2)}`;
-            })
-            .catch(error => {
-                document.getElementById('loadingSpinner').style.display = 'none'; // Hide spinner on error
-                console.error('Error fetching user cart:', error);
-                alert('There was an error fetching the cart. Please try again later.'); // Provide user feedback
-            });
-    }
+            // Display total price
+            document.getElementById('totalPrice').innerHTML = `<strong>Total Price:</strong> Ksh. ${totalPrice.toFixed(2)}`;
+        })
+        .catch(error => {
+            document.getElementById('loadingSpinner').style.display = 'none'; // Hide spinner on error
+            console.error('Error fetching user cart:', error);
+            alert('There was an error fetching the cart. Please try again later.'); // Provide user feedback
+        });
+}
 
     // Function to clear the entire cart
     function clearCart() {
@@ -372,33 +364,36 @@ h3 {
     }
 
     // Function to add selected product to the cart
-    function addToCart() {
-        var userId = document.getElementById('user').value;
-        var productId = document.getElementById('product').value;
-        var quantity = document.getElementById('quantity').value;
-        var customDescription = document.getElementById('custom_description').value;
-        var csrfToken = document.getElementById('csrf_token').value;
+function addToCart() {
+    var userId = document.getElementById('user').value;
+    var productId = document.getElementById('product').value;
+    var quantity = document.getElementById('quantity').value;
+    var customDescription = document.getElementById('custom_description').value;
+    var csrfToken = document.getElementById('csrf_token').value;
 
-        if (!userId || !productId || !quantity) {
-            alert('Please select a user, product, and specify quantity.');
-            return;
-        }
+    if (!userId || !productId || !quantity) {
+        alert('Please select a user, product, and specify quantity.');
+        return;
+    }
 
-        fetch('/admin/admin/add_to_cart', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                product_id: productId,
-                quantity: quantity,
-                custom_description: customDescription
-            })
+    fetch('/admin/admin/add_to_cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            user_id: userId,
+            product_id: productId,
+            quantity: quantity,
+            custom_description: customDescription
         })
-        .then(response => response.json())
-        .then(data => {
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'error') {
+            alert(data.message); // Show error message
+        } else {
             $('#productModal').modal('hide'); // Close the modal
             fetchUserCart(userId); // Refresh cart display
 
@@ -407,14 +402,29 @@ h3 {
             document.getElementById('product').innerHTML = '<option value="">-- Select a Product --</option>';
             document.getElementById('quantity').value = '1';
             document.getElementById('custom_description').value = '';
-        })
-        .catch(error => console.error('Error adding product to cart:', error));
-    }
-
+        }
+    })
+    .catch(error => console.error('Error adding product to cart:', error));
+}
     // Function to remove a product from the cart
 function removeFromCart(productId) {
     var userId = document.getElementById('user').value;
     var csrfToken = document.getElementById('csrf_token').value;
+
+    // Check if userId and productId are available
+    if (!userId) {
+        console.error('Error: User ID is missing.');
+        alert('Please select a user.');
+        return;
+    }
+
+    if (!productId) {
+        console.error('Error: Product ID is missing.');
+        alert('Product ID is missing.');
+        return;
+    }
+
+    console.log('Removing product from cart:', { user_id: userId, product_id: productId });
 
     fetch('/admin/admin/remove_from_cart', {
         method: 'POST',
@@ -432,13 +442,18 @@ function removeFromCart(productId) {
         if (data.message === 'Item removed from the cart successfully') {
             fetchUserCart(userId); // Refresh cart display
         } else {
+            console.error('Error message:', data.message);
             alert(data.message); // Show error message
         }
     })
-    .catch(error => console.error('Error removing product from cart:', error));
+    .catch(error => {
+        console.error('Error removing product from cart:', error);
+        alert('An error occurred while removing the product from the cart.');
+    });
 }
 
-    // Function to add another item without closing the modal
+
+       // Function to add another item without closing the modal
     function addAnotherItem() {
         var userId = document.getElementById('user').value;
         var productId = document.getElementById('product').value;
@@ -481,5 +496,9 @@ function removeFromCart(productId) {
         document.getElementById('user').value = ''; // Reset user selection
         $('#orderSummaryModal').modal('hide'); // Hide order summary modal
     }
+
+
+ 
+   
 </script>
 {% endblock %}
