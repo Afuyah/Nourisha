@@ -1,321 +1,202 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="csrf-token" content="{{ csrf_token() }}" />
-        <title>Nourisha Groceries</title>
-        <link
-            rel="shortcut icon"
-            href="{{ url_for('static', filename='favicon.ico') }}"
-        />
-
-        <!-- Bootstrap CSS -->
-        <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-            crossorigin="anonymous"
-        />
-
-        <!-- Custom CSS -->
-        <link
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>Nourisha Groceries</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+    
+     <link
             rel="stylesheet"
             type="text/css"
             href="{{ url_for('static', filename='styles/main.css') }}"
         />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+    
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body style="text-align: center">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <img src="{{ url_for('static', filename='logoford.png') }}" alt="Nourisha Groceries" class="d-inline-block align-text-top" style="height: 70px; width: 200px" />
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.product_listing') }}">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}#about-us">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}#contact-us">Contact</a></li>
+                    <li class="nav-item dropdown" id="accountDropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if current_user.is_authenticated %}
+                            <i class="fas fa-user-circle" aria-hidden="true"></i>
+                            <span class="visually-hidden">User</span>{{ current_user.username }}
+                            {% else %}
+                            Account
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            {% if current_user.is_authenticated %}
+                            <li><a class="dropdown-item" href="{{ url_for('main.user_dashboard') }}">Dashboard</a></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.logout') }}">Logout</a></li>
+                            {% else %}
+                            <li><a class="dropdown-item" href="#" id="loginLink">Login</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Login form will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <p class="text-center w-100">
+                        Don't have an account? <a href="{{ url_for('main.register') }}">Register here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <!-- Google Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-            rel="stylesheet"
-        />
+    <!-- Flash Messages Section -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="flash-messages">
+        {% for message in messages %}
+        <div class="flash-message alert alert-danger">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
 
-        <!-- Font Awesome -->
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
-        />
+    <!-- Main Content -->
+    <main>{% block content %}{% endblock %}</main>
 
-        <!-- Animate CSS -->
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-        />
-
-
-        <link
-            rel="stylesheet"
-            href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-        />
-
-        <!-- Google Fonts -->
-        <link
-            href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
-            rel="stylesheet"
-        />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Arizonia&family=Love+Ya+Like+A+Sister&display=swap"
-            rel="stylesheet"
-        />
-
-
-
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-        <script
-            type="text/javascript"
-            charset="utf8"
-            src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"
-        ></script>
-      
-    </head>
-    <body style="text-align: center">
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-md navbar-light bg-light  sticky-top">
-            <div class="container">
-                <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                    <img
-                        src="{{ url_for('static', filename='logoford.png') }}") }}"
-                        alt="Nourisha Groceries"
-                        class="d-inline-block align-text-top"
-                        style="height: 70px; width: 200px"
-                    />
-                </a>
-                <button
-                    class="navbar-toggler"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#navbarNav"
-                    aria-controls="navbarNav"
-                    aria-expanded="false"
-                    aria-label="Toggle navigation"
-                >
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div
-                    class="collapse navbar-collapse justify-content-end"
-                    id="navbarNav"
-                >
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="{{ url_for('main.index') }}"
-                                >Home</a
-                            >
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="{{ url_for('main.product_listing') }}"
-                                >Shop</a
-                            >
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="{{ url_for('main.index') }}#about-us"
-                                >About</a
-                            >
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="{{ url_for('main.index') }}#contact-us"
-                                >Contact</a
-                            >
-                        </li>
-                        <li class="nav-item dropdown" id="accountDropdown">
-                            <a
-                                class="nav-link dropdown-toggle"
-                                href="#"
-                                id="navbarDropdown"
-                                role="button"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                            >
-                                {% if current_user.is_authenticated %}
-                                <i
-                                    class="fas fa-user-circle"
-                                    aria-hidden="true"
-                                ></i>
-                                <!-- Font Awesome user icon -->
-                                <span class="visually-hidden">User</span>{{
-                                current_user.username }} {% else %} Account {%
-                                endif %}
-                            </a>
-                            <ul
-                                class="dropdown-menu"
-                                aria-labelledby="navbarDropdown"
-                            >
-                                {% if current_user.is_authenticated %}
-                                <li>
-                                    <a
-                                        class="dropdown-item"
-                                        href="{{ url_for('main.user_dashboard') }}"
-                                        >Dashboard</a
-                                    >
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider" />
-                                </li>
-                                <li>
-                                    <a
-                                        class="dropdown-item"
-                                        href="{{ url_for('main.logout') }}"
-                                        >Logout</a
-                                    >
-                                </li>
-                                {% else %}
-                                <li>
-                                    <a
-                                        class="dropdown-item"
-                                        href="{{ url_for('main.login') }}"
-                                        >Login</a
-                                    >
-                                </li>
-                                {% endif %}
-                            </ul>
-                        </li>
+    <!-- Footer -->
+    <footer class="footer py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Newsletter</h5>
+                    <p>Subscribe to our newsletter for the latest updates and exclusive offers.</p>
+                    <form>
+                        <div class="input-group mb-3">
+                            <input type="email" class="form-control" placeholder="Your Email" aria-label="Your Email" aria-describedby="subscribeBtn" />
+                            <button class="btn btn-outline-secondary" type="button" id="subscribeBtn">Subscribe</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-8">
+                    <h5>Follow Us</h5>
+                    <p>Stay connected with us on social media for the latest updates and promotions.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fab fa-facebook-f"></i><a href="#">Facebook</a></li>
+                        <li><i class="fab fa-twitter"></i><a href="#">Twitter</a></li>
+                        <li><i class="fab fa-instagram"></i><a href="#">Instagram</a></li>
+                        <li><i class="fab fa-linkedin-in"></i><a href="#">LinkedIn</a></li>
                     </ul>
                 </div>
             </div>
-        </nav>
-
-        <!-- Flash Messages Section -->
-        {% with messages = get_flashed_messages() %} {% if messages %}
-        <div class="flash-messages">
-            {% for message in messages %}
-            <div class="flash-message alert alert-danger">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %} {% endwith %}
-
-        <!-- Main Content -->
-        <main>{% block content %}{% endblock %}</main>
-
-        <!-- Footer -->
-        <footer class="footer py-4">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-4">
-                        <h5>Newsletter</h5>
-                        <p>
-                            Subscribe to our newsletter for the latest updates
-                            and exclusive offers.
-                        </p>
-                        <form>
-                            <div class="input-group mb-3">
-                                <input
-                                    type="email"
-                                    class="form-control"
-                                    placeholder="Your Email"
-                                    aria-label="Your Email"
-                                    aria-describedby="subscribeBtn"
-                                />
-                                <button
-                                    class="btn btn-outline-secondary"
-                                    type="button"
-                                    id="subscribeBtn"
-                                >
-                                    Subscribe
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="col-md-8">
-                        <h5>Follow Us</h5>
-                        <p>
-                            Stay connected with us on social media for the
-                            latest updates and promotions.
-                        </p>
-                        <ul class="list-unstyled">
-                            <li>
-                                <i class="fab fa-facebook-f"></i>
-                                <a href="#">Facebook</a>
-                            </li>
-                            <li>
-                                <i class="fab fa-twitter"></i>
-                                <a href="#">Twitter</a>
-                            </li>
-                            <li>
-                                <i class="fab fa-instagram"></i>
-                                <a href="#">Instagram</a>
-                            </li>
-                            <li>
-                                <i class="fab fa-linkedin-in"></i>
-                                <a href="#">LinkedIn</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <hr />
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <p>
-                            &copy; 2024 Nourisha Groceries. All Rights Reserved.
-                        </p>
-                    </div>
+            <hr />
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <p>&copy; 2024 Nourisha Groceries. All Rights Reserved.</p>
                 </div>
             </div>
-        </footer>
+        </div>
+    </footer>
 
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const navbar = document.querySelector('.navbar');
-            const toggleButton = document.querySelector('.navbar-toggle');
-            const navbarNav = document.querySelector('.navbar-nav');
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#loginLink').on('click', function(e) {
+                e.preventDefault(); // Prevent the default action
+                $('#loginModal').modal('show'); // Show the modal
 
-            // Scroll event to toggle transparent class
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 100) {
-                    navbar.classList.remove('transparent');
-                } else {
-                    navbar.classList.add('transparent');
-                }
+                // Load the login form via AJAX
+                $.ajax({
+                    url: "{{ url_for('main.login') }}",
+                    method: 'GET',
+                    success: function(data) {
+                        $('#modalBody').html(data);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading login form:', error);
+                        $('#modalBody').html('<p>Error loading form. Please try again later.</p>');
+                    }
+                });
             });
 
-          
+            // Handle form submission inside the modal
+            $(document).on('submit', '#loginForm', function(e) {
+                e.preventDefault(); // Prevent the default form submission
+
+                var form = $(this);
+                var action = form.attr('action');
+                var data = form.serialize();
+
+                $.ajax({
+                    url: action,
+                    method: 'POST',
+                    data: data,
+                    headers: {
+                        'X-CSRFToken': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        // If login is successful, reload the page
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            // Display error messages
+                            $('#modalBody').html(response.html);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error during login:', error);
+                        $('#modalBody').html('<p>Error during login. Please try again later.</p>');
+                    }
+                });
+            });
         });
-        </script>
 
+        $(document).ajaxError(function(event, xhr, options, exc) {
+            if (xhr.status === 401) {
+                $('#loginModal').modal('show');
+            }
+        });
 
-        
-        <script
-            defer
-            src="https://code.jquery.com/jquery-3.6.0.min.js"
-        ></script>
-        <script
-            defer
-            src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"
-        ></script>
-        <script
-            defer
-            src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"
-        ></script>
-        <script
-            defer
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-            crossorigin="anonymous"
-        ></script>
-        <script
-            defer
-            src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"
-        ></script>
-<script src="https://polyfill.io/v3/polyfill.min.js?features=IntersectionObserver"></script>
-
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        <!-- WOW.js for more animations -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
-        <script>
-            new WOW().init();
-        </script>
-    </body>
+                    
+    </script>
+</body>
 </html>

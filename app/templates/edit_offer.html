@@ -1,30 +1,35 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Edit Offer</h2>
+    <h1>Edit Offer</h1>
     <form method="POST" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         <div class="form-group">
-            {{ form.title.label(class="form-control-label") }}
+            {{ form.title.label }}
             {{ form.title(class="form-control") }}
         </div>
         <div class="form-group">
-            {{ form.description.label(class="form-control-label") }}
+            {{ form.description.label }}
             {{ form.description(class="form-control") }}
         </div>
         <div class="form-group">
-            {{ form.start_date.label(class="form-control-label") }}
+            {{ form.start_date.label }}
             {{ form.start_date(class="form-control") }}
         </div>
         <div class="form-group">
-            {{ form.end_date.label(class="form-control-label") }}
+            {{ form.end_date.label }}
             {{ form.end_date(class="form-control") }}
         </div>
         <div class="form-group">
-            {{ form.active.label(class="form-control-label") }}
-            {{ form.active() }}
+            {{ form.active.label }}
+            {{ form.active(class="form-check-input") }}
         </div>
-        <button type="submit" class="btn btn-primary">Update</button>
+        <div class="form-group">
+            {{ form.image.label }}
+            {{ form.image(class="form-control-file") }}
+        </div>
+        <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
     </form>
 </div>
 {% endblock %}

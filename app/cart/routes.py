@@ -23,24 +23,20 @@ def login_required(func):
 
     return decorated_function
 
-# Route to add a product to the cart
+
+        
 @cart_bp.route('/add_to_cart/<int:product_id>/<int:quantity>', methods=['POST'])
 @login_required
 def add_to_cart(product_id, quantity):
     product = Product.query.get_or_404(product_id)
 
     if quantity <= 0:
-        flash('Quantity must be greater than zero.', 'danger')
-        return redirect(url_for('main.product_details', product_id=product.id))
+        return jsonify({'error': 'Quantity must be greater than zero.'}), 400
 
     if quantity > product.quantity_in_stock:
-        flash(
-            'Sorry, but we have only {} items available in stock.'.format(
-                product.quantity_in_stock), 'danger')
-        return redirect(url_for('main.product_details', product_id=product.id))
+        return jsonify({'error': 'Sorry, but we have only {} items available in stock.'.format(product.quantity_in_stock)}), 400
 
-    cart_item = Cart.query.filter_by(user_id=current_user.id,
-                                      product_id=product.id).first()
+    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product.id).first()
     quantity = int(request.form.get('quantity'))
     custom_description = request.form.get('custom_description', '')
 
@@ -48,22 +44,18 @@ def add_to_cart(product_id, quantity):
         cart_item.quantity += quantity
         cart_item.custom_description = custom_description
     else:
-        cart_item = Cart(user_id=current_user.id,
-                          product_id=product.id,
-                          quantity=quantity,
-                          custom_description=custom_description)
+        cart_item = Cart(user_id=current_user.id, product_id=product.id, quantity=quantity, custom_description=custom_description)
         db.session.add(cart_item)
 
     product.quantity_in_stock -= quantity
 
     try:
         db.session.commit()
-        flash('Item added to cart successfully.', 'success')
+        cart_item_count = Cart.query.filter_by(user_id=current_user.id).count()
+        return jsonify({'message': 'Item added to cart successfully.', 'cartItemCount': cart_item_count, 'productId': product.id}), 200
     except Exception as e:
         db.session.rollback()
-        flash(f'Error adding item to cart: {str(e)}', 'danger')
-
-    return redirect(url_for('main.product_listing', product_id=product.id))
+        return jsonify({'error': 'Error adding item to cart: {}'.format(str(e))}), 500
 
 # Route to view the cart
 @cart_bp.route('/view_cart')

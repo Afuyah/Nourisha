@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, FloatField, IntegerField, TextAreaField, SelectField, DateField, SubmitField
+from wtforms import StringField, PasswordField, FloatField, IntegerField, TextAreaField, SelectField, DateField, DecimalField, DateTimeField, SubmitField, SelectMultipleField
 from wtforms.validators import DataRequired, Email, Length
 from flask_wtf.file import FileField, FileRequired, DataRequired
 from wtforms import HiddenField, TextAreaField, BooleanField
 from wtforms.validators import InputRequired, Optional, Length, NumberRange
 from wtforms.fields import DateTimeLocalField
-
+from flask_wtf.file import FileAllowed
 
 class RegistrationForm(FlaskForm):
   name = StringField('Name', validators=[DataRequired()])
@@ -51,9 +51,18 @@ class EditUserForm(FlaskForm):
 
 class AddProductCategoryForm(FlaskForm):
   name = StringField('Category Name',
-                     validators=[DataRequired(),
-                                 Length(max=100)])
+                     validators=[DataRequired(), Length(max=100)])
+  description = TextAreaField('Description', validators=[Length(max=500)], render_kw={"rows": 5})
+  tagline = StringField('Tagline', validators=[Length(max=150)])
   submit = SubmitField('Add Category')
+
+class EditProductCategoryForm(FlaskForm):
+  name = StringField('Category Name',
+                     validators=[DataRequired(), Length(max=100)])
+  description = TextAreaField('Description', validators=[Length(max=500)], render_kw={"rows": 5})
+  image = FileField('Category Image', validators=[FileAllowed(['jpg', 'png'])])
+  tagline = StringField('Tagline', validators=[Length(max=150)])
+  submit = SubmitField('Update Category')
 
 
 class AddSupplierForm(FlaskForm):
@@ -75,7 +84,7 @@ class AddProductForm(FlaskForm):
   unit_measurement = StringField('Unit of Measurement', validators=[Optional(), Length(max=50)])
   quantity_in_stock = IntegerField('Quantity in Stock', validators=[DataRequired(), NumberRange(min=0)])
   discount_percentage = FloatField('Discount Percentage', validators=[Optional(), NumberRange(min=0, max=100)])
-  promotional_tag = StringField('Promotional Tag', validators=[Optional(), Length(max=50)])
+  promotions = SelectMultipleField('Promotions', coerce=int)
   nutritional_information = TextAreaField('Nutritional Information', validators=[Optional()])
   country_of_origin = StringField('Country of Origin', validators=[Optional(), Length(max=50)])
   supplier = SelectField('Supplier', coerce=int, validators=[DataRequired()])
@@ -181,4 +190,46 @@ class OfferForm(FlaskForm):
   start_date = DateTimeLocalField('Start Date', format='%Y-%m-%dT%H:%M', validators=[Optional()])
   end_date = DateTimeLocalField('End Date', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
   active = BooleanField('Active', default=True)
+  image = FileField('Image', validators=[FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')])
   submit = SubmitField('Submit')
+
+
+class PaymentForm(FlaskForm):
+  transaction_id = StringField('Transaction ID', validators=[DataRequired()])
+  amount_paid = DecimalField('Amount Paid', places=2, validators=[DataRequired()])
+  payment_date = DateTimeField('Payment Date', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
+  phone_number = StringField('Phone Number', validators=[DataRequired()])
+  order_id = HiddenField('Order ID', validators=[DataRequired()])
+  submit = SubmitField('Submit Payment')
+
+class AboutUsForm(FlaskForm):
+  title = StringField('Title', validators=[DataRequired()])
+  description = TextAreaField('Description', validators=[DataRequired()])
+  image = FileField('Image', validators=[
+      FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')
+  ])
+
+
+class BlogPostForm(FlaskForm):
+  title = StringField('Title', validators=[DataRequired()])
+  description = TextAreaField('Description', validators=[DataRequired()])
+  image = FileField('Image (Optional)')
+  submit = SubmitField('Save')
+
+class ContactForm(FlaskForm):
+  name = StringField('Your Name', validators=[DataRequired()])
+  email = StringField('Your Email', validators=[DataRequired(), Email()])
+  message = TextAreaField('Your Message', validators=[DataRequired()])
+  submit = SubmitField('Submit')
+
+
+class PromotionForm(FlaskForm):
+  name = StringField('Promotion Name', validators=[DataRequired()])
+  description = StringField('Description')
+  start_date = DateField('Start Date', format='%Y-%m-%d', validators=[DataRequired()])
+  end_date = DateField('End Date', format='%Y-%m-%d', validators=[DataRequired()])
+  submit = SubmitField('Add Promotion')
+
+class TagProductsForm(FlaskForm):
+  products = SelectMultipleField('Select Products', coerce=int, validators=[DataRequired()])
+  csrf_token = HiddenField()

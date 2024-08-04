@@ -1,4 +1,6 @@
-{% extends 'layout.html' %} {% block content %}
+{% extends 'layout.html' %}
+
+{% block content %}
 <div class="container mt-4 mb-5 p-2">
   <!-- Animated Welcome Banner -->
   <div class="alert alert-primary alert-dismissible fade show" role="alert">
@@ -11,6 +13,11 @@
   <h1 class="mb-4 text-center">Your Cart</h1>
 
   {% if cart_items %}
+  <!-- Clear Cart Button -->
+  <div class="text-end mb-4">
+    <button class="btn btn-danger btn-lg" onclick="confirmClearCart('{{ csrf_token() }}')">Clear Cart</button>
+  </div>
+
   <div class="table-responsive mt-4">
     <table class="table table-bordered table-hover">
       <!-- Table Header -->
@@ -29,63 +36,29 @@
         {% for item in cart_items %}
         <tr class="fade-in">
           <td class="align-middle">
-    {% if item.product.images %}
-        <img
-          src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image) }}"
-          class="img-thumbnail"
-          alt="{{ item.product.brand }}"
-          style="max-width: 80px"
-        />
-    {% else %}
-        <p>No image available</p>
-    {% endif %}
-    <br />
-    <strong>{{ item.product.brand }}</strong>
-</td>
-
-
+            {% if item.product.images %}
+              <img src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image) }}" class="img-thumbnail" alt="{{ item.product.brand }}" style="max-width: 80px" />
+            {% else %}
+              <p>No image available</p>
+            {% endif %}
+            <br />
+            <strong>{{ item.product.brand }}</strong>
+          </td>
           <td class="align-middle">Ksh {{ item.product.unit_price }}</td>
           <td class="align-middle">
-            <button
-              class="btn btn-secondary btn-sm decrement-btn"
-              data-product-id="{{ item.product.id }}"
-            >
-              -
-            </button>
-            <span
-              class="quantity-display"
-              data-product-id="{{ item.product.id }}"
-              >{{ item.quantity }}</span
-            >
-            <button
-              class="btn btn-secondary btn-sm increment-btn"
-              data-product-id="{{ item.product.id }}"
-            >
-              +
-            </button>
-            <div
-              class="spinner-border text-primary d-none loading-spinner"
-              role="status"
-              data-product-id="{{ item.product.id }}"
-            >
-              <span class="sr-only"></span>
+            <div class="btn-group" role="group">
+              <button class="btn btn-outline-secondary btn-sm decrement-btn" data-product-id="{{ item.product.id }}">-</button>
+              <span class="quantity-display" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
+              <button class="btn btn-outline-secondary btn-sm increment-btn" data-product-id="{{ item.product.id }}">+</button>
+            </div>
+            <div class="spinner-border text-primary d-none loading-spinner" role="status" data-product-id="{{ item.product.id }}">
+              <span class="sr-only">Loading...</span>
             </div>
           </td>
-          <td class="align-middle">
-            Ksh<span id="subtotal-{{ item.product.id }}"
-              >{{ item.product.unit_price * item.quantity }}</span
-            >
-          </td>
-
+          <td class="align-middle">Ksh <span id="subtotal-{{ item.product.id }}">{{ item.product.unit_price * item.quantity }}</span></td>
           <td class="align-middle">{{ item.custom_description }}</td>
-
           <td class="align-middle">
-            <button
-              class="btn btn-danger btn-sm remove-item-btn"
-              data-product-id="{{ item.product.id }}"
-            >
-              Remove
-            </button>
+            <button class="btn btn-danger btn-sm remove-item-btn" data-product-id="{{ item.product.id }}">Remove</button>
           </td>
         </tr>
         {% endfor %}
@@ -94,55 +67,41 @@
   </div>
 
   <!-- Total Price and Proceed to Checkout -->
-  <p class="total-price text-center mt-4">
-    Total Price: Ksh<span id="total-price">{{ total_price }}</span>
-  </p>
-  <div class="text-center">
-    <button
-      class="btn btn-primary btn-sm proceed-to-checkout-btn"
-      onclick="window.location.href='/cart/checkout'"
-    >
-      Proceed to Checkout
-    </button>
+  <div class="d-flex justify-content-between align-items-center mt-4">
+    <p class="total-price mb-0">Total Price: Ksh <span id="total-price">{{ total_price }}</span></p>
+    <div class="btn-group">
+      <button class="btn btn-primary btn-lg" onclick="window.location.href='/cart/checkout'">Proceed to Checkout</button>
+      <a href="{{ url_for('main.product_listing') }}" class="btn btn-outline-primary btn-lg">Continue Shopping</a>
+    </div>
   </div>
-
-  <!-- Clear Cart Button -->
-  <div class="text-center mt-4">
-    <button
-      class="btn btn-danger btn-sm clear-cart-btn"
-      onclick="confirmClearCart('{{ csrf_token() }}')"
-    >
-      Clear Cart
-    </button>
-  </div>
-
-<div class="text-center mt-4">
-  <a href="{{ url_for('main.product_listing') }}" class="btn btn-outline-primary btn-sm">
-    Continue Shopping
-  </a>
-</div>
-
-
 
   {% else %}
   <!-- Display a message and suggest some items -->
   <div class="text-center">
     <p>Your cart is empty. Why not explore our products?</p>
-    <a href="{{url_for('main.product_listing')}}" class="btn btn-primary btn-sm"
-      >Explore Products</a
-    >
+    <a href="{{ url_for('main.product_listing') }}" class="btn btn-primary btn-lg">Explore Products</a>
   </div>
   {% endif %}
 
-  <div
-    class="spinner-border text-primary d-none"
-    role="status"
-    id="loading-spinner"
-  >
-    <span class="sr-only"></span>
+  <div class="spinner-border text-primary d-none" role="status" id="loading-spinner">
+    <span class="sr-only">Loading...</span>
   </div>
 </div>
 
+<!-- Toast Notifications -->
+<div id="cartToast" class="toast position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+  <div class="toast-header">
+    <strong class="me-auto">Cart Update</strong>
+    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+  </div>
+  <div class="toast-body">
+    Item added to cart successfully!
+  </div>
+</div>
+
+<!-- Toastr CSS/JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
 <style>
   /* Custom styles for animations and additional styles */
   .fade-in {
@@ -164,25 +123,50 @@
     text-align: center;
     font-size: 18px;
   }
- /* Styles for small devices */
+
+  /* Button styles */
+  .btn-lg {
+    font-size: 1.25rem;
+    padding: 0.75rem 1.25rem;
+  }
+
+  .btn-outline-secondary {
+    border: 1px solid #6c757d;
+    color: #6c757d;
+  }
+
+  .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #fff;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* Styles for small devices */
   @media (max-width: 576px) {
     .decrement-btn,
     .increment-btn {
-      font-size: 8px;
-      padding: 5px 10px;
+      font-size: 0.75rem;
+      padding: 0.5rem;
+    }
 
+    .btn-lg {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
     }
   }
-
-
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"
-/>
-
 <script>
+  // Toastr notification for errors and success messages
+  function showToast(type, message) {
+    toastr[type](message);
+  }
+
+  
+
   function confirmClearCart(csrfToken) {
     if (confirm("Are you sure you want to clear your cart?")) {
       clearCart(csrfToken);

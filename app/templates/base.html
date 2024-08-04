@@ -15,7 +15,8 @@
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
-
+ <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <!-- Leaflet JavaScript -->
@@ -115,7 +116,7 @@
 
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" role="button" id="locationsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="order-icon fas fa-map-marker-alt"></i> Our Locations
+            <i class="order-icon fas fa-map-marker-alt"></i> Locations Covered
           </a>
           <div class="dropdown-menu" aria-labelledby="locationsDropdown">
             <a class="dropdown-item" href="{{ url_for('admin.add_location') }}">Add Location</a>
@@ -135,17 +136,35 @@
       </div>
     </li>
 
-      <li class="dropdown">
+
+
+
+               <li class="dropdown">
           <a class="dropdown-toggle" href="#" role="button" id="locationsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="order-icon fas fa-map-marker-alt"></i> Site Setting
+            <i class="order-icon fas fa-dollar-sign"></i>Finances Department
           </a>
           <div class="dropdown-menu" aria-labelledby="locationsDropdown">
-            <a class="dropdown-item" href="{{ url_for('site.offers') }}">Special offers</a>
-
-            <a class="dropdown-item" href="#"> Promotions</a>
+            <a class="dropdown-item" href="{{ url_for('payments.admin_payments') }}">Update Payment</a>
+            <a class="dropdown-item" href="#">Financial Accounts</a>
+            <a class="dropdown-item" href="#">Payment Progress</a>
+            
+          </div>
+               </li>
+      <li class="dropdown">
+          <a class="dropdown-toggle" href="#" role="button" id="locationsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="order-icon fas fa-cog"></i> Website Setting
+          </a>
+          <div class="dropdown-menu" aria-labelledby="locationsDropdown">
+            <a class="dropdown-item" href="{{ url_for('site.offers') }}">Special offers Sections</a>
+             <a class="dropdown-item" href="{{ url_for('site.list_promotions') }}"> Promotions</a>
+            <a class="dropdown-item" href="{{ url_for('site.manage_blog') }}"> Blog Section</a>
             <a class="dropdown-item" href="#"> Hero Section</a>
+            <a class="dropdown-item" href="{{ url_for('site.about_us') }}"> About Us Section</a>
+            
           </div>
         </li>
+
+ 
 
         
         <li class="nav-item">
@@ -240,5 +259,11 @@
             defer
             src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"
         ></script>
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
+
 
 </html>

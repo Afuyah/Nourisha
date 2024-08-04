@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h1 class="display-4 text-center mb-4">Edit Blog Post</h1>
+
+  <div class="card mb-4 shadow-lg border-light rounded-3">
+      <div class="card-body">
+          <h5 class="card-title">Edit Blog Post</h5>
+          <form method="POST" enctype="multipart/form-data">
+              {{ form.csrf_token }}
+              <div class="mb-3">
+                  {{ form.title.label(class="form-label") }}
+                  {{ form.title(class="form-control") }}
+                  {% for error in form.title.errors %}
+                  <div class="text-danger">{{ error }}</div>
+                  {% endfor %}
+              </div>
+              <div class="mb-3">
+                  {{ form.description.label(class="form-label") }}
+                  {{ form.description(class="form-control", rows=4) }}
+                  {% for error in form.description.errors %}
+                  <div class="text-danger">{{ error }}</div>
+                  {% endfor %}
+              </div>
+              <div class="mb-3">
+                  {{ form.image.label(class="form-label") }}
+                  {{ form.image(class="form-control-file") }}
+                  {% for error in form.image.errors %}
+                  <div class="text-danger">{{ error }}</div>
+                  {% endfor %}
+              </div>
+              <div class="text-center">
+                  {{ form.submit(class="btn btn-primary btn-lg") }}
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+{% endblock %}

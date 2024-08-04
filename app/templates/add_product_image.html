@@ -1,43 +1,189 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="container mt-4">
-    <h1 class="mb-4">Upload Product Images</h1>
-    <form method="post" enctype="multipart/form-data">
-      {{ form.hidden_tag() }}
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Upload Product Images</h2>
+        </div>
+        <div class="card-body">
+            <form id="image-upload-form" method="post" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
 
-      <!-- Product Selection -->
-      <div class="mb-3">
-        {{ form.product.label(class='form-label') }}
-        {{ form.product(class='form-select', placeholder='Select product', required=true) }}
-      </div>
+                <!-- Product Selection -->
+                <div class="mb-3" data-bs-toggle="tooltip" data-bs-placement="right" title="Select the product to which you want to add images.">
+                    {{ form.product.label(class='form-label') }}
+                    <select id="product-select" name="product" class="form-select" required>
+                        <option value="" disabled selected>Select a product...</option>
+                        {% for value, label in form.product.choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-      <!-- Cover Image Upload -->
-      <div class="mb-3">
-        {{ form.cover_image.label(class='form-label') }}
-        {{ form.cover_image(class='form-control', accept='image/*', required=true) }}
-      </div>
+                <!-- Cover Image Upload -->
+                <div class="mb-3" data-bs-toggle="tooltip" data-bs-placement="right" title="Upload the main cover image for the product.">
+                    {{ form.cover_image.label(class='form-label') }}
+                    {{ form.cover_image(class='form-control', accept='image/*', required=true) }}
+                </div>
 
-      <!-- Additional Image Uploads -->
-      <div class="mb-3">
-        {{ form.image1.label(class='form-label') }}
-        {{ form.image1(class='form-control', accept='image/*') }}
-      </div>
+                <!-- Additional Image Uploads -->
+                <div class="mb-3" data-bs-toggle="tooltip" data-bs-placement="right" title="Upload additional images for the product (optional).">
+                    {{ form.image1.label(class='form-label') }}
+                    {{ form.image1(class='form-control', accept='image/*') }}
+                </div>
 
-      <div class="mb-3">
-        {{ form.image2.label(class='form-label') }}
-        {{ form.image2(class='form-control', accept='image/*') }}
-      </div>
+                <div class="mb-3" data-bs-toggle="tooltip" data-bs-placement="right" title="Upload additional images for the product (optional).">
+                    {{ form.image2.label(class='form-label') }}
+                    {{ form.image2(class='form-control', accept='image/*') }}
+                </div>
 
-      <div class="mb-3">
-        {{ form.image3.label(class='form-label') }}
-        {{ form.image3(class='form-control', accept='image/*') }}
-      </div>
+                <div class="mb-3" data-bs-toggle="tooltip" data-bs-placement="right" title="Upload additional images for the product (optional).">
+                    {{ form.image3.label(class='form-label') }}
+                    {{ form.image3(class='form-control', accept='image/*') }}
+                </div>
 
-      <!-- Submit Button -->
-      <div class="mb-3">
-        {{ form.submit(class='btn btn-primary') }}
-      </div>
-    </form>
-  </div>
+                <!-- Progress Bar -->
+                <div class="mb-3" id="progress-container" style="display: none;">
+                    <div class="progress">
+                        <div id="upload-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <span id="progress-percentage">0%</span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid gap-2">
+                    {{ form.submit(class='btn btn-primary btn-lg') }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Page Loader -->
+<div id="page-loader" style="display: none;">
+    <div class="loader"></div>
+</div>
+
+<!-- Toast Notifications -->
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="upload-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Upload Status</strong>
+                <small>Just now</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toast-body">
+                Uploading images...
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page Loader Styles -->
+<style>
+    #page-loader {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: rgba(255, 255, 255, 0.9);
+        z-index: 9999;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loader {
+        border: 12px solid #f3f3f3;
+        border-top: 12px solid #3498db;
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        animation: spin 1.5s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<!-- JavaScript to handle form submission and progress bar -->
+<script>
+    document.getElementById('image-upload-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const progressBar = document.getElementById('upload-progress-bar');
+        const progressContainer = document.getElementById('progress-container');
+        const progressPercentage = document.getElementById('progress-percentage');
+        const pageLoader = document.getElementById('page-loader');
+        const toast = new bootstrap.Toast(document.getElementById('upload-toast'));
+        const toastBody = document.getElementById('toast-body');
+
+        progressContainer.style.display = 'block'; // Show the progress bar container
+        pageLoader.style.display = 'flex'; // Show the page loader
+        toast.show(); // Show the toast notification
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', form.action, true);
+
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+                const percentComplete = (e.loaded / e.total) * 100;
+                progressBar.style.width = percentComplete + '%';
+                progressBar.setAttribute('aria-valuenow', percentComplete);
+                progressPercentage.innerText = Math.floor(percentComplete) + '%';
+                toastBody.innerText = `Uploading images... ${Math.floor(percentComplete)}% completed`;
+            }
+        });
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                progressBar.classList.remove('progress-bar-striped', 'progress-bar-animated');
+                progressBar.classList.add('bg-success');
+                progressBar.style.width = '100%';
+                progressBar.setAttribute('aria-valuenow', 100);
+                progressPercentage.innerText = '100%';
+                toastBody.innerText = 'Images uploaded successfully!';
+                setTimeout(function() {
+                    progressContainer.style.display = 'none';
+                    pageLoader.style.display = 'none';
+                    window.location.href = "{{ url_for('main.add_product_image') }}";
+                }, 1000);
+            } else {
+                progressBar.classList.add('bg-danger');
+                progressPercentage.innerText = 'Error';
+                toastBody.innerText = 'Failed to upload images. Please try again.';
+                pageLoader.style.display = 'none';
+                alert('Failed to upload images. Please try again.');
+            }
+        };
+
+        xhr.onerror = function() {
+            progressBar.classList.add('bg-danger');
+            progressPercentage.innerText = 'Error';
+            toastBody.innerText = 'An error occurred during the upload. Please try again.';
+            pageLoader.style.display = 'none';
+            alert('An error occurred during the upload. Please try again.');
+        };
+
+        xhr.send(formData);
+    });
+
+    // Initialize Bootstrap tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
 {% endblock %}

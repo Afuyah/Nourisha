@@ -17,7 +17,7 @@
                     <th>Unit of Measurement</th>
                     <th>Quantity in Stock</th>
                     <th>Discount Percentage</th>
-                    <th>Promotional Tag</th>
+                    <th>Promotional Tags</th> <!-- Updated column header -->
                     <th>Nutritional Information</th>
                     <th>Country of Origin</th>
                     <th>Supplier</th>
@@ -35,7 +35,15 @@
                     <td>{{ product.unit_measurement }}</td>
                     <td>{{ product.quantity_in_stock }}</td>
                     <td>{{ product.discount_percentage }}%</td>
-                    <td>{{ product.promotional_tag }}</td>
+                    <td>
+                        {% if product.promotions %}
+                            {% for promotion in product.promotions %}
+                                {{ promotion.name }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            No Promotions
+                        {% endif %}
+                    </td>
                     <td data-toggle="tooltip" title="{{ product.nutritional_information }}">
                         {{ product.nutritional_information[:30] }}{% if product.nutritional_information|length > 30 %}...{% endif %}
                     </td>
@@ -70,7 +78,7 @@ $(document).ready(function() {
         "lengthMenu": [5, 10, 25, 50, 100],
         "pageLength": 10,
         "columnDefs": [
-            { "orderable": false, "targets": [8, 9] } // Disable ordering on Promotional Tag and Nutritional Information
+            { "orderable": false, "targets": [8, 9] } // Disable ordering on Promotional Tags and Nutritional Information
         ]
     });
     
@@ -79,4 +87,3 @@ $(document).ready(function() {
 });
 </script>
 {% endblock %}
-

@@ -1,24 +1,5 @@
 {% extends 'base.html' %}
 
-{% block styles %}
-{{ super() }}
-<!-- Include Select2 CSS -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/css/select2.min.css" rel="stylesheet" />
-<style>
-    .select2-container--bootstrap4 .select2-selection--single {
-        height: calc(1.5em + 0.75rem + 2px);
-        padding: 0.375rem 1.75rem 0.375rem 0.75rem;
-        font-size: 1rem;
-        font-weight: normal;
-        line-height: 1.5;
-        color: #495057;
-        background-color: #fff;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="container mt-4">
     <h1 class="mb-4">Add Product</h1>
@@ -29,7 +10,7 @@
                     <form method="POST" action="{{ url_for('main.add_product') }}" novalidate>
                         {{ form.hidden_tag() }}
                         
-                        <!-- ProcategBrand -->
+                        <!-- Product Name -->
                         <div class="mb-3">
                             {{ form.name.label(class='form-label') }}
                             {{ form.name(class='form-control', placeholder='Enter product Brand', required=true) }}
@@ -43,7 +24,12 @@
                         <!-- Category -->
                         <div class="mb-3">
                             {{ form.category.label(class='form-label') }}
-                            {{ form.category(class='form-select', required=true, id='category') }}
+                            <select id="category" name="category" class="form-select">
+                                <option value="" selected disabled>Select a Category</option>
+                                {% for value, label in form.category.choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
                             {% if form.category.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.category.errors[0] }}
@@ -51,10 +37,10 @@
                             {% endif %}
                         </div>
                         
-                        <!-- Product name -->
+                        <!-- Brand -->
                         <div class="mb-3">
                             {{ form.brand.label(class='form-label') }}
-                            {{ form.brand(class='form-control', placeholder='Enter Product Name', required = true) }}
+                            {{ form.brand(class='form-control', placeholder='Enter Product Name', required=true) }}
                             {% if form.brand.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.brand.errors[0] }}
@@ -106,16 +92,6 @@
                             {% endif %}
                         </div>
 
-                        <!-- Promotional Tag -->
-                        <div class="mb-3">
-                            {{ form.promotional_tag.label(class='form-label') }}
-                            {{ form.promotional_tag(class='form-control', placeholder='Enter Promotional Tag') }}
-                            {% if form.promotional_tag.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.promotional_tag.errors[0] }}
-                            </div>
-                            {% endif %}
-                        </div>
 
                         <!-- Nutritional Information -->
                         <div class="mb-3">
@@ -142,7 +118,12 @@
                         <!-- Supplier -->
                         <div class="mb-3">
                             {{ form.supplier.label(class='form-label') }}
-                            {{ form.supplier(class='form-select', required=true, id='supplier') }}
+                            <select id="supplier" name="supplier" class="form-select">
+                                <option value="" selected disabled>Select a Supplier</option>
+                                {% for value, label in form.supplier.choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
                             {% if form.supplier.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.supplier.errors[0] }}
@@ -185,10 +166,8 @@
             autoclose: true,
             todayHighlight: true
         });
-    });
 
-    // Initialize Select2 for select fields
-    $(document).ready(function() {
+        // Initialize Select2 for select fields with placeholders
         $('#category').select2({
             placeholder: 'Select a Category',
             allowClear: true,
@@ -200,10 +179,6 @@
             allowClear: true,
             theme: 'bootstrap4'
         });
-
-        // Disable first options in select fields
-        $('#category option:first-child').attr('disabled', 'disabled');
-        $('#supplier option:first-child').attr('disabled', 'disabled');
     });
 
     // Handle form submission with loader
@@ -215,3 +190,4 @@
     });
 </script>
 {% endblock %}
+

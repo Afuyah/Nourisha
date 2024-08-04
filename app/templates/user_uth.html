@@ -1,0 +1,21 @@
+
+<form id="loginForm" method="post" action="{{ url_for('main.login') }}">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+        <label for="{{ form.identifier.id }}" class="form-label">User Name/Email/Phone</label>
+        {{ form.identifier(class="form-control", placeholder="Enter your username, email, or phone number") }}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.password.id }}" class="form-label">Password</label>
+        {{ form.password(class="form-control", placeholder="Enter your password") }}
+    </div>
+
+    <button type="submit" class="btn btn-success w-100">Login</button>
+
+    <div class="form-errors"></div> <!-- For displaying form errors -->
+</form>
+
+
+

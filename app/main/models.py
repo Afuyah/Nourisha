@@ -128,12 +128,14 @@ class Rating(db.Model):
 class ProductCategory(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String(100), nullable=False, unique=True)
-
-  # Define the relationship with Product
+  description = db.Column(db.Text, nullable=True)
+  image = db.Column(db.String(100), nullable=True)
+  tagline = db.Column(db.String(150), nullable=True)
   products = db.relationship('Product', back_populates='category')
 
   def __repr__(self):
-    return f"<ProductCategory {self.name}>"
+      return f"<ProductCategory {self.name}>"
+
 
 
 # Supplier model for handling information about product suppliers
@@ -162,7 +164,7 @@ class Product(db.Model):
   quantity_in_stock = db.Column(db.Integer, nullable=False)
   quantity_sold = db.Column(db.Integer, default=0)
   discount_percentage = db.Column(db.Float, nullable=True)
-  promotional_tag = db.Column(db.String(50), nullable=True)
+ 
   nutritional_information = db.Column(db.Text, nullable=True)
   country_of_origin = db.Column(db.String(50), nullable=True)
   average_rating = db.Column(db.Float)  # Average user rating
@@ -182,6 +184,9 @@ class Product(db.Model):
   clicks = db.relationship('ProductClick', back_populates='product')
   views = db.relationship('ProductView', back_populates='product')
   ratings = db.relationship('Rating', back_populates='product')
+  promotions = db.relationship('Promotion', secondary='product_promotions',
+                                 backref=db.backref('products', lazy='dynamic'))
+
 class ProductClick(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -240,8 +245,6 @@ class Cart(db.Model):
   product = db.relationship('Product', back_populates='carts')
   custom_description = db.Column(db.Text)
 
-
-# Order model for handling user orders
 class Order(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -257,20 +260,27 @@ class Order(db.Model):
   additional_info = db.Column(db.Text)
   payment_method = db.Column(db.String(50), nullable=False)
   payment_status = db.Column(db.String(50), default='unpaid')
-  payment_date = db.Column(db.DateTime)
-  transaction_id = db.Column(db.String(100))
-  phone_number = db.Column(db.String(20))
   delivery_remarks = db.Column(db.Text)
-
+  phone_number = db.Column(db.String(20))
   user = db.relationship('User', back_populates='orders')
   location = db.relationship('Location', back_populates='orders')
   arealine = db.relationship('Arealine', back_populates='orders')
   nearest_place = db.relationship('NearestPlace', back_populates='orders')
   order_items = db.relationship('OrderItem', back_populates='order')
-
+  payments = db.relationship('Payment', back_populates='order', cascade='all, delete-orphan')
   def calculate_fulfilled_total(self):
-        fulfilled_items_total = sum(item.total_price for item in self.order_items if item.fulfillment_status == 'fulfilled')
-        return fulfilled_items_total + 200  # Adding the shipping fee
+      fulfilled_items_total = sum(item.total_price for item in self.order_items if item.fulfillment_status == 'fulfilled')
+      return fulfilled_items_total + 200  # Adding the shipping fee
+
+class Payment(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
+  transaction_id = db.Column(db.String(100), nullable=False)
+  amount_paid = db.Column(db.Float, nullable=False)
+  payment_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+  order = db.relationship('Order', back_populates='payments')
+
 
 
 
@@ -365,9 +375,60 @@ class Offer(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   title = db.Column(db.String(100), nullable=False)
   description = db.Column(db.Text)
+  image = db.Column(db.String(100), nullable=True) 
   start_date = db.Column(db.DateTime, default=datetime.utcnow)
   end_date = db.Column(db.DateTime, nullable=False)
   active = db.Column(db.Boolean, default=True)
 
   def __repr__(self):
       return f'<Offer {self.title}>'
+
+
+
+class AboutUs(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  title = db.Column(db.String(255), nullable=False)
+  description = db.Column(db.Text, nullable=False)
+  image = db.Column(db.String(255), nullable=True) 
+  updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+  def __repr__(self):
+      return f'<AboutUs {self.title}>'
+
+class BlogPost(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  title = db.Column(db.String(255), nullable=False)
+  description = db.Column(db.Text, nullable=False)
+  image = db.Column(db.String(255), nullable=True)
+  date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+class ContactMessage(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String(100), nullable=False)
+  email = db.Column(db.String(120), nullable=False)
+  message = db.Column(db.Text, nullable=False)
+  timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+  def __repr__(self):
+      return f'<ContactMessage {self.id}>'    
+
+class Promotion(db.Model):
+  __tablename__ = 'promotions'
+    
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String(100), nullable=False, unique=True)
+  description = db.Column(db.String(255))
+  active = db.Column(db.Boolean, default=False)
+  start_date = db.Column(db.Date, nullable=False)
+  end_date = db.Column(db.Date, nullable=False)
+    
+  def __repr__(self):
+      return f'<Promotion {self.name}>'
+
+
+class ProductPromotion(db.Model):
+  __tablename__ = 'product_promotions'
+    
+  product_id = db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
+  promotion_id = db.Column(db.Integer, db.ForeignKey('promotions.id'), primary_key=True)

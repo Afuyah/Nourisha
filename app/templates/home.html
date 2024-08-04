@@ -1,6 +1,7 @@
 
 {% extends 'layout.html' %}
 
+
 {% block content %}
 <style>
     /* General Styles for Body */
@@ -167,167 +168,66 @@
 </section>
 
 
-  <style>
-        /* Hero Section Styling */
-        .hero h2.display-4 {
-            font-size: 1.8rem;
-            padding-top: 52px;
-            color: #6CF768;
-            font-weight: 500;
-        }
-
-        .full-height {
-            height: 100vh;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-            background: url('/static/cover_1.jpeg') no-repeat center center/cover;
-        }
-
-        .hero .overlay {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(144, 238, 144, 0.2);
-            z-index: 1;
-        }
-
-        .hero .container {
-            position: relative;
-            z-index: 2;
-            height: 100%;
-        }
-
-        /* Styles for small devices */
-        @media (max-width: 576px) {
-            .hero h2.display-4 {
-                font-size: 1.8rem;
-                padding-top: 50px;
-                color: #D6DBDF;
-                font-weight: 450;
-            }
-
-            .hero p.lead {
-                font-size: 1rem;
-                color: #E6B0AA;
-                padding-top: 16px;
-                font-family: 'Arial', sans-serif;
-            }
-
-            .full-height {
-                height: 90vh;
-                width: 100%;
-                position: relative;
-                overflow: hidden;
-                background: url('/static/cover_1.jpeg') no-repeat center center/cover;
-            }
-
-            .hero .btn {
-                position: relative;
-                top: 90%;
-                left: 10%;
-                transform: translate(-50%, -50%);
-                z-index: 3;
-            }
-        }
-
-        /* Card Styles */
-        .featured-products .card {
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .featured-products .card:hover {
-            transform: scale(1.05);
-        }
-
-        /* Button Styles */
-        .featured-products .btn {
-            background-color: #28a745;
-            border-color: #28a745;
-            color: #fff;
-        }
-
-        .featured-products .btn:hover {
-            background-color: #218838;
-            border-color: #218838;
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .featured-products .card {
-                margin-bottom: 30px;
-            }
-        }
-
-        /* Carousel Customizations */
-        .carousel-item {
-            transition: transform 2s ease;
-        }
-
-        .carousel-control-prev-icon,
-        .carousel-control-next-icon {
-            background-color: #28a745;
-        }
-    </style>
+ 
 
 
-  <section id="featured-products" class="featured-products py-5">
+<!-- Featured Categories Section -->
+<section id="featured-categories" class="featured-categories py-5">
     <div class="container">
-        <h3 class="display-4 text-center mb-5">Featured Selections</h3>
-        <p class="section-description text-center">Explore a wide range of products carefully curated for your needs. From fresh produce to pantry essentials, we've got you covered.</p>
+        <h3 class="display-4 text-center mb-5">Featured Categories</h3>
+        <p class="section-description text-center">Explore a wide range of categories carefully curated for your needs. From fresh produce to pantry essentials, we've got you covered.</p>
 
-        <div id="featuredProductsCarousel" class="carousel slide" data-ride="carousel" data-interval="5000">
+        <!-- Carousel for large screens -->
+        <div id="featuredCategoriesCarousel" class="carousel slide d-none d-md-block" data-ride="carousel">
             <div class="carousel-inner">
-                <div class="carousel-item active">
+                {% set categories_with_images = categories | selectattr('image', '!=', None) | list %}
+                {% set total_categories = categories_with_images | length %}
+                {% set items_per_slide_large = 3 %}
+                {% set num_slides_large = (total_categories // items_per_slide_large) + (1 if total_categories % items_per_slide_large != 0 else 0) %}
+                
+                {% for slide in range(num_slides_large) %}
+                <div class="carousel-item {% if slide == 0 %}active{% endif %}">
                     <div class="row">
-                        <div class="col-md-4">
-                            <div class="card h-100 border-0">
-                                <img src="static/hero.png" alt="Handpicked Fresh Fruits" class="card-img-top">
-                                <div class="card-body">
-                                    <h4 class="card-title">Handpicked Fresh Fruits</h4>
-                                    <p class="card-text">Fresh Fruits, Fresh Flavors, Every Bite Delights!</p>
-                                    <a href="#" class="btn btn-success btn-sm">Explore...</a>
-                                </div>
+                        {% for index in range(slide * items_per_slide_large, (slide + 1) * items_per_slide_large) %}
+                            {% if index < total_categories %}
+                            <div class="col-md-4">
+                                <a href="{{ url_for('main.product_listing_by_category', category_id=categories_with_images[index].id) }}" class="card mb-4">
+                                    <img src="{{ url_for('static', filename='uploads/' ~ categories_with_images[index].image) }}" alt="{{ categories_with_images[index].name }}" class="card-img-top">
+                                    <div class="card-body">
+                                        <h4 class="card-title">{{ categories_with_images[index].tagline }}</h4>
+                                        <p class="card-text">{{ categories_with_images[index].description }}</p>
+                                    </div>
+                                    <button class="btn btn-success btn-sm">Explore...</button>
+                                </a>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card h-100 border-0">
-                                <img src="static/cerials.png" alt="Cereal Kingdom" class="card-img-top">
-                                <div class="card-body">
-                                    <h5 class="card-title">Cereal Kingdom</h5>
-                                    <p class="card-text">Discover Exclusive Cereals for a Special Treat!</p>
-                                    <a href="#" class="btn btn-success btn-sm">Explore...</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card h-100 border-0">
-                                <img src="static/meat1.png" alt="Butcher's Picks" class="card-img-top">
-                                <div class="card-body">
-                                    <h5 class="card-title">Butcher's Picks</h5>
-                                    <p class="card-text">Naturally Raised Meats for Quality Conscious!</p>
-                                    <a href="#" class="btn btn-success btn-sm">Explore...</a>
-                                </div>
-                            </div>
-                        </div>
+                            {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
-                <!-- Add more carousel items for additional products -->
+                {% endfor %}
             </div>
-            <a class="carousel-control-prev" href="#featuredProductsCarousel" role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Previous</span>
-            </a>
-            <a class="carousel-control-next" href="#featuredProductsCarousel" role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Next</span>
-            </a>
+        </div>
+
+        <!-- Carousel for small devices -->
+        <div id="featuredCategoriesCarouselSmall" class="carousel slide d-md-none" data-ride="carousel">
+            <div class="carousel-inner">
+                {% for i in range(0, total_categories) %}
+                <div class="carousel-item {% if i == 0 %}active{% endif %}">
+                    <a href="{{ url_for('main.product_listing_by_category', category_id=categories_with_images[i].id) }}" class="card mb-4">
+                        <img src="{{ url_for('static', filename='uploads/' ~ categories_with_images[i].image) }}" alt="{{ categories_with_images[i].name }}" class="card-img-top">
+                        <div class="card-body">
+                            <h4 class="card-title">{{ categories_with_images[i].tagline }}</h4>
+                            <p class="card-text">{{ categories_with_images[i].description }}</p>
+                        </div>
+                        <button class="btn btn-success btn-sm">Explore...</button>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </section>
+
 
 
 
@@ -343,7 +243,7 @@
                         <i class="fas fa-truck fa-3x mb-3"></i>
                         <h5 class="card-title">Express Delivery</h5>
                         <p class="card-text">Get your groceries delivered within hours, ensuring freshness and convenience.</p>
-                        <a href="#" class="btn btn-success">Learn More</a>
+                      
                     </div>
                 </div>
             </div>
@@ -353,7 +253,7 @@
                         <i class="fas fa-shopping-basket fa-3x mb-3"></i>
                         <h5 class="card-title">Wide Product Selection</h5>
                         <p class="card-text">Choose from a wide range of fresh and high-quality groceries to meet your needs.</p>
-                        <a href="#" class="btn btn-success">Learn More</a>
+                       
                     </div>
                 </div>
             </div>
@@ -363,58 +263,64 @@
                         <i class="fas fa-users fa-3x mb-3"></i>
                         <h5 class="card-title">Friendly Customer Support</h5>
                         <p class="card-text">Our dedicated customer support team is here to assist you with any inquiries or concerns.</p>
-                        <a href="#" class="btn btn-success">Learn More</a>
+                       
                     </div>
                 </div>
             </div>
-            <!-- Add more service cards here -->
         </div>
-        <!-- Carousel for small devices -->
-        <div id="servicesCarousel" class="carousel slide d-md-none" data-ride="carousel">
-            <div class="carousel-inner">
-                <div class="carousel-item active">
-                    <div class="card mb-4 animate__animated animate__fadeInLeft">
-                        <div class="card-body">
-                            <i class="fas fa-truck fa-3x mb-3"></i>
-                            <h5 class="card-title">Express Delivery</h5>
-                            <p class="card-text">Get your groceries delivered within hours, ensuring freshness and convenience.</p>
-                            <a href="#" class="btn btn-success">Learn More</a>
-                        </div>
+        <!-- For small screens -->
+        <div class="d-md-none">
+            <div id="smallScreenService" class="d-block">
+                <div class="card mb-4 animate__animated animate__fadeInLeft">
+                    <div class="card-body">
+                        <i class="fas fa-truck fa-3x mb-3"></i>
+                        <h5 class="card-title">Express Delivery</h5>
+                        <p class="card-text">Get your groceries delivered within hours, ensuring freshness and convenience.</p>
+                        
                     </div>
                 </div>
-                <div class="carousel-item">
-                    <div class="card mb-4 animate__animated animate__fadeInLeft">
-                        <div class="card-body">
-                            <i class="fas fa-shopping-basket fa-3x mb-3"></i>
-                            <h5 class="card-title">Wide Product Selection</h5>
-                            <p class="card-text">Choose from a wide range of fresh and high-quality groceries to meet your needs.</p>
-                            <a href="#" class="btn btn-success">Learn More</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="carousel-item">
-                    <div class="card mb-4 animate__animated animate__fadeInLeft">
-                        <div class="card-body">
-                            <i class="fas fa-users fa-3x mb-3"></i>
-                            <h5 class="card-title">Friendly Customer Support</h5>
-                            <p class="card-text">Our dedicated customer support team is here to assist you with any inquiries or concerns.</p>
-                            <a href="#" class="btn btn-success">Learn More</a>
-                        </div>
-                    </div>
-                </div>
-                <!-- Add more carousel items here -->
             </div>
-            <a class="carousel-control-prev" href="#servicesCarousel" role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Previous</span>
-            </a>
-            <a class="carousel-control-next" href="#servicesCarousel" role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Next</span>
-            </a>
+            <div id="moreServices" class="d-none">
+                <div class="card mb-4 animate__animated animate__fadeInLeft">
+                    <div class="card-body">
+                        <i class="fas fa-shopping-basket fa-3x mb-3"></i>
+                        <h5 class="card-title">Wide Product Selection</h5>
+                        <p class="card-text">Choose from a wide range of fresh and high-quality groceries to meet your needs.</p>
+                       
+                    </div>
+                </div>
+                <div class="card mb-4 animate__animated animate__fadeInLeft">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-3x mb-3"></i>
+                        <h5 class="card-title">Friendly Customer Support</h5>
+                        <p class="card-text">Our dedicated customer support team is here to assist you with any inquiries or concerns.</p>
+                        
+                    </div>
+                </div>
+            </div>
+            <button id="moreButton" class="btn btn-primary">More services</button>
         </div>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const moreButton = document.getElementById('moreButton');
+    const moreServices = document.getElementById('moreServices');
+    const smallScreenService = document.getElementById('smallScreenService');
+
+    moreButton.addEventListener('click', function () {
+        if (moreServices.classList.contains('d-none')) {
+            moreServices.classList.remove('d-none');
+            moreButton.textContent = 'Less';
+        } else {
+            moreServices.classList.add('d-none');
+            moreButton.textContent = 'More';
+        }
+    });
+});
+</script>
+
 
 
 
@@ -423,16 +329,39 @@
 <section id="special-offers" class="special-offers py-5">
     <div class="container">
         <h2 class="display-4 text-center mb-5 animate__animated animate__fadeInDown">Special Offers</h2>
-        <div class="row row-cols-1 row-cols-md-2 g-4 d-none d-md-flex">
+        
+        <!-- Grid Layout for Medium to Large Devices -->
+        <div class="row row-cols-1 row-cols-md-1 g-4 d-none d-md-flex">
             {% for offer in offers %}
             <div class="col">
                 <div class="card h-100 border-0 shadow-sm animate__animated animate__fadeInUp">
-                    <img src="{{ url_for('static', filename=offer.image) }}" class="card-img-top" alt="{{ offer.title }}">
+                    <img src="{{ url_for('static', filename='uploads/' ~ offer.image) }}" class="card-img-top" alt="{{ offer.title }}">
                     <div class="card-body">
                         <h5 class="card-title text-center">{{ offer.title }}</h5>
                         <p class="card-text">{{ offer.description }}</p>
                         <p class="card-text"><small class="text-muted">Valid from {{ offer.start_date.strftime('%b %d, %Y') }} to {{ offer.end_date.strftime('%b %d, %Y') }}</small></p>
                         <div class="text-center">
+                            <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#offerModal{{ offer.id }}">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for Offer Details -->
+            <div class="modal fade" id="offerModal{{ offer.id }}" tabindex="-1" aria-labelledby="offerModalLabel{{ offer.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="offerModalLabel{{ offer.id }}">{{ offer.title }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <img src="{{ url_for('static', filename='uploads/' ~ offer.image) }}" class="img-fluid mb-3" alt="{{ offer.title }}">
+                            <p>{{ offer.description }}</p>
+                            <p><small class="text-muted">Valid from {{ offer.start_date.strftime('%b %d, %Y') }} to {{ offer.end_date.strftime('%b %d, %Y') }}</small></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <a href="#" class="btn btn-success">Shop Now</a>
                         </div>
                     </div>
@@ -440,184 +369,466 @@
             </div>
             {% endfor %}
         </div>
-        <!-- Carousel for small devices -->
+
+        <!-- Carousel for Small Devices -->
         <div id="specialOffersCarousel" class="carousel slide d-md-none" data-bs-ride="carousel">
             <div class="carousel-inner">
                 {% for offer in offers %}
                 <div class="carousel-item {% if loop.first %}active{% endif %}">
-                    <img src="{{ url_for('static', filename=offer.image) }}" class="d-block w-100" alt="{{ offer.title }}">
-                    <div class="carousel-caption d-none d-md-block">
+                    <img src="{{ url_for('static', filename='uploads/' ~ offer.image) }}" class="d-block w-100" alt="{{ offer.title }}">
+                    <div class="carousel-caption d-block">
                         <h5>{{ offer.title }}</h5>
                         <p>{{ offer.description }}</p>
                         <p><small class="text-muted">Valid from {{ offer.start_date.strftime('%b %d, %Y') }} to {{ offer.end_date.strftime('%b %d, %Y') }}</small></p>
-                        <a href="#" class="btn btn-success">Shop Now</a>
+                        <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#offerModal{{ offer.id }}">View Details</a>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-            <a class="carousel-control-prev" href="#specialOffersCarousel" role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Previous</span>
-            </a>
-            <a class="carousel-control-next" href="#specialOffersCarousel" role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Next</span>
-            </a>
+
         </div>
     </div>
 </section>
- <style>
-        /* Card Styling */
-        .card {
-            transition: transform 0.3s ease;
-            border-radius: 10px;
-            overflow: hidden;
-        }
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
+<style>
+    /* Card Styling */
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
 
-        /* Card Image */
-        .card-img-top {
-            object-fit: cover;
-            height: 250px; /* Adjust height as needed */
-        }
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
 
-        /* Button Styling */
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
-        }
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
 
-        .btn-success:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
-        }
+    .card:hover::before {
+        opacity: 1;
+    }
 
-        /* Text Styling */
-        .card-title {
-            font-size: 1.5rem;
-            color: #333;
-        }
+    /* Card Image */
+    .card-img-top {
+        object-fit: cover;
+        height: 250px; /* Adjust height as needed */
+        border-bottom: 2px solid #28a745;
+    }
 
-        .card-text {
-            color: #555;
-        }
+    /* Button Styling */
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+        transition: background-color 0.3s, border-color 0.3s;
+    }
 
-        .text-muted {
-            color: #777;
-        }
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
 
-        /* Carousel Caption (visible on small devices) */
-        .carousel-caption {
-            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-            padding: 1rem;
-            color: #fff;
-        }
+    /* Text Styling */
+    .card-title {
+        font-size: 1.5rem;
+        color: #333;
+    }
 
-        /* Carousel Navigation Icons */
-        .carousel-control-prev-icon,
-        .carousel-control-next-icon {
-            background-color: #28a745; /* Control icons color */
-        }
+    .card-text {
+        color: #555;
+    }
 
-    </style>
+    .text-muted {
+        color: #777;
+    }
+
+    /* Carousel Caption (visible on small devices) */
+    .carousel-caption {
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+        padding: 1rem;
+        color: #fff;
+        border-radius: 10px;
+    }
+
+    /* Carousel Navigation Icons */
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: #28a745; /* Control icons color */
+        border-radius: 50%;
+        padding: 10px;
+    }
+
+    .carousel-control-prev-icon::before,
+    .carousel-control-next-icon::before {
+        content: '';
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background-size: 100% 100%;
+        background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" fill="%23ffffff" viewBox="0 0 16 16"><path d="M11.354 1.146a.5.5 0 1 0-.708.708L13.293 4H1.5a.5.5 0 0 0 0 1h11.793l-2.647 2.646a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5z"/></svg>');
+    }
+
+    .carousel-control-prev-icon::before {
+        transform: rotate(180deg);
+    }
+</style>
+
+<!-- Add these scripts to the end of your HTML document -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('[data-bs-toggle="tooltip"]').tooltip();
+
+        // Add animation to cards on scroll
+        $(window).on('scroll', function() {
+            $('.card').each(function() {
+                if ($(this).offset().top < $(window).scrollTop() + $(window).height() - 100) {
+                    $(this).addClass('animate__animated animate__fadeInUp');
+                }
+            });
+        });
+
+        // Trigger scroll event on page load
+        $(window).trigger('scroll');
+    });
+</script>
+
+
+
 
 
     <!-- About Us Section -->
-    <section id="about-us" class="about-us py-2">
-        <div class="container">
-            <h2 class="display-4 text-center mb-3 animate__animated animate__fadeInDown">About Us</h2>
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="lead animate__animated animate__fadeInLeft">Nourisha Groceries is committed to providing the freshest and highest quality
-                        groceries to our customers. With a wide selection of products and convenient delivery options,
-                        we make grocery shopping easy and enjoyable.</p>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-
-
-
-
-
-    <!-- Blog Section -->
-    <section id="blog" class="blog py-5">
-        <div class="container">
-            <h2 class="display-4 text-center mb-3 animate__animated animate__fadeInDown">Latest from Our Blog</h2>
-            <div class="row">
-
-
-               <div class="col-md-4">
-                    <div class="card mb-4 animate__animated animate__fadeInLeft">
-                        <div class="card-body">
-                            <h5 class="card-title">5 Easy Recipes for Busy Weeknights</h5>
-                            <p class="card-text">Check out these quick and delicious meal ideas!</p>
-                        </div>
-                    </div>
-                </div>
-
-               <div class="col-md-4">
-                    <div class="card mb-4 animate__animated animate__fadeInLeft">
-                        <div class="card-body">
-                            <h5 class="card-title">5 Easy Recipes for Busy Weeknights</h5>
-                            <p class="card-text">Check out these quick and delicious meal ideas!</p>
-                        </div>
-                    </div>
-                </div>
-
-              <div class="col-md-4">
-                    <div class="card mb-4 animate__animated animate__fadeInLeft">
-                        <div class="card-body">
-                            <h5 class="card-title">5 Easy Recipes for Busy Weeknights</h5>
-                            <p class="card-text">Check out these quick and delicious meal ideas!</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Add more blog posts here -->
-            </div>
-        </div>
-    </section>
-
-
-
-    <!-- Contact Us Section -->
-    <section id="contact-us" class="contact-us py-5">
-        <div class="container">
-            <h2 class="display-4 text-center mb-5 animate__animated animate__fadeInDown">Contact Us</h2>
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="lead animate__animated animate__fadeInLeft">Have questions or feedback? Contact us using the form below:</p>
-                    <form>
-                        <div class="mb-3">
-                            <input type="text" class="form-control" placeholder="Your Name" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="email" class="form-control" placeholder="Your Email" required>
-                        </div>
-                        <div class="mb-3">
-                            <textarea class="form-control" rows="5" placeholder="Your Message" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-success">Submit</button>
-                    </form>
-                </div>
-                <div class="col-md-6">
-                    <p class="lead animate__animated animate__fadeInRight">Contact Information:</p>
-                    <ul class="list-unstyled animate__animated animate__fadeInRight">
-                        <li><i class="fas fa-envelope"></i> info@nourishagroceries.com</li>
-                        <li><i class="fas fa-phone"></i> +254707632230</li>
-                        <li><i class="fas fa-map-marker-alt"></i> 111th street Bombolulu, Mombasa, kenya</li>
-                    </ul>
+<section id="about-us" class="about-us py-5">
+    <div class="container">
+        <h2 class="display-4 text-center mb-4 animate__animated animate__fadeInDown">{{ about_us.title }}</h2>
+        <div class="row">
+            <div class="col-md-6 d-flex align-items-center">
+                <div class="about-content animate__animated animate__fadeInLeft">
+                    <p class="lead mb-4">{{ about_us.description }}</p>
+                    <a href="#services" class="btn btn-primary">Learn More About Our Services</a>
                 </div>
             </div>
+            <div class="col-md-6 d-flex align-items-center justify-content-center">
+                {% if about_us.image %}
+                <img src="{{ url_for('static', filename='uploads/' ~ about_us.image) }}" class="img-fluid rounded-circle shadow-lg" alt="About Us Image">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/default-about-us.jpg') }}" class="img-fluid rounded-circle shadow-lg" alt="Default About Us Image">
+                {% endif %}
+            </div>
         </div>
-    </section>
+    </div>
+</section>
+
+<style>
+    /* About Us Section Styling */
+    #about-us {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 2rem 0;
+    }
+
+    /* Title Styling */
+    #about-us h2 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #343a40;
+    }
+
+    /* Text Styling */
+    .about-content {
+        padding: 1rem;
+    }
+
+    .lead {
+        font-size: 1.25rem;
+        color: #495057;
+        line-height: 1.6;
+    }
+
+    /* Button Styling */
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+
+    /* Image Styling */
+    .img-fluid {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .rounded-circle {
+        border-radius: 50%;
+    }
+
+    /* Shadow Effect */
+    .shadow-lg {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+</style>
+
+<!-- Add these scripts to the end of your HTML document -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function(){
+        // Add animation to section on scroll
+        $(window).on('scroll', function() {
+            $('#about-us').each(function() {
+                if ($(this).offset().top < $(window).scrollTop() + $(window).height() - 100) {
+                    $(this).find('.animate__animated').each(function() {
+                        $(this).addClass('animate__fadeInUp');
+                    });
+                }
+            });
+        });
+
+        // Trigger scroll event on page load
+        $(window).trigger('scroll');
+    });
+</script>
 
 
+
+
+
+
+<section id="blog" class="blog py-5">
+    <div class="container">
+        <h2 class="display-4 text-center mb-4 animate__animated animate__fadeInDown">Latest from Our Blog</h2>
+        <div class="row">
+            {% for post in blog_posts %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="blog-item position-relative">
+                    {% if post.image %}
+                    <div class="blog-image position-relative overflow-hidden rounded-3">
+                        <img src="{{ url_for('static', filename='uploads/' ~ post.image) }}" class="img-fluid" alt="{{ post.title }}">
+
+                        <div class="overlay rounded-3"></div>
+                    </div>
+                    {% endif %}
+                    <div class="blog-content position-relative">
+                        <h4 class="mb-2">{{ post.title }}</h4>
+                        <p class="text-muted mb-3">{{ post.description }}</p>
+                        <a href="#" class="btn btn-primary">Read More</a>
+                        <div class="ribbon">Featured</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+
+<style>
+    /* Blog Section Styling */
+    #blog {
+        background: #f1f3f5;
+        padding: 3rem 0;
+    }
+
+    /* Blog Item Styling */
+    .blog-item {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1rem;
+        background: #fff;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid #e1e1e1;
+    }
+
+    .blog-item:hover {
+        transform: scale(1.03);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Blog Image Styling */
+    .blog-image {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .blog-image img {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.5s ease, filter 0.5s ease;
+    }
+
+    .blog-image:hover img {
+        transform: scale(1.1);
+        filter: brightness(70%);
+    }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        transition: opacity 0.3s ease;
+        opacity: 0;
+    }
+
+    .blog-image:hover .overlay {
+        opacity: 1;
+    }
+
+    /* Blog Content Styling */
+    .blog-content {
+        padding: 1rem;
+        position: relative;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+
+    .blog-item h4 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #343a40;
+    }
+
+    .blog-item p {
+        color: #6c757d;
+    }
+
+    /* Ribbon Styling */
+    .ribbon {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: #28a745;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        transform: rotate(45deg);
+        transform-origin: top right;
+        z-index: 1;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .blog-image {
+            height: 150px;
+        }
+    }
+</style>
+
+
+
+
+  <section id="contact-us" class="contact-us py-5">
+    <div class="container">
+        <h2 class="display-4 text-center mb-5 animate__animated animate__fadeInDown">Contact Us</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <p class="lead animate__animated animate__fadeInLeft">Have questions or feedback? Contact us using the form below:</p>
+                <form id="contact-form" method="POST" data-url="{{ url_for('main.contact') }}">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control") }}
+                        {% for error in form.name.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control") }}
+                        {% for error in form.email.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.message.label(class="form-label") }}
+                        {{ form.message(class="form-control", rows=5) }}
+                        {% for error in form.message.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center">
+                        {{ form.submit(class="btn btn-success") }}
+                    </div>
+                </form>
+                <div id="form-feedback"></div>
+            </div>
+            <div class="col-md-6">
+                <p class="lead animate__animated animate__fadeInRight">Contact Information:</p>
+                <ul class="list-unstyled animate__animated animate__fadeInRight">
+                    <li><i class="fas fa-envelope"></i> info@nourishagroceries.com</li>
+                    <li><i class="fas fa-phone"></i> +254707632230</li>
+                    <li><i class="fas fa-map-marker-alt"></i> 111th street Bombolulu, Mombasa, Kenya</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+ <script>
+        $(document).ready(function() {
+            $('#contact-form').on('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+                
+                var form = $(this);
+                var url = form.data('url');
+                var formData = form.serialize();
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#form-feedback').html('<div class="alert alert-success">' + response.success + '</div>');
+                            form.trigger('reset'); // Reset the form
+                        } else if (response.error) {
+                            $('#form-feedback').html('<div class="alert alert-danger">' + response.error + '</div>');
+                        }
+                    },
+                    error: function() {
+                        $('#form-feedback').html('<div class="alert alert-danger">An error occurred while sending your message. Please try again later.</div>');
+                    }
+                });
+            });
+        });
+    </script>
 
 <!-- Testimonials Section -->
 <section id="testimonials" class="testimonials py-5">
@@ -625,12 +836,20 @@
         <h2 class="display-4 text-center mb-5">Real Stories, Real Experiences!</h2>
         <p class="text-center lead">Discover what our customers have to say about their experiences with us:</p>
         <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+            <!-- Carousel Indicators -->
+            <ol class="carousel-indicators">
+                <li data-bs-target="#testimonialCarousel" data-bs-slide-to="0" class="active"></li>
+                <li data-bs-target="#testimonialCarousel" data-bs-slide-to="1"></li>
+                <li data-bs-target="#testimonialCarousel" data-bs-slide-to="2"></li>
+                <!-- Add more indicators here if you add more testimonials -->
+            </ol>
+
             <div class="carousel-inner">
                 <div class="carousel-item active">
                     <div class="card text-center">
                         <div class="card-body">
                             <p class="card-text">"I've been a loyal customer for years, and I'm always impressed by the quality of products and exceptional service. Highly recommend!"</p>
-                            <p class="card-text">- Sarah Johnson</p>
+                            <p class="card-text"><strong>- Sarah Johnson</strong></p>
                         </div>
                     </div>
                 </div>
@@ -638,7 +857,7 @@
                     <div class="card text-center">
                         <div class="card-body">
                             <p class="card-text">"The variety of options available is incredible, and I love that I can find everything I need in one place. Great job, team!"</p>
-                            <p class="card-text">- Michael Smith</p>
+                            <p class="card-text"><strong>- Michael Smith</strong></p>
                         </div>
                     </div>
                 </div>
@@ -646,16 +865,18 @@
                     <div class="card text-center">
                         <div class="card-body">
                             <p class="card-text">"I'm amazed by the fast delivery and the freshness of the products. Thank you for making my shopping experience so enjoyable!"</p>
-                            <p class="card-text">- Emily Davis</p>
+                            <p class="card-text"><strong>- Emily Davis</strong></p>
                         </div>
                     </div>
                 </div>
                 <!-- Add more testimonials here -->
             </div>
-            
+
+           
         </div>
     </div>
 </section>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const navbar = document.querySelector('.navbar');
@@ -673,6 +894,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
  
 });
+
+
+ $(document).ready(function () {
+        $('#featuredCategoriesCarousel').on('slide.bs.carousel', function (e) {
+            var $e = $(e.relatedTarget);
+            var idx = $e.index();
+            var itemsPerSlide = 3;
+            var totalItems = $('.carousel-item').length;
+
+            if (idx >= totalItems - (itemsPerSlide - 1)) {
+                var it = itemsPerSlide - (totalItems - idx);
+                for (var i = 0; i < it; i++) {
+                    // append slides to end
+                    if (e.direction == "left") {
+                        $('.carousel-item').eq(i).appendTo('.carousel-inner');
+                    }
+                    else {
+                        $('.carousel-item').eq(0).appendTo('.carousel-inner');
+                    }
+                }
+            }
+        });
+    });
+    
 </script>
 
 

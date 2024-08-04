@@ -6,6 +6,8 @@ from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from app import db, mail, socketio
 from app.admin import admin_bp
+from werkzeug.utils import secure_filename
+
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
@@ -26,8 +28,9 @@ from app.main.forms import (
     DateSelectionForm,
     FulfillmentForm,
     ShopForUserForm,
+    EditProductCategoryForm,
     AddUserForm,
-    CheckoutForm,
+    
 )
 from app.main.models import (
     Arealine,
@@ -380,16 +383,39 @@ def edit_role(role_id):
 @login_required
 def product_categories():
     form = AddProductCategoryForm()
+    edit_form = EditProductCategoryForm()
 
     if form.validate_on_submit():
-        category = ProductCategory(name=form.name.data)
+        category = ProductCategory(name=form.name.data, tagline=form.tagline.data, description=form.description.data)
         db.session.add(category)
         db.session.commit()
         flash('Product category added successfully', 'success')
+        return redirect(url_for('admin.product_categories'))
 
     categories = ProductCategory.query.all()
+    return render_template('add_product_category.html', form=form, edit_form=edit_form, categories=categories)
 
-    return render_template('add_product_category.html', form=form, categories=categories)
+@admin_bp.route('/edit_category/<int:category_id>', methods=['POST'])
+@login_required
+def edit_category(category_id):
+    edit_form = EditProductCategoryForm()
+    category = ProductCategory.query.get_or_404(category_id)
+
+    if edit_form.validate_on_submit():
+        category.name = edit_form.name.data
+        category.tagline = edit_form.tagline.data
+        category.description = edit_form.description.data
+
+        if edit_form.image.data:
+            filename = secure_filename(edit_form.image.data.filename)
+            image_path = os.path.join(current_app.root_path, 'static/uploads', filename)
+            edit_form.image.data.save(image_path)
+            category.image = filename
+
+        db.session.commit()
+        flash('Category updated successfully', 'success')
+
+    return redirect(url_for('admin.product_categories'))
 
 
 # Add a new route to display products under a specific category
@@ -1345,7 +1371,7 @@ def place_order_for_user():
     try:
         data = request.get_json()
         user_id = data.get('user_id')
-
+        username = data.get('username')
         if not user_id:
             return jsonify({'message': 'User ID is required'}), 400
 

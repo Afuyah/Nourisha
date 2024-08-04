@@ -19,8 +19,8 @@
     </div>
 
     <!-- Cart Display Section -->
-    <div id="cart" class="mt-4 card p-3 shadow-sm">
-    <h3 class="text-secondary">Cart for Selected User</h3>
+    <div id="cart" class="mt-4 card p-2 shadow-sm">
+    <h4 class="text-secondary">Cart for Selected User </h4>
     <div class="table-responsive">
          <table id="cartTable" class="table">
             <thead class="thead-light">
@@ -42,10 +42,10 @@
 
         <!-- Action Buttons -->
         <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#productModal">Add Item</button>
+            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#productModal">Add Item</button>
             <div>
-                <button type="button" class="btn btn-danger" onclick="clearCart()">Clear Cart</button>
-                <button type="button" class="btn btn-success" onclick="placeOrder()">Place Order</button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="clearCart()">Clear Cart</button>
+                <button type="button" class="btn btn-sm btn-success" onclick="placeOrder()">Place Order</button>
             </div>
         </div>
     </div>
@@ -146,7 +146,7 @@
 .btn-primary,
 .btn-danger,
 .btn-success {
-    border-radius: 20px;
+    border-radius: 10px;
 }
 
 .btn-primary:hover,
@@ -185,10 +185,10 @@
     height: 38px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 570px) {
     .modal-dialog {
         max-width: 100%;
-        margin: 1rem;
+        margin: 1 rem;
     }
 }
 </style>
@@ -222,7 +222,7 @@ function fetchUserCart(userId) {
             var totalPrice = 0;
 
             if (data.cart_items.length === 0) {
-                document.getElementById('cartItems').innerHTML = '<tr><td colspan="6">No items in cart.</td></tr>';
+                document.getElementById('cartItems').innerHTML = '<tr><td colspan="6">No items .</td></tr>';
             } else {
                 // Populate cart items table
                 data.cart_items.forEach(item => {
@@ -255,7 +255,7 @@ function fetchUserCart(userId) {
         var userId = document.getElementById('user').value;
         var csrfToken = document.getElementById('csrf_token').value;
 
-        if (confirm('Are you sure you want to clear the cart?')) {
+        if (confirm('Please Confirm You want to clear the cart?')) {
             fetch('/admin/admin/clear_cart', {
                 method: 'POST',
                 headers: {
@@ -424,7 +424,7 @@ function removeFromCart(productId) {
         return;
     }
 
-    console.log('Removing product from cart:', { user_id: userId, product_id: productId });
+    console.log('Removing Item from cart:', { user_id: userId, product_id: productId });
 
     fetch('/admin/admin/remove_from_cart', {
         method: 'POST',
@@ -448,7 +448,7 @@ function removeFromCart(productId) {
     })
     .catch(error => {
         console.error('Error removing product from cart:', error);
-        alert('An error occurred while removing the product from the cart.');
+        alert('An error occurred while removing the Item from the cart.');
     });
 }
 
@@ -495,10 +495,6 @@ function removeFromCart(productId) {
         document.getElementById('totalPrice').innerHTML = ''; // Clear total price
         document.getElementById('user').value = ''; // Reset user selection
         $('#orderSummaryModal').modal('hide'); // Hide order summary modal
-    }
-
-
- 
-   
+    } 
 </script>
 {% endblock %}

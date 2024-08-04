@@ -1,0 +1,10 @@
+
+<!-- Modal for Tagging Products -->
+<form method="POST" action="{{ url_for('site.tag_products', id=promotion.id) }}">
+    {{ form.csrf_token }}
+    <div class="mb-3">
+        <label class="form-label">Select Products</label>
+        {{ form.products(class='form-select') }}
+    </div>
+    <button type="submit" class="btn btn-primary">Tag Products</button>
+</form>

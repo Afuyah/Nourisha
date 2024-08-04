@@ -3,8 +3,8 @@ from app import db, mail
 from flask import render_template, abort, flash, redirect, url_for, request, jsonify, session,Flask, current_app as app
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
-from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm,RecommendationForm
-from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick, OrderItem, Offer
+from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm,RecommendationForm, ContactForm
+from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
@@ -63,20 +63,58 @@ def send_email(to, subject, body):
   mail.send(msg)
 
 
-@bp.route('/')
+@bp.route('/', methods=['GET', 'POST'])
 def index():
-  user_authenticated = current_user.is_authenticated
-  offers = Offer.query.filter_by(active=True).all()
+    user_authenticated = current_user.is_authenticated
+    offers = Offer.query.filter_by(active=True).all()
+    categories = ProductCategory.query.all()  # Fetch the categories
+    about_us = AboutUs.query.first()
+    blog_posts = BlogPost.query.order_by(BlogPost.date_posted.desc()).limit(3).all() 
+    form = ContactForm()
+    if form.validate_on_submit():
+        contact_message = ContactMessage(
+            name=form.name.data,
+            email=form.email.data,
+            message=form.message.data
+        )
+        try:
+            db.session.add(contact_message)
+            db.session.commit()
+            flash('Your message has been sent successfully!', 'success')
+            return redirect(url_for('main.index'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error sending message: {e}', 'danger')
 
-  return render_template('home.html',
-                         title='Home',
-                         product_listing_url=url_for('main.product_listing'),
-                         user_authenticated=user_authenticated, offers=offers)
+    return render_template('home.html',
+                           title='Home',
+                           product_listing_url=url_for('main.product_listing'),
+                           user_authenticated=user_authenticated, 
+                           offers=offers, 
+                           categories=categories,
+                           about_us=about_us,
+                           blog_posts=blog_posts,
+                           form=form)
 
-@bp.route('/about_us')
-def about_us():
-    return render_template('about_us.html', title='About Us')
-    
+
+@bp.route('/contact', methods=['POST'])
+def contact():
+    form = ContactForm()
+    if form.validate_on_submit():
+        contact_message = ContactMessage(
+            name=form.name.data,
+            email=form.email.data,
+            message=form.message.data
+        )
+        try:
+            db.session.add(contact_message)
+            db.session.commit()
+            return jsonify({'success': 'Your message has been sent successfully!'})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': f'Error sending message: {e}'})
+    return jsonify({'error': 'Invalid input'})
+
 
 
 @bp.route('/dashboard')
@@ -92,7 +130,7 @@ def user_dashboard():
 
 def send_welcome_email(user):
   msg = Message('Welcome to Our Application!', recipients=[user.email])
-  msg.body = f"Dear {user.username},\n\nWelcome to our application! We're excited to have you on board."
+  msg.body = f"Dear {user.username},\n\nWelcome to Nourisha!!! We're excited to have you on board."
   # You can also use HTML for the email body:
   # msg.html = render_template('welcome_email.html', user=user)
   mail.send(msg)
@@ -192,16 +230,8 @@ def login():
         identifier = form.identifier.data
         password = form.password.data
 
-        # Check if the identifier is an email
-        user = User.query.filter_by(email=identifier).first()
-
-        # If not found, check if it's a phone number
-        if not user:
-            user = User.query.filter_by(phone=identifier).first()
-
-        # If still not found, check if it's a username
-        if not user:
-            user = User.query.filter_by(username=identifier).first()
+        # Check if the identifier is an email, phone number, or username
+        user = User.query.filter((User.email == identifier) | (User.phone == identifier) | (User.username == identifier)).first()
 
         if user and user.check_password(password):
             if user.confirmed:
@@ -212,16 +242,25 @@ def login():
                 db.session.commit()
                 flash(f'Welcome back, {current_user.username}!', 'success')
 
-                if user.role and user.role.name == 'admin':
-                    return redirect(url_for('admin.admin_dashboard'))
+                redirect_url = url_for('admin.admin_dashboard') if user.role and user.role.name == 'admin' else url_for('main.index')
 
-                return redirect(url_for('main.index'))
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({'redirect': redirect_url})
+
+                return redirect(redirect_url)
+
             else:
                 flash('Your account is not confirmed. Please check your email for the confirmation link.', 'warning')
+
         else:
             flash('Invalid credentials. Please check your username/email/phone number and password.', 'danger')
 
-    return render_template('login.html', form=form)
+    # Render the login template with or without AJAX based on the request type
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template('user_uth.html', form=form)  # Assuming `user_auth.html` is the form template
+    return render_template('user_uth.html', form=form)
+
+
 
 @bp.before_request
 def before_request():
@@ -236,6 +275,13 @@ def before_request():
         session_duration = utc_now - login_time
         session['average_session_duration'] = session_duration.total_seconds()
         session['login_time'] = utc_now
+
+
+@bp.route('/check_authentication', methods=['GET'])
+def check_authentication():
+    return jsonify({'is_authenticated': current_user.is_authenticated})
+
+
 
 @bp.route('/logout')
 @login_required
@@ -258,6 +304,12 @@ def add_role():
   roles = Role.query.all()
 
   return render_template('add_role.html', form=form, roles=roles)
+
+@bp.route('/featured-categories')
+def featured_categories():
+    categories = ProductCategory.query.all()
+    return render_template('home.html', categories=categories)
+
 
 
 @bp.route('/add_product_category', methods=['GET', 'POST'])
@@ -386,7 +438,7 @@ def add_product():
             unit_measurement=form.unit_measurement.data,
             quantity_in_stock=form.quantity_in_stock.data,
             discount_percentage=form.discount_percentage.data,
-            promotional_tag=form.promotional_tag.data,
+            
             nutritional_information=form.nutritional_information.data,
             country_of_origin=form.country_of_origin.data,
             supplier_id=form.supplier.data,
@@ -433,46 +485,47 @@ def products():
 @bp.route('/add_product_image', methods=['GET', 'POST'])
 @login_required
 def add_product_image():
-  form = ProductImageForm()
+    form = ProductImageForm()
 
-  # Populate the product choices in the form
-  form.product.choices = [(product.id, product.brand)
-                          for product in Product.query.all()]
+    # Populate the product choices in the form
+    form.product.choices = [(product.id, product.brand) for product in Product.query.all()]
 
-  if form.validate_on_submit():
-    # Handle image uploads and save links to the database
-    product_id = form.product.data
-    cover_image = form.cover_image.data
-    image1 = form.image1.data
-    image2 = form.image2.data
-    image3 = form.image3.data
+    if form.validate_on_submit():
+        product_id = form.product.data
+        cover_image = form.cover_image.data
+        image1 = form.image1.data
+        image2 = form.image2.data
+        image3 = form.image3.data
 
-    # Save cover image
-    cover_filename = save_image(cover_image)
-    cover_image_entry = ProductImage(product_id=product_id,
-                                     cover_image=cover_filename)
-    db.session.add(cover_image_entry)
+        try:
+            # Save cover image
+            cover_filename = save_image(cover_image)
+            cover_image_entry = ProductImage(product_id=product_id, cover_image=cover_filename)
+            db.session.add(cover_image_entry)
 
-    # Save additional images
-    for image_data in [image1, image2, image3]:
-      if image_data:
-        filename = save_image(image_data)
-        image_entry = ProductImage(product_id=product_id, cover_image=filename)
-        db.session.add(image_entry)
+            # Save additional images
+            for image_data in [image1, image2, image3]:
+                if image_data:
+                    filename = save_image(image_data)
+                    image_entry = ProductImage(product_id=product_id, cover_image=filename)
+                    db.session.add(image_entry)
 
-    db.session.commit()
-    flash('Images uploaded successfully', 'success')
-    return redirect(url_for('main.add_product_image'))
+            db.session.commit()
+            flash('Images uploaded successfully', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'An error occurred while uploading images: {str(e)}', 'danger')
+        
+        return redirect(url_for('main.add_product_image'))
 
-  return render_template('add_product_image.html', form=form)
-
+    return render_template('add_product_image.html', form=form)
 
 def save_image(image_data):
-    
+    # Generate a unique filename
     filename = generate_unique_filename(image_data.filename)
-    image_data.save(os.path.join('app', 'static', 'uploads', filename))
+    file_path = os.path.join('app', 'static', 'uploads', filename)
+    image_data.save(file_path)
     return filename
-
 
 def generate_unique_filename(original_filename):
     filename, extension = os.path.splitext(original_filename)
@@ -512,12 +565,11 @@ def product_listing():
     form = AddProductForm()
     return render_template('product_listing.html', categories=categories, form=form, products=products)
 
-# Route to render the product listing based on the selected category
 @bp.route('/product_listing/<int:category_id>')
 def product_listing_by_category(category_id):
     category = ProductCategory.query.get_or_404(category_id)
     products = Product.query.filter_by(category=category).all()
-    categories = ProductCategory.query.all()  # Fetch all categories to display in the carousel
+    categories = ProductCategory.query.all()  # Fetch all categories to display in the sidebar if needed
     form = AddProductForm()
     return render_template('product_listing.html', category=category, products=products, categories=categories, form=form)
 
