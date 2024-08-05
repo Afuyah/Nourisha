@@ -193,7 +193,6 @@ class OfferForm(FlaskForm):
   image = FileField('Image', validators=[FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')])
   submit = SubmitField('Submit')
 
-
 class PaymentForm(FlaskForm):
   transaction_id = StringField('Transaction ID', validators=[DataRequired()])
   amount_paid = DecimalField('Amount Paid', places=2, validators=[DataRequired()])

@@ -50,16 +50,22 @@ def edit_offer(offer_id):
         offer.active = form.active.data
 
         if form.image.data:
-            filename = secure_filename(form.image.data.filename)
-            image_path = os.path.join(current_app.root_path, 'static/uploads', filename)
-            form.image.data.save(image_path)
-            offer.image = filename
+            # Debugging output
+            print(f"form.image.data: {form.image.data}")
+            print(f"form.image.data.filename: {form.image.data.filename}")
+
+            if form.image.data.filename != '':
+                filename = secure_filename(form.image.data.filename)
+                image_path = os.path.join(current_app.root_path, 'static/uploads', filename)
+                form.image.data.save(image_path)
+                offer.image = filename
 
         db.session.commit()
         flash('Offer updated successfully!', 'success')
         return redirect(url_for('site.offers'))
 
     return render_template('edit_offer.html', form=form, offer=offer)
+
 
 @site_bp.route('/delete_offer/<int:offer_id>', methods=['POST'])
 @login_required

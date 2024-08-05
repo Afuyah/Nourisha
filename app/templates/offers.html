@@ -4,7 +4,7 @@
 <div class="container mt-5">
     <h1>Create Offer</h1>
     <form method="POST" enctype="multipart/form-data">
-        {{ form.hidden_tag() }}
+        {{ form.csrf_token() }}
         <div class="form-group">
             {{ form.title.label }}
             {{ form.title(class="form-control") }}
@@ -21,9 +21,9 @@
             {{ form.end_date.label }}
             {{ form.end_date(class="form-control") }}
         </div>
-        <div class="form-group">
-            {{ form.active.label }}
+        <div class="form-group form-check">
             {{ form.active(class="form-check-input") }}
+            {{ form.active.label(class="form-check-label") }}
         </div>
         <div class="form-group">
             {{ form.image.label }}
@@ -42,6 +42,7 @@
             <img src="{{ url_for('static', filename='uploads/' ~ offer.image) }}" alt="{{ offer.title }}" width="100">
             <a href="{{ url_for('site.edit_offer', offer_id=offer.id) }}" class="btn btn-secondary btn-sm">Edit</a>
             <form method="POST" action="{{ url_for('site.delete_offer', offer_id=offer.id) }}" style="display:inline;">
+                {{ form.csrf_token() }}
                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
             </form>
         </li>
