@@ -242,7 +242,9 @@ def login():
                 db.session.commit()
                 flash(f'Welcome back, {current_user.username}!', 'success')
 
-                redirect_url = url_for('admin.admin_dashboard') if user.role and user.role.name == 'admin' else url_for('main.index')
+                # Redirect to the originally requested URL if present
+                redirect_url = session.get('next', url_for('main.index'))
+                session.pop('next', None)  # Remove the 'next' URL from the session
 
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return jsonify({'redirect': redirect_url})
@@ -257,8 +259,8 @@ def login():
 
     # Render the login template with or without AJAX based on the request type
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return render_template('user_uth.html', form=form)  # Assuming `user_auth.html` is the form template
-    return render_template('user_uth.html', form=form)
+        return render_template('user_auth.html', form=form)  # Assuming `user_auth.html` is the form template
+    return render_template('user_auth.html', form=form)
 
 
 

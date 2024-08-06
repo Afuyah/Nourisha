@@ -49,16 +49,17 @@ def edit_offer(offer_id):
         offer.end_date = form.end_date.data
         offer.active = form.active.data
 
-        if form.image.data:
-            # Debugging output
-            print(f"form.image.data: {form.image.data}")
-            print(f"form.image.data.filename: {form.image.data.filename}")
-
-            if form.image.data.filename != '':
-                filename = secure_filename(form.image.data.filename)
-                image_path = os.path.join(current_app.root_path, 'static/uploads', filename)
-                form.image.data.save(image_path)
+        # Handle image upload
+        image_data = form.image.data
+        if image_data and hasattr(image_data, 'filename') and image_data.filename:
+            filename = secure_filename(image_data.filename)
+            image_path = os.path.join(current_app.root_path, 'static/uploads', filename)
+            try:
+                image_data.save(image_path)
                 offer.image = filename
+            except Exception as e:
+                flash(f'Error saving image: {e}', 'danger')
+                return redirect(url_for('site.edit_offer', offer_id=offer_id))
 
         db.session.commit()
         flash('Offer updated successfully!', 'success')
@@ -101,19 +102,16 @@ def about_us():
         about_us.description = form.description.data
 
         # Handle image upload
-        if form.image.data:
-            filename = secure_filename(form.image.data.filename)
+        image_data = form.image.data
+        if image_data and hasattr(image_data, 'filename') and image_data.filename:
+            filename = secure_filename(image_data.filename)
             image_path = os.path.join(current_app.root_path, 'static/uploads', filename)
             try:
-                form.image.data.save(image_path)
+                image_data.save(image_path)
                 about_us.image = filename
             except Exception as e:
                 flash(f'Error saving image: {e}', 'danger')
                 return redirect(url_for('site.about_us'))
-        else:
-            # Keep the existing image if no new image is uploaded
-            if about_us.image is None:
-                about_us.image = 'default-image.jpg'  # Or any other default image
 
         # Add the new AboutUs record to the session if it was newly created
         if not AboutUs.query.first():
@@ -169,11 +167,17 @@ def edit_blog(post_id):
         post.title = form.title.data
         post.description = form.description.data
 
-        if form.image.data:
-            filename = secure_filename(form.image.data.filename)
+        # Handle image upload
+        image_data = form.image.data
+        if image_data and hasattr(image_data, 'filename') and image_data.filename:
+            filename = secure_filename(image_data.filename)
             image_path = os.path.join(current_app.root_path, 'static/uploads', filename)
-            form.image.data.save(image_path)
-            post.image = filename
+            try:
+                image_data.save(image_path)
+                post.image = filename
+            except Exception as e:
+                flash(f'Error saving image: {e}', 'danger')
+                return redirect(url_for('site.edit_blog', post_id=post_id))
 
         db.session.commit()
         flash('Blog post updated successfully!', 'success')

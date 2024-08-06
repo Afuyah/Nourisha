@@ -129,7 +129,7 @@
   </div>
 
 <!-- Product Modal -->
-<div class="modal fade add-to-cart-modal" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
+<div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-light">
@@ -138,27 +138,31 @@
             </div>
             <div class="modal-body">
                 <p class="lead">Do you want to add this item to your cart?</p>
-                <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}">
+
+                <!-- Quantity and Custom Description Form -->
+                <form id="addToCartForm{{ product.id }}" method="post">
                     {{ form.hidden_tag() }}
                     <div class="mb-3">
-                        <label for="quantity{{ product.id }}" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
-                        <input type="number" class="form-control" id="quantity{{ product.id }}" name="quantity" min="1" value="1">
+                        <label for="quantity" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
                     </div>
                     <div class="mb-3">
-                        <label for="custom_description{{ product.id }}" class="form-label">Custom Description:</label>
-                        <textarea class="form-control" id="custom_description{{ product.id }}" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
+                        <label for="custom_description" class="form-label">Custom Description:</label>
+                        <textarea class="form-control" id="custom_description" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
+                        <input type="hidden" id="hidden_custom_description" name="hidden_custom_description" value="">
                     </div>
-                    <button class="btn btn-success" type="submit">Add to Cart</button>
+                    <button type="button" class="btn btn-success add-to-cart-btn" data-product-id="{{ product.id }}">Add to Cart</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-
-
-  {% endfor %}
+    {% endfor %}
 </div>
+
+
+
 
 
 
@@ -171,23 +175,10 @@
     </a>
 </div>
 
-<!-- Modal HTML -->
-<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="loginModalLabel">Login</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="modalBody">
-                <!-- Login form will be loaded here -->
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <script>
-   $(document).ready(function() {
+$(document).ready(function() {
     // Function to check authentication and either show login modal or proceed with action
     function checkAuthentication(action) {
         $.ajax({
@@ -278,7 +269,52 @@
     });
 });
 
+    document.addEventListener('DOMContentLoaded', function () {
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const productId = this.getAttribute('data-product-id');
+            const form = document.getElementById(`addToCartForm${productId}`);
+            const quantity = form.querySelector('input[name="quantity"]').value;
+            const customDescription = form.querySelector('textarea[name="custom_description"]').value;
+
+            fetch(`/cart/add_to_cart/${productId}/${quantity}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    quantity: quantity,
+                    custom_description: customDescription
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Handle success
+                    alert('Item added to cart successfully.');
+                    // Optionally, close the modal
+                    bootstrap.Modal.getInstance(document.getElementById(`addToCartModal${productId}`)).hide();
+                } else if (data.redirect_to_login) {
+                    // Handle case when user is not authenticated
+                    $('#loginModal').modal('show'); // Assuming you have a login modal with this ID
+                } else {
+                    // Handle errors
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+    });
+});
+ 
 </script>
+
 
 
 

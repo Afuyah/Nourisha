@@ -10,52 +10,43 @@ from flask_mail import Message
 from app.main import bp
 from functools import wraps
 
+from app import login_required
 
 
-# Decorator for login-required routes
-def login_required(func):
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated:
-            flash('Please Login to complete this action!.', 'warning')
-            return redirect(url_for('main.login', next=request.url))
-        return func(*args, **kwargs)
-
-    return decorated_function
-
-
-        
 @cart_bp.route('/add_to_cart/<int:product_id>/<int:quantity>', methods=['POST'])
 @login_required
 def add_to_cart(product_id, quantity):
     product = Product.query.get_or_404(product_id)
 
     if quantity <= 0:
-        return jsonify({'error': 'Quantity must be greater than zero.'}), 400
+        return jsonify({'success': False, 'error': 'Quantity must be greater than zero.'})
 
     if quantity > product.quantity_in_stock:
-        return jsonify({'error': 'Sorry, but we have only {} items available in stock.'.format(product.quantity_in_stock)}), 400
+        return jsonify({'success': False, 'error': f'Sorry, but we have only {product.quantity_in_stock} items available in stock.'})
 
     cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product.id).first()
-    quantity = int(request.form.get('quantity'))
-    custom_description = request.form.get('custom_description', '')
+    quantity = int(request.json.get('quantity'))
+    custom_description = request.json.get('custom_description', '')
 
     if cart_item:
         cart_item.quantity += quantity
         cart_item.custom_description = custom_description
     else:
-        cart_item = Cart(user_id=current_user.id, product_id=product.id, quantity=quantity, custom_description=custom_description)
+        cart_item = Cart(user_id=current_user.id,
+                          product_id=product.id,
+                          quantity=quantity,
+                          custom_description=custom_description)
         db.session.add(cart_item)
 
     product.quantity_in_stock -= quantity
 
     try:
         db.session.commit()
-        cart_item_count = Cart.query.filter_by(user_id=current_user.id).count()
-        return jsonify({'message': 'Item added to cart successfully.', 'cartItemCount': cart_item_count, 'productId': product.id}), 200
+        return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'Error adding item to cart: {}'.format(str(e))}), 500
+        return jsonify({'success': False, 'error': f'Error adding item to cart: {str(e)}'})
+
 
 # Route to view the cart
 @cart_bp.route('/view_cart')

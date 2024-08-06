@@ -168,7 +168,214 @@
 </section>
 
 
- 
+  <style>
+    /* Hero Section Styling */
+    .hero h2.display-4 {
+        font-size: 1.8rem;
+        padding-top: 52px;
+        color: #6CF768;
+        font-weight: 500;
+    }
+
+    .full-height {
+        height: 100vh;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        background: url('/static/cover_1.jpeg') no-repeat center center/cover;
+    }
+
+    .hero .overlay {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(144, 238, 144, 0.2);
+        z-index: 1;
+    }
+
+    .hero .container {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+    }
+
+    /* Styles for small devices */
+    @media (max-width: 576px) {
+        .hero h2.display-4 {
+            font-size: 1.8rem;
+            padding-top: 50px;
+            color: #D6DBDF;
+            font-weight: 450;
+        }
+
+        .hero p.lead {
+            font-size: 1rem;
+            color: #E6B0AA;
+            padding-top: 16px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .full-height {
+            height: 90vh;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            background: url('/static/cover_1.jpeg') no-repeat center center/cover;
+        }
+
+        .hero .btn {
+            position: relative;
+            top: 90%;
+            left: 10%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
+    }
+/* Card Hover Animations */
+.featured-categories .card {
+    display: block;
+    transition: transform 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.featured-categories .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Card Image Hover Effects */
+.featured-categories .card-img-top {
+    transition: transform 0.3s ease;
+}
+
+.featured-categories .card:hover .card-img-top {
+    transform: scale(1.1);
+}
+
+/* Carousel Customizations */
+.carousel-inner .carousel-item {
+    transition: transform 1s ease-in-out;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: #28a745;
+    border-radius: 50%;
+    padding: 10px;
+}
+
+.carousel-control-prev-icon:hover,
+.carousel-control-next-icon:hover {
+    background-color: #218838;
+}
+
+/* Accessibility Improvements */
+.featured-categories .btn:focus,
+.featured-categories .card:focus {
+    outline: 3px solid #28a745;
+    outline-offset: 2px;
+}
+
+/* Loading Spinner */
+.carousel-item img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.carousel-item img:empty::after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #28a745;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .featured-categories .card {
+        margin-bottom: 30px;
+    }
+
+    .carousel-inner {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .carousel-item {
+        flex: 1 0 auto;
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .carousel-inner {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .carousel-item {
+        flex: 1 0 auto;
+        margin-bottom: 15px;
+    }
+
+    .featured-categories .card-title {
+        font-size: 1.25rem;
+    }
+
+    .featured-categories .card-text {
+        font-size: 0.875rem;
+    }
+}
+
+/* Carousel Item Style */
+.carousel-item {
+    padding: 0 15px;
+}
+
+/* Card Style */
+.featured-categories .card {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Ensure spacing between cards on large screens */
+@media (min-width: 992px) {
+    .carousel-inner .row {
+        display: flex;
+        flex-wrap: nowrap;
+    }
+}
+
+/* Ensure cards are full width on small screens */
+@media (max-width: 767px) {
+    .carousel-inner .row {
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    .carousel-inner .card {
+        margin-bottom: 10px;
+    }
+}
+
+</style>
 
 
 <!-- Featured Categories Section -->
@@ -177,55 +384,55 @@
         <h3 class="display-4 text-center mb-5">Featured Categories</h3>
         <p class="section-description text-center">Explore a wide range of categories carefully curated for your needs. From fresh produce to pantry essentials, we've got you covered.</p>
 
-        <!-- Carousel for large screens -->
-        <div id="featuredCategoriesCarousel" class="carousel slide d-none d-md-block" data-ride="carousel">
-            <div class="carousel-inner">
-                {% set categories_with_images = categories | selectattr('image', '!=', None) | list %}
-                {% set total_categories = categories_with_images | length %}
-                {% set items_per_slide_large = 3 %}
-                {% set num_slides_large = (total_categories // items_per_slide_large) + (1 if total_categories % items_per_slide_large != 0 else 0) %}
-                
-                {% for slide in range(num_slides_large) %}
-                <div class="carousel-item {% if slide == 0 %}active{% endif %}">
-                    <div class="row">
-                        {% for index in range(slide * items_per_slide_large, (slide + 1) * items_per_slide_large) %}
-                            {% if index < total_categories %}
-                            <div class="col-md-4">
-                                <a href="{{ url_for('main.product_listing_by_category', category_id=categories_with_images[index].id) }}" class="card mb-4">
-                                    <img src="{{ url_for('static', filename='uploads/' ~ categories_with_images[index].image) }}" alt="{{ categories_with_images[index].name }}" class="card-img-top">
-                                    <div class="card-body">
-                                        <h4 class="card-title">{{ categories_with_images[index].tagline }}</h4>
-                                        <p class="card-text">{{ categories_with_images[index].description }}</p>
-                                    </div>
-                                    <button class="btn btn-success btn-sm">Explore...</button>
-                                </a>
+       <!-- Carousel for large screens -->
+<div id="featuredCategoriesCarousel" class="carousel slide d-none d-md-block" data-ride="carousel">
+    <div class="carousel-inner">
+        {% set categories_with_images = categories | selectattr('image', '!=', None) | list %}
+        {% set total_categories = categories_with_images | length %}
+        {% set items_per_slide_large = 3 %}
+        {% set num_slides_large = (total_categories // items_per_slide_large) + (1 if total_categories % items_per_slide_large != 0 else 0) %}
+        
+        {% for slide in range(num_slides_large) %}
+        <div class="carousel-item {% if slide == 0 %}active{% endif %}">
+            <div class="row">
+                {% for index in range(slide * items_per_slide_large, (slide + 1) * items_per_slide_large) %}
+                    {% if index < total_categories %}
+                    <div class="col-md-4">
+                        <a href="{{ url_for('main.product_listing_by_category', category_id=categories_with_images[index].id) }}" class="card mb-4">
+                            <img src="{{ url_for('static', filename='uploads/' ~ categories_with_images[index].image) }}" alt="{{ categories_with_images[index].name }}" class="card-img-top">
+                            <div class="card-body">
+                                <h4 class="card-title">{{ categories_with_images[index].tagline }}</h4>
+                                <p class="card-text">{{ categories_with_images[index].description }}</p>
                             </div>
-                            {% endif %}
-                        {% endfor %}
+                            <button class="btn btn-success btn-sm">Explore...</button>
+                        </a>
                     </div>
-                </div>
+                    {% endif %}
                 {% endfor %}
             </div>
         </div>
-
-        <!-- Carousel for small devices -->
-        <div id="featuredCategoriesCarouselSmall" class="carousel slide d-md-none" data-ride="carousel">
-            <div class="carousel-inner">
-                {% for i in range(0, total_categories) %}
-                <div class="carousel-item {% if i == 0 %}active{% endif %}">
-                    <a href="{{ url_for('main.product_listing_by_category', category_id=categories_with_images[i].id) }}" class="card mb-4">
-                        <img src="{{ url_for('static', filename='uploads/' ~ categories_with_images[i].image) }}" alt="{{ categories_with_images[i].name }}" class="card-img-top">
-                        <div class="card-body">
-                            <h4 class="card-title">{{ categories_with_images[i].tagline }}</h4>
-                            <p class="card-text">{{ categories_with_images[i].description }}</p>
-                        </div>
-                        <button class="btn btn-success btn-sm">Explore...</button>
-                    </a>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
+        {% endfor %}
     </div>
+  
+</div>
+
+<!-- Carousel for small devices -->
+<div id="featuredCategoriesCarouselSmall" class="carousel slide d-md-none" data-ride="carousel">
+    <div class="carousel-inner">
+        {% for i in range(0, total_categories) %}
+        <div class="carousel-item {% if i == 0 %}active{% endif %}">
+            <a href="{{ url_for('main.product_listing_by_category', category_id=categories_with_images[i].id) }}" class="card mb-4">
+                <img src="{{ url_for('static', filename='uploads/' ~ categories_with_images[i].image) }}" alt="{{ categories_with_images[i].name }}" class="card-img-top">
+                <div class="card-body">
+                    <h4 class="card-title">{{ categories_with_images[i].tagline }}</h4>
+                    <p class="card-text">{{ categories_with_images[i].description }}</p>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+  
+
 </section>
 
 
@@ -751,6 +958,22 @@ document.addEventListener('DOMContentLoaded', function () {
 </style>
 
 
+<div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="row">
+                    <div class="col-md-12">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
 
 
   <section id="contact-us" class="contact-us py-5">
