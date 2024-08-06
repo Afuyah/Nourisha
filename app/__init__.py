@@ -28,6 +28,26 @@ def login_required(func):
         return func(*args, **kwargs)
     return decorated_function
 
+
+
+def admin_required(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'redirect': url_for('main.product_listing', show_modal='false')})
+            else:
+                session['next'] = request.url
+                flash('Please login to access this page.', 'warning')
+                return redirect(url_for('main.product_listing', show_modal='false'))
+
+        if not current_user.role or current_user.role.name != 'admin':
+            flash('You do not have permission to access this page.', 'danger')
+            return redirect(url_for('main.product_listing', show_modal='false'))
+
+        return func(*args, **kwargs)
+    return decorated_function
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)

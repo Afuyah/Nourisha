@@ -1,5 +1,5 @@
 
-from app import db, mail
+from app import db, mail, admin_required, login_required
 from flask import render_template, abort, flash, redirect, url_for, request, jsonify, session,Flask, current_app as app
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
@@ -39,18 +39,7 @@ def refresh_csrf_token():
 
 
 
-def login_required(func):
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated:
-            # Store the requested page URL in the session
-            session['next'] = request.url
-            flash('Please login to access this page.', 'warning')
-            return redirect(url_for('main.login'))
-        
-        return func(*args, **kwargs)
-    
-    return decorated_function
+
 
 
 # Instantiate the URLSafeTimedSerializer with a secret key
@@ -304,7 +293,7 @@ def logout():
     return redirect(url_for('main.index'))
 
 @bp.route('/add_role', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def add_role():
   form = AddRoleForm()
 
@@ -327,6 +316,7 @@ def featured_categories():
 
 
 @bp.route('/add_product_category', methods=['GET', 'POST'])
+@admin_required
 def add_product_category():
   form = AddProductCategoryForm()
 
@@ -348,7 +338,7 @@ def add_product_category():
 
 
 @bp.route('/add_supplier', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def add_supplier():
     form = AddSupplierForm()
 
@@ -376,7 +366,7 @@ def add_supplier():
 
 
 @bp.route('/edit_supplier/<int:supplier_id>', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def edit_supplier(supplier_id):
     supplier = Supplier.query.get_or_404(supplier_id)
     form = AddSupplierForm(obj=supplier)
@@ -402,7 +392,7 @@ def edit_supplier(supplier_id):
 
 
 @bp.route('/get_supplier_details', methods=['GET'])
-@login_required
+@admin_required
 def get_supplier_details():
     supplier_id = request.args.get('supplier_id', type=int)
     supplier = Supplier.query.get_or_404(supplier_id)
@@ -418,7 +408,7 @@ def get_supplier_details():
     return jsonify(supplier_data)
 
 @bp.route('/delete_supplier/<int:supplier_id>', methods=['POST'])
-@login_required
+@admin_required
 def delete_supplier(supplier_id):
     supplier = Supplier.query.get_or_404(supplier_id)
     try:
@@ -432,7 +422,7 @@ def delete_supplier(supplier_id):
 
 
 @bp.route('/add_product', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def add_product():
     form = AddProductForm()
     image_form = ProductImageForm()
@@ -473,7 +463,7 @@ def add_product():
 
 
 @bp.route('/delete_product/<int:product_id>', methods=['POST'])
-@login_required
+@admin_required
 def delete_product(product_id):
     product = Product.query.get_or_404(product_id)
     db.session.delete(product)
@@ -497,7 +487,7 @@ def products():
 
 
 @bp.route('/add_product_image', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def add_product_image():
     form = ProductImageForm()
 

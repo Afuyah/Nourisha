@@ -2,14 +2,14 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 import os
-from app import db
+from app import db, admin_required
 from app.main.models import Offer, AboutUs, BlogPost, ContactMessage, Promotion, ProductPromotion, Product
 from app.main.forms import OfferForm, AboutUsForm, BlogPostForm, ContactForm, PromotionForm, TagProductsForm
 
 site_bp = Blueprint('site', __name__)
 
 @site_bp.route('/offers', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def offers():
     form = OfferForm()
 
@@ -37,7 +37,7 @@ def offers():
     return render_template('offers.html', form=form, offers=offers)
 
 @site_bp.route('/edit_offer/<int:offer_id>', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def edit_offer(offer_id):
     offer = Offer.query.get_or_404(offer_id)
     form = OfferForm(obj=offer)
@@ -69,7 +69,7 @@ def edit_offer(offer_id):
 
 
 @site_bp.route('/delete_offer/<int:offer_id>', methods=['POST'])
-@login_required
+@admin_required
 def delete_offer(offer_id):
     offer = Offer.query.get_or_404(offer_id)
     db.session.delete(offer)
@@ -78,6 +78,7 @@ def delete_offer(offer_id):
     return redirect(url_for('site.offers'))
 
 @site_bp.route('/home', methods=['GET', 'POST'])
+@admin_required
 def client_offers():
     offers = Offer.query.filter_by(active=True).all()
     return render_template('home.html', offers=offers)
@@ -86,7 +87,7 @@ def client_offers():
 
 
 @site_bp.route('/about-us', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def about_us():
     # Fetch the first AboutUs record (or None if it doesn't exist)
     about_us = AboutUs.query.first()
@@ -131,7 +132,7 @@ def about_us():
     return render_template('about_us.html', form=form, about_us=about_us)
 
 @site_bp.route('/manage_blog', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def manage_blog():
     form = BlogPostForm()
     blog_posts = BlogPost.query.all()
@@ -158,7 +159,7 @@ def manage_blog():
     return render_template('manage_blog.html', form=form, blog_posts=blog_posts)
 
 @site_bp.route('/edit-blog/<int:post_id>', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def edit_blog(post_id):
     post = BlogPost.query.get_or_404(post_id)
     form = BlogPostForm(obj=post)
@@ -187,7 +188,7 @@ def edit_blog(post_id):
 
 
 @site_bp.route('/delete-blog/<int:post_id>', methods=['POST'])
-@login_required
+@admin_required
 def delete_blog(post_id):
     post = BlogPost.query.get_or_404(post_id)
     
@@ -203,12 +204,14 @@ def delete_blog(post_id):
 
 
 @site_bp.route('/promotions', methods=['GET'])
+@admin_required
 def list_promotions():
     promotions = Promotion.query.all()
     form = PromotionForm()
     return render_template('list_promotions.html', promotions=promotions, form=form)
 
 @site_bp.route('/promotions/add', methods=['GET', 'POST'])
+@admin_required
 def add_promotion():
     form = PromotionForm()
     if form.validate_on_submit():
@@ -224,6 +227,7 @@ def add_promotion():
     return render_template('add_promotion.html', form=form)
 
 @site_bp.route('/promotions/edit/<int:id>', methods=['GET', 'POST'])
+@admin_required
 def edit_promotion(id):
     promotion = Promotion.query.get_or_404(id)
     form = PromotionForm(obj=promotion)
@@ -237,6 +241,7 @@ def edit_promotion(id):
     return render_template('edit_promotion.html', form=form, promotion=promotion)
 
 @site_bp.route('/promotions/activate/<int:id>', methods=['POST'])
+@admin_required
 def activate_promotion(id):
     promotion = Promotion.query.get_or_404(id)
     promotion.active = True
@@ -245,6 +250,7 @@ def activate_promotion(id):
     return redirect(url_for('site.list_promotions'))
 
 @site_bp.route('/promotions/deactivate/<int:id>', methods=['POST'])
+@admin_required
 def deactivate_promotion(id):
     promotion = Promotion.query.get_or_404(id)
     promotion.active = False
@@ -253,6 +259,7 @@ def deactivate_promotion(id):
     return redirect(url_for('site.list_promotions'))
 
 @site_bp.route('/promotions/delete/<int:id>', methods=['POST'])
+@admin_required
 def delete_promotion(id):
     promotion = Promotion.query.get_or_404(id)
     db.session.delete(promotion)
@@ -261,6 +268,7 @@ def delete_promotion(id):
     return redirect(url_for('site.list_promotions'))
 
 @site_bp.route('/promotions/tag_products/<int:id>', methods=['POST'])
+@admin_required
 def tag_products(id):
     # Get the promotion by ID
     promotion = Promotion.query.get_or_404(id)
@@ -284,6 +292,7 @@ def tag_products(id):
 
 
 @site_bp.route('/promotions/tag_products_modal/<int:id>', methods=['GET'])
+@admin_required
 def tag_products_modal(id):
     promotion = Promotion.query.get_or_404(id)
     products = Product.query.all()

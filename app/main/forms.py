@@ -218,6 +218,7 @@ class BlogPostForm(FlaskForm):
 class ContactForm(FlaskForm):
   name = StringField('Your Name', validators=[DataRequired()])
   email = StringField('Your Email', validators=[DataRequired(), Email()])
+  username = StringField('Username', validators=[DataRequired()])
   message = TextAreaField('Your Message', validators=[DataRequired()])
   submit = SubmitField('Submit')
 

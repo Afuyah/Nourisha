@@ -71,7 +71,73 @@
       .navbar .btn:hover {
         background-color: #218838;
       }
+
+
+      .toast {
+    min-width: 300px;
+    border-radius: 0.75rem;
+    opacity: 0.9;
+    transition: opacity 0.5s ease;
+}
+
+.toast-body {
+    font-size: 1rem;
+    padding: 1rem;
+    line-height: 1.5;
+}
+
+.toast-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.toast-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.btn-close-white {
+    filter: brightness(0) invert(1);
+}
+
+.flash-messages {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1050;
+}
+
+.flash-message {
+    margin: 0.5rem 0;
+}
+
     </style>
+
+    <script>
+        $(document).ready(function() {
+            {% if get_flashed_messages() %}
+                {% for message in get_flashed_messages() %}
+                    var toastHtml = `
+                        <div class="toast align-items-center text-white bg-{{ 'success' if 'success' in message.lower() else 'danger' }}" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    {{ message }}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    `;
+                    $('#toastContainer').append(toastHtml);
+                    var toastElement = $('#toastContainer .toast').last()[0];
+                    var toast = new bootstrap.Toast(toastElement, {
+                        delay: 5000,
+                        autohide: true
+                    });
+                    toast.show();
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
   </head>
 
   <body>
@@ -194,16 +260,8 @@
         </div>
       </nav>
 
-      <!-- Flash Messages Section -->
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-      <div class="flash-messages">
-        {% for message in messages %}
-        <div class="flash-message alert alert-danger">{{ message }}</div>
-        {% endfor %}
-      </div>
-      {% endif %}
-      {% endwith %}
+      <!-- Toast Container -->
+    <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
 
       <!-- Main content-->
       <main>{% block content %}{% endblock %}</main>

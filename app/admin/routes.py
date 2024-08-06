@@ -4,7 +4,7 @@ from flask_login import current_user, login_required
 from flask_mail import Message
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
-from app import db, mail, socketio
+from app import db, mail, socketio, admin_required
 from app.admin import admin_bp
 from werkzeug.utils import secure_filename
 
@@ -46,19 +46,6 @@ from app.main.models import (
     Purchase,
 )
 
-def login_required(func):
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({'redirect': url_for('main.login'), 'show_modal': True})
-            else:
-                session['next'] = request.url
-                flash('Please login to access this page.', 'warning')
-                return redirect(url_for('main.login'))
-        return func(*args, **kwargs)
-    return decorated_function
-
 
 
 # Helper function to handle database errors and redirects
@@ -96,7 +83,7 @@ def create_sales_chart_data(labels, data):
     return sales_chart_data
 
 @admin_bp.route('/get_sales_chart_data', methods=['GET'])
-@login_required
+@admin_required
 def get_sales_chart_data():
     if current_user.role.name != 'admin':
         return jsonify({'error': 'Permission denied'}), 403
@@ -114,7 +101,7 @@ def get_sales_chart_data():
 
 
 @admin_bp.route('/get_average_order_value_by_day')
-@login_required
+@admin_required
 def get_average_order_value_by_day():
     # Calculate average order value by day of the week
     average_order_values = db.session.query(func.extract('dow', Order.order_date), func.avg(Order.total_price)).group_by(func.extract('dow', Order.order_date)).all()
@@ -139,6 +126,7 @@ def fetch_user_activity_timeline():
 
 
 @admin_bp.route('/all_users')
+@admin_required
 def all_users():
     users = User.query.all()
     form = AddUserForm()
@@ -147,7 +135,7 @@ def all_users():
 
 
 @admin_bp.route('/admin_dashboard', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def admin_dashboard():
     def route():
         if current_user is None or not current_user.is_authenticated or current_user.role is None or current_user.role.name != 'admin':
@@ -257,7 +245,7 @@ def get_top_selling_products():
 
 
 @admin_bp.route('/data_visualization', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def data_visualization():
     def route():
         if current_user is None or not current_user.is_authenticated or current_user.role is None or current_user.role.name != 'admin':
@@ -367,7 +355,7 @@ def get_top_selling_products():
 
 
 @admin_bp.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def edit_user(user_id):
     def route():
         user = User.query.get_or_404(user_id)
@@ -380,7 +368,7 @@ def edit_user(user_id):
     return handle_db_error_and_redirect(route)
 
 @admin_bp.route('/admin/edit_role/<int:role_id>', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def edit_role(role_id):
     def route():
         role = Role.query.get_or_404(role_id)
@@ -394,7 +382,7 @@ def edit_role(role_id):
     return handle_db_error_and_redirect(route)
 
 @admin_bp.route('/product_categories', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def product_categories():
     form = AddProductCategoryForm()
     edit_form = EditProductCategoryForm()
@@ -410,7 +398,7 @@ def product_categories():
     return render_template('add_product_category.html', form=form, edit_form=edit_form, categories=categories)
 
 @admin_bp.route('/edit_category/<int:category_id>', methods=['POST'])
-@login_required
+@admin_required
 def edit_category(category_id):
     edit_form = EditProductCategoryForm()
     category = ProductCategory.query.get_or_404(category_id)
@@ -434,6 +422,7 @@ def edit_category(category_id):
 
 # Add a new route to display products under a specific category
 @admin_bp.route('/products_by_category/<int:category_id>')
+@admin_required
 def products_by_category(category_id):
     category = ProductCategory.query.get_or_404(category_id)
     products = Product.query.filter_by(category=category).all()
@@ -441,7 +430,7 @@ def products_by_category(category_id):
 
 
 @admin_bp.route('/add_location', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def add_location():
     def route():
         # Initialize forms for adding location, arealine, and nearest place
@@ -514,6 +503,7 @@ def add_location():
 
 
 @admin_bp.route('/get_locations', methods=['GET'])
+@admin_required   
 def get_locations():
     locations = Location.query.all()
     locations_data = [{'id': location.id, 'name': location.name} for location in locations]
@@ -522,6 +512,7 @@ def get_locations():
 
 
 @admin_bp.route('/get_arealines/<location_id>', methods=['GET'])
+@admin_required
 def get_arealines(location_id):
     location = Location.query.get(location_id)
 
@@ -536,6 +527,7 @@ def get_arealines(location_id):
 
 
 @admin_bp.route('/get_nearest_places/<arealine_id>', methods=['GET'])
+@admin_required
 def get_nearest_places(arealine_id):
     arealine = Arealine.query.get(arealine_id)
 
@@ -549,6 +541,7 @@ def get_nearest_places(arealine_id):
 
 
 @admin_bp.route('/view_order_details/<int:order_id>')
+@admin_required
 def view_order_details(order_id):
     def route():
         order = Order.query.get_or_40704(order_id)
@@ -559,7 +552,8 @@ def view_order_details(order_id):
 
 
 @admin_bp.route('/cancel_order/<int:order_id>', methods=['POST'])
-@login_required
+@admin_required
+@admin_required
 def cancel_order(order_id):
     def route():
         if not current_user.is_authenticated or (current_user.role and current_user.role.name != 'admin'):
@@ -587,6 +581,7 @@ def cancel_order(order_id):
 
 
 @admin_bp.route('/view_orders', methods=['GET'])
+@admin_required
 def view_orders():
     def route():
         if not current_user.is_authenticated or (current_user.role and current_user.role.name != 'admin'):
@@ -635,7 +630,7 @@ def sendmail(subject, recipients, body):
 
 
 @admin_bp.route('/generate_allusers_pdf')
-@login_required
+@admin_required
 def generate_allusers_pdf():
     # Fetch all users
     users = User.query.all()
@@ -759,7 +754,7 @@ def generate_allusers_pdf():
 
 # View Orders by Date
 @admin_bp.route('/view_orders_by_date', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def view_orders_by_date():
     form = DateSelectionForm()
     orders = None
@@ -775,7 +770,7 @@ def view_orders_by_date():
 
 # Order Details
 @admin_bp.route('/admin/order/<int:order_id>', methods=['GET'])
-@login_required
+@admin_required
 def order_details(order_id):
     order = Order.query.get_or_404(order_id)
     form = FulfillmentForm()  # Create the form instance
@@ -784,7 +779,7 @@ def order_details(order_id):
 # Confirm Order
 
 @admin_bp.route('/admin/confirm_order/<int:order_id>', methods=['POST'])
-@login_required
+@admin_required
 def confirm_order(order_id):
     order = Order.query.get_or_404(order_id)
     form = request.form
@@ -804,7 +799,7 @@ def confirm_order(order_id):
     return redirect(url_for('admin.order_details', order_id=order_id))
 
 @admin_bp.route('/admin/fulfill_order/<int:order_id>', methods=['POST'])
-@login_required
+@admin_required
 def fulfill_order(order_id):
     order = Order.query.get_or_404(order_id)
     form = request.form
@@ -831,7 +826,7 @@ def fulfill_order(order_id):
 
 
 @admin_bp.route('/admin/mark_delivered/<int:order_id>', methods=['POST'])
-@login_required
+@admin_required
 def mark_delivered(order_id):
     order = Order.query.get_or_404(order_id)
     form = request.form
@@ -854,7 +849,7 @@ def mark_delivered(order_id):
 
 
 @admin_bp.route('/admin/purchase', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def admin_purchase():
     # Get the selected date from the request parameters or use today's date as default
     selected_date = request.args.get('date', datetime.today().strftime('%Y-%m-%d'))
@@ -879,7 +874,7 @@ def admin_purchase():
     return render_template('purchasing.html', items_available=items_available, items_bought=items_bought, selected_date=selected_date)
 
 @admin_bp.route('/purchase/update', methods=['POST'])
-@login_required
+@admin_required
 def admin_purchase_update():
     data = request.json
     item_id = data.get('item_id')
@@ -921,7 +916,7 @@ def admin_purchase_update():
 
 # View Orders by Status
 @admin_bp.route('/admin/orders/<status>', methods=['GET'])
-@login_required
+@admin_required
 def view_orders_by_status(status):
     # List of valid statuses, including 'completed'
     valid_statuses = ['pending', 'confirmed', 'out for delivery', 'delivered', 'canceled', 'completed']
@@ -950,7 +945,7 @@ def view_orders_by_status(status):
 
 # fetching orders by status
 @admin_bp.route('/admin/api/orders/<status>', methods=['GET'])
-@login_required
+@admin_required
 def api_get_orders_by_status(status):
     # Define valid statuses, including 'completed'
     valid_statuses = ['pending', 'confirmed', 'disparched', 'delivered', 'canceled', 'completed']
@@ -1009,6 +1004,7 @@ def api_get_orders_by_status(status):
 
 
 @admin_bp.route('/order/<int:order_id>/generate_invoice')
+@admin_required
 def generate_invoice(order_id):
     order = Order.query.get_or_404(order_id)
     fulfilled_items = [item for item in order.order_items if item.fulfillment_status == 'Fulfilled']
@@ -1220,6 +1216,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash
 
 @admin_bp.route('/admin/add_user', methods=['GET', 'POST'])
+@admin_required
 def add_user():
         form = AddUserForm()
         if form.validate_on_submit():
@@ -1255,6 +1252,7 @@ registration_date=datetime.utcnow()  # Capture current date and time
 
 
 @admin_bp.route('/admin/shop_for_user', methods=['GET', 'POST'])
+@admin_required
 def admin_shop_for_user():
     form = ShopForUserForm()
 
@@ -1297,6 +1295,7 @@ def admin_shop_for_user():
     return render_template('admin_shop_for_user.html', form=form, users=users, categories=categories)
 
 @admin_bp.route('/admin/get_products')
+@admin_required
 def get_products():
     category_id = request.args.get('category_id')
     if category_id:
@@ -1307,6 +1306,7 @@ def get_products():
 
 
 @admin_bp.route('/admin/get_user_cart')
+@admin_required
 def get_user_cart():
     user_id = request.args.get('user_id')
     if user_id:
@@ -1339,6 +1339,7 @@ def get_user_cart():
     return jsonify({'cart_items': []}), 400  # Return proper status code for bad requests
 
 @admin_bp.route('/admin/add_to_cart', methods=['POST'])
+@admin_required
 def add_to_cart():
     data = request.json
     user_id = data.get('user_id')
@@ -1377,7 +1378,7 @@ def add_to_cart():
 
 
 @admin_bp.route('/admin/place_order_for_user', methods=['POST'])
-@login_required
+@admin_required
 def place_order_for_user():
     if current_user.role.name != 'admin':
         return jsonify({'message': 'Unauthorized'}), 403
@@ -1497,7 +1498,7 @@ def clear_cart_for_user(user_id):
 
 
 @admin_bp.route('/admin/complete_order/<int:order_id>', methods=['POST'])
-@login_required
+@admin_required
 def complete_order(order_id):
     if current_user.role.name != 'admin':
         flash('Unauthorized access!', 'error')
@@ -1525,7 +1526,7 @@ def complete_order(order_id):
 
 # Route to clear the entire cart for a user
 @admin_bp.route('/admin/clear_cart', methods=['POST'])
-@login_required
+@admin_required
 def clear_cart():
     data = request.json
     user_id = data.get('user_id')
@@ -1556,7 +1557,7 @@ def clear_cart_for_user(user_id):
 
 
 @admin_bp.route('/admin/remove_from_cart', methods=['POST'])
-@login_required
+@admin_required
 def remove_from_cart():
     try:
         data = request.get_json()
