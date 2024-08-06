@@ -21,7 +21,7 @@ from sqlalchemy.orm.exc import NoResultFound
 import re
 import os
 import logging
-
+import random
 
 
 @bp.route('/refresh_csrf_token', methods=['GET'])
@@ -311,6 +311,7 @@ def add_role():
 @bp.route('/featured-categories')
 def featured_categories():
     categories = ProductCategory.query.all()
+    random.shuffle(categories)  # Shuffle the categories list
     return render_template('home.html', categories=categories)
 
 

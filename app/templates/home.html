@@ -384,57 +384,60 @@
         <h3 class="display-4 text-center mb-5">Featured Categories</h3>
         <p class="section-description text-center">Explore a wide range of categories carefully curated for your needs. From fresh produce to pantry essentials, we've got you covered.</p>
 
-       <!-- Carousel for large screens -->
-<div id="featuredCategoriesCarousel" class="carousel slide d-none d-md-block" data-ride="carousel">
-    <div class="carousel-inner">
-        {% set categories_with_images = categories | selectattr('image', '!=', None) | list %}
-        {% set total_categories = categories_with_images | length %}
-        {% set items_per_slide_large = 3 %}
-        {% set num_slides_large = (total_categories // items_per_slide_large) + (1 if total_categories % items_per_slide_large != 0 else 0) %}
-        
-        {% for slide in range(num_slides_large) %}
-        <div class="carousel-item {% if slide == 0 %}active{% endif %}">
-            <div class="row">
-                {% for index in range(slide * items_per_slide_large, (slide + 1) * items_per_slide_large) %}
-                    {% if index < total_categories %}
-                    <div class="col-md-4">
-                        <a href="{{ url_for('main.product_listing_by_category', category_id=categories_with_images[index].id) }}" class="card mb-4">
-                            <img src="{{ url_for('static', filename='uploads/' ~ categories_with_images[index].image) }}" alt="{{ categories_with_images[index].name }}" class="card-img-top">
-                            <div class="card-body">
-                                <h4 class="card-title">{{ categories_with_images[index].tagline }}</h4>
-                                <p class="card-text">{{ categories_with_images[index].description }}</p>
+        <!-- Carousel for large screens -->
+        <div id="featuredCategoriesCarousel" class="carousel slide d-none d-md-block" data-ride="carousel">
+            <div class="carousel-inner">
+                {% set categories_with_images = categories | selectattr('image', '!=', None) | list %}
+                {% set total_categories = categories_with_images | length %}
+                {% set items_per_slide_large = 3 %}
+                {% set num_slides_large = (total_categories // items_per_slide_large) + (1 if total_categories % items_per_slide_large != 0 else 0) %}
+                
+                {% for slide in range(num_slides_large) %}
+                <div class="carousel-item {% if slide == 0 %}active{% endif %}">
+                    <div class="row">
+                        {% for index in range(slide * items_per_slide_large, (slide + 1) * items_per_slide_large) %}
+                            {% if index < total_categories %}
+                            <div class="col-md-4">
+                                <a href="{{ url_for('main.product_listing_by_category', category_id=categories_with_images[index].id) }}" class="card mb-4">
+                                    <img src="{{ url_for('static', filename='uploads/' ~ categories_with_images[index].image) }}" alt="{{ categories_with_images[index].name }}" class="card-img-top">
+                                    <div class="card-body">
+                                        <h4 class="card-title">{{ categories_with_images[index].tagline }}</h4>
+                                        <p class="card-text">{{ categories_with_images[index].description }}</p>
+                                    </div>
+                                    <button class="btn btn-success btn-sm">Explore...</button>
+                                </a>
                             </div>
-                            <button class="btn btn-success btn-sm">Explore...</button>
-                        </a>
+                            {% endif %}
+                        {% endfor %}
                     </div>
-                    {% endif %}
+                </div>
                 {% endfor %}
             </div>
         </div>
-        {% endfor %}
-    </div>
-  
-</div>
 
-<!-- Carousel for small devices -->
-<div id="featuredCategoriesCarouselSmall" class="carousel slide d-md-none" data-ride="carousel">
-    <div class="carousel-inner">
-        {% for i in range(0, total_categories) %}
-        <div class="carousel-item {% if i == 0 %}active{% endif %}">
-            <a href="{{ url_for('main.product_listing_by_category', category_id=categories_with_images[i].id) }}" class="card mb-4">
-                <img src="{{ url_for('static', filename='uploads/' ~ categories_with_images[i].image) }}" alt="{{ categories_with_images[i].name }}" class="card-img-top">
-                <div class="card-body">
-                    <h4 class="card-title">{{ categories_with_images[i].tagline }}</h4>
-                    <p class="card-text">{{ categories_with_images[i].description }}</p>
+        <!-- Carousel for small devices -->
+        <div id="featuredCategoriesCarouselSmall" class="carousel slide d-md-none" data-ride="carousel">
+            <div class="carousel-inner">
+                {% for i in range(0, total_categories) %}
+                <div class="carousel-item {% if i == 0 %}active{% endif %}">
+                    <a href="{{ url_for('main.product_listing_by_category', category_id=categories_with_images[i].id) }}" class="card mb-4">
+                        <img src="{{ url_for('static', filename='uploads/' ~ categories_with_images[i].image) }}" alt="{{ categories_with_images[i].name }}" class="card-img-top">
+                        <div class="card-body">
+                            <h4 class="card-title">{{ categories_with_images[i].tagline }}</h4>
+                            <p class="card-text">{{ categories_with_images[i].description }}</p>
+                        </div>
+                    </a>
                 </div>
-            </a>
+                {% endfor %}
+            </div>
         </div>
-        {% endfor %}
     </div>
-  
-
 </section>
 
+<!-- Bootstrap and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 
 
