@@ -13,20 +13,26 @@ from functools import wraps
 from app import login_required
 
 
+
 @cart_bp.route('/add_to_cart/<int:product_id>/<int:quantity>', methods=['POST'])
 @login_required
 def add_to_cart(product_id, quantity):
     product = Product.query.get_or_404(product_id)
 
     if quantity <= 0:
-        return jsonify({'success': False, 'error': 'Quantity must be greater than zero.'})
+        flash('Quantity must be greater than zero.', 'danger')
+        return redirect(url_for('main.product_details', product_id=product.id))
 
     if quantity > product.quantity_in_stock:
-        return jsonify({'success': False, 'error': f'Sorry, but we have only {product.quantity_in_stock} items available in stock.'})
+        flash(
+            'Sorry, but we have only {} items available in stock.'.format(
+                product.quantity_in_stock), 'danger')
+        return redirect(url_for('main.product_details', product_id=product.id))
 
-    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product.id).first()
-    quantity = int(request.json.get('quantity'))
-    custom_description = request.json.get('custom_description', '')
+    cart_item = Cart.query.filter_by(user_id=current_user.id,
+                                      product_id=product.id).first()
+    quantity = int(request.form.get('quantity'))
+    custom_description = request.form.get('custom_description', '')
 
     if cart_item:
         cart_item.quantity += quantity
@@ -42,10 +48,13 @@ def add_to_cart(product_id, quantity):
 
     try:
         db.session.commit()
-        return jsonify({'success': True})
+        flash('Item added to cart successfully.', 'success')
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'error': f'Error adding item to cart: {str(e)}'})
+        flash(f'Error adding item to cart: {str(e)}', 'danger')
+
+    return redirect(url_for('main.product_listing', product_id=product.id))
+
 
 
 # Route to view the cart

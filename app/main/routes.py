@@ -231,7 +231,11 @@ def login():
         password = form.password.data
 
         # Check if the identifier is an email, phone number, or username
-        user = User.query.filter((User.email == identifier) | (User.phone == identifier) | (User.username == identifier)).first()
+        user = User.query.filter(
+            (User.email == identifier) | 
+            (User.phone == identifier) | 
+            (User.username == identifier)
+        ).first()
 
         if user and user.check_password(password):
             if user.confirmed:
@@ -242,12 +246,15 @@ def login():
                 db.session.commit()
                 flash(f'Welcome back, {current_user.username}!', 'success')
 
-                # Redirect to the originally requested URL if present
-                redirect_url = session.get('next', url_for('main.index'))
-                session.pop('next', None)  # Remove the 'next' URL from the session
+                # Determine the redirect URL based on the user's role
+                if user.role and user.role.name == 'admin':
+                    redirect_url = url_for('admin.admin_dashboard')
+                else:
+                    redirect_url = session.get('next', url_for('main.index'))
+                    session.pop('next', None)  # Remove the 'next' URL from the session
 
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return jsonify({'redirect': redirect_url})
+                    return jsonify({'success': True, 'redirect': redirect_url})
 
                 return redirect(redirect_url)
 
@@ -257,10 +264,15 @@ def login():
         else:
             flash('Invalid credentials. Please check your username/email/phone number and password.', 'danger')
 
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'html': render_template('user_auth.html', form=form)})
+
     # Render the login template with or without AJAX based on the request type
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return render_template('user_auth.html', form=form)  # Assuming `user_auth.html` is the form template
+        return render_template('user_auth.html', form=form)
+    
     return render_template('user_auth.html', form=form)
+
 
 
 

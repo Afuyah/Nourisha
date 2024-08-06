@@ -16,7 +16,7 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, mm, cm
 import os
-
+from functools import wraps
 from reportlab.lib.pagesizes import letter
 
 from reportlab.pdfgen import canvas
@@ -45,6 +45,20 @@ from app.main.models import (
     Cart,
     Purchase,
 )
+
+def login_required(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'redirect': url_for('main.login'), 'show_modal': True})
+            else:
+                session['next'] = request.url
+                flash('Please login to access this page.', 'warning')
+                return redirect(url_for('main.login'))
+        return func(*args, **kwargs)
+    return decorated_function
+
 
 
 # Helper function to handle database errors and redirects
