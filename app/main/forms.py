@@ -6,6 +6,8 @@ from wtforms import HiddenField, TextAreaField, BooleanField
 from wtforms.validators import InputRequired, Optional, Length, NumberRange
 from wtforms.fields import DateTimeLocalField
 from flask_wtf.file import FileAllowed
+from email_validator import validate_email, EmailNotValidError
+
 
 class RegistrationForm(FlaskForm):
   name = StringField('Name', validators=[DataRequired()])
@@ -216,12 +218,17 @@ class BlogPostForm(FlaskForm):
   submit = SubmitField('Save')
 
 class ContactForm(FlaskForm):
-  name = StringField('Your Name', validators=[DataRequired()])
-  email = StringField('Your Email', validators=[DataRequired(), Email()])
-  username = StringField('Username', validators=[DataRequired()])
-  message = TextAreaField('Your Message', validators=[DataRequired()])
-  submit = SubmitField('Submit')
+    name = StringField('Your Name', validators=[DataRequired()])
+    email = StringField('Your Email', validators=[DataRequired(), Email()])
+    
+    message = TextAreaField('Your Message', validators=[DataRequired()])
+    submit = SubmitField('Submit')
 
+    def validate_email(self, email):
+        try:
+            validate_email(email.data)
+        except EmailNotValidError as e:
+            raise ValidationError(str(e))
 
 class PromotionForm(FlaskForm):
   name = StringField('Promotion Name', validators=[DataRequired()])

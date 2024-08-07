@@ -962,7 +962,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-  <section id="contact-us" class="contact-us py-5">
+<section id="contact-us" class="contact-us py-5">
     <div class="container">
         <h2 class="display-4 text-center mb-5 animate__animated animate__fadeInDown">Contact Us</h2>
         <div class="row">
@@ -1009,35 +1009,55 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
 </section>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('contact-form');
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
 
- <script>
-        $(document).ready(function() {
-            $('#contact-form').on('submit', function(event) {
-                event.preventDefault(); // Prevent the default form submission
-                
-                var form = $(this);
-                var url = form.data('url');
-                var formData = form.serialize();
+            const url = form.getAttribute('data-url');
+            const formData = new FormData(form);
 
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: formData,
-                    success: function(response) {
-                        if (response.success) {
-                            $('#form-feedback').html('<div class="alert alert-success">' + response.success + '</div>');
-                            form.trigger('reset'); // Reset the form
-                        } else if (response.error) {
-                            $('#form-feedback').html('<div class="alert alert-danger">' + response.error + '</div>');
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrf_token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const feedbackDiv = document.getElementById('form-feedback');
+                if (data.success) {
+                    feedbackDiv.innerHTML = `<div class="alert alert-success">${data.success}</div>`;
+                    form.reset();
+                } else {
+                    feedbackDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+
+                    // Display individual form errors
+                    if (data.form_errors) {
+                        for (const [field, errors] of Object.entries(data.form_errors)) {
+                            const errorList = errors.map(error => `<div class="text-danger">${error}</div>`).join('');
+                            const fieldElement = document.querySelector(`[name="${field}"]`);
+                            if (fieldElement) {
+                                fieldElement.insertAdjacentHTML('afterend', errorList);
+                            }
                         }
-                    },
-                    error: function() {
-                        $('#form-feedback').html('<div class="alert alert-danger">An error occurred while sending your message. Please try again later.</div>');
                     }
-                });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
         });
-    </script>
+    });
+    
+                
+</script>
+
+
+
+        
 
 <!-- Testimonials Section -->
 <section id="testimonials" class="testimonials py-5">
