@@ -503,7 +503,7 @@ def add_location():
 
 
 @admin_bp.route('/get_locations', methods=['GET'])
-@admin_required   
+@login_required  
 def get_locations():
     locations = Location.query.all()
     locations_data = [{'id': location.id, 'name': location.name} for location in locations]
@@ -512,7 +512,7 @@ def get_locations():
 
 
 @admin_bp.route('/get_arealines/<location_id>', methods=['GET'])
-@admin_required
+@login_required
 def get_arealines(location_id):
     location = Location.query.get(location_id)
 
@@ -527,7 +527,7 @@ def get_arealines(location_id):
 
 
 @admin_bp.route('/get_nearest_places/<arealine_id>', methods=['GET'])
-@admin_required
+@login_required
 def get_nearest_places(arealine_id):
     arealine = Arealine.query.get(arealine_id)
 
