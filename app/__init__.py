@@ -9,41 +9,41 @@ from config import Config
 from datetime import timedelta
 from functools import wraps
 
+# Extensions
 db = SQLAlchemy()
 login_manager = LoginManager()
 mail = Mail()
 migrate = Migrate()
 socketio = SocketIO()
+csrf = CSRFProtect()
 
 def login_required(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({'redirect': url_for('main.login'), 'show_modal': True})
+                return jsonify({'redirect': url_for('auth.login'), 'show_modal': True})
             else:
                 session['next'] = request.url
                 flash('Please login to access this page.', 'warning')
-                return redirect(url_for('main.login'))
+                return redirect(url_for('auth.login'))
         return func(*args, **kwargs)
     return decorated_function
-
-
 
 def admin_required(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({'redirect': url_for('main.product_listing', show_modal='false')})
+                return jsonify({'redirect': url_for('main.product_listing', show_modal='true')})
             else:
                 session['next'] = request.url
                 flash('Please login to access this page.', 'warning')
-                return redirect(url_for('main.product_listing', show_modal='false'))
+                return redirect(url_for('main.product_listing', show_modal='true'))
 
         if not current_user.role or current_user.role.name != 'admin':
             flash('You do not have permission to access this page.', 'danger')
-            return redirect(url_for('main.product_listing', show_modal='false'))
+            return redirect(url_for('main.product_listing', show_modal='true'))
 
         return func(*args, **kwargs)
     return decorated_function
@@ -56,8 +56,8 @@ def create_app():
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
     app.config['SESSION_COOKIE_NAME'] = 'myapp_session'
     app.config['SESSION_REFRESH_EACH_REQUEST'] = True
-    app.config['SESSION_COOKIE_SECURE'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+    app.config['SESSION_COOKIE_SECURE'] = True if not app.debug else False
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' if not app.debug else 'None'
 
     # Initialize extensions
     db.init_app(app)
@@ -65,19 +65,22 @@ def create_app():
     mail.init_app(app)
     migrate.init_app(app, db)
     socketio.init_app(app)
-    
-    csrf = CSRFProtect(app)
+    csrf.init_app(app)
     app.config['WTF_CSRF_TIME_LIMIT'] = None
-    
+
     # Blueprints registration
+
+    from app.auth.routes import auth_bp
+    app.register_blueprint(auth_bp)
+    
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
 
     from app.admin.routes import admin_bp
     app.register_blueprint(admin_bp)
 
-    from app.user.routes import user_bp
-    app.register_blueprint(user_bp)
+    from app.role.routes import role_bp
+    app.register_blueprint(role_bp)
 
     from app.payments.routes import payment_bp
     app.register_blueprint(payment_bp)
@@ -87,7 +90,7 @@ def create_app():
 
     from app.site_setting.routes import site_bp
     app.register_blueprint(site_bp)
-    
+
     # User loader function
     from app.main.models import User
     @login_manager.user_loader

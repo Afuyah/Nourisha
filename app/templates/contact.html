@@ -1,0 +1,81 @@
+{% extends 'layout.html' % }
+{%block content %}
+
+<section id="contact-us" class="contact-us py-5">
+  <div class="container">
+      <h2 class="text-center mb-5 animate__animated animate__fadeInDown">Contact Us</h2>
+      <div class="row">
+          <div class="col-md-6">
+              <p class="lead animate__animated animate__fadeInLeft">Have questions or feedback? Contact us using the form below:</p>
+              <form id="contact-form" method="POST" data-url="{{ url_for('main.contact') }}">
+                  {{ form.hidden_tag() }}
+                  <div class="mb-3">
+                      {{ form.name.label(class="form-label") }}
+                      {{ form.name(class="form-control") }}
+                      {% for error in form.name.errors %}
+                      <div class="text-danger">{{ error }}</div>
+                      {% endfor %}
+                  </div>
+                  <div class="mb-3">
+                      {{ form.email.label(class="form-label") }}
+                      {{ form.email(class="form-control") }}
+                      {% for error in form.email.errors %}
+                      <div class="text-danger">{{ error }}</div>
+                      {% endfor %}
+                  </div>
+                  <div class="mb-3">
+                      {{ form.message.label(class="form-label") }}
+                      {{ form.message(class="form-control", rows=5) }}
+                      {% for error in form.message.errors %}
+                      <div class="text-danger">{{ error }}</div>
+                      {% endfor %}
+                  </div>
+                  <div class="text-center">
+                      {{ form.submit(class="btn btn-success") }}
+                  </div>
+              </form>
+              <div id="form-feedback"></div>
+          </div>
+          <div class="col-md-6">
+              <p class="lead animate__animated animate__fadeInRight">Contact Information:</p>
+              <ul class="list-unstyled animate__animated animate__fadeInRight">
+                  <li><i class="fas fa-envelope"></i> info@nourishagroceries.com</li>
+                  <li><i class="fas fa-phone"></i> +254707632230</li>
+                  <li><i class="fas fa-map-marker-alt"></i> 111th street Bombolulu, Mombasa, Kenya</li>
+              </ul>
+          </div>
+      </div>
+  </div>
+</section>
+
+
+
+<script>
+      $(document).ready(function() {
+          $('#contact-form').on('submit', function(event) {
+              event.preventDefault(); // Prevent the default form submission
+
+              var form = $(this);
+              var url = form.data('url');
+              var formData = form.serialize();
+
+              $.ajax({
+                  type: 'POST',
+                  url: url,
+                  data: formData,
+                  success: function(response) {
+                      if (response.success) {
+                          $('#form-feedback').html('<div class="alert alert-success">' + response.success + '</div>');
+                          form.trigger('reset'); // Reset the form
+                      } else if (response.error) {
+                          $('#form-feedback').html('<div class="alert alert-danger">' + response.error + '</div>');
+                      }
+                  },
+                  error: function() {
+                      $('#form-feedback').html('<div class="alert alert-danger">An error occurred while sending your message. Please try again later.</div>');
+                  }
+              });
+          });
+      });
+  </script>
+{% endblock %}

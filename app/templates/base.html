@@ -141,103 +141,117 @@
   </head>
 
   <body>
-    <div id="sidebar">
-      <div class="sidebar-heading">Naurisha Groceries</div>
-      <ul>
-        <li><a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Admin Dashboard </a></li>
+   <div id="sidebar">
+  <div class="sidebar-heading">Naurisha Groceries</div>
+  <ul>
+    <li><a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Admin Dashboard </a></li>
 
-        <li class="dropdown">
-          <a class="dropdown-toggle" href="#" role="button" id="productsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="product-icon fas fa-shopping-basket"></i> Product Management
-          </a>
-          <div class="dropdown-menu" aria-labelledby="productsDropdown">
-            <a class="dropdown-item" href="{{ url_for('main.products') }}">Products</a>
-            <a class="dropdown-item" href="{{ url_for('main.add_product') }}">Add Product</a>
-            <a class="dropdown-item" href="{{ url_for('admin.product_categories') }}">Product Categories</a>
-            <a class="dropdown-item" href="{{ url_for('main.add_product_image') }}">Add Product Images</a>
-            <a class="dropdown-item" href="{{ url_for('main.add_supplier') }}">Product Suppliers</a>
-          </div>
-        </li>
-        <li class="dropdown">
-          <a class="dropdown-toggle" href="#" role="button" id="ordersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="order-icon fas fa-shopping-cart"></i> Order Management
-          </a>
-          <div class="dropdown-menu" aria-labelledby="ordersDropdown">
-            <a class="dropdown-item" href="{{ url_for('admin.view_orders') }}">All Orders</a>
-            <a class="dropdown-item" href="{{ url_for('admin.view_orders_by_date') }}">Daily Orders</a>
-            <a class="dropdown-item" href="{{ url_for('admin.admin_purchase') }}">Market Pro</a>                                                                                       
-            
-          </div>
-        </li>
+    <!-- Product Management (visible to all roles) -->
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#" role="button" id="productsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="product-icon fas fa-shopping-basket"></i> Product Management
+      </a>
+      <div class="dropdown-menu" aria-labelledby="productsDropdown">
+        <a class="dropdown-item" href="{{ url_for('main.products') }}">Products</a>
+        <a class="dropdown-item" href="{{ url_for('main.add_product') }}">Add Product</a>
+        <a class="dropdown-item" href="{{ url_for('admin.product_categories') }}">Product Categories</a>
+        <a class="dropdown-item" href="{{ url_for('main.add_product_image') }}">Add Product Images</a>
+        <a class="dropdown-item" href="{{ url_for('main.add_supplier') }}">Product Suppliers</a>
+      </div>
+    </li>
 
-        <li class="dropdown">
-          <a class="dropdown-toggle" href="#" role="button" id="dataVizDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="order-icon fas fa-chart-line"></i> Data Visualization
-          </a>
-          <div class="dropdown-menu" aria-labelledby="dataVizDropdown">
-            <a class="dropdown-item" href="{{ url_for('admin.data_visualization') }}">Sales Overview</a>
-            <a class="dropdown-item" href="#">More Data Visualization</a>
-          </div>
-        </li>
+    <!-- Order Management (visible to all roles) -->
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#" role="button" id="ordersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="order-icon fas fa-shopping-cart"></i> Order Management
+      </a>
+      <div class="dropdown-menu" aria-labelledby="ordersDropdown">
+        <a class="dropdown-item" href="{{ url_for('admin.view_orders') }}">All Orders</a>
+        <a class="dropdown-item" href="{{ url_for('admin.view_orders_by_date') }}">Daily Orders</a>
+      </div>
+    </li>
 
-        <li class="dropdown">
-          <a class="dropdown-toggle" href="#" role="button" id="locationsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="order-icon fas fa-map-marker-alt"></i> Locations Covered
-          </a>
-          <div class="dropdown-menu" aria-labelledby="locationsDropdown">
-            <a class="dropdown-item" href="{{ url_for('admin.add_location') }}">Add Location</a>
-            <a class="dropdown-item" href="#">Customer Locations</a>
-          </div>
-        </li>
+    <!-- Data Visualization (visible to all roles) -->
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#" role="button" id="dataVizDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="order-icon fas fa-chart-line"></i> Data Visualization
+      </a>
+      <div class="dropdown-menu" aria-labelledby="dataVizDropdown">
+        <a class="dropdown-item" href="{{ url_for('admin.data_visualization') }}">Sales Overview</a>
+        <a class="dropdown-item" href="#">More Data Visualization</a>
+      </div>
+    </li>
 
-        <li class="dropdown">
+    <!-- Locations Covered (visible to all roles) -->
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#" role="button" id="locationsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="order-icon fas fa-map-marker-alt"></i> Locations Covered
+      </a>
+      <div class="dropdown-menu" aria-labelledby="locationsDropdown">
+        <a class="dropdown-item" href="{{ url_for('admin.add_location') }}">Add Location</a>
+        <a class="dropdown-item" href="#">Customer Locations</a>
+      </div>
+    </li>
+
+    <!-- User Management (visible to all roles) -->
+    <li class="dropdown">
       <a class="dropdown-toggle" href="#" role="button" id="usersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="customer-icon fas fa-users"></i> User Management
       </a>
       <div class="dropdown-menu" aria-labelledby="usersDropdown">
         <a class="dropdown-item" href="{{ url_for('admin.all_users') }}">Clients Operations</a>
-       <a class="dropdown-item" href="{{ url_for('admin.admin_shop_for_user') }}">Shop for User</a>
-
+        <a class="dropdown-item" href="{{ url_for('admin.admin_shop_for_user') }}">Shop for User</a>
         <a class="dropdown-item" href="#">Sales Representatives</a>
       </div>
     </li>
 
+    <!-- User Roles (visible to all roles) -->
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#" role="button" id="rolesDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="order-icon fas fa-cogs"></i> User Roles
+      </a>
+      <div class="dropdown-menu" aria-labelledby="rolesDropdown">
+        <a class="dropdown-item" href="{{ url_for('role.manage_roles') }}">Manage Roles</a>
+        <a class="dropdown-item" href="{{ url_for('role.assign_role') }}">Assign Role</a>
+      </div>
+    </li>
 
+    <!-- Finances Department (visible only to admin) -->
+    {% if current_user.role.name.lower() == 'admin' %}
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#" role="button" id="financesDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="order-icon fas fa-dollar-sign"></i> Finances Department
+      </a>
+      <div class="dropdown-menu" aria-labelledby="financesDropdown">
+        <a class="dropdown-item" href="{{ url_for('payments.admin_payments') }}">Update Payment</a>
+        <a class="dropdown-item" href="#">Financial Accounts</a>
+        <a class="dropdown-item" href="#">Payment Progress</a>
+      </div>
+    </li>
+    {% endif %}
 
+    <!-- Website Settings (visible only to admin) -->
+    {% if current_user.role.name.lower() == 'admin' %}
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#" role="button" id="settingsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="order-icon fas fa-cog"></i> Website Settings
+      </a>
+      <div class="dropdown-menu" aria-labelledby="settingsDropdown">
+        <a class="dropdown-item" href="{{ url_for('site.offers') }}">Special Offers Sections</a>
+        <a class="dropdown-item" href="{{ url_for('site.list_promotions') }}">Promotions</a>
+        <a class="dropdown-item" href="{{ url_for('site.manage_blog') }}">Blog Section</a>
+        <a class="dropdown-item" href="#">Hero Section</a>
+        <a class="dropdown-item" href="{{ url_for('site.about_us') }}">About Us Section</a>
+      </div>
+    </li>
+    {% endif %}
 
-               <li class="dropdown">
-          <a class="dropdown-toggle" href="#" role="button" id="locationsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="order-icon fas fa-dollar-sign"></i>Finances Department
-          </a>
-          <div class="dropdown-menu" aria-labelledby="locationsDropdown">
-            <a class="dropdown-item" href="{{ url_for('payments.admin_payments') }}">Update Payment</a>
-            <a class="dropdown-item" href="#">Financial Accounts</a>
-            <a class="dropdown-item" href="#">Payment Progress</a>
-            
-          </div>
-               </li>
-      <li class="dropdown">
-          <a class="dropdown-toggle" href="#" role="button" id="locationsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="order-icon fas fa-cog"></i> Website Setting
-          </a>
-          <div class="dropdown-menu" aria-labelledby="locationsDropdown">
-            <a class="dropdown-item" href="{{ url_for('site.offers') }}">Special offers Sections</a>
-             <a class="dropdown-item" href="{{ url_for('site.list_promotions') }}"> Promotions</a>
-            <a class="dropdown-item" href="{{ url_for('site.manage_blog') }}"> Blog Section</a>
-            <a class="dropdown-item" href="#"> Hero Section</a>
-            <a class="dropdown-item" href="{{ url_for('site.about_us') }}"> About Us Section</a>
-            
-          </div>
-        </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </li>
+  </ul>
+</div>
 
- 
-
-        
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
-        </li>
-      </ul>
-    </div>
 
     <div id="content" class= " container-fluid">
       <nav class="navbar navbar-expand navbar-dark">

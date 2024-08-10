@@ -31,12 +31,12 @@
                         <tr>
                             <!-- 'All' Link Button -->
                             <td>
-                                <a href="{{ url_for('main.product_listing') }}" class="btn btn-outline-primary">All</a>
+                                <a href="{{ url_for('main.product_listing') }}" class="btn btn-outline-success">All</a>
                             </td>
                             <!-- Category Buttons -->
                             {% for category in categories %}
                             <td>
-                                <a href="{{ url_for('main.product_listing_by_category', category_id=category.id) }}" class="btn btn-outline-primary">{{ category.name }}</a>
+                                <a href="{{ url_for('main.product_listing_by_category', category_id=category.id) }}" class="btn btn-outline-success">{{ category.name }}</a>
                             </td>
                             {% endfor %}
                         </tr>
@@ -90,7 +90,7 @@
                 <p class="card-text text-muted fs-6 mb-3">{{ product.description | truncate(80) }}</p>
                 <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
                 <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
-                    Buy
+                    Add To Cart
                 </button>
             </div>
         </div>
@@ -166,18 +166,7 @@
 </div>
 
 
- <!-- Login Modal -->
-<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            
-            <div class="modal-body" id="modalBody">
-                <!-- Login form will be loaded here -->
-            </div>
-            
-        </div>
-    </div>
-</div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -251,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     // Load the login form via AJAX
                     $.ajax({
-                        url: "{{ url_for('main.login') }}",
+                        url: "{{ url_for('auth.login') }}",
                         method: 'GET',
                         success: function(data) {
                             $('#modalBody').html(data);

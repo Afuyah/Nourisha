@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 import os
 from app import db, admin_required
 from app.main.models import Offer, AboutUs, BlogPost, ContactMessage, Promotion, ProductPromotion, Product
-from app.main.forms import OfferForm, AboutUsForm, BlogPostForm, ContactForm, PromotionForm, TagProductsForm
+from app.main.forms import OfferForm, AboutUsForm, BlogPostForm, PromotionForm, TagProductsForm
 
 site_bp = Blueprint('site', __name__)
 

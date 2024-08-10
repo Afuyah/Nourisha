@@ -3,7 +3,7 @@ from app import db, mail, admin_required, login_required
 from flask import render_template, abort, flash, redirect, url_for, request, jsonify, session,Flask, current_app as app
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
-from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, RegistrationForm, LoginForm, AddRoleForm, AddSupplierForm,RecommendationForm, ContactForm
+from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, AddRoleForm, AddSupplierForm,RecommendationForm,LoginForm
 from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
@@ -58,22 +58,8 @@ def index():
     categories = ProductCategory.query.all()  # Fetch the categories
     about_us = AboutUs.query.first()
     blog_posts = BlogPost.query.order_by(BlogPost.date_posted.desc()).limit(3).all() 
-    form = ContactForm()
-    if form.validate_on_submit():
-        contact_message = ContactMessage(
-            name=form.name.data,
-            email=form.email.data,
-            message=form.message.data
-        )
-        try:
-            db.session.add(contact_message)
-            db.session.commit()
-            flash('Your message has been sent successfully!', 'success')
-            return redirect(url_for('main.index'))
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error sending message: {e}', 'danger')
-
+    
+    login_form = LoginForm()
     return render_template('home.html',
                            title='Home',
                            product_listing_url=url_for('main.product_listing'),
@@ -82,7 +68,7 @@ def index():
                            categories=categories,
                            about_us=about_us,
                            blog_posts=blog_posts,
-                           form=form)
+                           login_form=login_form)
 
 
 @bp.route('/contact', methods=['POST'])
@@ -113,11 +99,11 @@ def contact():
 def user_dashboard():
   # Fetch user information from the database
   user = User.query.filter_by(id=current_user.id).first()
-
+  login_form=LoginForm()
   # Fetch user's orders from the database
   orders = Order.query.filter_by(user_id=current_user.id).all()
 
-  return render_template('user_dashboard.html', user=user, orders=orders)
+  return render_template('user_dashboard.html', user=user, orders=orders, login_form=login_form)
 
 def send_welcome_email(user):
   msg = Message('Welcome to Our Application!', recipients=[user.email])
@@ -213,56 +199,6 @@ def register():
     return render_template('register.html', form=form)
 
 
-@bp.route('/login', methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
-
-    if request.method == 'POST' and form.validate_on_submit():
-        identifier = form.identifier.data
-        password = form.password.data
-
-        # Check if the identifier is an email, phone number, or username
-        user = User.query.filter(
-            (User.email == identifier) | 
-            (User.phone == identifier) | 
-            (User.username == identifier)
-        ).first()
-
-        if user and user.check_password(password):
-            if user.confirmed:
-                login_user(user)
-                session['login_time'] = datetime.utcnow()
-                user.last_login_date = datetime.utcnow()
-                user.last_login_ip = request.remote_addr
-                db.session.commit()
-                flash(f'Welcome back, {current_user.username}!', 'success')
-
-                # Determine the redirect URL based on the user's role
-                if user.role and user.role.name == 'admin':
-                    redirect_url = url_for('admin.admin_dashboard')
-                else:
-                    redirect_url = session.get('next', url_for('main.index'))
-                    session.pop('next', None)  # Remove the 'next' URL from the session
-
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return jsonify({'success': True, 'redirect': redirect_url})
-
-                return redirect(redirect_url)
-
-            else:
-                flash('Your account is not confirmed. Please check your email for the confirmation link.', 'warning')
-
-        else:
-            flash('Invalid credentials. Please check your username/email/phone number and password.', 'danger')
-
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({'success': False, 'html': render_template('user_auth.html', form=form)})
-
-    # Render the login template with or without AJAX based on the request type
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return render_template('user_auth.html', form=form)
-    
-    return render_template('user_auth.html', form=form)
 
 
 
@@ -569,22 +505,26 @@ def product_details(product_id):
 def product_listing():
     categories = ProductCategory.query.all()
     products = Product.query.all()
-    form = AddProductForm()
-    return render_template('product_listing.html', categories=categories, form=form, products=products)
+    add_product_form = AddProductForm()
+    login_form = LoginForm()
+    return render_template('product_listing.html', categories=categories, form=add_product_form, products=products, login_form=login_form)
+
 
 @bp.route('/product_listing/<int:category_id>')
 def product_listing_by_category(category_id):
     category = ProductCategory.query.get_or_404(category_id)
     products = Product.query.filter_by(category=category).all()
-    categories = ProductCategory.query.all()  # Fetch all categories to display in the sidebar if needed
-    form = AddProductForm()
-    return render_template('product_listing.html', category=category, products=products, categories=categories, form=form)
+    categories = ProductCategory.query.all()
+    add_product_form = AddProductForm()
+    login_form = LoginForm()
+    return render_template('product_listing.html', category=category, products=products, categories=categories, form=add_product_form, login_form=login_form)
 
 @bp.route('/view_order/<int:order_id>')
 @login_required
 def view_order(order_id):
+    login_form = LoginForm()
     order = Order.query.get_or_404(order_id)
-    return render_template('user_view_order.html', order=order)
+    return render_template('user_view_order.html', order=order, login_form=login_form)
 
 @bp.route('/search', methods=['GET', 'POST'])
 def search():
@@ -615,24 +555,7 @@ def get_similar_users(user_id, top_n=5):
 
     return top_similar_users
 
-# Collaborative Filtering (Item-Based)
-def get_similar_products(product, top_n=5):
-    products = db.session.query(Product).all()
-    product_texts = [
-        (p.nutritional_information or '') + ' ' + (p.promotional_tag or '') for p in products
-    ]
-    product_ids = [p.id for p in products]
 
-    tfidf = TfidfVectorizer(stop_words='english')
-    tfidf_matrix = tfidf.fit_transform(product_texts)
-
-    product_idx = product_ids.index(product.id)
-    product_vector = tfidf_matrix[product_idx]
-
-    cosine_sim = cosine_similarity(product_vector, tfidf_matrix)
-    similar_indices = cosine_sim.argsort().flatten()[-(top_n + 1):-1]
-
-    return [products[i] for i in similar_indices]
 
 # Content-Based Recommendations
 def get_content_based_recommendations(product, top_n=5):
@@ -677,14 +600,9 @@ def recommend_products(user_id, num_recommendations=10):
     for similar_user_id in similar_users:
         recommendations.extend(get_user_interactions(similar_user_id))
 
-    # Collaborative Filtering (Item-Based)
-    user_purchased_products = get_user_interactions(user_id)
-    for product in user_purchased_products:
-        recommendations.extend(get_similar_products(product))
+   
 
-    # Content-Based Recommendations
-    for product in user_purchased_products:
-        recommendations.extend(get_content_based_recommendations(product))
+   
 
     # Popularity-Based Recommendations
     recommendations.extend(get_most_popular_products())
@@ -799,6 +717,7 @@ def get_current_user_id():
 def recommendations():
     user_id = current_user.id
     form = RecommendationForm()
+    login_form= LoginForm()
     recommendations = recommend_products(user_id, 10)  # Get top 10 recommendations
-    return render_template('recommendations.html', recommendations=recommendations, form=form)
+    return render_template('recommendations.html', recommendations=recommendations, form=form, login_form=login_form)
 

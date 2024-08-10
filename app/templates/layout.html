@@ -179,19 +179,31 @@
         </div>
     </nav>
 
-    <!-- Login Modal -->
-<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            
-            <div class="modal-body" id="modalBody">
-                <!-- Login form will be loaded here -->
+ <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{{ url_for('auth.login') }}">
+                        {{ login_form.hidden_tag() }}
+                        <div class="mb-3">
+                            <label for="{{ login_form.identifier.id }}" class="form-label">Username/Email/Phone</label>
+                            {{ login_form.identifier(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ login_form.password.id }}" class="form-label">Password</label>
+                            {{ login_form.password(class="form-control") }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                </div>
             </div>
-            
         </div>
     </div>
-</div>
-
 
 
 
@@ -345,7 +357,7 @@ $(document).ready(function() {
         $('#loginModal').modal('show'); // Show the modal
 
         $.ajax({
-            url: "{{ url_for('main.login') }}",
+            url: "{{ url_for('auth.login') }}",
             method: 'GET',
             success: function(data) {
                 $('#modalBody').html(data);

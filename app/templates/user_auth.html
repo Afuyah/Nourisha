@@ -1,24 +1,20 @@
-{% include 'loader.html' %}
+{% extends 'layout.html' %}
 {% block content %}
 <!-- Login Form -->
-<form id="loginForm" method="post" action="{{ url_for('main.login') }}" style="margin-top:40px;">
-    {{ form.hidden_tag() }}
+<form id="loginForm" method="post" action="{{ url_for('auth.login') }}">
+    {{ login_form.hidden_tag() }}
 
-    <div class="mb-3" style="margin-bottom:10px; text-align:center;>
-        <label for="{{ form.identifier.id }}" class="form-label">Username</label>
-        {{ form.identifier(class="form-control", placeholder="Enter your username, email, or phone number") }}
+    <div class="mb-3">
+        <label for="{{ login_form.identifier.id }}" class="form-label">Username/Email/Phone</label>
+        {{ login_form.identifier(class="form-control", placeholder="Enter your username, email, or phone number") }}
     </div>
 
     <div class="mb-3">
-        <label for="{{ form.password.id }}" class="form-label">Password</label>
-        {{ form.password(class="form-control", placeholder="Enter your password") }}
+        <label for="{{ login_form.password.id }}" class="form-label">Password</label>
+        {{ login_form.password(class="form-control", placeholder="Enter your password") }}
     </div>
 
-    <button type="submit" class="btn btn-primary w-100">Login</button>
-
-    <div class="text-center mt-3">
-        <a href="{{ url_for('main.register') }}" class="text-primary">Don't have an account? Register here</a>
-    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
 </form>
 <!-- Bootstrap CSS -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">

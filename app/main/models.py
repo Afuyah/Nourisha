@@ -9,10 +9,15 @@ from sqlalchemy import event
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import Numeric
 
-# Role model for user roles
 class Role(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String(50), unique=True, nullable=False)
+ 
+  users = db.relationship('User', backref='role', lazy=True)
+    
+  def __repr__(self):
+      return f'<Role {self.name}>'
+
 
 
 class User(db.Model, UserMixin):
@@ -36,23 +41,17 @@ class User(db.Model, UserMixin):
   purchase_frequency = db.Column(db.Integer)  # Number of orders per month
   last_active = db.Column(db.DateTime)  # Last activity timestamp
 
-      # Relationships adjusted to avoid conflict
-  purchases = db.relationship('Purchase', back_populates='user', lazy=True)  # Use back_populates instead of backref
-      # Define other relationships as before
+  purchases = db.relationship('Purchase', back_populates='user', lazy=True)
   delivery_info = db.relationship('UserDeliveryInfo', back_populates='user', lazy='dynamic')
-  role = db.relationship('Role', backref=db.backref('users', lazy=True))
   orders = db.relationship('Order', back_populates='user')
   clicks = db.relationship('ProductClick', back_populates='user')
   views = db.relationship('ProductView', back_populates='user')
   search_queries = db.relationship('UserSearchQuery', back_populates='user')
   ratings = db.relationship('Rating', back_populates='user')
-
   bought_items = db.relationship('OrderItem', back_populates='bought_by_admin', foreign_keys='OrderItem.bought_by_admin_id')
-  
+   
   def __repr__(self):
       return f'<User {self.username}>'
-
-
 
   def set_password(self, password):
       self.password_hash = generate_password_hash(password)
@@ -79,7 +78,6 @@ class User(db.Model, UserMixin):
           return False
 
       if 'exp' in data and data['exp'] < time():
-          # Token has expired
           return False
 
       if data.get('confirm') != self.id:
@@ -90,7 +88,6 @@ class User(db.Model, UserMixin):
       db.session.commit()
       return True
 
-    # Method to calculate and update average spending per order
   def update_average_spending(self):
       orders = Order.query.filter_by(user_id=self.id).all()
       if orders:
@@ -99,20 +96,22 @@ class User(db.Model, UserMixin):
       else:
           self.average_spending = 0.0
 
-    # Method to update purchase frequency
   def update_purchase_frequency(self):
       orders = Order.query.filter_by(user_id=self.id).all()
       if orders:
           self.purchase_frequency = len(orders)
       else:
           self.purchase_frequency = 0
-   # Method to update last active timestamp
+
   def update_last_active(self):
       self.last_active = datetime.utcnow()
-   # Method to fetch user ratings for collaborative filtering
+
   def fetch_ratings(self):
       return Rating.query.filter_by(user_id=self.id).all()
-# Rating model to capture user ratings for products
+
+  def has_role(self, role_name):
+        return self.role.name == role_name
+
 class Rating(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

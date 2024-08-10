@@ -35,6 +35,21 @@ class AddRoleForm(FlaskForm):
   name = StringField('Role Name', validators=[DataRequired()])
   submit = SubmitField('Add Role')
 
+class UserRoleForm(FlaskForm):
+  user = SelectField('User', coerce=int, validators=[DataRequired()])
+  role = SelectField('Role', coerce=int, validators=[DataRequired()])
+  submit = SubmitField('Assign Role')
+
+class AssignPermissionForm(FlaskForm):
+  role = SelectField('Role', coerce=int, validators=[DataRequired()])
+  permissions = SelectMultipleField('Permissions', coerce=int, validators=[DataRequired()])
+  submit = SubmitField('Assign Permissions')
+
+class AddPermissionForm(FlaskForm):
+  name = StringField('Permission Name', validators=[DataRequired()])
+  description = StringField('Permission Description')
+  submit = SubmitField('Add Permission')
+
 
 class EditUserForm(FlaskForm):
   username = StringField('Username',

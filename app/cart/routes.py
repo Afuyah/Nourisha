@@ -4,7 +4,7 @@ from flask_login import current_user, login_required
 from app.main.models import User, Location, Order, OrderItem
 from app.main.models import Cart, Product, Location, Order, Arealine, NearestPlace, UserDeliveryInfo, Location
 from app.cart import cart_bp
-from app.main.forms import CheckoutForm, AddProductForm
+from app.main.forms import CheckoutForm, AddProductForm, LoginForm
 from app import db, mail
 from flask_mail import Message
 from app.main import bp
@@ -14,10 +14,13 @@ from app import login_required
 
 
 
-@cart_bp.route('/add_to_cart/<int:product_id>/<int:quantity>', methods=['POST'])
+@cart_bp.route('/add_to_cart/<int:product_id>', methods=['POST'])
 @login_required
-def add_to_cart(product_id, quantity):
+def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
+
+    quantity = int(request.form.get('quantity', 1))
+    custom_description = request.form.get('custom_description', '')
 
     if quantity <= 0:
         flash('Quantity must be greater than zero.', 'danger')
@@ -31,8 +34,6 @@ def add_to_cart(product_id, quantity):
 
     cart_item = Cart.query.filter_by(user_id=current_user.id,
                                       product_id=product.id).first()
-    quantity = int(request.form.get('quantity'))
-    custom_description = request.form.get('custom_description', '')
 
     if cart_item:
         cart_item.quantity += quantity
@@ -70,12 +71,12 @@ def view_cart():
     total_price = sum(item.product.unit_price * item.quantity
                       for item in cart_items)
 
-    form = AddProductForm()  # Replace with the actual form you're using
+    login_form = LoginForm()  # Replace with the actual form you're using
 
     return render_template('view_cart.html',
                            cart_items=cart_items,
                            total_price=total_price,
-                           form=form)
+                           login_form=login_form)
 
 # Function to calculate the total amount in the cart
 def calculate_total_amount():
@@ -263,6 +264,7 @@ def _in_stock(product_id):
 @login_required
 def checkout():
     form = CheckoutForm()
+    login_form = LoginForm()
 
     # Retrieve cart items for the current user
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
@@ -301,7 +303,7 @@ def checkout():
         # Redirect to the order summary page
         return redirect(url_for('cart.order_summary'))
 
-    return render_template('checkout.html', form=form, cart_items=cart_items, total_price=total_price)
+    return render_template('checkout.html', form=form, cart_items=cart_items, total_price=total_price, login_form=login_form)
 
 @cart_bp.route('/latest_delivery_info', methods=['GET'])
 @login_required
@@ -357,6 +359,7 @@ def update_delivery_info():
 @login_required
 def order_summary():
     form = CheckoutForm()
+    login_form = LoginForm()
     # Fetch stored delivery information from session
     delivery_info = session.get('delivery_info', {})
 
@@ -426,7 +429,8 @@ def order_summary():
                            location=location,
                            arealine=arealine,
                            nearest_place=nearest_place,
-                           form=form)
+                           form=form,
+                           login_form=login_form)
 
 
 
