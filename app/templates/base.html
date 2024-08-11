@@ -202,15 +202,16 @@
       </div>
     </li>
 
-<li class="dropdown">
-          <a class="dropdown-toggle" href="#" role="button" id="locationsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="order-icon fas fa-map-marker-alt"></i> User Roles
-          </a>
-          <div class="dropdown-menu" aria-labelledby="locationsDropdown">
-            <a class="dropdown-item" href="{{ url_for('role.manage_roles') }}">Manage roles</a>
-            <a class="dropdown-item" href="{{url_for('role.assign_role')}}">Assign Role</a>
-          </div>
-        </li>
+<!-- User Roles (visible to all roles) -->
+    <li class="dropdown">
+      <a class="dropdown-toggle" href="#" role="button" id="rolesDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="order-icon fas fa-cogs"></i> User Roles
+      </a>
+      <div class="dropdown-menu" aria-labelledby="rolesDropdown">
+        <a class="dropdown-item" href="{{ url_for('role.manage_roles') }}">Manage Roles</a>
+        <a class="dropdown-item" href="{{ url_for('role.assign_role') }}">Assign Role</a>
+      </div>
+    </li>
 
 
                <li class="dropdown">
