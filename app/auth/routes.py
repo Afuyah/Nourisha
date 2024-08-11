@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify, session
+from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify, session, current_app as app
 from flask_login import current_user, login_user, logout_user, login_required
 from app import db
 from app.main.forms import RegistrationForm, LoginForm
@@ -7,6 +7,21 @@ from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError
 
 auth_bp = Blueprint('auth', __name__)
+
+@auth_bp.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
+
+    login_time = session.get('login_time')
+
+    if login_time:
+        utc_now = datetime.utcnow().replace(tzinfo=timezone.utc)
+        session_duration = utc_now - login_time
+        session['average_session_duration'] = session_duration.total_seconds()
+        session['login_time'] = utc_now
+
 
 @auth_bp.route('/register', methods=['POST', 'GET'])
 def register():
@@ -35,9 +50,6 @@ def register():
             # Automatically log in the user after registration
             login_user(user)
 
-            # Send welcome email to the user
-            # send_welcome_email(user)
-
             flash(f'Registration successful! You are now logged in as {current_user.username}.', 'success')
             return redirect(url_for('main.index'))
 
@@ -45,6 +57,11 @@ def register():
             db.session.rollback()
             flash('Email address is already registered. Please use Sign In.', 'danger')
             return redirect(url_for('auth.login'))
+
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f'Error during registration: {str(e)}')
+            flash('An error occurred. Please try again.', 'danger')
 
     return render_template('register.html', form=form)
 
@@ -70,15 +87,10 @@ def login():
                 user.last_login_ip = request.remote_addr
                 db.session.commit()
 
-                flash(f'Welcome back, {current_user.username} !', 'success')
+                flash(f'Welcome back, {current_user.username}!', 'success')
 
-                # Determine the redirect URL based on the user's role
-                if user.role and user.role.name == 'admin':
-                    redirect_url = url_for('admin.admin_dashboard')
-                else:
-                    redirect_url = url_for('main.product_listing')
+                redirect_url = url_for('admin.admin_dashboard') if user.role and user.role.name == 'admin' else url_for('main.product_listing')
 
-                # Handle AJAX request
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return jsonify({'success': True, 'redirect': redirect_url})
 
@@ -88,11 +100,9 @@ def login():
         else:
             flash('Invalid credentials. Please check your username/email/phone number and password.', 'danger')
 
-        # Handle AJAX request
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return jsonify({'success': False, 'html': render_template('user_auth.html', login_form=login_form)})
 
-    # Render the login form
     return render_template('user_auth.html', login_form=login_form)
 
 @auth_bp.before_request
@@ -117,7 +127,9 @@ def check_authentication():
 @login_required
 def logout():
     logout_user()
+    flash('You have been logged out.', 'info')
     return redirect(url_for('main.product_listing'))
+
 
 
 

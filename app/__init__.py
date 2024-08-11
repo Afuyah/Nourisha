@@ -1,4 +1,4 @@
-from flask import Flask, session, redirect, url_for, flash, request, jsonify
+from flask import Flask, session, redirect, url_for, flash, request, jsonify, current_app as app
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
@@ -8,6 +8,10 @@ from flask_migrate import Migrate
 from config import Config
 from datetime import timedelta
 from functools import wraps
+import logging
+from logging.handlers import RotatingFileHandler
+import os
+
 
 # Extensions
 db = SQLAlchemy()
@@ -16,6 +20,11 @@ mail = Mail()
 migrate = Migrate()
 socketio = SocketIO()
 csrf = CSRFProtect()
+
+
+
+
+
 
 def login_required(func):
     @wraps(func)
@@ -68,6 +77,32 @@ def create_app():
     csrf.init_app(app)
     app.config['WTF_CSRF_TIME_LIMIT'] = None
 
+
+    
+
+    # Set up basic configuration for logging
+    logging.basicConfig(level=logging.DEBUG)
+    
+    # Create a file handler object
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
+    file_handler = RotatingFileHandler('logs/grocery_store.log', maxBytes=10240, backupCount=10)
+    
+    # Define the logging format
+    formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+    file_handler.setFormatter(formatter)
+    
+    # Set the log level for the file handler
+    file_handler.setLevel(logging.INFO)
+    
+    # Add the file handler to the app's logger
+    app.logger.addHandler(file_handler)
+    app.logger.setLevel(logging.INFO)
+    
+    # Log an application startup message
+    app.logger.info('Nourisha Grocery Store application started')
+
+    
     # Blueprints registration
 
     from app.auth.routes import auth_bp

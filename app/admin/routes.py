@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from flask import abort, flash, jsonify, redirect, render_template, request, url_for, Response, send_file, current_app
+from flask import abort, flash, jsonify, redirect, render_template, request, url_for, Response, send_file, current_app as app
 from flask_login import current_user, login_required
 from flask_mail import Message
 from sqlalchemy import func
@@ -18,6 +18,8 @@ from reportlab.lib.units import inch, mm, cm
 import os
 from functools import wraps
 from reportlab.lib.pagesizes import letter
+
+
 
 from reportlab.pdfgen import canvas
 from app.main.forms import (
@@ -766,15 +768,19 @@ def view_orders_by_date():
             Order.order_date >= start_date,
             Order.order_date <= end_date
         ).all()
+        app.logger.info(f'Orders fetched for date: {selected_date}')
     return render_template('view_orders_by_date.html', form=form, orders=orders)
+
 
 # Order Details
 @admin_bp.route('/admin/order/<int:order_id>', methods=['GET'])
 @admin_required
 def order_details(order_id):
     order = Order.query.get_or_404(order_id)
-    form = FulfillmentForm()  # Create the form instance
+    form = FulfillmentForm()
+    app.logger.info(f'Viewing details for order ID: {order_id}')
     return render_template('order_details.html', order=order, form=form)
+
 
 # Confirm Order
 
@@ -791,12 +797,14 @@ def confirm_order(order_id):
             order.status = 'confirmed'
             db.session.commit()
             flash('Order confirmed successfully.', 'success')
+            app.logger.info(f'Order ID {order_id} confirmed with delivery date {expected_delivery_date}')
         else:
             flash('Expected delivery date is required to confirm the order.', 'danger')
     else:
         flash('Order cannot be confirmed. It may already be confirmed or in a different status.', 'danger')
 
     return redirect(url_for('admin.order_details', order_id=order_id))
+
 
 @admin_bp.route('/admin/fulfill_order/<int:order_id>', methods=['POST'])
 @admin_required
@@ -816,12 +824,14 @@ def fulfill_order(order_id):
             order.status = 'disparched'
             db.session.commit()
             flash('Selected items fulfilled successfully.', 'success')
+            app.logger.info(f'Order ID {order_id} items fulfilled.')
         else:
             flash('No items selected for fulfillment.', 'warning')
     else:
         flash('Failed to fulfill order. Please ensure the order is confirmed.', 'danger')
 
     return redirect(url_for('admin.order_details', order_id=order_id))
+
 
 
 
@@ -834,12 +844,12 @@ def mark_delivered(order_id):
     if order.status == 'disparched':
         delivery_remarks = form.get('delivery_remarks')
 
-        # Ensure delivery remarks are provided and not just whitespace
         if delivery_remarks and delivery_remarks.strip():
             order.status = 'delivered'
-            order.delivery_remarks = delivery_remarks.strip()  # Save the delivery remarks
+            order.delivery_remarks = delivery_remarks.strip()
             db.session.commit()
             flash('Order marked as delivered successfully with remarks.', 'success')
+            app.logger.info(f'Order ID {order_id} marked as delivered with remarks: {delivery_remarks}')
         else:
             flash('Delivery remarks are required to mark the order as delivered.', 'warning')
     else:
@@ -848,13 +858,12 @@ def mark_delivered(order_id):
     return redirect(url_for('admin.order_details', order_id=order_id))
 
 
+
 @admin_bp.route('/admin/purchase', methods=['GET', 'POST'])
 @admin_required
 def admin_purchase():
-    # Get the selected date from the request parameters or use today's date as default
     selected_date = request.args.get('date', datetime.today().strftime('%Y-%m-%d'))
 
-    # Query for items that are not yet bought
     items_available = db.session.query(OrderItem) \
         .join(Order, OrderItem.order_id == Order.id) \
         .join(Product, OrderItem.product_id == Product.id) \
@@ -862,7 +871,6 @@ def admin_purchase():
         .filter(OrderItem.purchase_status != 'Bought', db.func.date(Order.order_date) == selected_date) \
         .order_by(Order.id.desc()).all()
 
-    # Query for items that have been bought
     items_bought = db.session.query(OrderItem) \
         .join(Order, OrderItem.order_id == Order.id) \
         .join(Product, OrderItem.product_id == Product.id) \
@@ -870,8 +878,9 @@ def admin_purchase():
         .filter(OrderItem.purchase_status == 'Bought', db.func.date(Order.order_date) == selected_date) \
         .order_by(Order.id.desc()).all()
 
-    # Render the purchasing template with the available and bought items
+    app.logger.info(f'Admin purchase view for date: {selected_date}')
     return render_template('purchasing.html', items_available=items_available, items_bought=items_bought, selected_date=selected_date)
+
 
 @admin_bp.route('/purchase/update', methods=['POST'])
 @admin_required
@@ -879,15 +888,13 @@ def admin_purchase_update():
     data = request.json
     item_id = data.get('item_id')
     purchase_price = data.get('purchase_price')
-    admin_id = current_user.id  # Assuming current_user gives you the logged-in admin's ID
+    admin_id = current_user.id
 
     item = OrderItem.query.get_or_404(item_id)
 
-    # Calculate amount paid based on purchase price and quantity
-    quantity_bought = item.quantity  # Adjust this if quantity comes from the form
+    quantity_bought = item.quantity
     amount_paid = purchase_price * quantity_bought
 
-    # Create a new purchase record
     new_purchase = Purchase(
         order_item_id=item_id,
         user_id=admin_id,
@@ -897,14 +904,12 @@ def admin_purchase_update():
     )
     db.session.add(new_purchase)
 
-    # Update the order item status
     item.purchase_price = purchase_price
     item.bought_by_admin_id = admin_id
     item.purchase_status = 'Bought'
-
-    # Commit the session to save changes
     db.session.commit()
 
+    app.logger.info(f'Purchase updated for item ID {item_id} by admin ID {admin_id}')
     return jsonify({
         "status": "success",
         "item_id": item_id,
@@ -914,31 +919,31 @@ def admin_purchase_update():
     })
 
 
+
 # View Orders by Status
 @admin_bp.route('/admin/orders/<status>', methods=['GET'])
 @admin_required
 def view_orders_by_status(status):
-    # List of valid statuses, including 'completed'
     valid_statuses = ['pending', 'confirmed', 'out for delivery', 'delivered', 'canceled', 'completed']
 
-    # Check if the provided status is valid
     if status not in valid_statuses:
         flash('Invalid status provided.', 'danger')
         return redirect(url_for('admin.dashboard'))
 
-    # Query orders by the given status
     orders = Order.query.filter_by(status=status).all()
 
     status_counts = {
-            'pending': len([order for order in orders if order.status == 'pending']),
-            'confirmed': len([order for order in orders if order.status == 'confirmed']),
-            'out for delivery': len([order for order in orders if order.status == 'out for delivery']),
-            'delivered': len([order for order in orders if order.status == 'delivered']),
-            'canceled': len([order for order in orders if order.status == 'canceled']),
-            'completed': len([order for order in orders if order.status == 'completed'])
-        }
+        'pending': len([order for order in orders if order.status == 'pending']),
+        'confirmed': len([order for order in orders if order.status == 'confirmed']),
+        'out for delivery': len([order for order in orders if order.status == 'out for delivery']),
+        'delivered': len([order for order in orders if order.status == 'delivered']),
+        'canceled': len([order for order in orders if order.status == 'canceled']),
+        'completed': len([order for order in orders if order.status == 'completed'])
+    }
 
-    return render_template('view_orders_by_status.html', orders=orders, status=status)
+    app.logger.info(f'Viewing orders by status: {status}')
+    return render_template('view_orders_by_status.html', orders=orders, status=status, status_counts=status_counts)
+
 
 
 
@@ -947,18 +952,14 @@ def view_orders_by_status(status):
 @admin_bp.route('/admin/api/orders/<status>', methods=['GET'])
 @admin_required
 def api_get_orders_by_status(status):
-    # Define valid statuses, including 'completed'
     valid_statuses = ['pending', 'confirmed', 'disparched', 'delivered', 'canceled', 'completed']
 
-    # Validate the status
     if status not in valid_statuses:
         return jsonify({'error': 'Invalid status'}), 400
 
     try:
-        # Base query
         query = Order.query.filter_by(status=status)
 
-        # Apply filters
         order_id = request.args.get('order_id', type=int)
         if order_id:
             query = query.filter(Order.id == order_id)
@@ -971,7 +972,6 @@ def api_get_orders_by_status(status):
         if order_date:
             query = query.filter(db.func.date(Order.order_date) == order_date)
 
-        # Apply sorting
         sort_by = request.args.get('sort_by', type=str)
         if sort_by == 'total_price':
             query = query.order_by(Order.total_price)
@@ -980,10 +980,8 @@ def api_get_orders_by_status(status):
         else:
             query = query.order_by(Order.order_date)
 
-        # Fetch orders
         orders = query.all()
 
-        # Serialize the orders to JSON format
         orders_data = []
         for order in orders:
             orders_data.append({
@@ -995,6 +993,7 @@ def api_get_orders_by_status(status):
                 'expected_delivery_date': order.expected_delivery_date.strftime('%Y-%m-%d') if order.expected_delivery_date else 'N/A'
             })
 
+        app.logger.info(f'API: Fetched orders by status: {status}')
         return jsonify(orders_data)
 
     except Exception as e:
@@ -1104,7 +1103,7 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     ])
 
     # Header with logo and company information
-    logo_path = os.path.join(current_app.static_folder, 'logoford.png')
+    logo_path = os.path.join(app.static_folder, 'logoford.png')
     logo = Image(logo_path, width=1.2*inch, height=0.6*inch) if os.path.exists(logo_path) else None
 
     company_info = [
@@ -1212,51 +1211,42 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
     return buffer
     return buffer
     
-from datetime import datetime
-from werkzeug.security import generate_password_hash
 
+
+# Route to add a new user
 @admin_bp.route('/admin/add_user', methods=['GET', 'POST'])
 @admin_required
 def add_user():
-        form = AddUserForm()
-        if form.validate_on_submit():
-            # Use phone number as the default password and hash it
-            hashed_password = generate_password_hash(form.phone.data)
-            
+    form = AddUserForm()
+    if form.validate_on_submit():
+        hashed_password = generate_password_hash(form.phone.data)
+        new_user = User(
+            username=form.username.data,
+            email=form.email.data,
+            phone=form.phone.data,
+            name=form.name.data,
+            confirmed=True,
+            password_hash=hashed_password,
+            registration_date=datetime.utcnow()
+        )
 
-            # Create a new user object with the hashed password
-            new_user = User(
-                username=form.username.data,
-                email=form.email.data,
-                phone=form.phone.data,
-                name=form.name.data,
-                
-confirmed=True,
-                password_hash=hashed_password,  # Storing the hashed phone number
-#Allow user confirmation automatically 
-registration_date=datetime.utcnow()  # Capture current date and time
-            )
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            flash('User added successfully!', 'success')
+            return redirect(url_for('admin.admin_shop_for_user', user_id=new_user.id))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f'Error adding user: {str(e)}')
+            flash('Error adding user. Please try again.', 'danger')
 
-            try:
-                db.session.add(new_user)
-                db.session.commit()
-                flash('User added successfully!', 'success')
-                return redirect(url_for('admin.admin_shop_for_user', user_id=new_user.id))
-            except Exception as e:
-                db.session.rollback()
-                flash('Error adding user: ' + str(e), 'danger')
+    return render_template('system_users.html', form=form)
 
-        return render_template('system_users.html', form=form)
-
-
-
-
+# Route to shop for a user
 @admin_bp.route('/admin/shop_for_user', methods=['GET', 'POST'])
 @admin_required
 def admin_shop_for_user():
     form = ShopForUserForm()
-
-    # Populate user and product choices
     users = User.query.all()
     form.user.choices = [(user.id, user.username) for user in users]
     categories = ProductCategory.query.all()
@@ -1279,9 +1269,8 @@ def admin_shop_for_user():
 
         unit_price = product.unit_price
 
-        # Create order item
         new_order_item = OrderItem(
-            order_id=None,  # No order_id yet since the order isn't placed
+            order_id=None,
             user_id=user_id,
             product_id=product_id,
             quantity=quantity,
@@ -1294,6 +1283,7 @@ def admin_shop_for_user():
 
     return render_template('admin_shop_for_user.html', form=form, users=users, categories=categories)
 
+# Route to get products by category
 @admin_bp.route('/admin/get_products')
 @admin_required
 def get_products():
@@ -1304,7 +1294,7 @@ def get_products():
         return jsonify({'products': product_list})
     return jsonify({'products': []})
 
-
+# Route to get items in the user's cart
 @admin_bp.route('/admin/get_user_cart')
 @admin_required
 def get_user_cart():
@@ -1328,16 +1318,14 @@ def get_user_cart():
                     'custom_description': item.custom_description
                 })
                 total_price += subtotal
-            else:
-                # Handle case where product is not found (optional)
-                pass
 
         return jsonify({
             'cart_items': cart_data,
             'total_price': total_price
         }), 200
-    return jsonify({'cart_items': []}), 400  # Return proper status code for bad requests
+    return jsonify({'cart_items': []}), 400
 
+# Route to add an item to the cart
 @admin_bp.route('/admin/add_to_cart', methods=['POST'])
 @admin_required
 def add_to_cart():
@@ -1354,7 +1342,6 @@ def add_to_cart():
     if not product:
         return jsonify({'status': 'error', 'message': 'Product not found'}), 404
 
-    # Check if the item already exists in the cart
     existing_cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
     if existing_cart_item:
         return jsonify({'status': 'error', 'message': 'Product already exists in the cart'}), 400
@@ -1373,75 +1360,56 @@ def add_to_cart():
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({'status': 'error', 'message': f'Failed to add item to cart: {str(e)}'}), 500
+        app.logger.error(f'Failed to add item to cart: {str(e)}')
+        return jsonify({'status': 'error', 'message': 'Failed to add item to cart'}), 500
 
-
-
+# Route to place an order for a user
 @admin_bp.route('/admin/place_order_for_user', methods=['POST'])
 @admin_required
 def place_order_for_user():
     if current_user.role.name != 'admin':
         return jsonify({'message': 'Unauthorized'}), 403
 
+    data = request.get_json()
+    user_id = data.get('user_id')
+    if not user_id:
+        return jsonify({'message': 'User ID is required'}), 400
+
+    cart_items = Cart.query.filter_by(user_id=user_id).all()
+    if not cart_items:
+        return jsonify({'message': 'No items in the cart for the user'}), 400
+
+    total_price = calculate_total_price(cart_items)
+    additional_services = 0
+    shipping_fee = 200
+    total_price += additional_services + shipping_fee
+
+    location_id = data.get('location_id', 1)
+    arealine_id = data.get('arealine_id', 1)
+    nearest_place_id = data.get('nearest_place_id', 1)
+    address_line = data.get('address_line', 'Call Client')
+    if not address_line:
+        return jsonify({'message': 'Address line is required'}), 400
+
+    order = Order(
+        user_id=user_id,
+        status='pending',
+        order_date=datetime.utcnow(),
+        total_price=total_price,
+        location_id=location_id,
+        arealine_id=arealine_id,
+        nearest_place_id=nearest_place_id,
+        address_line=address_line,
+        additional_info=data.get('additional_info'),
+        payment_method=data.get('payment_method', 'pay on delivery'),
+        phone_number=data.get('phone_number'),
+        custom_description=data.get('custom_description')
+    )
+
     try:
-        data = request.get_json()
-        user_id = data.get('user_id')
-        username = data.get('username')
-        if not user_id:
-            return jsonify({'message': 'User ID is required'}), 400
-
-        # Fetch cart items from the database for the specified user
-        cart_items = Cart.query.filter_by(user_id=user_id).all()
-
-        # Debug: Log the cart items
-        print("Fetched Cart Items: ", [item.product_id for item in cart_items])
-
-        if not cart_items:
-            return jsonify({'message': 'No items in the cart for the user'}), 400
-
-        # Calculate the total price for the order
-        total_price = calculate_total_price(cart_items)
-
-        # Add additional services and shipping fee
-        additional_services = 0  # Adjust this value if applicable
-        shipping_fee = 200  # Standard shipping fee
-
-        total_price += additional_services + shipping_fee
-
-        # Ensure location_id, arealine_id, and nearest_place_id are provided or set defaults
-        location_id = data.get('location_id', 1)  # Default value if not provided
-        arealine_id = data.get('arealine_id', 1)  # Default value if not provided
-        nearest_place_id = data.get('nearest_place_id', 1)  # Default value if not provided
-
-        # Ensure address_line is provided, otherwise raise an error
-        address_line = data.get('address_line', 'Call Client')
-        if not address_line:
-            return jsonify({'message': 'Address line is required'}), 400
-
-        # Create a new order instance
-        order = Order(
-            user_id=user_id,
-            status='pending',
-            order_date=datetime.utcnow(),
-            total_price=total_price,
-            location_id=location_id,
-            arealine_id=arealine_id,
-            nearest_place_id=nearest_place_id,
-            address_line=address_line,
-            additional_info=data.get('additional_info'),
-            payment_method=data.get('payment_method', 'pay on delivery'),
-            phone_number=data.get('phone_number'),
-            custom_description=data.get('custom_description')
-        )
-
-        # Add the new order to the session and commit to get the order ID
         db.session.add(order)
         db.session.commit()
 
-        # Debug: Log the new order ID
-        print(f"New Order ID: {order.id}")
-
-        # Add each cart item as an order item
         for cart_item in cart_items:
             product = cart_item.product
             if product:
@@ -1454,13 +1422,9 @@ def place_order_for_user():
                 )
                 db.session.add(order_item)
 
-        # Commit all changes to the database
         db.session.commit()
-
-        # Clear the cart for the user after placing the order
         clear_cart_for_user(user_id)
 
-        # Prepare data for the order summary
         order_data = {
             'order_id': order.id,
             'user_id': order.user_id,
@@ -1480,23 +1444,11 @@ def place_order_for_user():
         return jsonify({'message': 'Order placed successfully!', 'order': order_data}), 200
 
     except Exception as e:
-        # Rollback the session in case of error
         db.session.rollback()
-        return jsonify({'message': f'Failed to place order: {str(e)}'}), 500
+        app.logger.error(f'Failed to place order: {str(e)}')
+        return jsonify({'message': 'Failed to place order'}), 500
 
-def calculate_total_price(cart_items):
-    total_price = 0
-    for item in cart_items:
-        product = item.product
-        if product:
-            total_price += item.quantity * product.unit_price
-    return total_price
-
-def clear_cart_for_user(user_id):
-    Cart.query.filter_by(user_id=user_id).delete()
-    db.session.commit()
-
-
+# Route to complete an order
 @admin_bp.route('/admin/complete_order/<int:order_id>', methods=['POST'])
 @admin_required
 def complete_order(order_id):
@@ -1504,94 +1456,83 @@ def complete_order(order_id):
         flash('Unauthorized access!', 'error')
         return redirect(url_for('admin.some_redirect_route'))
 
-    # Fetch the order
     order = Order.query.get(order_id)
     if not order:
         flash('Order not found', 'error')
         return redirect(url_for('admin.some_redirect_route'))
 
     try:
-        # Update the order status to 'completed'
         order.status = 'completed'
         db.session.commit()
-
         flash('Order completed successfully!', 'success')
         return redirect(url_for('admin.order_summary', order_id=order_id))
 
     except Exception as e:
         db.session.rollback()
-        flash(f'Failed to complete order: {str(e)}', 'error')
+        app.logger.error(f'Failed to complete order {order_id}: {str(e)}')
+        flash('Failed to complete order. Please try again.', 'danger')
         return redirect(url_for('admin.order_summary', order_id=order_id))
 
 
-# Route to clear the entire cart for a user
-@admin_bp.route('/admin/clear_cart', methods=['POST'])
-@admin_required
-def clear_cart():
-    data = request.json
-    user_id = data.get('user_id')
-
-    if not user_id:
-        return jsonify({'status': 'error', 'message': 'User ID is required'}), 400
-
-    try:
-        Cart.query.filter_by(user_id=user_id).delete()
-        db.session.commit()
-        return jsonify({'status': 'success', 'message': 'Cart cleared successfully'}), 200
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'status': 'error', 'message': f'Failed to clear cart: {str(e)}'}), 500
-
 def calculate_total_price(cart_items):
-    total_price = 0
+    total = 0.0
     for item in cart_items:
         product = Product.query.get(item.product_id)
         if product:
-            total_price += item.quantity * product.unit_price
-    return total_price
+            total += item.quantity * product.unit_price
+    return total
 
+
+# Route to clear cart for a user
 def clear_cart_for_user(user_id):
-    Cart.query.filter_by(user_id=user_id).delete()
-    db.session.commit()
+    try:
+        Cart.query.filter_by(user_id=user_id).delete()
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error clearing cart for user {user_id}: {str(e)}')
 
-
+# Route to remove an item from the cart
 @admin_bp.route('/admin/remove_from_cart', methods=['POST'])
 @admin_required
 def remove_from_cart():
+    data = request.json
+    user_id = data.get('user_id')
+    product_id = data.get('product_id')
+
+    if not user_id or not product_id:
+        app.logger.error(f'Missing parameters: user_id={user_id}, product_id={product_id}')
+        return jsonify({'message': 'User ID and Product ID are required'}), 400
+
+    if current_user.role.name != 'admin':
+        app.logger.warning(f'Unauthorized access attempt: user_id={user_id}, product_id={product_id}')
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+
+    if not cart_item:
+        app.logger.info(f'Cart item not found: user_id={user_id}, product_id={product_id}')
+        return jsonify({'message': 'Item not found in the cart'}), 404
+
     try:
-        data = request.get_json()
-        user_id = data.get('user_id')
-        product_id = data.get('product_id')
-
-        print(f"Received request to remove from cart: user_id={user_id}, product_id={product_id}")
-
-        if not user_id or not product_id:
-            print('Error: User ID and Product ID are missing')
-            return jsonify({'message': 'User ID and Product ID are missing'}), 400
-
-        if current_user.role.name != 'admin':
-            print('Error: Unauthorized access attempt')
-            return jsonify({'message': 'Unauthorized'}), 403
-
-        cart_item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
-
-        if not cart_item:
-            print('Error: Item not found in the cart')
-            return jsonify({'message': 'Item not found in the cart'}), 404
-
         db.session.delete(cart_item)
         db.session.commit()
-
-        print('Item removed from the cart successfully')
+        app.logger.info(f'Item removed from cart: user_id={user_id}, product_id={product_id}')
         return jsonify({'message': 'Item removed from the cart successfully'}), 200
 
     except Exception as e:
         db.session.rollback()
-        print(f"Error removing item from cart: {str(e)}")
+        app.logger.error(f'Error removing item from cart: {str(e)}')
         return jsonify({'message': f'Failed to remove item: {str(e)}'}), 500
-        
 
+# Route to get order details
+@admin_bp.route('/admin/order_summary/<int:order_id>')
+@admin_required
+def order_summary(order_id):
+    order = Order.query.get(order_id)
+    if not order:
+        flash('Order not found', 'error')
+        return redirect(url_for('admin.some_redirect_route'))
 
-
-
+    order_items = OrderItem.query.filter_by(order_id=order_id).all()
+    return render_template('order_summary.html', order=order, order_items=order_items) 
