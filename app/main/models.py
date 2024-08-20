@@ -161,7 +161,7 @@ class Product(db.Model):
   category_id = db.Column(db.Integer, db.ForeignKey('product_category.id'), nullable=False)
   brand = db.Column(db.String(50), nullable=True)
   unit_price = db.Column(db.Float, nullable=False)
-  unit_measurement_id = db.Column(db.Integer, db.ForeignKey('unit_of_measurement.id'), nullable=False)
+  unit_measurement_id = db.Column(db.Integer, db.ForeignKey('unit_of_measurement.id'), nullable=True)
 
   quantity_in_stock = db.Column(db.Integer, nullable=False)
   quantity_sold = db.Column(db.Integer, default=0)
