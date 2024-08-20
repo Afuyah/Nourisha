@@ -206,6 +206,7 @@ class Product(db.Model):
 class ProductClick(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+  guest_ip = db.Column(db.String(45), nullable=True)
   product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
   timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -228,6 +229,7 @@ class UnitOfMeasurement(db.Model):
 class ProductView(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+  
   product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
   timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 

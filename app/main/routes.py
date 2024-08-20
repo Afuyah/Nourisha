@@ -100,8 +100,8 @@ def user_dashboard():
   user = User.query.filter_by(id=current_user.id).first()
   login_form=LoginForm()
   # Fetch user's orders from the database
-  orders = Order.query.filter_by(user_id=current_user.id).all()
-
+  
+  orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.order_date.desc()).all()
   return render_template('user_dashboard.html', user=user, orders=orders, login_form=login_form)
 
 def send_welcome_email(user):

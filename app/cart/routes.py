@@ -1,5 +1,5 @@
 # Import necessary modules and classes
-from flask import render_template, flash, redirect, url_for, request, jsonify, current_app, session
+from flask import render_template, flash, redirect, url_for, request, jsonify, current_app as app, session
 from flask_login import current_user, login_required
 from app.main.models import User, Location, Order, OrderItem
 from app.main.models import Cart, Product, Location, Order, Arealine, NearestPlace, UserDeliveryInfo, Location
@@ -476,17 +476,36 @@ def reorder(order_id):
         return jsonify({'error': str(e)}), 500
 
 
-# Function to send order confirmation emails
-def  send_order_confirmation_email(user_email, admin_email, order):
-    user_subject = 'Order Confirmation - Your Order was Successful'
-    user_body = f'Thank you for your order!\n\nOrder ID: {order.id}\nTotal Price: {order.total_price}\n\nWe will process your order shortly.'
-    user_msg = Message(user_subject, recipients=[user_email], body=user_body)
-    mail.send(user_msg)
+def send_order_confirmation_email(user_email, admin_email, order):
+    try:
+        # Define the subject and recipients
+        user_subject = 'Order Confirmation - Your Order Was Successful'
+        admin_subject = 'New Order Alert'
 
-    admin_subject = 'New Order Alert'
-    admin_body = f'New order received!\n\nOrder ID: {order.id}\nUser: {order.user.username}\nTotal Price: {order.total_price}'
-    admin_msg = Message(admin_subject, recipients=[admin_email], body=admin_body)
-    mail.send(admin_msg)
+        # Render the HTML content for the user's email
+        user_msg = Message(subject=user_subject,
+                           sender=app.config['MAIL_USERNAME'],
+                           recipients=[user_email])
+        user_msg.html = render_template('emails/order_confirmation_user.html', order=order)
+
+        # Send the user's confirmation email
+        mail.send(user_msg)
+        app.logger.info(f"Order confirmation email sent to {user_email}")
+
+        # Render the HTML content for the admin's email
+        admin_msg = Message(subject=admin_subject,
+                            sender=app.config['MAIL_USERNAME'],
+                            recipients=[admin_email])
+        admin_msg.html = render_template('emails/order_confirmation_admin.html', order=order)
+
+        # Send the admin's order alert email
+        mail.send(admin_msg)
+        app.logger.info(f"New order alert email sent to {admin_email}")
+
+    except Exception as e:
+        app.logger.error(f"Failed to send order confirmation email: {str(e)}")
+        # Optionally, handle the error further or notify someone
+
 
 # Route to remove item from the cart
 @cart_bp.route('/api/remove', methods=['POST'])

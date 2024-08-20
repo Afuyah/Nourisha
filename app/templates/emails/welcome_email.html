@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #333333;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #007bff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #6c757d;
+            text-align: center;
+        }
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Nourisha Groceries Ltd, {{ user.username }}!</h1>
+        <p>Thank you for joining us! We are excited to have you as part of the Nourisha Groceries community. As a new member, you now have access to a wide range of fresh groceries, exclusive deals, and more.</p>
+        <p>To get started, we recommend exploring our <a href="{{ url_for('main.index') }}" class="btn">Shop Now</a>. If you need any assistance, feel free to reach out to our support team at <a href="mailto:support@nourishagroceries.com">support@nourishagroceries.com</a>.</p>
+        <p>We look forward to serving you!</p>
+        <p>Best regards,<br>The Nourisha Groceries Team</p>
+        <div class="footer">
+            <p>&copy; {{ current_year }} Nourisha Groceries Ltd. All rights reserved.</p>
+            <p><a href="{{ url_for('main.index') }}">Visit Our Website</a> | <a href="mailto:support@nourishagroceries.com">Contact Us</a></p>
+        </div>
+    </div>
+</body>
+</html>

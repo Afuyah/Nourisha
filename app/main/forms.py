@@ -7,7 +7,7 @@ from wtforms.validators import InputRequired, Optional, Length, NumberRange
 from wtforms.fields import DateTimeLocalField
 from flask_wtf.file import FileAllowed
 from email_validator import validate_email, EmailNotValidError
-
+from wtforms.validators import DataRequired, EqualTo, Length
 
 class RegistrationForm(FlaskForm):
   name = StringField('Name', validators=[DataRequired()])
@@ -26,9 +26,26 @@ class AddUserForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     # Add the identifier field for username, email, or phone number
-    identifier = StringField('Username/Email/Phone', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Login')
+  identifier = StringField('Username/Email/Phone', validators=[DataRequired()])
+  password = PasswordField('Password', validators=[DataRequired()])
+  submit = SubmitField('Login')
+
+
+class PasswordResetRequestForm(FlaskForm):
+  email = StringField('Email', validators=[DataRequired(), Email()])
+  submit = SubmitField('Request Password Reset')
+
+
+class PasswordResetForm(FlaskForm):
+  password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
+  confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('password')])
+  submit = SubmitField('Reset Password')
+
+class ChangePasswordForm(FlaskForm):
+  old_password = PasswordField('Old Password', validators=[DataRequired()])
+  new_password = PasswordField('New Password', validators=[DataRequired()])
+  confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password')])
+  submit = SubmitField('Change Password')
 
 
 class AddRoleForm(FlaskForm):

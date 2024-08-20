@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 700px;
+            margin: auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #333333;
+            line-height: 1.6;
+        }
+        .order-items {
+            margin-top: 20px;
+        }
+        .order-items table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .order-items th, .order-items td {
+            border: 1px solid #dddddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .order-items th {
+            background-color: #f2f2f2;
+        }
+        .order-items img {
+            width: 80px;
+            height: auto;
+            border-radius: 4px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #6c757d;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>New Order Alert</h1>
+        <p>A new order has been placed!</p>
+        <p><strong>Order ID:</strong> {{ order.id }}</p>
+        <p><strong>User:</strong> {{ order.user.username }}</p>
+        <p><strong>Total Price:</strong> KSh {{ order.total_price }}</p>
+        
+        <div class="order-items">
+            <h2>Order Details</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.order_items %}
+                    <tr>
+                        <td><img src="{{ item.product.image_url }}" alt="{{ item.product.name }}"></td>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>KSh {{ item.unit_price }}</td>
+                        <td>KSh {{ item.unit_price * item.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p>Please review and process this order as soon as possible.</p>
+        <p>Best regards,<br>The Nourisha Groceries Team</p>
+        <div class="footer">
+            <p>&copy; {{ current_year }} Nourisha Groceries Ltd. All rights reserved.</p>
+            <p><a href="{{ url_for('main.index') }}">Visit Our Website</a></p>
+        </div>
+    </div>
+</body>
+</html>

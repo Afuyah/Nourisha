@@ -24,7 +24,7 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') 
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') 
     MAIL_DEBUG = os.environ.get('MAIL_DEBUG', 'False').lower() in ['true', '1', 'yes']
-
+    SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT', 'your_default_salt')
     # Additional Flask-Mail settings
     MAIL_MAX_EMAILS = None
     MAIL_SUPPRESS_SEND = False
