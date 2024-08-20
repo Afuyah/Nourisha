@@ -1,4 +1,5 @@
 from flask import Flask, session, redirect, url_for, flash, request, jsonify, current_app as app
+from flask_login import user_logged_in, user_logged_out
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
@@ -12,7 +13,6 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 
-
 # Extensions
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -20,11 +20,6 @@ mail = Mail()
 migrate = Migrate()
 socketio = SocketIO()
 csrf = CSRFProtect()
-
-
-
-
-
 
 def login_required(func):
     @wraps(func)
@@ -57,6 +52,18 @@ def admin_required(func):
         return func(*args, **kwargs)
     return decorated_function
 
+def user_logged_in_handler(sender, user):
+    with app.app_context():
+        app.logged_in_users.add(user.id)
+        app.logger.info(f"User logged in: {user.username}. Total logged in users: {len(app.logged_in_users)}")
+        socketio.emit('update_logged_in_users', {'count': len(app.logged_in_users)}, namespace='/')
+
+def user_logged_out_handler(sender, user):
+    with app.app_context():
+        app.logged_in_users.discard(user.id)
+        app.logger.info(f"User logged out: {user.username}. Total logged in users: {len(app.logged_in_users)}")
+        socketio.emit('update_logged_in_users', {'count': len(app.logged_in_users)}, namespace='/')
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -65,7 +72,7 @@ def create_app():
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
     app.config['SESSION_COOKIE_NAME'] = 'myapp_session'
     app.config['SESSION_REFRESH_EACH_REQUEST'] = True
-    app.config['SESSION_COOKIE_SECURE'] = True if not app.debug else False
+    app.config['SESSION_COOKIE_SECURE'] = not app.debug
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' if not app.debug else 'None'
 
     # Initialize extensions
@@ -77,37 +84,35 @@ def create_app():
     csrf.init_app(app)
     app.config['WTF_CSRF_TIME_LIMIT'] = None
 
-
-    
+    # Initialize logged_in_users
+    app.logged_in_users = set()
 
     # Set up basic configuration for logging
     logging.basicConfig(level=logging.DEBUG)
-    
+
     # Create a file handler object
     if not os.path.exists('logs'):
         os.mkdir('logs')
     file_handler = RotatingFileHandler('logs/grocery_store.log', maxBytes=10240, backupCount=10)
-    
+
     # Define the logging format
     formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
     file_handler.setFormatter(formatter)
-    
+
     # Set the log level for the file handler
     file_handler.setLevel(logging.INFO)
-    
+
     # Add the file handler to the app's logger
     app.logger.addHandler(file_handler)
     app.logger.setLevel(logging.INFO)
-    
+
     # Log an application startup message
     app.logger.info('Nourisha Grocery Store application started')
 
-    
     # Blueprints registration
-
     from app.auth.routes import auth_bp
     app.register_blueprint(auth_bp)
-    
+
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
 
@@ -131,6 +136,11 @@ def create_app():
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
+
+    # Connect signals within application context
+    with app.app_context():
+        user_logged_in.connect(user_logged_in_handler, app)
+        user_logged_out.connect(user_logged_out_handler, app)
 
     return app
 

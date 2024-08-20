@@ -129,38 +129,39 @@
   </div>
 
 <!-- Product Modal -->
-                <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-primary text-light">
-                                <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p class="lead">Do you want to add this item to your cart?</p>
 
-                                <!-- Quantity and Custom Description Form -->
-                                <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}">
-                                    {{form.hidden_tag()}}
-                                    <div class="mb-3">
-                                        <label for="quantity" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
-                                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
+                                <!-- Product Modal -->
+                                            <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-lg">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header bg-primary text-light">
+                                                            <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p class="lead">Do you want to add this item to your cart?</p>
+
+                                                            <!-- Quantity and Custom Description Form -->
+                                                            <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}">
+                                                                {{form.hidden_tag()}}
+                                                                <div class="mb-3">
+                                                                    <label for="quantity" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
+                                                                    <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="custom_description" class="form-label">Custom Description:</label>
+                                                                    <textarea class="form-control" id="custom_description" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
+                                                                    <input type="hidden" id="hidden_custom_description" name="hidden_custom_description" value="">
+                                                                </div>
+                                                                <button class="btn btn-success" type="submit">Add to Cart</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="custom_description" class="form-label">Custom Description:</label>
-                                        <textarea class="form-control" id="custom_description" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
-                                        <input type="hidden" id="hidden_custom_description" name="hidden_custom_description" value="">
-                                    </div>
-                                    <button class="btn btn-success" type="submit">Add to Cart</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
+                                </div>
 
   {% endfor %}
 </div>

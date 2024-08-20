@@ -156,6 +156,9 @@
             <a class="dropdown-item" href="{{ url_for('admin.product_categories') }}">Product Categories</a>
             <a class="dropdown-item" href="{{ url_for('main.add_product_image') }}">Add Product Images</a>
             <a class="dropdown-item" href="{{ url_for('main.add_supplier') }}">Product Suppliers</a>
+
+            <a class="nav-link" href="{{ url_for('main.add_unit_of_measurement') }}"> Measurement Unit</a>
+                        
           </div>
         </li>
         <li class="dropdown">
@@ -198,7 +201,8 @@
         <a class="dropdown-item" href="{{ url_for('admin.all_users') }}">Clients Operations</a>
        <a class="dropdown-item" href="{{ url_for('admin.admin_shop_for_user') }}">Shop for User</a>
 
-        <a class="dropdown-item" href="#">Sales Representatives</a>
+       <a class="dropdown-item" href="{{ url_for('admin.user_accounts_info') }}" id="userAccountsLink">User Accounts</a>
+
       </div>
     </li>
 
@@ -326,7 +330,8 @@
             defer
             src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js"
         ></script>
-     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>

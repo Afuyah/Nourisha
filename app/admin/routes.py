@@ -7,7 +7,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from app import db, mail, socketio, admin_required
 from app.admin import admin_bp
 from werkzeug.utils import secure_filename
-
+from werkzeug.security import generate_password_hash
+from flask_login import user_logged_in, user_logged_out
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
@@ -46,6 +47,7 @@ from app.main.models import (
     User,
     Cart,
     Purchase,
+    Payment,
 )
 
 
@@ -145,7 +147,8 @@ def admin_dashboard():
           return redirect(url_for('main.index'))
  # Fetch product categories
         categories = ProductCategory.query.all()
-
+        logged_in_users = getattr(app, 'logged_in_users', set())
+        total_users = User.query.count()
         # Fetch sales data
         sales_data = fetch_sales_data()
         #labels = [datetime.strptime(data.order_date, '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
@@ -202,7 +205,7 @@ def admin_dashboard():
         if request.method == 'POST':
             flash('POST request received.', 'info')
 
-        return render_template('admin_dashboard.html', users=users, roles=roles, admin_data=admin_data, user_growth_chart_image=user_growth_chart_image, categories=categories)
+        return render_template('admin_dashboard.html', users=users, roles=roles, admin_data=admin_data, user_growth_chart_image=user_growth_chart_image, categories=categories,logged_in_users=len(logged_in_users),)
 
     return handle_db_error_and_redirect(route)
 
@@ -1536,3 +1539,82 @@ def order_summary(order_id):
 
     order_items = OrderItem.query.filter_by(order_id=order_id).all()
     return render_template('order_summary.html', order=order, order_items=order_items) 
+
+
+@admin_bp.route('/user_accounts_info')
+@login_required
+def user_accounts_info():
+    if current_user.role.name != 'admin':
+        flash('Unauthorized access!', 'error')
+        return redirect(url_for('main.product_listing'))
+    return render_template('user_accounts_info.html')
+
+
+
+
+@admin_bp.route('/get_users')
+@login_required
+def get_users():
+    users = User.query.all()
+    users_list = [{'id': user.id, 'name': user.name} for user in users]
+    return jsonify(users_list)
+
+
+
+@admin_bp.route('/get_user_info/<int:user_id>')
+@login_required
+def get_user_info(user_id):
+    user = User.query.get_or_404(user_id)
+    
+    # Fetch the orders for the user
+    orders = Order.query.filter_by(user_id=user_id).all()
+    
+    # Collect all payments associated with these orders
+    payments = [payment for order in orders for payment in order.payments]
+
+    # Calculate total amount due from all orders
+    total_amount_due = sum(order.total_price for order in orders)
+    
+    # Calculate total amount paid from all payments
+    total_amount_paid = sum(payment.amount_paid for payment in payments)
+    
+    # Calculate outstanding balance
+    outstanding_balance = total_amount_due - total_amount_paid
+
+    # Calculate purchase frequency
+    purchase_frequency = len(orders) / 7  # Example: per week (this should be adjusted based on actual logic)
+
+    # Logic to get most bought items
+    item_counts = {}
+    for order in orders:
+        for item in order.order_items:
+            if item.product.name in item_counts:
+                item_counts[item.product.name] += item.quantity
+            else:
+                item_counts[item.product.name] = item.quantity
+    most_bought_items = sorted(item_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+
+    user_info = {
+        'name': user.name,
+        'phone': user.phone,
+        'email': user.email,
+       
+        'outstanding_balance': outstanding_balance,
+        'orders': [{'id': order.id, 'order_number': order.id, 'amount': order.total_price} for order in orders],
+        'purchase_frequency': purchase_frequency,
+        'last_login_date': user.last_login_date,
+        'most_bought_items': [{'name': item[0], 'quantity': item[1]} for item in most_bought_items]
+    }
+    return jsonify(user_info)
+
+
+@admin_bp.route('/get_order_details/<int:order_id>')
+@login_required
+def get_order_details(order_id):
+    order = Order.query.get_or_404(order_id)
+    order_details = {
+        'order_number': order.order_number,
+        'products': [{'name': item.product.name, 'quantity': item.quantity, 'price': item.price} for item in order.order_items]
+    }
+    return jsonify(order_details)
+

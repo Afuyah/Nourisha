@@ -7,20 +7,21 @@
         <div class="col-md-8 offset-md-2">
             <div class="card shadow-sm">
                 <div class="card-body">
+                    <!-- Form for adding a product -->
                     <form method="POST" action="{{ url_for('main.add_product') }}" novalidate>
                         {{ form.hidden_tag() }}
-                        
+
                         <!-- Product Name -->
                         <div class="mb-3">
                             {{ form.name.label(class='form-label') }}
-                            {{ form.name(class='form-control', placeholder='Enter product Brand', required=true) }}
+                            {{ form.name(class='form-control', placeholder='E.g oranges, sukuma wiki, ngwaci', required=true) }}
                             {% if form.name.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.name.errors[0] }}
                             </div>
                             {% endif %}
                         </div>
-                        
+
                         <!-- Category -->
                         <div class="mb-3">
                             {{ form.category.label(class='form-label') }}
@@ -36,11 +37,11 @@
                             </div>
                             {% endif %}
                         </div>
-                        
+
                         <!-- Brand -->
                         <div class="mb-3">
                             {{ form.brand.label(class='form-label') }}
-                            {{ form.brand(class='form-control', placeholder='Enter Product Name', required=true) }}
+                            {{ form.brand(class='form-control', placeholder='Example Farm Fresh Oranges', required=true) }}
                             {% if form.brand.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.brand.errors[0] }}
@@ -62,7 +63,12 @@
                         <!-- Unit Measurement -->
                         <div class="mb-3">
                             {{ form.unit_measurement.label(class='form-label') }}
-                            {{ form.unit_measurement(class='form-control', placeholder='Enter Unit of Measurement') }}
+                            <select id="unit_measurement" name="unit_measurement" class="form-select">
+                                <option value="" selected disabled>Select a Unit of Measurement</option>
+                                {% for value, label in form.unit_measurement.choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
                             {% if form.unit_measurement.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.unit_measurement.errors[0] }}
@@ -73,7 +79,7 @@
                         <!-- Quantity in Stock -->
                         <div class="mb-3">
                             {{ form.quantity_in_stock.label(class='form-label') }}
-                            {{ form.quantity_in_stock(class='form-control', placeholder='Enter Quantity in Stock', required=true) }}
+                            {{ form.quantity_in_stock(class='form-control', placeholder='First Stock Quantity', required=true) }}
                             {% if form.quantity_in_stock.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.quantity_in_stock.errors[0] }}
@@ -91,7 +97,6 @@
                             </div>
                             {% endif %}
                         </div>
-
 
                         <!-- Nutritional Information -->
                         <div class="mb-3">
@@ -161,13 +166,14 @@
 <!-- Date Picker Initialization -->
 <script type="text/javascript">
     $(document).ready(function(){
+        // Initialize date picker
         $('.datepicker').datepicker({
             format: 'yyyy-mm-dd',
             autoclose: true,
             todayHighlight: true
         });
 
-        // Initialize Select2 for select fields with placeholders
+        // Initialize Select2 for select fields
         $('#category').select2({
             placeholder: 'Select a Category',
             allowClear: true,
@@ -176,6 +182,12 @@
 
         $('#supplier').select2({
             placeholder: 'Select a Supplier',
+            allowClear: true,
+            theme: 'bootstrap4'
+        });
+
+        $('#unit_measurement').select2({
+            placeholder: 'Select a Unit of Measurement',
             allowClear: true,
             theme: 'bootstrap4'
         });
@@ -190,4 +202,3 @@
     });
 </script>
 {% endblock %}
-

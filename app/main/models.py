@@ -49,6 +49,8 @@ class User(db.Model, UserMixin):
   search_queries = db.relationship('UserSearchQuery', back_populates='user')
   ratings = db.relationship('Rating', back_populates='user')
   bought_items = db.relationship('OrderItem', back_populates='bought_by_admin', foreign_keys='OrderItem.bought_by_admin_id')
+
+    
    
   def __repr__(self):
       return f'<User {self.username}>'
@@ -159,7 +161,8 @@ class Product(db.Model):
   category_id = db.Column(db.Integer, db.ForeignKey('product_category.id'), nullable=False)
   brand = db.Column(db.String(50), nullable=True)
   unit_price = db.Column(db.Float, nullable=False)
-  unit_measurement = db.Column(db.String(20), nullable=True)
+  unit_measurement_id = db.Column(db.Integer, db.ForeignKey('unit_of_measurement.id'), nullable=False)
+
   quantity_in_stock = db.Column(db.Integer, nullable=False)
   quantity_sold = db.Column(db.Integer, default=0)
   discount_percentage = db.Column(db.Float, nullable=True)
@@ -185,6 +188,8 @@ class Product(db.Model):
   ratings = db.relationship('Rating', back_populates='product')
   promotions = db.relationship('Promotion', secondary='product_promotions',
                                  backref=db.backref('products', lazy='dynamic'))
+  
+  unit_of_measurement = db.relationship('UnitOfMeasurement', back_populates='products')
 
 class ProductClick(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -195,6 +200,18 @@ class ProductClick(db.Model):
     # Relationships
   user = db.relationship('User', back_populates='clicks')
   product = db.relationship('Product', back_populates='clicks')
+  
+
+
+
+class UnitOfMeasurement(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  unit = db.Column(db.String(50), nullable=False, unique=True)
+  added_by = db.Column(db.String(100), nullable=False)
+  date_added = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+  products = db.relationship('Product', back_populates='unit_of_measurement')
+
 
 class ProductView(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -431,3 +448,6 @@ class ProductPromotion(db.Model):
     
   product_id = db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
   promotion_id = db.Column(db.Integer, db.ForeignKey('promotions.id'), primary_key=True)
+
+  
+  

@@ -49,9 +49,34 @@
           <p class="text-primary">Total Customers: {{ admin_data.total_customers }}</p>
           <p class="text-success">New Customers (Last 7 Days): {{ admin_data.new_customers_last_7_days }}</p>
           <p class="text-info">Returning Customers: {{ admin_data.returning_customers }}</p>
+         <p>Logged in users: <span id="logged-in-users-count">0</span></p>
+
+    </div>
+
+   
+         
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+    var socket = io.connect('https://' + document.domain + ':' + location.port);
+
+    socket.on('update_logged_in_users', (data) => {
+        var countElement = document.getElementById('logged_in_users_count');
+        if (countElement) {
+            countElement.textContent = data.count;
+        } else {
+            console.error('Element with ID "logged_in_users_count" not found.');
+        }
+    });
+});
+
+
+    </script>
+
 {% endblock %}

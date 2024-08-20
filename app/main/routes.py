@@ -1,10 +1,9 @@
-
 from app import db, mail, admin_required, login_required
 from flask import render_template, abort, flash, redirect, url_for, request, jsonify, session,Flask, current_app as app
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
-from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, AddRoleForm, AddSupplierForm,RecommendationForm,LoginForm
-from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage
+from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, AddRoleForm, AddSupplierForm,RecommendationForm,LoginForm, UnitOfMeasurementForm
+from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage, UnitOfMeasurement
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
@@ -370,35 +369,57 @@ def add_product():
     image_form.product.choices = [(product.id, product.name) for product in Product.query.all()]
     form.supplier.choices = [(supplier.id, supplier.name) for supplier in Supplier.query.all()]
     form.category.choices = [(category.id, category.name) for category in ProductCategory.query.all()]
+    form.unit_measurement.choices = [(unit.id, unit.unit) for unit in UnitOfMeasurement.query.all()]
 
     if form.validate_on_submit():
-        # Create a new product using the form data
         product = Product(
             name=form.name.data,
             category_id=form.category.data,
             brand=form.brand.data,
             unit_price=form.unit_price.data,
-            unit_measurement=form.unit_measurement.data,
+            unit_measurement_id=form.unit_measurement.data,
             quantity_in_stock=form.quantity_in_stock.data,
             discount_percentage=form.discount_percentage.data,
-            
             nutritional_information=form.nutritional_information.data,
             country_of_origin=form.country_of_origin.data,
             supplier_id=form.supplier.data,
             date_added=form.date_added.data or datetime.utcnow()
         )
 
-        # Add and commit the new product to the database
         db.session.add(product)
         db.session.commit()
 
         flash('Product added successfully!', 'success')
         return redirect(url_for('main.add_product'))
 
-    # Fetch all products for display (you may not need this for this view)
-    # products = Product.query.all()
-
     return render_template('add_product.html', form=form, image_form=image_form)
+
+
+@bp.route('/add_unit_of_measurement', methods=['GET', 'POST'])
+@admin_required
+def add_unit_of_measurement():
+    form = UnitOfMeasurementForm()
+
+    if form.validate_on_submit():
+        try:
+            unit = UnitOfMeasurement(
+                unit=form.unit.data,
+                added_by=current_user.username,  # Assuming current_user has a username attribute
+                date_added=datetime.utcnow()
+            )
+
+            db.session.add(unit)
+            db.session.commit()
+
+            flash('Unit of Measurement added successfully!', 'success')
+            return redirect(url_for('main.add_unit_of_measurement'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'An error occurred: {str(e)}', 'danger')
+
+    return render_template('add_unit_of_measurement.html', form=form)
+
 
 
 @bp.route('/delete_product/<int:product_id>', methods=['POST'])

@@ -96,9 +96,9 @@ class AddSupplierForm(FlaskForm):
 class AddProductForm(FlaskForm):
   name = StringField('Product Brand', validators=[DataRequired(), Length(max=100)])
   category = SelectField('Category', coerce=int, validators=[DataRequired()])
-  brand = StringField('Product name', validators=[Optional(), Length(max=100)])
+  brand = StringField('Display Name', validators=[Optional(), Length(max=100)])
   unit_price = FloatField('Unit Price', validators=[DataRequired(), NumberRange(min=0)])
-  unit_measurement = StringField('Unit of Measurement', validators=[Optional(), Length(max=50)])
+  unit_measurement = SelectField('Unit of Measurement', coerce=int, validators=[DataRequired()])
   quantity_in_stock = IntegerField('Quantity in Stock', validators=[DataRequired(), NumberRange(min=0)])
   discount_percentage = FloatField('Discount Percentage', validators=[Optional(), NumberRange(min=0, max=100)])
   promotions = SelectMultipleField('Promotions', coerce=int)
@@ -109,6 +109,10 @@ class AddProductForm(FlaskForm):
   submit = SubmitField('Add Product')
 
 
+class UnitOfMeasurementForm(FlaskForm):
+  unit = StringField('Unit of Measurement', validators=[DataRequired()])
+  submit = SubmitField('Add Unit of Measurement')
+
 class ProductImageForm(FlaskForm):
   product = SelectField('Product', coerce=int, validators=[DataRequired()])
   cover_image = FileField('Cover Image', validators=[FileRequired()])
@@ -116,6 +120,8 @@ class ProductImageForm(FlaskForm):
   image2 = FileField('Image 2', validators=[FileRequired()])
   image3 = FileField('Image 3', validators=[FileRequired()])
   submit = SubmitField('Upload Images')
+
+
 
 
 class AddLocationForm(FlaskForm):

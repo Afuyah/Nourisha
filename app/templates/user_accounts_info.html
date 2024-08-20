@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Informative Card about Accessing User Accounts -->
+    <div class="card">
+        <div class="card-body text-center">
+            <h1 class="card-title">Accessing User Accounts</h1>
+            <p class="card-text">You are about to access confidential information of users. All data will be logged.</p>
+            <p class="card-text">Please be very careful with the actions performed on user accounts.</p>
+            <p class="card-text">Ensure all actions are necessary and authorized.</p>
+            <!-- Button to proceed to user accounts, which triggers the user selection modal -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#userSelectionModal">Proceed To Accounts</button>
+        </div>
+    </div>
+</div>
+
+<!-- User Selection Modal -->
+<div class="modal fade" id="userSelectionModal" tabindex="-1" role="dialog" aria-labelledby="userSelectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userSelectionModalLabel">Select User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- User select box populated by JavaScript -->
+                <select id="userSelect" class="form-control">
+                    <option value="" disabled selected> Select a user</Select></option>
+                    <!-- Users will be populated here by JavaScript -->
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- User Information Modal -->
+<div class="modal fade" id="userInformationModal" tabindex="-1" role="dialog" aria-labelledby="userInformationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content rounded-lg shadow-lg">
+            <div class="modal-header bg-primary text-white border-0">
+                <h5 class="modal-title" id="userInformationModalLabel">User Information</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- User Info Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card border-light shadow-sm">
+                                <div class="card-body">
+                                    <h4 class="card-title text-center mb-3" id="userNameInfo"></h4>
+                                    <p class="card-text text-center">
+                                        <strong>Email:</strong> <span id="userEmailInfo"></span><br>
+                                        <strong>Phone:</strong> <span id="userPhoneInfo"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <!-- User Stats Cards -->
+                            <div class="row">
+                               
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-danger shadow-sm">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Balance</h5>
+                                            <p class="card-text" id="outstandingBalance"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-info shadow-sm">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Purchase Frequency</h5>
+                                            <p class="card-text" id="purchaseFrequency"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-warning shadow-sm">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Last Login</h5>
+                                            <p class="card-text" id="lastLogin"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card border-secondary shadow-sm mt-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Most Bought Items</h5>
+                                    <p class="card-text" id="mostBoughtItems"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Orders Table -->
+                    <h5 class="mt-4 mb-3">Orders</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Order Number</th>
+                                    <th>Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTable">
+                                <!-- Orders will be populated here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+  .modal-content {
+    border-radius: 0.5rem;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.card {
+    border-radius: 0.5rem;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.card-text {
+    font-size: 1.125rem;
+}
+
+.table thead th {
+    background-color: #343a40;
+    color: white;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+</style>
+
+
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" role="dialog" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="orderDetailsContent">
+                <!-- Order details will be populated here by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Shop for User Modal -->
+<div class="modal fade" id="shopForUserModal" tabindex="-1" role="dialog" aria-labelledby="shopForUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shopForUserModalLabel">Shop for User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="productSelection">
+                <!-- Products for the user will be populated here by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- jQuery (required for Bootstrap's JavaScript) -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userSelectionModal = new bootstrap.Modal(document.getElementById('userSelectionModal'));
+    const userInformationModal = new bootstrap.Modal(document.getElementById('userInformationModal'));
+    const orderDetailsModal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+    const shopForUserModal = new bootstrap.Modal(document.getElementById('shopForUserModal'));
+
+    // Show user selection modal when the button is clicked
+    document.getElementById('userAccountsLink').addEventListener('click', function(event) {
+        event.preventDefault();
+        userSelectionModal.show();
+    });
+
+    // Load users into the select box
+    fetch('/admin/get_users')
+        .then(response => response.json())
+        .then(users => {
+            const userSelect = document.getElementById('userSelect');
+            if (userSelect) {
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.innerText = user.name;
+                    userSelect.appendChild(option);
+                });
+
+                // Add event listener for when a user is selected
+                userSelect.addEventListener('change', function() {
+                    const userId = this.value;
+                    if (userId) {
+                        loadUserInfo(userId);
+                        userSelectionModal.hide();
+                        userInformationModal.show();
+                    }
+                });
+            } else {
+                console.error('User select element not found.');
+            }
+        })
+        .catch(error => console.error('Error loading users:', error));
+
+    // Function to load user information
+    function loadUserInfo(userId) {
+        fetch(`/admin/get_user_info/${userId}`)
+            .then(response => response.json())
+            .then(userInfo => {
+                document.getElementById('userNameInfo').innerText = userInfo.name;
+                document.getElementById('userPhoneInfo').innerText = userInfo.phone;
+                document.getElementById('userEmailInfo').innerText = userInfo.email;
+                document.getElementById('walletBalance').innerText = userInfo.wallet_balance;
+                document.getElementById('outstandingBalance').innerText = userInfo.outstanding_balance;
+                document.getElementById('purchaseFrequency').innerText = userInfo.purchase_frequency;
+                document.getElementById('lastLogin').innerText = userInfo.last_login;
+                document.getElementById('mostBoughtItems').innerText = userInfo.most_bought_items;
+
+                const ordersTableBody = document.getElementById('ordersTable').querySelector('tbody');
+                if (ordersTableBody) {
+                    ordersTableBody.innerHTML = '';
+                    userInfo.orders.forEach(order => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${order.order_number}</td>
+                            <td>${order.amount}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm" onclick="viewOrderDetails(${order.id})">View Details</button>
+                                <button class="btn btn-primary btn-sm" onclick="shopForUser(${userId})">Shop for User</button>
+                            </td>
+                        `;
+                        ordersTableBody.appendChild(row);
+                    });
+                }
+            })
+            .catch(error => console.error('Error loading user info:', error));
+    }
+
+    // Function to load order details
+    window.viewOrderDetails = function(orderId) {
+        fetch(`/admin/get_order_details/${orderId}`)
+            .then(response => response.json())
+            .then(orderDetails => {
+                const orderDetailsContent = document.getElementById('orderDetailsContent');
+                if (orderDetailsContent) {
+                    orderDetailsContent.innerHTML = `
+                        <p><strong>Order Number:</strong> ${orderDetails.order_number}</p>
+                        <p><strong>Amount:</strong> ${orderDetails.amount}</p>
+                        <p><strong>Items:</strong> ${orderDetails.items}</p>
+                        <p><strong>Status:</strong> ${orderDetails.status}</p>
+                        <p><strong>Date:</strong> ${orderDetails.date}</p>
+                    `;
+                }
+                orderDetailsModal.show();
+            })
+            .catch(error => console.error('Error loading order details:', error));
+    }
+
+    // Function to initiate shopping for a user
+    window.shopForUser = function(userId) {
+        fetch(`/admin/get_products_for_user/${userId}`)
+            .then(response => response.json())
+            .then(products => {
+                const productSelection = document.getElementById('productSelection');
+                if (productSelection) {
+                    productSelection.innerHTML = `
+                        <h5>Products for User</h5>
+                        <ul class="list-group">
+                            ${products.map(product => `
+                                <li class="list-group-item">
+                                    <span>${product.name}</span>
+                                    <button class="btn btn-primary btn-sm float-right" onclick="addToCart(${product.id})">Add to Cart</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                }
+                shopForUserModal.show();
+            })
+            .catch(error => console.error('Error loading products for user:', error));
+    }
+
+    // Function to add product to cart
+    window.addToCart = function(productId) {
+        fetch(`/cart/add/${productId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Product added to cart!');
+                } else {
+                    alert('Error adding product to cart.');
+                }
+            })
+            .catch(error => console.error('Error adding product to cart:', error));
+    }
+});
+
+</script> `
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+{% endblock %}
