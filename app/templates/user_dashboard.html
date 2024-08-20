@@ -180,7 +180,7 @@
             margin-right: 5px;
         }
 
-        .order-status.pending {
+        .order-status.zz {
             color: #ffc107;
         }
 
@@ -386,8 +386,8 @@
                 <div class="order-card">
                     <div class="order-header">
                         <span class="order-id">Order #{{ order.id }}</span>
-                        <span class="order-status {% if order.status == 'pending' %}pending{% elif order.status == 'confirmed' %}confirmed{% else %}cancelled{% endif %}">
-                            <i class="fas {% if order.status == 'pending' %}fa-hourglass-start{% elif order.status == 'confirmed' %}fa-check-circle{% else %}fa-check-circle{% endif %}"></i> {{ order.status }}
+                        <span class="order-status {% if order.status == 'zz' %}zz{% elif order.status == 'confirmed' %}confirmed{% else %}cancelled{% endif %}">
+                            <i class="fas {% if order.status == 'zz' %}fa-hourglass-start{% elif order.status == 'confirmed' %}fa-check-circle{% else %}fa-check-circle{% endif %}"></i> {{ order.status }}
                         </span>
                     </div>
                     <div class="order-body">

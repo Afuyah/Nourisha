@@ -20,6 +20,7 @@
       <button class="btn btn-outline-success" type="submit">Search</button>
     </form>
   </div>
+</div>
 
   <!-- Category Carousel -->
 <div id="categoryCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
@@ -70,8 +71,8 @@
     </div>
 </div>
 
- <!-- Product Listing Section -->
-<div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 ">
+<!-- Product Listing Section -->
+<div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
     {% for product in products %}
     <div class="col">
         <div class="card product-card border-0 shadow-sm" data-product-id="{{ product.id }}">
@@ -98,72 +99,66 @@
     {% endfor %}
 </div>
 
+{% for product in products %}
+<!-- Product Details Modal -->
+<div class="modal fade" id="productDetailsModal{{ product.id }}" tabindex="-1" aria-labelledby="productDetailsModalLabel{{ product.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productDetailsModalLabel{{ product.id }}">{{ product.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="{{ url_for('static', filename='uploads/' + (product.images[0].cover_image if product.images else 'alt_img.png')) }}" class="img-fluid" alt="{{ product.name }}">
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary">{{ product.brand }}</h6>
+                        <p>{{ product.description }}</p>
+                        <p><strong>Price: Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
+                        <p>{{ product.nutritional_information }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">Buy</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-  {% for product in products %}
-  <div class="modal fade" id="productDetailsModal{{ product.id }}" tabindex="-1" aria-labelledby="productDetailsModalLabel{{ product.id }}" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <h5 class="modal-title" id="productDetailsModalLabel{{ product.id }}">{{ product.name }}</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                  <div class="row">
-                      <div class="col-md-6">
-                          <img src="{{ url_for('static', filename='uploads/' + (product.images[0].cover_image if product.images else 'alt_img.png')) }}" class="img-fluid" alt="{{ product.name }}">
-                      </div>
-                      <div class="col-md-6">
-                          <h6 class="text-primary">{{ product.brand }}</h6>
-                          <p>{{ product.description }}</p>
-                          <p><strong>Price: Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
-                          <p>{{ product.nutritional_information }}</p>
-                      </div>
-                  </div>
-              </div>
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-success" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">Buy</button>
-              </div>
-          </div>
-      </div>
-  </div>
+<!-- Add to Cart Modal -->
+<div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-light">
+                <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="lead">Do you want to add this item to your cart?</p>
+                <!-- Quantity and Custom Description Form -->
+                <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}">
+                    {{ form.hidden_tag() }}
+                    <input type="hidden" id="csrf_token_{{ product.id }}" name="csrf_token" value="{{ form.csrf_token._value() }}">
+                    <div class="mb-3">
+                        <label for="quantity{{ product.id }}" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
+                        <input type="number" class="form-control" id="quantity{{ product.id }}" name="quantity" min="1" value="1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="custom_description{{ product.id }}" class="form-label">Custom Description:</label>
+                        <textarea class="form-control" id="custom_description{{ product.id }}" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
+                    </div>
+                    <button class="btn btn-success" type="submit">Add to Cart</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-<!-- Product Modal -->
-
-                                <!-- Product Modal -->
-                                            <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
-                                                <div class="modal-dialog modal-lg">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header bg-primary text-light">
-                                                            <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
-                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <p class="lead">Do you want to add this item to your cart?</p>
-
-                                                            <!-- Quantity and Custom Description Form -->
-                                                            <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}">
-                                                                {{form.hidden_tag()}}
-                                                                <div class="mb-3">
-                                                                    <label for="quantity" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
-                                                                    <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label for="custom_description" class="form-label">Custom Description:</label>
-                                                                    <textarea class="form-control" id="custom_description" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
-                                                                    <input type="hidden" id="hidden_custom_description" name="hidden_custom_description" value="">
-                                                                </div>
-                                                                <button class="btn btn-success" type="submit">Add to Cart</button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-  {% endfor %}
+{% endfor %}
 </div>
 
 

@@ -1617,4 +1617,3 @@ def get_order_details(order_id):
         'products': [{'name': item.product.name, 'quantity': item.quantity, 'price': item.price} for item in order.order_items]
     }
     return jsonify(order_details)
-

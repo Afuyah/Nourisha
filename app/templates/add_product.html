@@ -87,17 +87,6 @@
                             {% endif %}
                         </div>
 
-                        <!-- Discount Percentage -->
-                        <div class="mb-3">
-                            {{ form.discount_percentage.label(class='form-label') }}
-                            {{ form.discount_percentage(class='form-control', placeholder='Enter Discount Percentage') }}
-                            {% if form.discount_percentage.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.discount_percentage.errors[0] }}
-                            </div>
-                            {% endif %}
-                        </div>
-
                         <!-- Nutritional Information -->
                         <div class="mb-3">
                             {{ form.nutritional_information.label(class='form-label') }}
@@ -105,17 +94,6 @@
                             {% if form.nutritional_information.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.nutritional_information.errors[0] }}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Country of Origin -->
-                        <div class="mb-3">
-                            {{ form.country_of_origin.label(class='form-label') }}
-                            {{ form.country_of_origin(class='form-control', placeholder='Enter Country of Origin') }}
-                            {% if form.country_of_origin.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.country_of_origin.errors[0] }}
                             </div>
                             {% endif %}
                         </div>
@@ -136,17 +114,6 @@
                             {% endif %}
                         </div>
 
-                        <!-- Date Added -->
-                        <div class="mb-3">
-                            {{ form.date_added.label(class='form-label') }}
-                            {{ form.date_added(class='form-control datepicker', placeholder='Select Date Added', required=true) }}
-                            {% if form.date_added.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.date_added.errors[0] }}
-                            </div>
-                            {% endif %}
-                        </div>
-
                         <!-- Submit Button with Loader -->
                         <button type="submit" class="btn btn-primary position-relative" id="submitBtn">
                             <span class="me-2">Add Product</span>
@@ -159,20 +126,9 @@
     </div>
 </div>
 
-<!-- Include jQuery and Select2 JavaScript -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/js/select2.min.js"></script>
 
-<!-- Date Picker Initialization -->
 <script type="text/javascript">
-    $(document).ready(function(){
-        // Initialize date picker
-        $('.datepicker').datepicker({
-            format: 'yyyy-mm-dd',
-            autoclose: true,
-            todayHighlight: true
-        });
-
+    $(document).ready(function() {
         // Initialize Select2 for select fields
         $('#category').select2({
             placeholder: 'Select a Category',
@@ -191,13 +147,11 @@
             allowClear: true,
             theme: 'bootstrap4'
         });
-    });
 
-    // Handle form submission with loader
-    $(document).ready(function() {
+        // Handle form submission with loader
         $('form').submit(function() {
             $('#submitBtn .spinner-border').removeClass('d-none');
-            $('#submitBtn').attr('disabled', 'disabled');
+            $('#submitBtn').prop('disabled', true);
         });
     });
 </script>

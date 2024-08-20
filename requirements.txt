@@ -17,3 +17,4 @@ twilio
 flask-socketio
 elasticsearch
 email-validator
+pandas

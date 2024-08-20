@@ -131,6 +131,11 @@ def create_app():
     from app.site_setting.routes import site_bp
     app.register_blueprint(site_bp)
 
+    from app.product.routes import product_bp
+    app.register_blueprint(product_bp)
+
+
+
     # User loader function
     from app.main.models import User
     @login_manager.user_loader

@@ -114,6 +114,18 @@ class User(db.Model, UserMixin):
   def has_role(self, role_name):
         return self.role.name == role_name
 
+
+class PriceHistory(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+  old_price = db.Column(db.Float, nullable=False)
+  new_price = db.Column(db.Float, nullable=False)
+  timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationship
+  product = db.relationship('Product', backref='price_histories')
+
+
 class Rating(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -173,7 +185,7 @@ class Product(db.Model):
   click_count = db.Column(db.Integer, default=0)  # Number of times the product was clicked
   view_count = db.Column(db.Integer, default=0)  # Number of times the product was viewed
   supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False)
-  date_added = db.Column(db.Date, nullable=False)
+  date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Define relationships with Supplier, ProductCategory, and images
   supplier = db.relationship('Supplier', back_populates='products')

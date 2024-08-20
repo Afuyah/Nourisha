@@ -1,0 +1,93 @@
+2024-08-20 04:36:47,203 INFO: API: Fetched orders by status: pending [in /home/runner/Naurish/app/admin/routes.py:999]
+2024-08-20 04:36:50,536 INFO: API: Fetched orders by status: confirmed [in /home/runner/Naurish/app/admin/routes.py:999]
+2024-08-20 04:36:53,161 INFO: API: Fetched orders by status: pending [in /home/runner/Naurish/app/admin/routes.py:999]
+2024-08-20 04:37:00,551 INFO: API: Fetched orders by status: confirmed [in /home/runner/Naurish/app/admin/routes.py:999]
+2024-08-20 04:37:02,737 INFO: API: Fetched orders by status: disparched [in /home/runner/Naurish/app/admin/routes.py:999]
+2024-08-20 04:37:05,183 INFO: API: Fetched orders by status: confirmed [in /home/runner/Naurish/app/admin/routes.py:999]
+2024-08-20 04:37:06,503 INFO: API: Fetched orders by status: pending [in /home/runner/Naurish/app/admin/routes.py:999]
+2024-08-20 04:37:16,752 INFO: Viewing details for order ID: 1 [in /home/runner/Naurish/app/admin/routes.py:784]
+2024-08-20 04:37:30,269 INFO: Order ID 1 confirmed with delivery date 2024-08-20 [in /home/runner/Naurish/app/admin/routes.py:803]
+2024-08-20 04:37:30,948 INFO: Viewing details for order ID: 1 [in /home/runner/Naurish/app/admin/routes.py:784]
+2024-08-20 04:38:29,704 INFO: Order ID 1 items fulfilled. [in /home/runner/Naurish/app/admin/routes.py:830]
+2024-08-20 04:38:30,290 INFO: Viewing details for order ID: 1 [in /home/runner/Naurish/app/admin/routes.py:784]
+2024-08-20 04:38:51,290 INFO: Order ID 1 marked as delivered with remarks: x [in /home/runner/Naurish/app/admin/routes.py:855]
+2024-08-20 04:38:52,717 INFO: Viewing details for order ID: 1 [in /home/runner/Naurish/app/admin/routes.py:784]
+2024-08-20 04:39:33,981 INFO: API: Fetched orders by status: pending [in /home/runner/Naurish/app/admin/routes.py:999]
+2024-08-20 04:39:56,846 INFO: User logged out: bha. Total logged in users: 0 [in /home/runner/Naurish/app/__init__.py:64]
+2024-08-20 04:39:56,846 INFO: User logged out: bha [in /home/runner/Naurish/app/auth/routes.py:136]
+2024-08-20 04:40:23,740 ERROR: Error recording view event for user 1723119655, product 3: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+(sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO product_view (user_id, product_id, timestamp) VALUES (?, ?, ?)]
+[parameters: ('1723119655', '3', '2024-08-20 04:40:17.991000')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8) [in /home/runner/Naurish/app/main/routes.py:724]
+2024-08-20 04:40:23,740 ERROR: Error tracking event: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+(sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO product_view (user_id, product_id, timestamp) VALUES (?, ?, ?)]
+[parameters: ('1723119655', '3', '2024-08-20 04:40:17.991000')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8) [in /home/runner/Naurish/app/main/routes.py:687]
+2024-08-20 04:40:23,774 ERROR: Error recording view event for user 1723119655, product 2: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+(sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO product_view (user_id, product_id, timestamp) VALUES (?, ?, ?)]
+[parameters: ('1723119655', '2', '2024-08-20 04:40:17.993000')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8) [in /home/runner/Naurish/app/main/routes.py:724]
+2024-08-20 04:40:23,777 ERROR: Error tracking event: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+(sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO product_view (user_id, product_id, timestamp) VALUES (?, ?, ?)]
+[parameters: ('1723119655', '2', '2024-08-20 04:40:17.993000')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8) [in /home/runner/Naurish/app/main/routes.py:687]
+2024-08-20 04:40:23,836 ERROR: Error recording view event for user 1723119655, product 3: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+(sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO product_view (user_id, product_id, timestamp) VALUES (?, ?, ?)]
+[parameters: ('1723119655', '3', '2024-08-20 04:40:18.257000')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8) [in /home/runner/Naurish/app/main/routes.py:724]
+2024-08-20 04:40:23,836 ERROR: Error tracking event: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+(sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO product_view (user_id, product_id, timestamp) VALUES (?, ?, ?)]
+[parameters: ('1723119655', '3', '2024-08-20 04:40:18.257000')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8) [in /home/runner/Naurish/app/main/routes.py:687]
+2024-08-20 04:40:23,838 ERROR: Error recording view event for user 1723119655, product 2: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+(sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO product_view (user_id, product_id, timestamp) VALUES (?, ?, ?)]
+[parameters: ('1723119655', '2', '2024-08-20 04:40:18.258000')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8) [in /home/runner/Naurish/app/main/routes.py:724]
+2024-08-20 04:40:23,839 ERROR: Error tracking event: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+(sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO product_view (user_id, product_id, timestamp) VALUES (?, ?, ?)]
+[parameters: ('1723119655', '2', '2024-08-20 04:40:18.258000')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8) [in /home/runner/Naurish/app/main/routes.py:687]
+2024-08-20 04:40:24,773 ERROR: Error recording view event for user 1723119655, product 1: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+(sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO product_view (user_id, product_id, timestamp) VALUES (?, ?, ?)]
+[parameters: ('1723119655', '1', '2024-08-20 04:40:18.259000')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8) [in /home/runner/Naurish/app/main/routes.py:724]
+2024-08-20 04:40:24,774 ERROR: Error tracking event: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+(sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO product_view (user_id, product_id, timestamp) VALUES (?, ?, ?)]
+[parameters: ('1723119655', '1', '2024-08-20 04:40:18.259000')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8) [in /home/runner/Naurish/app/main/routes.py:687]
+2024-08-20 04:40:36,649 INFO: User logged in: bha. Total logged in users: 1 [in /home/runner/Naurish/app/__init__.py:58]
+2024-08-20 04:40:36,729 INFO: User logged in: bha, IP: 172.31.196.55 [in /home/runner/Naurish/app/auth/routes.py:99]
+2024-08-20 04:40:46,610 INFO: User logged out: bha. Total logged in users: 0 [in /home/runner/Naurish/app/__init__.py:64]
+2024-08-20 04:40:46,610 INFO: User logged out: bha [in /home/runner/Naurish/app/auth/routes.py:136]
+2024-08-20 05:38:38,387 INFO: Nourisha Grocery Store application started [in /home/runner/Naurish/app/__init__.py:110]
+2024-08-20 05:38:47,379 INFO: Nourisha Grocery Store application started [in /home/runner/Naurish/app/__init__.py:110]
+2024-08-20 07:32:50,583 INFO: User logged in: Namzaganda. Total logged in users: 1 [in /home/runner/Naurish/app/__init__.py:58]
+2024-08-20 07:32:50,655 INFO: User logged in: Namzaganda, IP: 172.31.196.122 [in /home/runner/Naurish/app/auth/routes.py:99]
+2024-08-20 07:52:23,736 INFO: User logged out: Namzaganda. Total logged in users: 0 [in /home/runner/Naurish/app/__init__.py:64]
+2024-08-20 07:52:23,736 INFO: User logged out: Namzaganda [in /home/runner/Naurish/app/auth/routes.py:136]
+2024-08-20 07:57:48,538 INFO: User logged in: Namzaganda. Total logged in users: 1 [in /home/runner/Naurish/app/__init__.py:58]
+2024-08-20 07:57:48,609 INFO: User logged in: Namzaganda, IP: 172.31.196.122 [in /home/runner/Naurish/app/auth/routes.py:99]
+2024-08-20 07:58:06,211 INFO: User logged out: Namzaganda. Total logged in users: 0 [in /home/runner/Naurish/app/__init__.py:64]
+2024-08-20 07:58:06,212 INFO: User logged out: Namzaganda [in /home/runner/Naurish/app/auth/routes.py:136]
+2024-08-20 08:04:03,413 INFO: User logged in: Namzaganda. Total logged in users: 1 [in /home/runner/Naurish/app/__init__.py:58]
+2024-08-20 08:04:03,550 INFO: User logged in: Namzaganda, IP: 172.31.196.122 [in /home/runner/Naurish/app/auth/routes.py:99]
+2024-08-20 08:05:23,671 INFO: User logged out: Namzaganda. Total logged in users: 0 [in /home/runner/Naurish/app/__init__.py:64]
+2024-08-20 08:05:23,672 INFO: User logged out: Namzaganda [in /home/runner/Naurish/app/auth/routes.py:136]
+2024-08-20 08:06:38,179 INFO: User logged in: Namzaganda. Total logged in users: 1 [in /home/runner/Naurish/app/__init__.py:58]
+2024-08-20 08:06:38,253 INFO: User logged in: Namzaganda, IP: 172.31.196.122 [in /home/runner/Naurish/app/auth/routes.py:99]
+2024-08-20 08:08:03,186 INFO: User logged out: Namzaganda. Total logged in users: 0 [in /home/runner/Naurish/app/__init__.py:64]
+2024-08-20 08:08:03,186 INFO: User logged out: Namzaganda [in /home/runner/Naurish/app/auth/routes.py:136]
+2024-08-20 08:08:28,091 INFO: User logged in: Namzaganda. Total logged in users: 1 [in /home/runner/Naurish/app/__init__.py:58]
+2024-08-20 08:08:28,169 INFO: User logged in: Namzaganda, IP: 172.31.196.122 [in /home/runner/Naurish/app/auth/routes.py:99]
+2024-08-20 08:09:22,763 INFO: User logged out: Namzaganda. Total logged in users: 0 [in /home/runner/Naurish/app/__init__.py:64]
+2024-08-20 08:09:22,764 INFO: User logged out: Namzaganda [in /home/runner/Naurish/app/auth/routes.py:136]

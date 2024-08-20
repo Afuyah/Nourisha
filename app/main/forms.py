@@ -105,7 +105,7 @@ class AddProductForm(FlaskForm):
   nutritional_information = TextAreaField('Nutritional Information', validators=[Optional()])
   country_of_origin = StringField('Country of Origin', validators=[Optional(), Length(max=50)])
   supplier = SelectField('Supplier', coerce=int, validators=[DataRequired()])
-  date_added = DateField('Date Added to Inventory', validators=[DataRequired()])
+ 
   submit = SubmitField('Add Product')
 
 

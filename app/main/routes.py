@@ -157,46 +157,6 @@ def confirm_email(token):
 
 from flask_login import login_user
 
-@bp.route('/register', methods=['POST', 'GET'])
-def register():
-    form = RegistrationForm()
-
-    if form.validate_on_submit():
-        try:
-            # Create a new user instance
-            user = User(
-                username=form.username.data,
-                email=form.email.data,
-                phone=form.phone.data,
-                name=form.name.data,
-            )
-
-            # Set the user password
-            user.set_password(form.password.data)
-
-            # Set confirmed to True to allow immediate login
-            user.confirmed = True
-
-            # Add the user to the database
-            db.session.add(user)
-            db.session.commit()
-
-            # Automatically log in the user after registration
-            login_user(user)
-
-            # Send welcome email to the user
-            send_welcome_email(user)
-
-            flash(f'Registration successful! You are now logged in as {current_user.username}.!', 'success')
-            return redirect(url_for('main.index'))
-
-        except IntegrityError:
-            db.session.rollback()
-            flash('Email address is already registered. Please use Sign In.', 'danger')
-            return redirect(url_for('main.login'))
-
-    return render_template('register.html', form=form)
-
 
 
 
@@ -229,21 +189,6 @@ def logout():
     logout_user()
     return redirect(url_for('main.index'))
 
-@bp.route('/add_role', methods=['GET', 'POST'])
-@admin_required
-def add_role():
-  form = AddRoleForm()
-
-  if form.validate_on_submit():
-    role = Role(name=form.name.data)
-    db.session.add(role)
-    db.session.commit()
-    flash('Role added successfully!', 'success')
-    return redirect(url_for('main.add_role'))
-
-  roles = Role.query.all()
-
-  return render_template('add_role.html', form=form, roles=roles)
 
 @bp.route('/featured-categories')
 def featured_categories():
@@ -383,7 +328,7 @@ def add_product():
             nutritional_information=form.nutritional_information.data,
             country_of_origin=form.country_of_origin.data,
             supplier_id=form.supplier.data,
-            date_added=form.date_added.data or datetime.utcnow()
+            
         )
 
         db.session.add(product)
@@ -419,18 +364,6 @@ def add_unit_of_measurement():
             flash(f'An error occurred: {str(e)}', 'danger')
 
     return render_template('add_unit_of_measurement.html', form=form)
-
-
-
-@bp.route('/delete_product/<int:product_id>', methods=['POST'])
-@admin_required
-def delete_product(product_id):
-    product = Product.query.get_or_404(product_id)
-    db.session.delete(product)
-    db.session.commit()
-    flash('Product deleted successfully!', 'success')
-    return redirect(url_for('main.products'))
-
 
 @bp.route('/view_product/<int:product_id>')
 @login_required

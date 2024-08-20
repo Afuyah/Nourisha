@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+ <h1>Price Analysis</h1>
+    {% if plot_url %}
+        <img src="data:image/png;base64,{{ plot_url }}" alt="Price Analysis Plot">
+    {% else %}
+        <p>No data available for analysis.</p>
+    {% endif %}
+
+
+<h1>Price Prediction</h1>
+    <form action="{{ url_for('data.predict_price') }}" method="post">
+        <label for="old_price">Old Price:</label>
+        <input type="text" id="old_price" name="old_price" required>
+        <br>
+        <label for="timestamp">Timestamp:</label>
+        <input type="datetime-local" id="timestamp" name="timestamp" required>
+        <br>
+        <input type="submit" value="Predict Price">
+    </form>
+
+{% endblock %}

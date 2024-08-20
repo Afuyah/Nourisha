@@ -1,0 +1,179 @@
+  /* General form styling */
+#loginForm {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    background: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Form labels */
+#loginForm .form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Input fields */
+#loginForm .form-control {
+    border-radius: 50px;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid #ced4da;
+    box-shadow: none;
+}
+
+#loginForm .form-control:focus {
+    box-shadow: none;
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Submit button */
+#loginForm .btn-primary {
+    background-color: #007bff;
+    border: none;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+#loginForm .btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Registration link */
+#loginForm .text-center a {
+    text-decoration: none;
+    font-weight: 600;
+}
+
+#loginForm .text-center a:hover {
+    text-decoration: underline;
+}
+
+/* Shadows and Rounded Corners */
+#loginForm .rounded {
+    border-radius: 0.5rem;
+}
+
+#loginForm .shadow-sm {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+
+.toast {
+    min-width: 200px;
+    border-radius: 0.5rem;
+}
+
+.toast-body {
+    font-size: 1rem;
+    padding: 0.5rem;
+}
+
+.toast-success {
+    background-color: #d4edda;
+    color: #7dd66b;
+}
+
+.toast-danger {
+    background-color: #f8d7da;
+    color: #b91324;
+}
+
+.btn-close-white {
+    filter: brightness(0) invert(1);
+}
+ /* Footer Styling */
+    .footer {
+        background: #2c3e50;
+        color: #ecf0f1;
+        padding: 4rem 0;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .footer h5 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .footer p {
+        color: #bdc3c7;
+        margin-bottom: 1.5rem;
+    }
+
+    .footer .input-group {
+        max-width: 400px;
+    }
+
+    .footer .form-control {
+        border-radius: 30px 0 0 30px;
+        border: none;
+        padding: 1rem;
+        transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+    .footer .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+    }
+
+    .footer .btn-outline-secondary {
+        border-radius: 0 30px 30px 0;
+        color: #ecf0f1;
+        border: none;
+        background: #2980b9;
+        transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    .footer .btn-outline-secondary:hover {
+        background-color: #3498db;
+        color: #ecf0f1;
+    }
+
+    .footer ul {
+        padding: 0;
+        list-style: none;
+    }
+
+    .footer ul li {
+        display: inline-block;
+        margin-right: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .footer ul li i {
+        margin-right: 0.5rem;
+        color: #bdc3c7;
+    }
+
+    .footer ul li a {
+        color: #bdc3c7;
+        text-decoration: none;
+        transition: color 0.3s ease-in-out;
+    }
+
+    .footer ul li a:hover {
+        color: #ecf0f1;
+    }
+
+    .footer hr {
+        border-color: #7f8c8d;
+        margin: 2rem 0;
+    }
+
+    .footer .text-center {
+        color: #bdc3c7;
+        font-size: 0.9rem;
+    }
+
+    .footer .text-center a {
+        color: #bdc3c7;
+        text-decoration: none;
+    }
+
+    .footer .text-center a:hover {
+        color: #ecf0f1;
+    }
