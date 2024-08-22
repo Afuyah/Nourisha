@@ -160,8 +160,8 @@ class CheckoutForm(FlaskForm):
   payment_method = RadioField(
       'Payment Method',
       choices=[
-          ('cash_on_delivery', 'CASH ON DELIVERY'),
-          ('lipa_na_mpesa', 'LIPA NA MPESA')
+          ('cash_on_delivery', 'CASH ON DELIVERY')
+         
       ],
       validators=[DataRequired()],
       default='cash_on_delivery'  
