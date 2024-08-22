@@ -368,16 +368,11 @@ class Arealine(db.Model):
   name = db.Column(db.String(255), nullable=False)
   location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
   location = db.relationship('Location', back_populates='arealines')
-  nearest_places = db.relationship('NearestPlace', back_populates='arealine')
+ 
   user_delivery_infos = db.relationship('UserDeliveryInfo', back_populates='arealine')
 
 
-class NearestPlace(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(255), nullable=False)
-  arealine_id = db.Column(db.Integer, db.ForeignKey('arealine.id'), nullable=False)
-  arealine = db.relationship('Arealine', back_populates='nearest_places')
-  user_delivery_infos = db.relationship('UserDeliveryInfo', back_populates='nearest_place')
+
 
 
 class UserDeliveryInfo(db.Model):
@@ -388,7 +383,7 @@ class UserDeliveryInfo(db.Model):
   alt_phone_number = db.Column(db.String(20))
   location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
   arealine_id = db.Column(db.Integer, db.ForeignKey('arealine.id'), nullable=False)
-  nearest_place_id = db.Column(db.Integer, db.ForeignKey('nearest_place.id'), nullable=True)  # Adjusted to FK
+  nearest_place = db.Column(db.String(255)) 
   address_line = db.Column(db.String(500), nullable=False)
  
     
@@ -396,7 +391,7 @@ class UserDeliveryInfo(db.Model):
   user = db.relationship('User', back_populates='delivery_infos')
   location = db.relationship('Location', back_populates='user_delivery_infos')
   arealine = db.relationship('Arealine', back_populates='user_delivery_infos')
-  nearest_place = db.relationship('NearestPlace', back_populates='user_delivery_infos')
+ 
   orders = db.relationship('Order', back_populates='delivery_info')
 
 class Offer(db.Model):

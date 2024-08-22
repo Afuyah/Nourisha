@@ -325,7 +325,7 @@ def add_or_update_delivery_info():
             delivery_info.alt_phone_number = delivery_info_form.alt_phone_number.data
             delivery_info.location_id = delivery_info_form.location.data
             delivery_info.arealine_id = delivery_info_form.arealine.data
-            delivery_info.nearest_place_id = delivery_info_form.nearest_place.data
+            delivery_info.nearest_place = delivery_info_form.nearest_place.data
             delivery_info.address_line = delivery_info_form.address_line.data
 
             flash('Delivery information updated successfully!', 'success')
@@ -338,7 +338,7 @@ def add_or_update_delivery_info():
                 alt_phone_number=delivery_info_form.alt_phone_number.data,
                 location_id=delivery_info_form.location.data,
                 arealine_id=delivery_info_form.arealine.data,
-                nearest_place_id=delivery_info_form.nearest_place.data,  # Adjusted for FK
+                nearest_place=delivery_info_form.nearest_place.data, 
                 address_line=delivery_info_form.address_line.data
             )
 

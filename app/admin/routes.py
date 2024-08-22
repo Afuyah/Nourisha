@@ -38,7 +38,7 @@ from app.main.forms import (
 from app.main.models import (
     Arealine,
     Location,
-    NearestPlace,
+   
     Order,
     OrderItem,
     Product,
