@@ -105,37 +105,42 @@
 
 
     
- <!-- Login Modal -->
-<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="loginModalLabel">Login</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{{ url_for('auth.login') }}">
-                    {{ login_form.hidden_tag() }}
-                    <div class="mb-3">
-                        <label for="{{ login_form.identifier.id }}" class="form-label">Username/Email/Phone</label>
-                        {{ login_form.identifier(class="form-control") }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ login_form.password.id }}" class="form-label">Password</label>
-                        {{ login_form.password(class="form-control") }}
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <a href="{{ url_for('auth.reset_password_request') }}" class="text-decoration-none">Forgot Password?</a>
-                        <button type="submit" class="btn btn-primary">Login</button>
-                    </div>
-                    <div class="text-center">
-                        <p class="mb-0">Don't have an account? <a href="{{ url_for('auth.register') }}" class="btn btn-link">Register</a></p>
-                    </div>
-                </form>
+  <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{{ url_for('auth.login') }}">
+                        {% if login_form %}
+                            {{ login_form.hidden_tag() }}
+                            <div class="mb-3">
+                                <label for="{{ login_form.identifier.id }}" class="form-label">Username/Email/Phone</label>
+                                {{ login_form.identifier(class="form-control") }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ login_form.password.id }}" class="form-label">Password</label>
+                                {{ login_form.password(class="form-control") }}
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <a href="{{ url_for('auth.reset_password_request') }}" class="text-decoration-none">Forgot Password?</a>
+                                <button type="submit" class="btn btn-primary">Login</button>
+                            </div>
+                        {% else %}
+                            <!-- Display a message or leave blank if login_form is not available -->
+                            <p>Login form is not available.</p>
+                        {% endif %}
+                        <div class="text-center">
+                            <p class="mb-0">Don't have an account? <a href="{{ url_for('auth.register') }}" class="btn btn-link">Register</a></p>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     
 

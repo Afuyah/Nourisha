@@ -42,14 +42,13 @@ class User(db.Model, UserMixin):
   last_active = db.Column(db.DateTime)  # Last activity timestamp
 
   purchases = db.relationship('Purchase', back_populates='user', lazy=True)
-  delivery_info = db.relationship('UserDeliveryInfo', back_populates='user', lazy='dynamic')
   orders = db.relationship('Order', back_populates='user')
   clicks = db.relationship('ProductClick', back_populates='user')
   views = db.relationship('ProductView', back_populates='user')
   search_queries = db.relationship('UserSearchQuery', back_populates='user')
   ratings = db.relationship('Rating', back_populates='user')
   bought_items = db.relationship('OrderItem', back_populates='bought_by_admin', foreign_keys='OrderItem.bought_by_admin_id')
-
+  delivery_infos = db.relationship('UserDeliveryInfo', back_populates='user')
     
    
   def __repr__(self):
@@ -283,24 +282,25 @@ class Order(db.Model):
   expected_delivery_date = db.Column(db.Date)
   total_price = db.Column(db.Float, nullable=False)
   custom_description = db.Column(db.Text)
-  location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
-  arealine_id = db.Column(db.Integer, db.ForeignKey('arealine.id'), nullable=False)
-  nearest_place_id = db.Column(db.Integer, db.ForeignKey('nearest_place.id'), nullable=False)
-  address_line = db.Column(db.String(500), nullable=False)
-  additional_info = db.Column(db.Text)
+  additional_info = db.Column(db.Text)  
+  delivery_info_id = db.Column(db.Integer, db.ForeignKey('user_delivery_info.id'), nullable=False)  # Links to delivery info
+   # Optionally, you could remove this if it’s redundant
+ 
   payment_method = db.Column(db.String(50), nullable=False)
   payment_status = db.Column(db.String(50), default='unpaid')
   delivery_remarks = db.Column(db.Text)
   phone_number = db.Column(db.String(20))
+    
+    # Relationships
   user = db.relationship('User', back_populates='orders')
-  location = db.relationship('Location', back_populates='orders')
-  arealine = db.relationship('Arealine', back_populates='orders')
-  nearest_place = db.relationship('NearestPlace', back_populates='orders')
+  delivery_info = db.relationship('UserDeliveryInfo', back_populates='orders')
   order_items = db.relationship('OrderItem', back_populates='order')
   payments = db.relationship('Payment', back_populates='order', cascade='all, delete-orphan')
+
   def calculate_fulfilled_total(self):
       fulfilled_items_total = sum(item.total_price for item in self.order_items if item.fulfillment_status == 'fulfilled')
       return fulfilled_items_total + 200  # Adding the shipping fee
+
 
 class Payment(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -360,46 +360,44 @@ class Location(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String(100), nullable=False, unique=True)
   arealines = db.relationship('Arealine', back_populates='location')
-  orders = db.relationship('Order', back_populates='location')
-  user_delivery_info = db.relationship('UserDeliveryInfo', back_populates='location')
-  
+  user_delivery_infos = db.relationship('UserDeliveryInfo', back_populates='location')
+
+
 class Arealine(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String(255), nullable=False)
   location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
   location = db.relationship('Location', back_populates='arealines')
   nearest_places = db.relationship('NearestPlace', back_populates='arealine')
-  user_delivery_info = db.relationship('UserDeliveryInfo', back_populates='arealine')
-  orders = db.relationship('Order', back_populates='arealine')
+  user_delivery_infos = db.relationship('UserDeliveryInfo', back_populates='arealine')
 
 
 class NearestPlace(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String(255), nullable=False)
-  arealine_id = db.Column(db.Integer, db.ForeignKey('arealine.id'), nullable=False)  
+  arealine_id = db.Column(db.Integer, db.ForeignKey('arealine.id'), nullable=False)
   arealine = db.relationship('Arealine', back_populates='nearest_places')
-  orders = db.relationship('Order', back_populates='nearest_place')
-  user_delivery_info = db.relationship('UserDeliveryInfo', back_populates='nearest_place')
+  user_delivery_infos = db.relationship('UserDeliveryInfo', back_populates='nearest_place')
 
 
 class UserDeliveryInfo(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+  full_name = db.Column(db.String(100), nullable=False)
+  phone_number = db.Column(db.String(20), nullable=False)
+  alt_phone_number = db.Column(db.String(20))
   location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
   arealine_id = db.Column(db.Integer, db.ForeignKey('arealine.id'), nullable=False)
-  nearest_place_id = db.Column(db.Integer, db.ForeignKey('nearest_place.id'), nullable=False)
-  address_line = db.Column(db.String(500))
-  full_name = db.Column(db.String(100))
-  phone_number = db.Column(db.String(20))
-  alt_phone_number = db.Column(db.String(20))
-  additional_info = db.Column(db.Text)
-  timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=True)
-
-  user = db.relationship('User', back_populates='delivery_info')
-  location = db.relationship('Location', back_populates='user_delivery_info')
-  arealine = db.relationship('Arealine', back_populates='user_delivery_info')
-  nearest_place = db.relationship('NearestPlace', back_populates='user_delivery_info')
-
+  nearest_place_id = db.Column(db.Integer, db.ForeignKey('nearest_place.id'), nullable=True)  # Adjusted to FK
+  address_line = db.Column(db.String(500), nullable=False)
+ 
+    
+    # Relationships
+  user = db.relationship('User', back_populates='delivery_infos')
+  location = db.relationship('Location', back_populates='user_delivery_infos')
+  arealine = db.relationship('Arealine', back_populates='user_delivery_infos')
+  nearest_place = db.relationship('NearestPlace', back_populates='user_delivery_infos')
+  orders = db.relationship('Order', back_populates='delivery_info')
 
 class Offer(db.Model):
   id = db.Column(db.Integer, primary_key=True)

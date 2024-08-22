@@ -2,12 +2,14 @@
 <html>
 <head>
     <style>
+        /* Basic reset and styling for the email body */
         body {
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;
             margin: 0;
             padding: 0;
         }
+        /* Main container for email content */
         .container {
             width: 100%;
             max-width: 700px;
@@ -17,50 +19,70 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+        /* Styling for the main heading */
         h1 {
             color: #007bff;
             margin-bottom: 20px;
         }
+        /* General paragraph styling */
         p {
             color: #333333;
             line-height: 1.6;
         }
+        /* Section for displaying order items */
         .order-items {
             margin-top: 20px;
         }
+        /* Table styling for order details */
         .order-items table {
             width: 100%;
             border-collapse: collapse;
         }
+        /* Styling for table headers and cells */
         .order-items th, .order-items td {
             border: 1px solid #dddddd;
             padding: 10px;
             text-align: left;
         }
+        /* Background color for table headers */
         .order-items th {
             background-color: #f2f2f2;
         }
+        /* Styling for product images within the table */
         .order-items img {
             width: 80px;
             height: auto;
             border-radius: 4px;
         }
+        /* Footer styling with smaller text and centered content */
         .footer {
             margin-top: 20px;
             font-size: 0.9em;
             color: #6c757d;
             text-align: center;
         }
+        /* Styling for footer links */
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        /* Hover effect for footer links */
+        .footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Main heading of the email -->
         <h1>Order Confirmation</h1>
+        <!-- Thank you message and order details -->
         <p>Thank you for your order!</p>
         <p><strong>Order ID:</strong> {{ order.id }}</p>
         <p><strong>Total Price:</strong> KSh {{ order.total_price }}</p>
         <p>We will process your order shortly. You can track your order status in your account.</p>
         
+        <!-- Section displaying the details of the ordered items -->
         <div class="order-items">
             <h2>Order Details</h2>
             <table>
@@ -74,12 +96,18 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Looping through each item in the order -->
                     {% for item in order.order_items %}
                     <tr>
+                        <!-- Displaying product image -->
                         <td><img src="{{ item.product.image_url }}" alt="{{ item.product.name }}"></td>
+                        <!-- Displaying product name -->
                         <td>{{ item.product.name }}</td>
+                        <!-- Displaying quantity ordered -->
                         <td>{{ item.quantity }}</td>
+                        <!-- Displaying unit price -->
                         <td>KSh {{ item.unit_price }}</td>
+                        <!-- Calculating and displaying total price for the item -->
                         <td>KSh {{ item.unit_price * item.quantity }}</td>
                     </tr>
                     {% endfor %}
@@ -87,10 +115,12 @@
             </table>
         </div>
 
+        <!-- Closing statement with the team name -->
         <p>Best regards,<br>The Nourisha Groceries Team</p>
+        <!-- Footer with copyright information and additional links -->
         <div class="footer">
             <p>&copy; {{ current_year }} Nourisha Groceries Ltd. All rights reserved.</p>
-            <p><a href="{{ url_for('main.index') }}">Visit Our Website</a> | <a href="mailto:support@nourishagroceries.com">Contact Us</a></p>
+            <p><a href="{{ url_for('main.index', _external=True) }}">Visit Our Website</a> | <a href="mailto:support@nourishagroceries.com">Contact Us</a></p>
         </div>
     </div>
 </body>

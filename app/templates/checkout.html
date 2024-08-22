@@ -1,270 +1,383 @@
-{% extends 'layout.html' %}
-
+{% extends "layout.html" %}
 {% block content %}
-<style>
-    /* Themed Colors */
-    .primary-color {
-      color: purple; /* purple */
-    }
+ <div class="container mt-5">
+  <!-- Checkout Page Title -->
+  <h2 class="text-center mb-4">Checkout</h2>
 
-    .secondary-color {
-      color: #FFC107; /* Yellow */
-    }
+  <form method="POST" action="{{ url_for('cart.checkout') }}">
+    {{ form.hidden_tag() }}
 
-    .tertiary-color {
-      color: #2196F3; /* Blue */
-    }
-
-    /* Animations */
-    @keyframes fadeIn {
-      0% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 1;
-      }
-    }
-
-    /* Page Loader */
-    .loader-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(255, 255, 255, 0.5);
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .loader {
-      border: 5px solid #f3f3f3;
-      border-radius: 50%;
-      border-top: 5px solid #3498db;
-      width: 50px;
-      height: 50px;
-      animation: spin 2s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
-
-
-  <div class="loader-container" id="loader-container">
-    <div class="loader"></div>
-  </div>
-
-  <div class="container mt-2 mb-1">
-    <div class="row">
-      <div class="col-md-12 mb-1" style="text-align:center;">
-        <a href="{{ url_for('cart.view_cart') }}" class="btn btn-secondary mb-3">Back to Cart</a>
-      </div>
+    <!-- Display Cart Items and Total Price -->
+    <div class="mb-4">
+      <h4 class="fw-bold mb-3">Your Cart</h4>
+      <ul class="list-group">
+        {% for item in cart_items %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ item.product.name }} - {{ item.quantity }} x {{ item.product.unit_price }}
+            <span class="badge bg-secondary rounded-pill">{{ item.quantity * item.product.unit_price }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="mt-3 text-end"><strong>Total: {{ total_price }}</strong></p>
     </div>
 
-    <div class="row justify-content-center">
-      <div class="col-md-10">
-        <div class="card">
-          <div class="card-body">
-            <h3 class="card-title mb-4 primary-color">Checkout</h3>
-
-            {% if cart_items %}
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Product</th>
-                      <th>Quantity</th>
-                      <th>Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for item in cart_items %}
-                      <tr>
-                        <td>{{ item.product.brand }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>Ksh. {{ item.product.unit_price * item.quantity }}</td>
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="mb-2">
-                <p class="text-muted text-center">Standard shipping fee : Ksh 200.</p>
-                <h4 class="primary-color mb-4 text-center">Total Amount + shipping: Ksh. {{ total_price }}</h4>
-                
-              </div>
-
-
-              <div class="mb-4">
-    <form method="POST" action="{{ url_for('cart.checkout') }}">
-        {{ form.hidden_tag() }}
-        <div class="mb-4">
-            <h4 class="tertiary-color">Shipping Information</h4>
-            <div class="mb-3">
-                <label for="full_name" class="form-label">Full Name</label>
-                <input type="text" id="full_name" name="full_name" class="form-control" placeholder="Enter your full name" required>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="phone_number" class="form-label">Phone Number</label>
-                    <input type="tel" id="phone_number" name="phone_number" class="form-control" placeholder="Enter your phone number" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="alt_phone_number" class="form-label">Alternative Phone</label>
-                    <input type="tel" id="alt_phone_number" name="alt_phone_number" class="form-control" placeholder="Enter alternative phone number">
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label for="location" class="form-label">Select Location</label>
-                    {{ form.location(class="form-control", id="location", required=true) }}
-                </div>
-
-                <div class="col-md-4">
-                    <label for="arealine" class="form-label">Select Arealine</label>
-                    {{ form.arealine(class="form-control", id="arealine", required=true) }}
-                </div>
-
-                <div class="col-md-4">
-                    <label for="nearest_place" class="form-label">Select Nearest Place</label>
-                    {{ form.nearest_place(class="form-control", id="nearest_place", required=true) }}
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label for="address" class="form-label">Delivery Address</label>
-                {{ form.address_line(class="form-control", id="address", rows="3", placeholder="Enter your delivery address", required=true) }}
-            </div>
+    <!-- Shipping Information Section -->
+    <div class="mb-4">
+      {% if has_delivery_info %}
+        <!-- If the user already has shipping information saved -->
+        <div class="d-flex flex-column align-items-start">
+          <!-- Checkbox to use existing shipping information -->
+          <div class="form-check mb-2">
+            <input type="checkbox" id="use_saved_address" name="use_saved_address" class="form-check-input" checked>
+            <label for="use_saved_address" class="form-check-label ms-2">Use This Shipping Address</label>
+          </div>
+          <!-- Display shipping info link -->
+          <p class="mt-2">
+            <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#shippingInfoModal">
+              {{ delivery_info.full_name }}, {{ delivery_info.address_line }}
+            </a>
+          </p>
         </div>
-
-        <div class="mb-4">
-            <h4 class="secondary-color">Additional Information</h4>
-            <div class="mb-3">
-                <label for="additional_info" class="form-label">Special Instructions</label>
-                {{ form.additional_info(class="form-control", id="additional_info") }}
-            </div>
+      {% else %}
+        <!-- If the user does not have shipping information saved -->
+        <div>
+          <!-- Button to add shipping information, opens the modal -->
+          <button type="button" class="btn btn-primary btn-lg" id="add-shipping-info">
+            Add Shipping Information
+          </button>
         </div>
+      {% endif %}
+    </div>
 
-        <div class="mb-4">
-            <h4 class="tertiary-color">Payment Method</h4>
-            <div class="mb-3">
-                {{ form.payment_method.label }} {{ form.payment_method(class="form-control", required=true) }}
-            </div>
-        </div>
-<div class="mb-4 row justify-content-center">
-        <button type="submit" class="btn btn-success btn-lg ">Place Order</button>
-    </form>
+ <!-- Payment Method Section -->
+<div class="mb-4">
+  <label class="form-label fw-bold">Payment Method</label>
+  <div class="form-check">
+    {% for value, label in form.payment_method.choices %}
+      <div class="form-check mb-3">
+        <input 
+          type="radio" 
+          id="{{ value }}" 
+          name="{{ form.payment_method.name }}" 
+          value="{{ value }}" 
+          class="form-check-input"
+          {% if form.payment_method.data == value %} checked {% endif %}
+        >
+        <label class="form-check-label" for="{{ value }}">
+          <div class="d-flex align-items-center">
+            <!-- Add an icon or image if needed -->
+            <span class="me-2"><i class="bi bi-credit-card"></i></span>
+            <span>{{ label }}</span>
+          </div>
+        </label>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+<style> /* Payment Method Section Styles */
+.form-check {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-check:hover {
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
+}
+
+.form-check-label {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-check-label i {
+    font-size: 1.3rem;
+    color: var(--primary-color);
+}
+
+.form-check-label span {
+    font-size: 1rem;
+    color: #333;
+}
+  </style>
+
+    <!-- Submit Button to Confirm and Proceed with the Order -->
+    <div class="text-center mb-5">
+      <button type="submit" class="btn btn-success btn-lg">Confirm & Proceed</button>
+    </div>
+  </form>
 </div>
 
-            
-            {% else %}
-              <div class="alert alert-info text-center" role="alert">
-                Your grocery cart is empty.
-                <a href="{{url_for('main.product_listing')}}">EXPLORE OUR STORE</a>
-                and add items before checking out.
+<!-- Custom CSS -->
+<style>
+  .container {
+    max-width: 900px; /* Center content in a larger container */
+  }
+
+  .list-group-item {
+    border: 1px solid #dee2e6; /* Subtle border for list items */
+    border-radius: 0.375rem; /* Rounded corners for list items */
+  }
+
+  .badge {
+    font-size: 0.875rem; /* Smaller font size for badge */
+  }
+
+  .form-check-input {
+    cursor: pointer; /* Pointer cursor for checkbox */
+  }
+
+  .btn-primary {
+    background-color: #007bff; /* Primary button color */
+    border-color: #007bff;
+  }
+
+  .btn-primary:hover {
+    background-color: #0056b3; /* Darker hover state */
+    border-color: #0056b3;
+  }
+
+  .btn-success {
+    background-color: #28a745; /* Success button color */
+    border-color: #28a745;
+  }
+
+  .btn-success:hover {
+    background-color: #218838; /* Darker hover state */
+    border-color: #1e7e34;
+  }
+
+  .text-primary {
+    color: #007bff; /* Primary link color */
+  }
+
+  .text-primary:hover {
+    color: #0056b3; /* Darker hover state for link */
+  }
+
+  .form-label {
+    font-weight: bold; /* Bold label text */
+  }
+</style>
+
+
+<!-- Shipping Info Modal -->
+<div class="modal fade" id="shippingInfoModal" tabindex="-1" aria-labelledby="shippingInfoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-3 border-0 shadow-lg">
+      <!-- Modal Header -->
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title" id="shippingInfoModalLabel">Shipping Information</h5>
+        <button type="button" class="btn-close btn-light" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="p-4 border rounded-3 bg-light">
+              <div class="row">
+                <!-- Full Name -->
+                <div class="col-md-6 mb-3">
+                  <h6 class="fw-bold text-dark">Full Name</h6>
+                  <p class="text-muted">{{ delivery_info.full_name or 'Not provided' }}</p>
+                </div>
+
+                <!-- Phone Number -->
+                <div class="col-md-6 mb-3">
+                  <h6 class="fw-bold text-dark">Phone Number</h6>
+                  <p class="text-muted">{{ delivery_info.phone_number or 'Not provided' }}</p>
+                </div>
+
+                <!-- Address Line -->
+                <div class="col-md-12 mb-3">
+                  <h6 class="fw-bold text-dark">Address</h6>
+                  <p class="text-muted">{{ delivery_info.address_line or 'Not provided' }}</p>
+                </div>
+
+                <!-- Location -->
+                <div class="col-md-6 mb-3">
+                  <h6 class="fw-bold text-dark">Location</h6>
+                  <p class="text-muted">{{ delivery_info.location.name if delivery_info.location else 'Not provided' }}</p>
+                </div>
+
+                <!-- Arealine -->
+                <div class="col-md-6 mb-3">
+                  <h6 class="fw-bold text-dark">Arealine</h6>
+                  <p class="text-muted">{{ delivery_info.arealine.name if delivery_info.arealine else 'Not provided' }}</p>
+                </div>
+
+                <!-- Nearest Place -->
+                <div class="col-md-12 mb-3">
+                  <h6 class="fw-bold text-dark">Nearest Place</h6>
+                  <p class="text-muted">{{ delivery_info.nearest_place.name if delivery_info.nearest_place else 'Not provided' }}</p>
+                </div>
               </div>
-            {% endif %}
+
+              <!-- Edit Shipping Info Button -->
+              <div class="text-center mt-4">
+                <button type="button" class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#editShippingInfoModal">
+                  Edit Shipping Info
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
+
+<style>
+  .modal-content {
+    border-radius: 15px; /* Soft rounded corners */
+  }
+
+  .card-body {
+    padding: 1.5rem; /* Adequate padding for spacing */
+  }
+
+  h6 {
+    font-size: 1rem; /* Consistent heading size */
+  }
+
+  p {
+    font-size: 0.875rem; /* Clear and readable text */
+  }
+
+</style>
+
+<!-- Edit Shipping Info Modal -->
+<div class="modal fade" id="editShippingInfoModal" tabindex="-1" aria-labelledby="editShippingInfoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded">
+      <!-- Modal Header with a Title and Close Button -->
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="editShippingInfoModalLabel">Edit Shipping Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal Body with the Shipping Info Form -->
+      <div class="modal-body">
+        <form id="edit-shipping-info-form" method="POST" action="{{ url_for('cart.add_or_update_delivery_info') }}">
+          {{ delivery_info_form.hidden_tag() }}
+
+          <!-- Full Name Field -->
+          <div class="mb-3">
+            {{ delivery_info_form.full_name.label(class="form-label fw-bold") }}
+            {{ delivery_info_form.full_name(class="form-control") }}
+          </div>
+
+          <!-- Phone Number Field -->
+          <div class="mb-3">
+            {{ delivery_info_form.phone_number.label(class="form-label fw-bold") }}
+            {{ delivery_info_form.phone_number(class="form-control") }}
+          </div>
+
+          <!-- Alternative Phone Number Field -->
+          <div class="mb-3">
+            {{ delivery_info_form.alt_phone_number.label(class="form-label fw-bold") }}
+            {{ delivery_info_form.alt_phone_number(class="form-control") }}
+          </div>
+
+          <!-- Location Dropdown Field -->
+          <div class="mb-3">
+            {{ delivery_info_form.location.label(class="form-label fw-bold") }}
+            {{ delivery_info_form.location(class="form-control", id="edit-location") }}
+          </div>
+
+          <!-- Arealine Dropdown Field -->
+          <div class="mb-3">
+            {{ delivery_info_form.arealine.label(class="form-label fw-bold") }}
+            {{ delivery_info_form.arealine(class="form-control", id="edit-arealine") }}
+          </div>
+
+          <!-- Nearest Place/Landmark Field -->
+          <div class="mb-3">
+            {{ delivery_info_form.nearest_place.label(class="form-label fw-bold") }}
+            {{ delivery_info_form.nearest_place(class="form-control") }}
+          </div>
+
+          <!-- Delivery Address Field -->
+          <div class="mb-3">
+            {{ delivery_info_form.address_line.label(class="form-label fw-bold") }}
+            {{ delivery_info_form.address_line(class="form-control") }}
+          </div>
+
+          <!-- Save Shipping Info Button -->
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-  $(document).ready(function () {
-    // Toggle new address section based on the checkbox
+$(document).ready(function () {
+    // Toggle the modal for shipping info when the button/link is clicked
+    $('#add-shipping-info, #change-shipping-info').click(function () {
+        $('#shippingInfoModal').modal('show');
+    });
+
+    // Toggle the modal if the checkbox to use the saved address is unchecked
     $('#use_saved_address').change(function () {
-      $('#new-address-section').toggle(!this.checked);
+        if (this.checked) {
+            $('#saved-info-link').show();
+        } else {
+            $('#saved-info-link').hide();
+            $('#shippingInfoModal').modal('show');
+        }
     });
-  });
-
-  $(document).ready(function () {
-    // Fetch locations on page load
+    
+    // Fetch locations on page load to populate the dropdowns
     $.ajax({
-      url: "/admin/get_locations",
-      type: "GET",
-      beforeSend: function () {
-        // Show loading spinner
-        $("#loader-container").show();
-        $("#location").prop("disabled", true).html("<option> Fetching ...</option>");
-        $("#arealine, #nearest_place").prop("disabled", true).html("<option>Select Arealine</option>");
-      },
-      success: function (response) {
-        // Update locations dropdown
-        var locationsDropdown = $("#location");
-        locationsDropdown.prop("disabled", false).empty();
-        locationsDropdown.append('<option value="" disabled selected>Select Location</option>');
-        $.each(response.locations, function (index, location) {
-          locationsDropdown.append('<option value="' + location.id + '">' + location.name + "</option>");
+        url: "/admin/get_locations",
+        type: "GET",
+        success: function (response) {
+            // Populate the location dropdown with data from the server
+            var locationsDropdown = $("#location, #edit-location");
+            locationsDropdown.empty();
+            locationsDropdown.append('<option value="" disabled selected>Select Location</option>');
+            $.each(response.locations, function (index, location) {
+                locationsDropdown.append('<option value="' + location.id + '">' + location.name + '</option>');
+            });
+        }
+    });
+
+    // Fetch arealines based on the selected location
+    $('#location, #edit-location').change(function () {
+        var selectedLocation = $(this).val();
+
+        // Fetch the related arealines for the selected location
+        $.ajax({
+            url: `/admin/get_arealines/${selectedLocation}`,
+            type: "GET",
+            success: function (response) {
+                // Populate the arealine dropdown with data from the server
+                var arealineDropdown = $("#arealine, #edit-arealine");
+                arealineDropdown.empty();
+                arealineDropdown.append('<option value="" disabled selected>Select Arealine</option>');
+                $.each(response.arealines, function (index, arealine) {
+                    arealineDropdown.append('<option value="' + arealine.id + '">' + arealine.name + '</option>');
+                });
+            }
         });
-      },
-      complete: function () {
-        // Hide loading spinner
-        $("#loader-container").hide();
-      }
     });
-
-    // Handle location change
-    $("#location").change(function () {
-      var selectedLocation = $(this).val();
-
-      // Fetch arealines based on the selected location
-      $.ajax({
-        url: `/admin/get_arealines/${selectedLocation}`,
-        type: "GET",
-        beforeSend: function () {
-          // Show loading spinner
-          $("#loader-container").show();
-          $("#arealine").prop("disabled", true).html("<option>Fetching data...</option>");
-          $("#nearest_place").prop("disabled", true).html("<option>Select Arealine</option>");
-        },
-        success: function (response) {
-          // Update arealine dropdown
-          var arealineDropdown = $("#arealine");
-          arealineDropdown.prop("disabled", false).empty();
-          arealineDropdown.append('<option value="" disabled selected>Select Arealine</option>');
-          $.each(response.arealines, function (index, arealine) {
-            arealineDropdown.append('<option value="' + arealine.id + '">' + arealine.name + "</option>");
-          });
-        },
-        complete: function () {
-          // Hide loading spinner
-          $("#loader-container").hide();
-        }
-      });
-
-      // Fetch nearest places based on the selected arealine
-      $.ajax({
-        url: `/admin/get_nearest_places/${selectedLocation}`, // Update with the correct route
-        type: "GET",
-        beforeSend: function () {
-          // Show loading spinner
-          $("#loader-container").show();
-          $("#nearest_place").prop("disabled", true).html("<option>Fetching Data...</option>");
-        },
-        success: function (response) {
-          // Update nearest place dropdown
-          var nearestPlaceDropdown = $("#nearest_place");
-          nearestPlaceDropdown.prop("disabled", false).empty();
-          nearestPlaceDropdown.append('<option value="" disabled selected>Select Nearest Place</option>');
-          $.each(response.nearest_places, function (index, place) {
-            nearestPlaceDropdown.append('<option value="' + place.id + '">' + place.name + "</option>");
-          });
-        },
-        complete: function () {
-          // Hide loading spinner
-          $("#loader-container").hide();
-        }
-      });
-    });
-  });
+});
 </script>
 {% endblock %}

@@ -38,8 +38,7 @@
         background-color: #f0f0f0;
     }
 
-    .shipping-info,
-    .payment-info {
+    .info-card {
         margin-bottom: 2rem;
         padding: 1.5rem;
         border: 1px solid #ddd;
@@ -88,6 +87,15 @@
         text-decoration: underline;
     }
 
+    /* Radio Button Styles */
+    .form-check-input {
+        margin-right: 0.5rem;
+    }
+
+    .form-check-label {
+        margin-bottom: 0;
+    }
+
     /* Responsive Styles */
     @media (max-width: 768px) {
         .summary-container {
@@ -105,6 +113,46 @@
             margin-bottom: 1rem;
         }
     }
+
+.form-check {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-check:hover {
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
+}
+
+.form-check-label {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-check-label i {
+    font-size: 1.3rem;
+    color: var(--primary-color);
+}
+
+.form-check-label span {
+    font-size: 1rem;
+    color: #333;
+}
+
+    
 </style>
 
 <div class="container summary-container">
@@ -116,68 +164,84 @@
 
     <div class="row">
         <div class="col-md-10 offset-md-1">
-            <div class="card">
-                <div class="card-body">
-                    {% if cart_items %}
-                    <div class="table-responsive">
-                        <table class="table summary-table">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Quantity</th>
-                                    <th>Price</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in cart_items %}
-                                <tr>
-                                    <td>{{ item.product.brand }}</td>
-                                    <td>{{ item.quantity }}</td>
-                                    <td>Ksh. {{ item.product.unit_price * item.quantity }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="info-card">
+                {% if cart_items %}
+                <div class="table-responsive">
+                    <table class="table summary-table">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart_items %}
+                            <tr>
+                                <td>{{ item.product.brand }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>Ksh. {{ item.product.unit_price * item.quantity }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
 
-                    <div class="mb-4">
-                        <p class="text-muted text-center">Standard shipping fee: Ksh 200.</p>
-                        <h3 class="text-center">Total Amount + Shipping: Ksh. {{ total_price }}</h3>
-                    </div>
+                <div class="mb-4">
+                    <p class="text-muted text-center">Standard shipping fee: Ksh 200.</p>
+                    <h3 class="text-center">Total Amount + Shipping: Ksh. {{ total_price }}</h3>
+                </div>
 
-                    <div class="shipping-info mb-4">
-                        <h4>Shipping Information</h4>
-                        <p><strong>Name:</strong> {{ delivery_info.full_name }}</p>
-                        <p><strong>Phone:</strong> {{ delivery_info.phone_number }}</p>
-                        {% if delivery_info.alt_phone_number %}
-                        <p><strong>Alternative Phone:</strong> {{ delivery_info.alt_phone_number }}</p>
-                        {% endif %}
-                        <p><strong>Location:</strong> {{ location.name }}</p>
-                        <p><strong>Arealine:</strong> {{ arealine.name }}</p>
-                        <p><strong>Nearest Place:</strong> {{ nearest_place.name }}</p>
-                        <p><strong>Address:</strong> {{ delivery_info.address_line }}</p>
-                    </div>
+                <div class="info-card mb-4">
+                    <h4>Shipping Information</h4>
+                    <p><strong>Name:</strong> {{ delivery_info.full_name }}</p>
+                    <p><strong>Phone:</strong> {{ delivery_info.phone_number }}</p>
+                    {% if delivery_info.alt_phone_number %}
+                    <p><strong>Alternative Phone:</strong> {{ delivery_info.alt_phone_number }}</p>
+                    {% endif %}
+                    <p><strong>Location:</strong> {{ delivery_info.location.name }}</p>
+                    <p><strong>Arealine:</strong> {{ delivery_info.arealine.name }}</p>
+                    <p><strong>Address:</strong> {{ delivery_info.address_line }}</p>
+                </div>
 
-                    <div class="payment-info mb-4">
-                        <h4>Payment Method</h4>
-                        <p><strong>Method:</strong> {{ delivery_info.payment_method }}</p>
-                    </div>
+                <div class="mb-4">
+  <label class="form-label fw-bold">Payment Method</label>
+  <div class="form-check">
+    {% for value, label in form.payment_method.choices %}
+      <div class="form-check mb-3">
+        <input 
+          type="radio" 
+          id="{{ value }}" 
+          name="{{ form.payment_method.name }}" 
+          value="{{ value }}" 
+          class="form-check-input"
+          {% if form.payment_method.data == value %} checked {% endif %}
+        >
+        <label class="form-check-label" for="{{ value }}">
+          <div class="d-flex align-items-center">
+            <!-- Add an icon or image if needed -->
+            <span class="me-2"><i class="bi bi-credit-card"></i></span>
+            <span>{{ label }}</span>
+          </div>
+        </label>
+      </div>
+    {% endfor %}
+  </div>
+</div>
 
-                    <form method="post">
-                        {{ form.csrf_token }}
                         <div class="summary-footer">
                             <a href="{{ url_for('cart.checkout') }}" class="btn edit-details-btn">Edit Details</a>
                             <button type="submit" class="btn confirm-order-btn">Confirm and Place Order</button>
                         </div>
                     </form>
-                    {% else %}
-                    <div class="alert alert-info text-center" role="alert">
-                        Your grocery cart is empty.
-                        <a href="{{ url_for('main.product_listing') }}" class="alert-link">EXPLORE OUR STORE</a>
-                        and add items before checking out.
-                    </div>
-                    {% endif %}
+                
+                {% else %}
+                <div class="alert alert-info text-center" role="alert">
+                    Your grocery cart is empty.
+                    <a href="{{ url_for('main.product_listing') }}" class="alert-link">EXPLORE OUR STORE</a>
+                    and add items before checking out.
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -152,7 +152,8 @@ def login():
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return jsonify({'success': False, 'html': render_template('user_auth.html', login_form=login_form)})
 
-    return render_template('layout.html', login_form=login_form)
+    return render_template('user_auth.html', login_form=login_form)
+
 
 # Check authentication status route (useful for AJAX requests)
 @auth_bp.route('/check_authentication', methods=['GET'])

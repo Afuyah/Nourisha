@@ -33,32 +33,13 @@
         {{ form_arealine.submit(class="btn btn-primary") }}
     </form>
 
-    <!-- Heading for Adding Nearest Place -->
-    <h2 class="mt-4">Add Nearest Place</h2>
-    <form method="post" action="{{ url_for('admin.add_location') }}" id="addNearestPlaceForm">
-        {{ form_nearest_place.hidden_tag() }}
-        <!-- Dropdown for Selecting Arealine -->
-        <div class="mb-3">
-            <label for="arealineDropdown" class="form-label">Select Arealine</label>
-            {{ form_nearest_place.arealine(class="form-control", id="arealineDropdown", required=true) }}
-        </div>
-        <!-- Input for Nearest Place -->
-        <div class="mb-3">
-            <label for="nearestPlace" class="form-label">Nearest Place</label>
-            {{ form_nearest_place.name(class="form-control", id="nearestPlace", required=true) }}
-        </div>
-        <!-- Submit Button for Adding Nearest Place -->
-        {{ form_nearest_place.submit(class="btn btn-primary") }}
-    </form>
-
-    <!-- Table for Displaying Locations with Arealines and Nearest Places -->
-    <h2 class="mt-4">Locations, Arealines, and Nearest Places</h2>
+    <!-- Table for Displaying Locations and Arealines -->
+    <h2 class="mt-4">Locations and Arealines</h2>
     <table class="table table-bordered">
         <thead class="table-dark">
             <tr>
                 <th>Location</th>
                 <th>Arealines</th>
-                <th>Nearest Places</th>
             </tr>
         </thead>
         <tbody>
@@ -71,11 +52,6 @@
                 </td>
                 {% endif %}
                 <td>{{ arealine.name }}</td>
-                <td>
-                    {% for nearest_place in arealine.nearest_places %}
-                    {{ nearest_place.name }}
-                    {% endfor %}
-                </td>
             </tr>
             {% endfor %}
             {% endfor %}
@@ -84,39 +60,29 @@
 </div>
 
 <script>
-    
-fetch('/admin/get_locations')
-    .then(response => response.json())
-    .then(data => {
-        // Handle the response data (array of locations)
-        console.log(data.locations);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+    fetch('/admin/get_locations')
+        .then(response => response.json())
+        .then(data => {
+            // Handle the response data (array of locations)
+            console.log(data.locations);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 
-// Example fetch request to get arealines for a location
-fetch('/admin/get_arealines/' + locationId)
-    .then(response => response.json())
-    .then(data => {
-        // Handle the response data (array of arealines)
-        console.log(data.arealines);
-    })
-    .catch(error => {
-        console.error('Error:', error);
+    // Fetch arealines based on selected location
+    document.getElementById('locationDropdown').addEventListener('change', function() {
+        const locationId = this.value;
+        fetch('/admin/get_arealines/' + locationId)
+            .then(response => response.json())
+            .then(data => {
+                // Handle the response data (array of arealines)
+                console.log(data.arealines);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     });
-
-// Example fetch request to get nearest places for an arealine
-fetch('/admin/get_nearest_places/' + arealineId)
-    .then(response => response.json())
-    .then(data => {
-        // Handle the response data (array of nearest places)
-        console.log(data.nearest_places);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-
 </script>
 
 {% endblock %}

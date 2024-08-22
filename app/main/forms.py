@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, FloatField, IntegerField, TextAreaField, SelectField, DateField, DecimalField, DateTimeField, SubmitField, SelectMultipleField
+from wtforms import StringField, PasswordField, FloatField, IntegerField, RadioField, TextAreaField, SelectField, DateField, DecimalField, DateTimeField, SubmitField, SelectMultipleField
 from wtforms.validators import DataRequired, Email, Length
 from flask_wtf.file import FileField, FileRequired, DataRequired
 from wtforms import HiddenField, TextAreaField, BooleanField
@@ -153,46 +153,41 @@ class AddArealineForm(FlaskForm):
   submit = SubmitField('Add Arealine')
 
 
-class AddNearestPlaceForm(FlaskForm):
-  name = StringField('Nearest Place Name', validators=[DataRequired()])
-  arealine = SelectField('Arealine', coerce=int, validators=[DataRequired()])
-  submit = SubmitField('Add Nearest Place')
-
-
 class CheckoutForm(FlaskForm):
+  hidden_custom_description = HiddenField("Custom Description")
+  custom_description = TextAreaField('Custom Description')
+  additional_info = TextAreaField('Additional Information')
+  payment_method = RadioField(
+      'Payment Method',
+      choices=[
+          ('cash_on_delivery', 'CASH ON DELIVERY'),
+          ('lipa_na_mpesa', 'LIPA NA MPESA')
+      ],
+      validators=[DataRequired()],
+      default='cash_on_delivery'  # Ensure this is a valid choice
+  )
+
+
+
+class userDeliveryInfoForm(FlaskForm):
   full_name = StringField('Full Name', validators=[DataRequired()])
   phone_number = StringField('Phone Number', validators=[DataRequired()])
   alt_phone_number = StringField('Alternative Phone')
   location = SelectField('Select Location', validators=[DataRequired()])
   arealine = SelectField('Select Arealine', validators=[DataRequired()])
-  nearest_place = SelectField('Select Nearest Place',
-                              validators=[DataRequired()])
-  address_line = TextAreaField('Delivery Address', validators=[DataRequired()])
-  additional_info = TextAreaField('Special Instructions')
-  hidden_custom_description = HiddenField("Custom Description")
-  custom_description = TextAreaField('Custom Description')
-  payment_method = SelectField('Payment Method',
-                               choices=[('pay_on_delivery', 'Pay on Delivery'),
-                                        ('pay_now', 'Pay Now')],
-                               validators=[DataRequired()])
-  submit = SubmitField('Confirm Order')
+  nearest_place = StringField('Land Mark/ Nearest Place', validators=[DataRequired()])
+  address_line = TextAreaField('Delivery Address', validators=[DataRequired()]) 
+  dditional_info = TextAreaField('Additional Information') 
+  submit = SubmitField('Save Shipping Info')
 
   # Method to set choices for location
   def set_location_choices(self, locations):
-    self.location.choices = [(location.id, location.name)
-                             for location in locations]
+    self.location.choices = [(loc.id, loc.name) for loc in locations]
 
-  # Method to set choices for arealine
   def set_arealine_choices(self, arealines):
-    self.arealine.choices = [(arealine.id, arealine.name)
-                             for arealine in arealines]
+    self.arealine.choices = [(area.id, area.name) for area in arealines]
 
-  # Method to set choices for nearest place
-  def set_nearest_place_choices(self, nearest_places):
-    self.nearest_place.choices = [(place.id, place.name)
-                                  for place in nearest_places]
-
-
+ 
 
 class DateSelectionForm(FlaskForm):
     order_date = DateField('Select Order Date', format='%Y-%m-%d', validators=[DataRequired()])

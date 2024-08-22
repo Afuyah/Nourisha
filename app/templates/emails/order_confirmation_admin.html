@@ -2,12 +2,14 @@
 <html>
 <head>
     <style>
+        /* Basic reset and styling for the email body */
         body {
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;
             margin: 0;
             padding: 0;
         }
+        /* Container that holds the entire email content */
         .container {
             width: 100%;
             max-width: 700px;
@@ -17,50 +19,102 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+        /* Centered logo at the top of the email */
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            height: 70px;
+            width: 200px;
+        }
+        /* Styling for the main heading */
         h1 {
             color: #007bff;
             margin-bottom: 20px;
         }
+        /* General paragraph styling */
         p {
             color: #333333;
             line-height: 1.6;
         }
+        /* Section for order items */
         .order-items {
             margin-top: 20px;
         }
+        /* Table styling for displaying order details */
         .order-items table {
             width: 100%;
             border-collapse: collapse;
         }
+        /* Styling for table headers and cells */
         .order-items th, .order-items td {
             border: 1px solid #dddddd;
             padding: 10px;
             text-align: left;
         }
+        /* Specific background color for table headers */
         .order-items th {
             background-color: #f2f2f2;
+            color: #555555;
         }
+        /* Styling for product images within the table */
         .order-items img {
             width: 80px;
             height: auto;
             border-radius: 4px;
+            display: block;
+            margin: auto;
         }
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 600px) {
+            .order-items img {
+                width: 60px;
+            }
+            .order-items th, .order-items td {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+        /* Footer styling with smaller text and centered content */
         .footer {
             margin-top: 20px;
             font-size: 0.9em;
             color: #6c757d;
             text-align: center;
         }
+        /* Footer link styling */
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        /* Hover effect for footer links */
+        .footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Logo section at the top of the email -->
+        <div class="logo">
+            <a href="{{ url_for('main.index', _external=True) }}">
+                <img src="{{ url_for('static', filename='logoford.png', _external=True) }}" alt="Nourisha Groceries" />
+            </a>
+        </div>
+        
+        <!-- Main heading of the email -->
         <h1>New Order Alert</h1>
+        <!-- Brief introduction about the new order -->
         <p>A new order has been placed!</p>
+        <!-- Displaying order ID -->
         <p><strong>Order ID:</strong> {{ order.id }}</p>
+        <!-- Displaying username of the person who placed the order -->
         <p><strong>User:</strong> {{ order.user.username }}</p>
+        <!-- Displaying total price of the order -->
         <p><strong>Total Price:</strong> KSh {{ order.total_price }}</p>
         
+        <!-- Section that lists the order details -->
         <div class="order-items">
             <h2>Order Details</h2>
             <table>
@@ -74,12 +128,24 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Looping through each item in the order -->
                     {% for item in order.order_items %}
                     <tr>
-                        <td><img src="{{ item.product.image_url }}" alt="{{ item.product.name }}"></td>
+                        <!-- Displaying product image or a placeholder if no image is available -->
+                        <td>
+                            {% if item.product.images %}
+                                <img src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image, _external=True) }}" alt="{{ item.product.name }}" style="width: 80px; height: auto; border-radius: 4px;">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='alt_img.png', _external=True) }}" alt="Placeholder Image" style="width: 80px; height: auto; border-radius: 4px;">
+                            {% endif %}
+                        </td>
+                        <!-- Displaying the name of the product -->
                         <td>{{ item.product.name }}</td>
+                        <!-- Displaying the quantity of the product ordered -->
                         <td>{{ item.quantity }}</td>
+                        <!-- Displaying the unit price of the product -->
                         <td>KSh {{ item.unit_price }}</td>
+                        <!-- Calculating and displaying the total price for this product (unit price * quantity) -->
                         <td>KSh {{ item.unit_price * item.quantity }}</td>
                     </tr>
                     {% endfor %}
@@ -87,11 +153,14 @@
             </table>
         </div>
 
+        <!-- Call to action to review and process the order -->
         <p>Please review and process this order as soon as possible.</p>
+        <!-- Closing statement with the team name -->
         <p>Best regards,<br>The Nourisha Groceries Team</p>
+        <!-- Footer section with copyright information and a link to the website -->
         <div class="footer">
             <p>&copy; {{ current_year }} Nourisha Groceries Ltd. All rights reserved.</p>
-            <p><a href="{{ url_for('main.index') }}">Visit Our Website</a></p>
+            <p><a href="{{ url_for('main.index', _external=True) }}">Visit Our Website</a></p>
         </div>
     </div>
 </body>

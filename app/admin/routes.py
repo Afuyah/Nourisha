@@ -26,7 +26,7 @@ from reportlab.pdfgen import canvas
 from app.main.forms import (
     AddArealineForm,
     AddLocationForm,
-    AddNearestPlaceForm,
+    
     AddProductCategoryForm,
     DateSelectionForm,
     FulfillmentForm,
@@ -438,20 +438,15 @@ def products_by_category(category_id):
 @admin_required
 def add_location():
     def route():
-        # Initialize forms for adding location, arealine, and nearest place
+        # Initialize forms for adding location and arealine
         form_location = AddLocationForm()
         form_arealine = AddArealineForm()
-        form_nearest_place = AddNearestPlaceForm()
 
-        # Fetch locations and arealines for dropdowns
+        # Fetch locations for dropdowns in AddArealineForm
         locations = Location.query.all()
-        arealines = Arealine.query.all()
 
         # Set choices for location field in AddArealineForm
         form_arealine.location.choices = [(location.id, location.name) for location in locations]
-
-        # Set choices for arealine field in AddNearestPlaceForm
-        form_nearest_place.arealine.choices = [(arealine.id, arealine.name) for arealine in arealines]
 
         # Handle form submissions
         if form_location.validate_on_submit():
@@ -480,30 +475,15 @@ def add_location():
                 db.session.commit()
                 flash('Arealine added successfully!', 'success')
 
-        elif form_nearest_place.validate_on_submit():
-            existing_nearest_place = NearestPlace.query.filter_by(name=form_nearest_place.name.data,
-                                                                 arealine_id=form_nearest_place.arealine.data).first()
-
-            if existing_nearest_place:
-                flash('Nearest Place already exists!', 'error')
-            else:
-                # Process Add Nearest Place Form
-                nearest_place = NearestPlace(name=form_nearest_place.name.data,
-                                             arealine_id=form_nearest_place.arealine.data)
-                db.session.add(nearest_place)
-                db.session.commit()
-                flash('Nearest Place added successfully!', 'success')
-
         # Render the template with the forms and data
         return render_template('add_location.html',
                                form_location=form_location,
                                form_arealine=form_arealine,
-                               form_nearest_place=form_nearest_place,
-                               locations=locations,
-                               arealines=arealines)
+                               locations=locations)
 
     # Use helper function to handle database errors and redirects
     return handle_db_error_and_redirect(route)
+
 
 
 
