@@ -283,7 +283,7 @@ class Order(db.Model):
   total_price = db.Column(db.Float, nullable=False)
   custom_description = db.Column(db.Text)
   additional_info = db.Column(db.Text)  
-  delivery_info_id = db.Column(db.Integer, db.ForeignKey('user_delivery_info.id'), nullable=False)  # Links to delivery info
+  delivery_info_id = db.Column(db.Integer, db.ForeignKey('user_delivery_info.id'), nullable=True)  
    # Optionally, you could remove this if it’s redundant
  
   payment_method = db.Column(db.String(50), nullable=False)

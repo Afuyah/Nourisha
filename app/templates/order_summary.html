@@ -88,12 +88,42 @@
     }
 
     /* Radio Button Styles */
-    .form-check-input {
-        margin-right: 0.5rem;
+    .form-check {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-check:hover {
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .form-check-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
     }
 
     .form-check-label {
-        margin-bottom: 0;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .form-check-label i {
+        font-size: 1.3rem;
+        color: var(--primary-color);
+    }
+
+    .form-check-label span {
+        font-size: 1rem;
+        color: #333;
     }
 
     /* Responsive Styles */
@@ -113,46 +143,6 @@
             margin-bottom: 1rem;
         }
     }
-
-.form-check {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-check:hover {
-    background-color: #f9f9f9;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.form-check-input:checked {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.form-check-input:focus {
-    box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
-}
-
-.form-check-label {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #333;
-}
-
-.form-check-label i {
-    font-size: 1.3rem;
-    color: var(--primary-color);
-}
-
-.form-check-label span {
-    font-size: 1rem;
-    color: #333;
-}
-
-    
 </style>
 
 <div class="container summary-container">
@@ -204,36 +194,38 @@
                     <p><strong>Address:</strong> {{ delivery_info.address_line }}</p>
                 </div>
 
-                <div class="mb-4">
-  <label class="form-label fw-bold">Payment Method</label>
-  <div class="form-check">
-    {% for value, label in form.payment_method.choices %}
-      <div class="form-check mb-3">
-        <input 
-          type="radio" 
-          id="{{ value }}" 
-          name="{{ form.payment_method.name }}" 
-          value="{{ value }}" 
-          class="form-check-input"
-          {% if form.payment_method.data == value %} checked {% endif %}
-        >
-        <label class="form-check-label" for="{{ value }}">
-          <div class="d-flex align-items-center">
-            <!-- Add an icon or image if needed -->
-            <span class="me-2"><i class="bi bi-credit-card"></i></span>
-            <span>{{ label }}</span>
-          </div>
-        </label>
-      </div>
-    {% endfor %}
-  </div>
-</div>
-
-                        <div class="summary-footer">
-                            <a href="{{ url_for('cart.checkout') }}" class="btn edit-details-btn">Edit Details</a>
-                            <button type="submit" class="btn confirm-order-btn">Confirm and Place Order</button>
+                <form method="post">
+                    {{ form.csrf_token }}
+                    <div class="info-card mb-4">
+                        <label class="form-label fw-bold">Payment Method</label>
+                        <div class="form-check">
+                            {% for value, label in form.payment_method.choices %}
+                            <div class="form-check mb-3">
+                                <input 
+                                    type="radio" 
+                                    id="{{ value }}" 
+                                    name="{{ form.payment_method.name }}" 
+                                    value="{{ value }}" 
+                                    class="form-check-input"
+                                    {% if form.payment_method.data == value %} checked {% endif %}
+                                >
+                                <label class="form-check-label" for="{{ value }}">
+                                    <div class="d-flex align-items-center">
+                                        <!-- Add an icon or image if needed -->
+                                        <span class="me-2"><i class="bi bi-credit-card"></i></span>
+                                        <span>{{ label }}</span>
+                                    </div>
+                                </label>
+                            </div>
+                            {% endfor %}
                         </div>
-                    </form>
+                    </div>
+
+                    <div class="summary-footer">
+                        <a href="{{ url_for('cart.checkout') }}" class="btn edit-details-btn">Edit Details</a>
+                        <button type="submit" class="btn confirm-order-btn">Confirm and Place Order</button>
+                    </div>
+                </form>
                 
                 {% else %}
                 <div class="alert alert-info text-center" role="alert">

@@ -164,7 +164,7 @@ class CheckoutForm(FlaskForm):
           ('lipa_na_mpesa', 'LIPA NA MPESA')
       ],
       validators=[DataRequired()],
-      default='cash_on_delivery'  # Ensure this is a valid choice
+      default='cash_on_delivery'  
   )
 
 
