@@ -12,6 +12,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sqlalchemy.orm.exc import NoResultFound
 from app.cart.routes import cart_bp
 from .send_email import send_confirmation_email
+from sqlalchemy.exc import SQLAlchemyError
+
 from sqlalchemy import func, desc
 from flask_mail import Message
 from functools import wraps
