@@ -721,29 +721,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-      function searchProducts() {
-          var query = document.getElementById("searchInput").value.trim();
-          if (query.length === 0) {
-              // Clear search results and display all products
-              document.getElementById("searchResults").innerHTML = "";
-              document.getElementById("productListing").style.display = "block";
-              return;
-          }
-          var xhr = new XMLHttpRequest();
-          xhr.open('GET', '/search?query=' + encodeURIComponent(query), true);
-          xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-          xhr.onreadystatechange = function() {
-              if (xhr.readyState === XMLHttpRequest.DONE) {
-                  if (xhr.status === 200) {
-                      // Update search results
-                      document.getElementById("searchResults").innerHTML = xhr.responseText;
-                      // Hide product listing when search results are displayed
-                      document.getElementById("productListing").style.display = "none";
-                  }
-              }
-          };
-          xhr.send();
-      }
+      
 
 
     function trackProductEvent(productId, eventType) {
@@ -805,10 +783,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Search Products interaction
-    document.getElementById("searchInput").addEventListener("keyup", function() {
-        searchProducts();
-    });
+          
 });
 
 // Function to initialize event listeners for tracking
