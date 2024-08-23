@@ -44,8 +44,7 @@ class User(db.Model, UserMixin):
 
     purchases = db.relationship('Purchase', back_populates='user', lazy='dynamic')
     orders = db.relationship('Order', back_populates='user', lazy='dynamic')
-    clicks = db.relationship('ProductClick', back_populates='user', lazy='dynamic')
-    views = db.relationship('ProductView', back_populates='user', lazy='dynamic')
+    
     search_queries = db.relationship('UserSearchQuery', back_populates='user', lazy='dynamic')
     ratings = db.relationship('Rating', back_populates='user', lazy='dynamic')
     bought_items = db.relationship('OrderItem', back_populates='bought_by_admin', foreign_keys='OrderItem.bought_by_admin_id', lazy='dynamic')
@@ -176,8 +175,7 @@ class Product(db.Model):
     nutritional_information = db.Column(db.Text, nullable=True)
     country_of_origin = db.Column(db.String(50), nullable=True)
     average_rating = db.Column(db.Float, default=0.0)
-    click_count = db.Column(db.Integer, default=0)
-    view_count = db.Column(db.Integer, default=0)
+    
     supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False, index=True)
     date_added = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
@@ -187,8 +185,7 @@ class Product(db.Model):
     carts = db.relationship('Cart', back_populates='product', lazy='dynamic')
     order_items = db.relationship('OrderItem', back_populates='product', lazy='dynamic')
 
-    clicks = db.relationship('ProductClick', back_populates='product', lazy='dynamic')
-    views = db.relationship('ProductView', back_populates='product', lazy='dynamic')
+    
     ratings = db.relationship('Rating', back_populates='product', lazy='dynamic')
     promotions = db.relationship('Promotion', secondary='product_promotions', backref=db.backref('products', lazy='dynamic'))
 
@@ -196,25 +193,6 @@ class Product(db.Model):
 
 
 
-class ProductClick(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True, index=True)
-    guest_ip = db.Column(db.String(45), nullable=True, index=True) 
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False, index=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-
-    user = db.relationship('User', back_populates='clicks', lazy='joined')
-    product = db.relationship('Product', back_populates='clicks', lazy='joined')
-
-class ProductView(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True, index=True)
-    guest_ip = db.Column(db.String(45), nullable=True, index=True) 
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False, index=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-
-    user = db.relationship('User', back_populates='views', lazy='joined')
-    product = db.relationship('Product', back_populates='views', lazy='joined')
 
 
 class UnitOfMeasurement(db.Model):

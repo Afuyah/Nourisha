@@ -3,7 +3,7 @@ from flask import render_template, abort, flash, redirect, url_for, request, jso
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, AddRoleForm, AddSupplierForm,RecommendationForm,LoginForm, UnitOfMeasurementForm
-from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage, UnitOfMeasurement
+from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage, UnitOfMeasurement
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
@@ -15,6 +15,7 @@ from .send_email import send_confirmation_email
 from sqlalchemy import func, desc
 from flask_mail import Message
 from functools import wraps
+from dateutil import parser
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from sqlalchemy.orm.exc import NoResultFound
 import re
@@ -608,36 +609,42 @@ def get_recommendations():
 @bp.route('/api/track-product-event', methods=['POST'])
 def track_event():
     try:
+        # Extract data from request
         data = request.json
+        app.logger.debug(f"Request data: {data}")
 
         product_id = data.get('productId')
         event_type = data.get('eventType')
         timestamp = data.get('timestamp')
 
         if not product_id or not event_type or not timestamp:
+            app.logger.warning(f"Missing data: productId={product_id}, eventType={event_type}, timestamp={timestamp}")
             return jsonify({'error': 'Missing data in request'}), 400
 
         try:
-            parsed_timestamp = parser.parse(timestamp)  # Use dateutil.parser for flexible parsing
-        except ValueError:
+            parsed_timestamp = parser.parse(timestamp)
+            app.logger.debug(f"Parsed timestamp: {parsed_timestamp}")
+        except ValueError as ve:
+            app.logger.warning(f"Invalid timestamp format: {timestamp} - {ve}")
             return jsonify({'error': 'Invalid timestamp format'}), 400
 
         user_id = get_current_user_id()
         guest_ip = get_client_ip() if not user_id else None
+        app.logger.debug(f"User ID: {user_id}, Guest IP: {guest_ip}")
 
         if event_type == 'click':
             record_click_event(user_id, guest_ip, product_id, parsed_timestamp)
         elif event_type == 'view':
             record_view_event(user_id, guest_ip, product_id, parsed_timestamp)
         else:
+            app.logger.warning(f"Invalid event type: {event_type}")
             return jsonify({'error': 'Invalid event type'}), 400
 
+        app.logger.info(f"Event tracked successfully: productId={product_id}, eventType={event_type}")
         return jsonify({'message': 'Event tracked successfully'}), 200
     except Exception as e:
-        app.logger.error(f"Error tracking event: {e}")
+        app.logger.error(f"Error tracking event: {e}", exc_info=True)
         return jsonify({'error': 'Server error'}), 500
-
-from dateutil import parser
 
 def record_click_event(user_id, guest_ip, product_id, timestamp):
     try:
@@ -648,16 +655,22 @@ def record_click_event(user_id, guest_ip, product_id, timestamp):
             timestamp=timestamp
         )
         db.session.add(new_click)
+        app.logger.debug(f"Added click event: {new_click}")
 
         product = Product.query.get(product_id)
         if product:
             product.click_count += 1
             db.session.commit()
+            app.logger.info(f"Updated product click count: {product_id}, clickCount={product.click_count}")
         else:
-            app.logger.error(f"Product with ID {product_id} not found.")
+            app.logger.warning(f"Product with ID {product_id} not found.")
             db.session.rollback()
+    except SQLAlchemyError as e:
+        app.logger.error(f"SQLAlchemy error recording click event: {e}", exc_info=True)
+        db.session.rollback()
+        raise e
     except Exception as e:
-        app.logger.error(f"Error recording click event for user {user_id}, product {product_id}: {e}")
+        app.logger.error(f"Error recording click event: {e}", exc_info=True)
         db.session.rollback()
         raise e
 
@@ -670,16 +683,22 @@ def record_view_event(user_id, guest_ip, product_id, timestamp):
             timestamp=timestamp
         )
         db.session.add(new_view)
+        app.logger.debug(f"Added view event: {new_view}")
 
         product = Product.query.get(product_id)
         if product:
             product.view_count += 1
             db.session.commit()
+            app.logger.info(f"Updated product view count: {product_id}, viewCount={product.view_count}")
         else:
-            app.logger.error(f"Product with ID {product_id} not found.")
+            app.logger.warning(f"Product with ID {product_id} not found.")
             db.session.rollback()
+    except SQLAlchemyError as e:
+        app.logger.error(f"SQLAlchemy error recording view event: {e}", exc_info=True)
+        db.session.rollback()
+        raise e
     except Exception as e:
-        app.logger.error(f"Error recording view event for user {user_id}, product {product_id}: {e}")
+        app.logger.error(f"Error recording view event: {e}", exc_info=True)
         db.session.rollback()
         raise e
 
@@ -687,9 +706,12 @@ def get_current_user_id():
     if current_user.is_authenticated:
         return current_user.id
     else:
-        # Get the IP address and remove the dots
-        ip_address = request.remote_addr.replace('.', '')
+        ip_address = request.remote_addr
+        app.logger.debug(f"Guest IP address: {ip_address}")
         return ip_address
+
+def get_client_ip():
+    return request.remote_addr
 
 # Route for rendering recommendations page
 @bp.route('/recommendations')

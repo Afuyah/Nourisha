@@ -1,7 +1,7 @@
 {% extends 'layout.html' %} 
 {% block content %}
 <div class="container mt-3">
-  <!-- Search Bar Section -->
+  <!-- Search Bar Section 
   <div class="mb-4">
     <form class="d-flex" id="searchForm" method="get" action="{{ url_for('main.search') }}">
       <input class="form-control me-2" type="text" id="searchInput" placeholder="Search products..." onkeyup="searchProducts()" />
@@ -10,7 +10,52 @@
     </form>
   </div>
 </div>
+-->
+    <!-- WhatsApp Section -->
+<div class="whatsapp-section mb-4">
+  <a href="https://wa.me/2547006222298" target="_blank" class="whatsapp-link">
+    <i class="fab fa-whatsapp"></i> WhatsApp Us
+  </a>
+</div>
 
+<style>
+    /* WhatsApp Section Styles */
+.whatsapp-section {
+  text-align: center;
+  padding: 20px;
+  background-color: #25D366; /* WhatsApp green color */
+  border-radius: 10px;
+  color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for a soft effect */
+}
+
+.whatsapp-link {
+  color: #fff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: bold; /* Make text bold for emphasis */
+}
+
+.whatsapp-link i {
+  margin-right: 10px;
+  font-size: 1.8rem; /* Slightly larger icon */
+}
+
+/* Add responsiveness */
+@media (max-width: 768px) {
+  .whatsapp-section {
+    font-size: 1.2rem;
+    padding: 15px;
+  }
+
+  .whatsapp-link i {
+    font-size: 1.5rem;
+  }
+}
+
+</style>
 <!-- Category Carousel -->
 <div id="categoryCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
   <div class="carousel-inner">
@@ -38,10 +83,6 @@
   </div>
 </div>
 
-<!-- Recommended Products Section -->
-<!-- <h4 class="mt-5 mb-5">Recommended</h4>
-<div class="recommended-products row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3"></div>
--->
 
 <div aria-live="polite" aria-atomic="true" class="position-relative">
   <div class="toast-container position-fixed end-0 p-3">
@@ -707,59 +748,12 @@ document.addEventListener('DOMContentLoaded', function () {
           xhr.send();
       }
 
-
-    function trackProductEvent(productId, eventType) {
-        // Fetch the CSRF token from the meta tag
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        fetch('/api/track-product-event', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken  // Include CSRF token
-            },
-            body: JSON.stringify({
-                productId: productId,
-                eventType: eventType,
-                timestamp: new Date().toISOString()  // Use current ISO timestamp
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!response.ok) {
-                throw new Error(data.error || 'Unknown error');
-            }
-            console.log('Event tracked:', data);
-        })
-        .catch(error => {
-            console.error('Error tracking event:', error);
-        });
-    }
-
-    // Example usage for product view event
-    document.querySelectorAll('.product-card').forEach(card => {
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const productId = entry.target.getAttribute('data-product-id');
-                    trackProductEvent(productId, 'view');
-                    observer.unobserve(entry.target);  // Stop observing once viewed
-                }
-            });
-        });
-        observer.observe(card);
-    });
-
-
- document.addEventListener("DOMContentLoaded", function () {
-    // Initialize event listeners for the existing products
+document.addEventListener("DOMContentLoaded", function () {
+    // Initialize event listeners for existing products
     initializeEventListeners();
 
-    // Load Recommendations for the user
-    //loadRecommendations();
-
     // Add to Cart interaction
-    document.querySelectorAll(".add-to-cart-btn").forEach(function (button) {
+    document.querySelectorAll(".add-to-cart-btn").forEach(button => {
         button.addEventListener("click", function (event) {
             event.preventDefault();
             const productId = button.getAttribute("data-product-id");
@@ -768,161 +762,31 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Search Products interaction
-    document.getElementById("searchInput").addEventListener("keyup", function() {
-        searchProducts();
-    });
+    document.getElementById("searchInput").addEventListener("keyup", searchProducts);
 });
 
 // Function to initialize event listeners for tracking
 function initializeEventListeners() {
     // Quick View Button (Track as 'view')
     document.querySelectorAll(".quick-view-btn").forEach(button => {
-        button.addEventListener("click", function (event) {
-            const productId = event.target.getAttribute("data-product-id");
+        button.addEventListener("click", function () {
+            const productId = button.getAttribute("data-product-id");
             trackProductEvent(productId, "view");
         });
     });
 
     // Product Image and Name (Track as 'click')
     document.querySelectorAll(".product-image, .product-name").forEach(element => {
-        element.addEventListener("click", function (event) {
-            const productId = event.target.closest(".product-card").getAttribute("data-product-id");
+        element.addEventListener("click", function () {
+            const productId = element.closest(".product-card").getAttribute("data-product-id");
             trackProductEvent(productId, "click");
         });
     });
 
-    // Viewing products using Intersection Observer
-    document.querySelectorAll('.product-card').forEach(card => {
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const productId = entry.target.getAttribute('data-product-id');
-                    trackProductEvent(productId, 'view');
-                    observer.unobserve(entry.target);  // Stop observing once viewed
-                }
-            });
-        });
-        observer.observe(card);
-    });
+   
 }
 
-// Function to search products and display results
-function searchProducts() {
-    var query = document.getElementById("searchInput").value.trim();
-    if (query.length === 0) {
-        // Clear search results and display all products
-        document.getElementById("searchResults").innerHTML = "";
-        document.getElementById("searchResults").style.display = "none";
-        document.getElementById("productListing").style.display = "block";
-        return;
-    }
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/search?query=' + encodeURIComponent(query), true);
-    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-                // Update search results
-                document.getElementById("searchResults").innerHTML = xhr.responseText;
-                document.getElementById("searchResults").style.display = "block";
-                // Hide product listing when search results are displayed
-                document.getElementById("productListing").style.display = "none";
-                // Initialize event listeners for the search results
-                initializeEventListeners();
-            }
-        }
-    };
-    xhr.send();
-}
 
-function getCSRFToken() {
-    // Function to retrieve the CSRF token from the cookie or meta tag
-    // Implement this function based on your CSRF token setup
-    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-}
-
-function trackProductEvent(productId, eventType) {
-    const csrfToken = getCSRFToken();
-
-    fetch('/api/track-product-event', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify({
-            productId: productId,
-            eventType: eventType,
-            timestamp: new Date().toISOString()
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            throw new Error(data.error || 'Unknown error');
-        }
-        console.log('Event tracked:', data);
-    })
-    .catch(error => {
-        console.error('Error tracking event:', error);
-    });
-}
-
-/*
-   // Function to load recommendations dynamically
-        async function loadRecommendations() {
-            try {
-                const response = await fetch('/api/recommendations?user_id={{ current_user.id }}&num=5');
-                const recommendedProducts = await response.json();
-
-                if (recommendedProducts.length > 0) {
-                    const recommendationsSection = document.querySelector(".recommended-products");
-                    recommendationsSection.innerHTML = ""; // Clear existing recommendations
-
-                    recommendedProducts.forEach(product => {
-                        const productCard = `
-                            <div class="col">
-                                <div class="card product-card border-0 shadow-sm" data-product-id="${product.id}">
-                                    <div class="magnifier position-relative overflow-hidden">
-                                        <img src="{{ url_for('static', filename='uploads/') }}${product.image}" class="img-fluid rounded-start" alt="${product.name}">
-                                    </div>
-                                    <div class="product-overlay d-flex align-items-center justify-content-center">
-                                        <div class="card-body text-center">
-                                            <h6 class="card-title text-primary mb-2 product-name" data-product-id="${product.id}">${product.brand}</h6>
-
-                                            <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="${product.id}" data-bs-toggle="modal" data-bs-target="#productDetailsModal${product.id}">
-                                                Quick View
-                                            </button>
-                                            <p class="card-text">Price: Ksh ${product.price}</p>
-                                            <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal${product.id}">
-                                                Add To Cart
-                                            </button>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>`;
-
-                        recommendationsSection.insertAdjacentHTML('beforeend', productCard);
-                    });
-
-                    initializeEventListeners();
-                }
-            } catch (error) {
-                console.error('Error loading recommendations:', error);
-            }
-        }
-
-        // Call loadRecommendations when the page is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            loadRecommendations();
-        });
-
-        function initializeEventListeners() {
-            // Initialize event listeners for the dynamically created elements
-        }
-
-*/
 // Function to add product to cart
 async function addToCart(productId) {
     try {
@@ -998,45 +862,7 @@ function getCSRFToken() {
     }
 });
  
-function searchProducts() {
-    let query = $('#searchInput').val();
-    if (query.length > 0) {
-        $.ajax({
-            url: '/search', // Adjust this URL based on your route
-            method: 'GET',
-            data: { q: query },
-            success: function(data) {
-                $('#product-list').empty();
-                data.forEach(function(product) {
-                    let productCard = `
-                        <div class="col">
-                            <div class="card product-card border-0 shadow-sm" data-product-id="${product.id}">
-                                <div class="magnifier position-relative overflow-hidden">
-                                    ${product.images.length > 0 ? 
-                                        `<img data-src="/static/uploads/${product.images[0].cover_image}" class="card-img-top product-image lazy" alt="${product.name}">` : 
-                                        `<img data-src="/static/alt_img.png" class="card-img-top product-image lazy" alt="Placeholder Image">`}
-                                    <div class="product-overlay d-flex align-items-center justify-content-center">
-                                        <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="${product.id}" data-bs-toggle="modal" data-bs-target="#productDetailsModal${product.id}">Quick View</button>
-                                    </div>
-                                </div>
-                                <div class="card-body text-center">
-                                    <h6 class="card-title text-primary mb-2 product-name" data-product-id="${product.id}">${product.brand}</h6>
-                                    <p class="card-text text-muted fs-6 mb-3">${product.description.substring(0, 80)}...</p>
-                                    <p class="card-text fs-6 mb-2"><strong>Ksh ${product.unit_price} / ${product.unit_measurement}</strong></p>
-                                    <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal${product.id}">
-                                        Buy
-                                    </button>
-                                </div>
-                            </div>
-                        </div>`;
-                    $('#product-list').append(productCard);
-                });
-            }
-        });
-    } else {
-        // Optionally, you could reload the full product list if the search query is empty
-    }
-}
+
 
 // Optional: Use Intersection Observer to lazy load images
 $(document).ready(function() {
