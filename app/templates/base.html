@@ -255,25 +255,28 @@
     </div>
 
     <div id="content" class= " container-fluid">
-      <nav class="navbar navbar-expand navbar-dark">
+       <nav class="navbar navbar-expand navbar-dark">
         <button class="btn btn-success" id="sidebarToggle">
-          <i class="fas fa-bars"></i>
+            <i class="fas fa-bars"></i>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item active">
-              <a class="nav-link" href="#"><i class="fas fa-bell"></i> Notifications</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#"><i class="fas fa-user"></i> Profile</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            </li>
-          </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for('message.admin_chat_interface') }}">
+                        <i class="fas fa-bell"></i> Notifications
+                        <span id="notification-count" class="badge bg-danger">{{ notification_count }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-user"></i> Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </li>
+            </ul>
         </div>
-      </nav>
+    </nav>
     
       <!-- Toast Container -->
     <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>

@@ -1,6 +1,7 @@
 from app import db, mail, admin_required, login_required
 from flask import render_template, abort, flash, redirect, url_for, request, jsonify, session,Flask, current_app as app
-from flask_login import current_user, login_user, logout_user, login_required
+from flask_login import current_user, login_user, logout_user
+
 from app.main import bp
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, AddRoleForm, AddSupplierForm,RecommendationForm,LoginForm, UnitOfMeasurementForm
 from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage, UnitOfMeasurement

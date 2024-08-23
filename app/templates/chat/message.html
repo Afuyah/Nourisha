@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-fluid mt-4">
+    <div id="chat-window" class="card shadow-sm">
+        <div id="messages" class="card-body overflow-auto" style="height: 400px;">
+            <!-- Messages will be dynamically inserted here -->
+        </div>
+        <div class="card-footer">
+            <div class="input-group">
+                <textarea id="message-text" class="form-control" placeholder="Type your message here..." rows="2"></textarea>
+                <button id="send-button" class="btn btn-primary">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Socket.IO -->
+<script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+<!-- Include the custom chat.js script -->
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}

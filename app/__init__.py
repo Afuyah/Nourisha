@@ -1,3 +1,4 @@
+#app/__init__.py
 from flask import Flask, session, redirect, url_for, flash, request, jsonify, current_app as app
 from flask_login import user_logged_in, user_logged_out, LoginManager, current_user
 from flask_socketio import SocketIO
@@ -143,6 +144,9 @@ def create_app():
 
     from app.product.routes import product_bp
     app.register_blueprint(product_bp)
+
+    from app.messages.routes import message_bp
+    app.register_blueprint(message_bp)
 
     # User loader function
     from app.main.models import User

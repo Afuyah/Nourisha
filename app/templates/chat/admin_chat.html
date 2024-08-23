@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2>Admin Chat Interface</h2>
+    <div id="chat-window">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message-box">
+                    <p><strong>From User {{ message.sender_id }}:</strong> {{ message.message_text }}</p>
+                    <p><small>Received on {{ message.timestamp }}</small></p>
+                    <form method="POST" action="{{ url_for('messages.admin_chat_interface') }}">
+                        <input type="hidden" name="message_id" value="{{ message.id }}">
+                        <textarea name="response_text" placeholder="Type your response here..." required></textarea>
+                        <button type="submit" class="btn btn-primary">Reply</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No unread messages.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const socket = io.connect(window.location.origin);
+
+    // Join the admin room
+    socket.on('connect', function() {
+        socket.emit('join', { room: `admin_room` });
+    });
+
+    // Handle incoming messages
+    socket.on('new_message', function(data) {
+        // Logic to update the admin's message list
+        const messageBox = document.createElement('div');
+        messageBox.innerHTML = `
+            <p><strong>From User ${data.sender_id}:</strong> ${data.message_text}</p>
+            <p><small>Received on ${data.timestamp}</small></p>
+            <form method="POST" action="{{ url_for('message.admin_chat_interface') }}">
+                <input type="hidden" name="message_id" value="${data.id}">
+                <textarea name="response_text" placeholder="Type your response here..." required></textarea>
+                <button type="submit" class="btn btn-primary">Reply</button>
+            </form>
+        `;
+        document.getElementById('chat-window').appendChild(messageBox);
+    });
+});
+</script>
+
+{% endblock %}
