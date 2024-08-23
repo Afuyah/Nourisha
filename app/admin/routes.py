@@ -138,71 +138,61 @@ def all_users():
 
 
 
-
 @admin_bp.route('/admin_dashboard', methods=['GET', 'POST'])
 @admin_required
 def admin_dashboard():
     def route():
         if current_user is None or not current_user.is_authenticated or current_user.role is None or current_user.role.name != 'admin':
-            flash('You do not have permission to access the admin dashboard.', 'danger')
-            return redirect(url_for('main.index'))
-        
-        # Fetch product categories
+          flash('You do not have permission to access the admin dashboard.', 'danger')
+          return redirect(url_for('main.index'))
+ # Fetch product categories
         categories = ProductCategory.query.all()
         logged_in_users = getattr(app, 'logged_in_users', set())
         total_users = User.query.count()
-        
         # Fetch sales data
         sales_data = fetch_sales_data()
+        #labels = [datetime.strptime(data.order_date, '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
         labels = [datetime.strptime(str(data.order_date), '%Y-%m-%d').strftime('%Y-%m-%d') for data in sales_data]
+
         data = [float(data.total_sales) for data in sales_data]
 
         # Fetch user registrations for user growth chart
         user_registrations = User.query.with_entities(User.registration_date).all()
+
+        # Process the data to get counts per month
         registrations_by_month = {}
         for user_registration in user_registrations:
             registration_date = user_registration.registration_date
+
+            # Ensure registration_date is a datetime object
             if isinstance(registration_date, datetime):
                 month_year = registration_date.strftime('%b %Y')
                 registrations_by_month[month_year] = registrations_by_month.get(month_year, 0) + 1
-        
+
+        # Create lists for chart labels and data
         chart_labels = list(registrations_by_month.keys())
         chart_data = list(registrations_by_month.values())
-        
+
+        # Create user growth chart
         user_growth_chart = create_user_growth_chart(chart_labels, chart_data)
         user_growth_chart_image = generate_chart_image(user_growth_chart)
-        
+
         # Call the function to get top-selling products
         top_selling_products = db.session.query(
             Product,
             db.func.sum(OrderItem.quantity).label('total_quantity_sold'),
             db.func.sum(OrderItem.unit_price * OrderItem.quantity).label('total_revenue')
-        ).join(OrderItem, Product.id == OrderItem.product_id).group_by(
-            Product.id,
-            Product.name,
-            Product.category_id,
-            Product.brand,
-            Product.unit_price,
-            Product.unit_measurement_id,
-            Product.quantity_in_stock,
-            Product.quantity_sold,
-            Product.discount_percentage,
-            Product.nutritional_information,
-            Product.country_of_origin,
-            Product.average_rating,
-            Product.supplier_id,
-            Product.date_added
-        ).order_by(db.desc('total_quantity_sold')).limit(4).all()
+        ).join(OrderItem, Product.id == OrderItem.product_id).group_by(Product).order_by(db.desc('total_quantity_sold')).limit(4).all()
 
         admin_data = {
-            'total_users': total_users,
+            'total_users': User.query.count(),
             'recent_users': User.query.order_by(User.registration_date.desc()).limit(5).all(),
             'sales_data': {'labels': labels, 'data': data},
             'total_products': Product.query.count(),
-            'active_products': 0,  # Define how to calculate active products
+            'active_products': 0,  # You need to define how to calculate active products
             'out_of_stock': Product.query.filter(Product.quantity_in_stock == 0).count(),
             'recent_orders': Order.query.order_by(Order.order_date.desc()).limit(3).all(),
-            'total_customers': total_users,
+            'total_customers': User.query.count(),
             'new_customers_last_7_days': User.query.filter(User.registration_date >= (datetime.utcnow() - timedelta(days=7))).count(),
             'returning_customers': User.query.filter(User.registration_date < (datetime.utcnow() - timedelta(days=7))).count(),
             'top_selling_products': top_selling_products,
@@ -215,10 +205,9 @@ def admin_dashboard():
         if request.method == 'POST':
             flash('POST request received.', 'info')
 
-        return render_template('admin_dashboard.html', users=users, roles=roles, admin_data=admin_data, user_growth_chart_image=user_growth_chart_image, categories=categories, logged_in_users=len(logged_in_users),)
+        return render_template('admin_dashboard.html', users=users, roles=roles, admin_data=admin_data, user_growth_chart_image=user_growth_chart_image, categories=categories,logged_in_users=len(logged_in_users),)
 
     return handle_db_error_and_redirect(route)
-
 
 
 

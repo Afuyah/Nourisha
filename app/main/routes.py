@@ -3,7 +3,7 @@ from flask import render_template, abort, flash, redirect, url_for, request, jso
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, AddRoleForm, AddSupplierForm,RecommendationForm,LoginForm, UnitOfMeasurementForm
-from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage, UnitOfMeasurement
+from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage, UnitOfMeasurement
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
@@ -12,8 +12,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sqlalchemy.orm.exc import NoResultFound
 from app.cart.routes import cart_bp
 from .send_email import send_confirmation_email
-from sqlalchemy.exc import SQLAlchemyError
-
 from sqlalchemy import func, desc
 from flask_mail import Message
 from functools import wraps
@@ -678,10 +676,6 @@ def record_click_event(user_id, guest_ip, product_id, timestamp):
 
 def record_view_event(user_id, guest_ip, product_id, timestamp):
     try:
-        if user_id is None:
-            app.logger.warning(f"Cannot record view event: user_id is None")
-            return
-
         new_view = ProductView(
             user_id=user_id,
             guest_ip=guest_ip,
@@ -693,8 +687,6 @@ def record_view_event(user_id, guest_ip, product_id, timestamp):
 
         product = Product.query.get(product_id)
         if product:
-            if product.view_count is None:
-                product.view_count = 0  # Initialize if None
             product.view_count += 1
             db.session.commit()
             app.logger.info(f"Updated product view count: {product_id}, viewCount={product.view_count}")
@@ -710,7 +702,6 @@ def record_view_event(user_id, guest_ip, product_id, timestamp):
         db.session.rollback()
         raise e
 
-
 def get_current_user_id():
     if current_user.is_authenticated:
         return current_user.id
@@ -721,3 +712,14 @@ def get_current_user_id():
 
 def get_client_ip():
     return request.remote_addr
+
+# Route for rendering recommendations page
+@bp.route('/recommendations')
+def recommendations():
+    recommendations = Product.query.all()
+    
+    # Convert AppenderQuery to list
+    for product in recommendations:
+        product.images = list(product.images)
+    
+    return render_template('recommendations.html', recommendations=recommendations)

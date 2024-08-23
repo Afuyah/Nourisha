@@ -1,0 +1,388 @@
+{% extends "layout.html" %}
+{% block title %}Recommendations{% endblock %}
+{% block content %}
+
+<div class="container">
+  <h4 class="my-4">Did You Forget something?</h4>
+  <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+      {% for product in recommendations %}
+      <div class="col">
+          <div class="card product-card border-0 shadow-sm" data-product-id="{{ product.id }}">
+              <div class="magnifier position-relative overflow-hidden">
+                  {% if product.images %}
+                  <img src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image" alt="{{ product.name }}">
+                  {% else %}
+                  <img src="{{ url_for('static', filename='placeholder.jpg') }}" class="card-img-top product-image" alt="Placeholder Image">
+                  {% endif %}
+                  <div class="product-overlay d-flex align-items-center justify-content-center">
+                      <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="{{ product.id }}" data-bs-toggle="modal" data-bs-target="#productDetailsModal{{ product.id }}">Quick View</button>
+                  </div>
+              </div>
+              <div class="card-body text-center">
+                  <h6 class="card-title text-primary mb-2 product-name" data-product-id="{{ product.id }}">{{ product.brand }}</h6>
+                  <p class="card-text text-muted fs-6 mb-3">{{ product.nutritional_information | truncate(80) }}</p>
+                  <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
+                  <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
+                      Buy
+                  </button>
+              </div>
+          </div>
+      </div>
+      {% endfor %}
+  </div>
+</div>
+
+<!-- Modals for quick view and add to cart -->
+ {% for product in recommendations %}
+  <div class="modal fade" id="productDetailsModal{{ product.id }}" tabindex="-1" aria-labelledby="productDetailsModalLabel{{ product.id }}" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="productDetailsModalLabel{{ product.id }}">{{ product.name }}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <div class="row">
+                      <div class="col-md-6">
+                          <img src="{{ url_for('static', filename='uploads/' + (product.images[0].cover_image if product.images else 'placeholder.jpg')) }}" class="img-fluid" alt="{{ product.name }}">
+                      </div>
+                      <div class="col-md-6">
+                          <h6 class="text-primary">{{ product.brand }}</h6>
+                          <p>{{ product.description }}</p>
+                          <p><strong>Price: Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
+                          <p>{{ product.nutritional_information }}</p>
+                      </div>
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-success" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">Buy</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+ <!-- Product Modal -->
+  <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+              <div class="modal-header bg-primary text-light">
+                  <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <p class="lead">Do you want to add this item to your cart?</p>
+                  <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id, quantity=1) }}">
+                      {{ form.csrf_token() }}
+                      <div class="mb-3">
+                          <label for="quantity" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
+                          <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
+                      </div>
+                      <div class="mb-3">
+                          <label for="custom_description" class="form-label">Custom Description:</label>
+                          <textarea class="form-control" id="custom_description" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
+                          <input type="hidden" id="hidden_custom_description" name="hidden_custom_description" value="">
+                      </div>
+                      <button class="btn btn-success" type="submit">Add to Cart</button>
+                  </form>
+              </div>
+          </div>
+      </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Floating Cart Icon -->
+<div class="floating-cart-icon">
+    <a href="{{ url_for('cart.view_cart') }}" class="d-flex align-items-center justify-content-center text-decoration-none">
+        <img src="static/cart2.gif" alt="Cart Icon" class="cart-icon">
+        <span id="cart-badge" class="badge bg-danger">0</span>
+    </a>
+</div>
+
+
+<style>
+/* Floating Cart Icon */
+.floating-cart-icon {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+.floating-cart-icon a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #007bff; /* Use your preferred color */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.floating-cart-icon a:hover {
+    background-color: green; /* Darker shade of the primary color */
+}
+
+.cart-icon {
+    width: 30px;
+    height: auto;
+    margin-right: 5px;
+}
+
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 20px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 50%;
+}
+
+/* Badge colors */
+.badge.bg-danger {
+    background-color: #dc3545; /* Bootstrap's danger color */
+    color: #fff;
+}
+
+/* Badge animation */
+.badge.shake {
+    animation: shake 0.5s ease-in-out infinite;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25%, 75% {
+        transform: translateX(-10px);
+    }
+    50% {
+        transform: translateX(10px);
+    }
+}
+
+.shake {
+    animation: shake 1s ease-in-out;
+}
+
+
+  
+
+  /* Add custom styles for product cards and modals */
+  .product-card {
+      transition: transform 0.2s;
+  }
+
+  .product-card:hover {
+      transform: scale(1.05);
+  }
+
+  .product-overlay {
+      opacity: 0;
+      transition: opacity 0.2s;
+  }
+
+  .product-card:hover .product-overlay {
+      opacity: 1;
+  }
+
+  /* Toast styles */
+  .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+  }
+
+  /* Custom styles for modals */
+  .modal .modal-content {
+      border-radius: 10px;
+      overflow: hidden;
+      animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+      from {
+          transform: translateY(-50px);
+          opacity: 0;
+      }
+      to {
+          transform: translateY(0);
+          opacity: 1;
+      }
+  }
+
+</style>
+
+<script>
+
+  document.addEventListener('DOMContentLoaded', () => {
+      // Initialize modals
+      $('.modal').modal();
+
+      // Initialize toasts
+      $('.toast').toast();
+
+      // Show order success toast
+      if ({{ get_flashed_messages() }}) {
+          showOrderSuccessToast();
+      }
+  });
+
+
+
+
+  // Function to handle Add to Cart button click
+    function addToCartHandler(productId) {
+      // Check if the user is authenticated
+      if (!isUserAuthenticated()) {
+        // If not authenticated, show a message and redirect to the login page
+        alert('Please sign in to start shopping with us.');
+        window.location.href = '/login';  // Adjust the URL to your login page
+        return;
+      }
+
+      // If authenticated, open the Add to Cart modal
+      openAddToCartModal(productId);
+    }
+
+    // Function to check if the user is authenticated
+    function isUserAuthenticated() {
+      // Adjust this logic based on your authentication implementation
+      return {{ current_user.is_authenticated }};
+    }
+
+    // Function to open the Add to Cart modal
+    function openAddToCartModal(productId) {
+      // Use Bootstrap's modal function to open the modal
+      $('#addToCartModal' + productId).modal('show');
+
+      // Fetch and update the quantity when the modal is opened
+      updateQuantityOnModalOpen(productId);
+    }
+
+    // Function to fetch and update the quantity when the modal is opened
+    async function updateQuantityOnModalOpen(productId) {
+      try {
+        const response = await fetch(`/cart/api/get_quantity/${productId}`);
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          // Update the quantity input in the modal
+          const quantityInput = document.getElementById('quantity' + productId);
+          quantityInput.value = data.data.quantity;
+        } else {
+          console.error('Error fetching product quantity:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching product quantity:', error);
+      }
+    }
+
+     // Update cart count using AJAX
+  $(document).ready(function () {
+    function updateCartCount() {
+      console.log('Updating cart count...'); // Debug statement
+      $.ajax({
+        url: 'cart/get_cart_count',
+        method: 'GET',
+        success: function (response) {
+          console.log('AJAX Response:', response); // Debug statement
+          if (response.status === 'success') {
+            console.log('Updating cart count:', response.cart_count); // Debug statement
+            // Update the badge with the actual cart count
+            const cartIcon = $('.floating-cart-icon');
+            const currentCount = parseInt(cartIcon.find('.badge').text(), 10);
+            const newCount = response.cart_count;
+
+            cartIcon.find('.badge').text(newCount);
+
+            // Toggle visibility of the entire cart icon based on the cart count
+            if (newCount > 0) {
+              cartIcon.removeClass('inactive');
+            } else {
+              cartIcon.addClass('inactive');
+            }
+
+            // Add shake class to the entire cart icon if the count has increased
+            if (newCount > currentCount) {
+              cartIcon.addClass('shake');
+
+              // Remove the shake class after a short delay (e.g., 1 second)
+              setTimeout(function () {
+                cartIcon.removeClass('shake');
+              }, 1000);
+            }
+          } else {
+            console.error('Error fetching cart count:', response.message);
+          }
+        },
+        error: function (error) {
+          console.error('AJAX Error:', error);
+        },
+      });
+    }
+
+    updateCartCount();
+
+    // Set an interval to periodically update the cart count (every 15 seconds as you mentioned)
+    setInterval(function () {
+      console.log('Periodic cart count update...'); // Debug statement
+      updateCartCount();
+    }, 15000);
+  });
+
+  // Trigger the Add to Cart modal when clicking on the floating cart icon
+  $('.floating-cart-icon').click(function () {
+    // Check if the user is authenticated
+    if (!isUserAuthenticated()) {
+      // If not authenticated, show a message and redirect to the login page
+      alert('Please sign in to start shopping with us.');
+      window.location.href = '/login'; // Adjust the URL to your login page
+      return;
+    }
+
+    // If authenticated, open the Add to Cart modal for the first product
+    const firstProductId = $('.product-card:first').data('product-id');
+    openAddToCartModal(firstProductId);
+  });
+
+  // Function to check if the user is authenticated
+  function isUserAuthenticated() {
+    // Adjust this logic based on your authentication implementation
+    return {{ current_user.is_authenticated }};
+  }
+
+  // Function to open the Add to Cart modal
+  function openAddToCartModal(productId) {
+    // Use Bootstrap's modal function to open the modal
+    $('#addToCartModal' + productId).modal('show');
+
+    // Fetch and update the quantity when the modal is opened
+    updateQuantityOnModalOpen(productId);
+  }
+
+  // Function to fetch and update the quantity when the modal is opened
+  async function updateQuantityOnModalOpen(productId) {
+    try {
+      const response = await fetch(`/cart/api/get_quantity/${productId}`);
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        // Update the quantity input in the modal
+        const quantityInput = document.getElementById('quantity' + productId);
+        quantityInput.value = data.data.quantity;
+      } else {
+        console.error('Error fetching product quantity:', data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching product quantity:', error);
+    }
+  }
+</script>
+{% endblock %}
