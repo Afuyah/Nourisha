@@ -3,7 +3,7 @@ from flask import render_template, abort, flash, redirect, url_for, request, jso
 from flask_login import current_user, login_user, logout_user, login_required
 from app.main import bp
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, AddRoleForm, AddSupplierForm,RecommendationForm,LoginForm, UnitOfMeasurementForm
-from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage, UnitOfMeasurement
+from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, ProductView, ProductClick, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage, UnitOfMeasurement
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
@@ -712,14 +712,3 @@ def get_current_user_id():
 
 def get_client_ip():
     return request.remote_addr
-
-# Route for rendering recommendations page
-@bp.route('/recommendations')
-def recommendations():
-    recommendations = Product.query.all()
-    
-    # Convert AppenderQuery to list
-    for product in recommendations:
-        product.images = list(product.images)
-    
-    return render_template('recommendations.html', recommendations=recommendations)
