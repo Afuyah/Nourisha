@@ -678,6 +678,10 @@ def record_click_event(user_id, guest_ip, product_id, timestamp):
 
 def record_view_event(user_id, guest_ip, product_id, timestamp):
     try:
+        if user_id is None:
+            app.logger.warning(f"Cannot record view event: user_id is None")
+            return
+
         new_view = ProductView(
             user_id=user_id,
             guest_ip=guest_ip,
@@ -689,6 +693,8 @@ def record_view_event(user_id, guest_ip, product_id, timestamp):
 
         product = Product.query.get(product_id)
         if product:
+            if product.view_count is None:
+                product.view_count = 0  # Initialize if None
             product.view_count += 1
             db.session.commit()
             app.logger.info(f"Updated product view count: {product_id}, viewCount={product.view_count}")
@@ -703,6 +709,7 @@ def record_view_event(user_id, guest_ip, product_id, timestamp):
         app.logger.error(f"Error recording view event: {e}", exc_info=True)
         db.session.rollback()
         raise e
+
 
 def get_current_user_id():
     if current_user.is_authenticated:
