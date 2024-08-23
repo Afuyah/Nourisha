@@ -9,7 +9,7 @@ from app import db, mail
 from flask_mail import Message
 from app.main import bp
 from functools import wraps
-
+from sqlalchemy.orm import joinedload
 from app import login_required
 
 
@@ -58,7 +58,6 @@ def add_to_cart(product_id):
 
 
 
-# Route to view the cart
 @cart_bp.route('/view_cart')
 @login_required
 def view_cart():
@@ -77,6 +76,8 @@ def view_cart():
                            cart_items=cart_items,
                            total_price=total_price,
                            login_form=login_form)
+
+
 
 # Function to calculate the total amount in the cart
 def calculate_total_amount():
@@ -410,9 +411,9 @@ def order_summary():
         # Clear the session information after the order is placed
         session.pop('delivery_info', None)
 
-        # Flash success message and redirect
+        # Flash success message and redirect to recommendations page
         flash('Your order has been successfully placed!', 'success')
-        return redirect(url_for('main.recommendations', order_id=new_order.id))
+        return redirect(url_for('main.product_listing', order_id=new_order.id))
 
     return render_template('order_summary.html',
                            cart_items=cart_items,

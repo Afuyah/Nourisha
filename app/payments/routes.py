@@ -71,9 +71,9 @@ def admin_payments():
 
     form = PaymentForm()
     filter_status = request.args.get('status', 'unpaid_partially_paid')
-    
+
     current_app.logger.info(f'Fetching orders with filter status: {filter_status}')
-    
+
     if filter_status == 'all':
         orders = Order.query
     else:
@@ -85,7 +85,7 @@ def admin_payments():
         order_date = request.form.get('order_date')
 
         current_app.logger.info(f'Filtering orders by user_id: {user_id}, order_id: {order_id}, order_date: {order_date}')
-        
+
         if user_id:
             orders = orders.filter_by(user_id=user_id)
         if order_id:

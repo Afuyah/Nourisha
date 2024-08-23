@@ -1,8 +1,7 @@
 from flask import Flask, session, redirect, url_for, flash, request, jsonify, current_app as app
-from flask_login import user_logged_in, user_logged_out
+from flask_login import user_logged_in, user_logged_out, LoginManager, current_user
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, current_user
 from flask_wtf.csrf import CSRFProtect
 from flask_mail import Mail
 from flask_migrate import Migrate
@@ -74,6 +73,7 @@ def create_app():
     app.config['SESSION_REFRESH_EACH_REQUEST'] = True
     app.config['SESSION_COOKIE_SECURE'] = not app.debug
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' if not app.debug else 'None'
+    app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # Set CSRF token timeout to 1 hour
 
     # Initialize extensions
     db.init_app(app)
@@ -82,7 +82,6 @@ def create_app():
     migrate.init_app(app, db)
     socketio.init_app(app)
     csrf.init_app(app)
-    app.config['WTF_CSRF_TIME_LIMIT'] = None
 
     # Initialize logged_in_users
     app.logged_in_users = set()
@@ -109,6 +108,17 @@ def create_app():
     # Log an application startup message
     app.logger.info('Nourisha Grocery Store application started')
 
+    # Helper function to get image URL
+    def get_image_url(product):
+        if product.images and len(product.images) > 0:
+            return url_for('static', filename='uploads/' + product.images[0].cover_image)
+        else:
+            return url_for('static', filename='uploads/default_image.jpg')
+
+    @app.context_processor
+    def utility_processor():
+        return dict(get_image_url=get_image_url)
+
     # Blueprints registration
     from app.auth.routes import auth_bp
     app.register_blueprint(auth_bp)
@@ -134,8 +144,6 @@ def create_app():
     from app.product.routes import product_bp
     app.register_blueprint(product_bp)
 
-
-
     # User loader function
     from app.main.models import User
     @login_manager.user_loader
@@ -151,4 +159,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    socketio.run(app, debug=True, ssl_context='adhoc')
+    socketio.run(app, debug=False)  # Disable debug mode for production

@@ -3,7 +3,7 @@ from wtforms import StringField, PasswordField, FloatField, IntegerField, RadioF
 from wtforms.validators import DataRequired, Email, Length
 from flask_wtf.file import FileField, FileRequired, DataRequired
 from wtforms import HiddenField, TextAreaField, BooleanField
-from wtforms.validators import InputRequired, Optional, Length, NumberRange
+from wtforms.validators import Optional, Length, NumberRange
 from wtforms.fields import DateTimeLocalField
 from flask_wtf.file import FileAllowed
 from email_validator import validate_email, EmailNotValidError

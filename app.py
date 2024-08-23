@@ -1,6 +1,6 @@
 from app import create_app, db
 from flask_migrate import Migrate
-# Import additional models and blueprints if needed
+
 
 app = create_app()
 migrate = Migrate(app, db)

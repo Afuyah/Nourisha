@@ -33,36 +33,38 @@
       </thead>
       <!-- Table Body -->
       <tbody>
-        {% for item in cart_items %}
-        <tr class="fade-in">
-          <td class="align-middle">
-            {% if item.product.images %}
-              <img src="{{ url_for('static', filename='uploads/' + item.product.images[0].cover_image) }}" class="img-thumbnail" alt="{{ item.product.brand }}" style="max-width: 80px" />
+    {% for item in cart_items %}
+    <tr class="fade-in">
+        <td class="align-middle">
+            {% set images_list = item.product.images.all() %}
+            {% if images_list %}
+                <img src="{{ url_for('static', filename='uploads/' + images_list[0].cover_image) }}" class="img-thumbnail" alt="{{ item.product.brand }}" style="max-width: 80px" />
             {% else %}
-              <p>No image available</p>
+                <p>missing image</p>
             {% endif %}
             <br />
             <strong>{{ item.product.brand }}</strong>
-          </td>
-          <td class="align-middle">Ksh {{ item.product.unit_price }}</td>
-          <td class="align-middle">
+        </td>
+        <td class="align-middle">Ksh {{ item.product.unit_price }}</td>
+        <td class="align-middle">
             <div class="btn-group" role="group">
-              <button class="btn btn-outline-secondary btn-sm decrement-btn" data-product-id="{{ item.product.id }}">-</button>
-              <span class="quantity-display" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
-              <button class="btn btn-outline-secondary btn-sm increment-btn" data-product-id="{{ item.product.id }}">+</button>
+                <button class="btn btn-outline-secondary btn-sm decrement-btn" data-product-id="{{ item.product.id }}">-</button>
+                <span class="quantity-display" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
+                <button class="btn btn-outline-secondary btn-sm increment-btn" data-product-id="{{ item.product.id }}">+</button>
             </div>
             <div class="spinner-border text-primary d-none loading-spinner" role="status" data-product-id="{{ item.product.id }}">
-              <span class="sr-only">Loading...</span>
+                <span class="sr-only">Loading...</span>
             </div>
-          </td>
-          <td class="align-middle">Ksh <span id="subtotal-{{ item.product.id }}">{{ item.product.unit_price * item.quantity }}</span></td>
-          <td class="align-middle">{{ item.custom_description }}</td>
-          <td class="align-middle">
+        </td>
+        <td class="align-middle">Ksh <span id="subtotal-{{ item.product.id }}">{{ item.product.unit_price * item.quantity }}</span></td>
+        <td class="align-middle">{{ item.custom_description }}</td>
+        <td class="align-middle">
             <button class="btn btn-danger btn-sm remove-item-btn" data-product-id="{{ item.product.id }}">Remove</button>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+
     </table>
   </div>
 

@@ -511,20 +511,6 @@ def get_arealines(location_id):
 
 
 
-@admin_bp.route('/get_nearest_places/<arealine_id>', methods=['GET'])
-@login_required
-def get_nearest_places(arealine_id):
-    arealine = Arealine.query.get(arealine_id)
-
-    if not arealine:
-        return jsonify({'error': 'Invalid arealine ID'}), 400
-
-    nearest_places = [{'id': place.id, 'name': place.name} for place in arealine.nearest_places]
-
-    return jsonify({'nearest_places': nearest_places})
-
-
-
 @admin_bp.route('/view_order_details/<int:order_id>')
 @admin_required
 def view_order_details(order_id):

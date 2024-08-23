@@ -453,25 +453,36 @@ def product_details(product_id):
     # Handle the case where the product with the given ID is not found
     abort(404)
 
-
-# Route to render the product listing page with categories
 @bp.route('/product_listing')
 def product_listing():
     categories = ProductCategory.query.all()
     products = Product.query.all()
+
+    # Convert the dynamic query object to a list
+    for product in products:
+        product.images = list(product.images)  # Convert AppenderQuery to list
+
     add_product_form = AddProductForm()
     login_form = LoginForm()
     return render_template('product_listing.html', categories=categories, form=add_product_form, products=products, login_form=login_form)
+
 
 
 @bp.route('/product_listing/<int:category_id>')
 def product_listing_by_category(category_id):
     category = ProductCategory.query.get_or_404(category_id)
     products = Product.query.filter_by(category=category).all()
+
+    # Ensure images are converted to lists
+    for product in products:
+        product.images = list(product.images)  # Convert AppenderQuery to list
+
     categories = ProductCategory.query.all()
     add_product_form = AddProductForm()
     login_form = LoginForm()
     return render_template('product_listing.html', category=category, products=products, categories=categories, form=add_product_form, login_form=login_form)
+
+
 
 @bp.route('/view_order/<int:order_id>')
 @login_required
@@ -595,7 +606,7 @@ def get_recommendations():
 
 # Route for tracking product events
 @bp.route('/api/track-product-event', methods=['POST'])
-def track_product_event():
+def track_event():
     try:
         data = request.json
 
@@ -606,12 +617,18 @@ def track_product_event():
         if not product_id or not event_type or not timestamp:
             return jsonify({'error': 'Missing data in request'}), 400
 
+        try:
+            parsed_timestamp = parser.parse(timestamp)  # Use dateutil.parser for flexible parsing
+        except ValueError:
+            return jsonify({'error': 'Invalid timestamp format'}), 400
+
         user_id = get_current_user_id()
+        guest_ip = get_client_ip() if not user_id else None
 
         if event_type == 'click':
-            record_click_event(user_id, product_id, timestamp)
+            record_click_event(user_id, guest_ip, product_id, parsed_timestamp)
         elif event_type == 'view':
-            record_view_event(user_id, product_id, timestamp)
+            record_view_event(user_id, guest_ip, product_id, parsed_timestamp)
         else:
             return jsonify({'error': 'Invalid event type'}), 400
 
@@ -622,10 +639,14 @@ def track_product_event():
 
 from dateutil import parser
 
-def record_click_event(user_id, product_id, timestamp):
+def record_click_event(user_id, guest_ip, product_id, timestamp):
     try:
-        parsed_timestamp = parser.parse(timestamp)
-        new_click = ProductClick(user_id=user_id, product_id=product_id, timestamp=parsed_timestamp)
+        new_click = ProductClick(
+            user_id=user_id,
+            guest_ip=guest_ip,
+            product_id=product_id,
+            timestamp=timestamp
+        )
         db.session.add(new_click)
 
         product = Product.query.get(product_id)
@@ -640,10 +661,14 @@ def record_click_event(user_id, product_id, timestamp):
         db.session.rollback()
         raise e
 
-def record_view_event(user_id, product_id, timestamp):
+def record_view_event(user_id, guest_ip, product_id, timestamp):
     try:
-        parsed_timestamp = parser.parse(timestamp)
-        new_view = ProductView(user_id=user_id, product_id=product_id, timestamp=parsed_timestamp)
+        new_view = ProductView(
+            user_id=user_id,
+            guest_ip=guest_ip,
+            product_id=product_id,
+            timestamp=timestamp
+        )
         db.session.add(new_view)
 
         product = Product.query.get(product_id)
@@ -657,6 +682,7 @@ def record_view_event(user_id, product_id, timestamp):
         app.logger.error(f"Error recording view event for user {user_id}, product {product_id}: {e}")
         db.session.rollback()
         raise e
+
 def get_current_user_id():
     if current_user.is_authenticated:
         return current_user.id
@@ -667,11 +693,11 @@ def get_current_user_id():
 
 # Route for rendering recommendations page
 @bp.route('/recommendations')
-@login_required
 def recommendations():
-    user_id = current_user.id
-    form = RecommendationForm()
-    login_form= LoginForm()
-    recommendations = recommend_products(user_id, 10)  # Get top 10 recommendations
-    return render_template('recommendations.html', recommendations=recommendations, form=form, login_form=login_form)
-
+    recommendations = Product.query.all()
+    
+    # Convert AppenderQuery to list
+    for product in recommendations:
+        product.images = list(product.images)
+    
+    return render_template('recommendations.html', recommendations=recommendations)

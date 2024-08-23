@@ -12,7 +12,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_urlsafe(32)
 
     # SQLAlchemy Database URI
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')  # Default to SQLite for local development
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Flask-Mail Configuration

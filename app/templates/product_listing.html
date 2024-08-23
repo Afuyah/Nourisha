@@ -3,165 +3,150 @@
 <div class="container mt-3">
   <!-- Search Bar Section -->
   <div class="mb-4">
-    <form
-      class="d-flex"
-      id="searchForm"
-      method="get"
-      action="{{ url_for('main.search') }}"
-    >
-      <input
-        class="form-control me-2"
-        type="text"
-        id="searchInput"
-        placeholder="Search products..."
-        onkeyup="searchProducts()"
-      />
+    <form class="d-flex" id="searchForm" method="get" action="{{ url_for('main.search') }}">
+      <input class="form-control me-2" type="text" id="searchInput" placeholder="Search products..." onkeyup="searchProducts()" />
       {{ form.csrf_token }}
       <button class="btn btn-outline-success" type="submit">Search</button>
     </form>
   </div>
 </div>
 
-  <!-- Category Carousel -->
+<!-- Category Carousel -->
 <div id="categoryCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <tbody>
-                        <tr>
-                            <!-- 'All' Link Button -->
-                            <td>
-                                <a href="{{ url_for('main.product_listing') }}" class="btn btn-outline-success">All</a>
-                            </td>
-                            <!-- Category Buttons -->
-                            {% for category in categories %}
-                            <td>
-                                <a href="{{ url_for('main.product_listing_by_category', category_id=category.id) }}" class="btn btn-outline-success">{{ category.name }}</a>
-                            </td>
-                            {% endfor %}
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <!-- Add more carousel items with additional category buttons as needed -->
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <tbody>
+            <tr>
+              <!-- 'All' Link Button -->
+              <td>
+                <a href="{{ url_for('main.product_listing') }}" class="btn btn-outline-success">All</a>
+              </td>
+              <!-- Category Buttons -->
+              {% for category in categories %}
+              <td>
+                <a href="{{ url_for('main.product_listing_by_category', category_id=category.id) }}" class="btn btn-outline-success">{{ category.name }}</a>
+              </td>
+              {% endfor %}
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+    <!-- Add more carousel items with additional category buttons as needed -->
+  </div>
 </div>
 
-
-        <!-- Recommended Products Section 
-        <h4 class="mt-5 mb-5">Recommended </h4>
-        <div class="recommended-products row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3"></div>
-    </div>
-
+<!-- Recommended Products Section -->
+<!-- <h4 class="mt-5 mb-5">Recommended</h4>
+<div class="recommended-products row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3"></div>
 -->
+
 <div aria-live="polite" aria-atomic="true" class="position-relative">
-    <div class="toast-container position-fixed  end-0 p-3">
-        <div id="cartToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto">Cart</strong>
-                <small>Just now</small>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                Added to cart successfully!
-            </div>
-        </div>
+  <div class="toast-container position-fixed end-0 p-3">
+    <div id="cartToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <strong class="me-auto">Cart</strong>
+        <small>Just now</small>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        Added to cart successfully!
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- Product Listing Section -->
 <div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
-    {% for product in products %}
-    <div class="col">
-        <div class="card product-card border-0 shadow-sm" data-product-id="{{ product.id }}">
-            <div class="magnifier position-relative overflow-hidden">
-                {% if product.images %}
-                <img data-src="{{ url_for('static', filename='uploads/' + product.images[0].cover_image) }}" class="card-img-top product-image lazy" alt="{{ product.name }}">
-                {% else %}
-                <img data-src="{{ url_for('static', filename='alt_img.png') }}" class="card-img-top product-image lazy" alt="Placeholder Image">
-                {% endif %}
-                <div class="product-overlay d-flex align-items-center justify-content-center">
-                    <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="{{ product.id }}" data-bs-toggle="modal" data-bs-target="#productDetailsModal{{ product.id }}">Quick View</button>
-                </div>
-            </div>
-            <div class="card-body text-center">
-                <h6 class="card-title text-primary mb-2 product-name" data-product-id="{{ product.id }}">{{ product.brand }}</h6>
-                <p class="card-text text-muted fs-6 mb-3">{{ product.description | truncate(80) }}</p>
-                <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
-                <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
-                    Add To Cart
-                </button>
-            </div>
+  {% for product in products %}
+  <div class="col">
+    <div class="card product-card border-0 shadow-sm" data-product-id="{{ product.id }}">
+      <div class="magnifier position-relative overflow-hidden">
+        {% set images_list = product.images | list %}
+        {% if images_list and images_list | length > 0 %}
+        <img data-src="{{ url_for('static', filename='uploads/' + images_list[0].cover_image) }}" class="card-img-top product-image lazy" alt="{{ product.name }}">
+        {% else %}
+        <img data-src="{{ url_for('static', filename='alt_img.png') }}" class="card-img-top product-image lazy" alt="Placeholder Image">
+        {% endif %}
+        <div class="product-overlay d-flex align-items-center justify-content-center">
+          <button type="button" class="btn btn-light btn-sm quick-view-btn" data-product-id="{{ product.id }}" data-bs-toggle="modal" data-bs-target="#productDetailsModal{{ product.id }}">Quick View</button>
         </div>
+      </div>
+      <div class="card-body text-center">
+        <h6 class="card-title text-primary mb-2 product-name" data-product-id="{{ product.id }}">{{ product.brand }}</h6>
+        <p class="card-text text-muted fs-6 mb-3">{{ product.description | truncate(80) }}</p>
+        <p class="card-text fs-6 mb-2"><strong>Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
+        <button type="button" class="btn btn-success btn-sm fs-6" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">
+          Add To Cart
+        </button>
+      </div>
     </div>
-    {% endfor %}
+  </div>
+  {% endfor %}
 </div>
 
 {% for product in products %}
 <!-- Product Details Modal -->
 <div class="modal fade" id="productDetailsModal{{ product.id }}" tabindex="-1" aria-labelledby="productDetailsModalLabel{{ product.id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="productDetailsModalLabel{{ product.id }}">{{ product.name }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <img src="{{ url_for('static', filename='uploads/' + (product.images[0].cover_image if product.images else 'alt_img.png')) }}" class="img-fluid" alt="{{ product.name }}">
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="text-primary">{{ product.brand }}</h6>
-                        <p>{{ product.description }}</p>
-                        <p><strong>Price: Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
-                        <p>{{ product.nutritional_information }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">Buy</button>
-            </div>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="productDetailsModalLabel{{ product.id }}">{{ product.name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <img src="{{ url_for('static', filename='uploads/' + (product.images[0].cover_image if images_list else 'alt_img.png')) }}" class="img-fluid" alt="{{ product.name }}">
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-primary">{{ product.brand }}</h6>
+            <p>{{ product.description }}</p>
+            <p><strong>Price: Ksh {{ product.unit_price }} / {{ product.unit_measurement }}</strong></p>
+            <p>{{ product.nutritional_information }}</p>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#addToCartModal{{ product.id }}">Buy</button>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Add to Cart Modal -->
 <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-light">
-                <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="lead">Do you want to add this item to your cart?</p>
-                <!-- Quantity and Custom Description Form -->
-                <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}">
-                    {{ form.hidden_tag() }}
-                    <input type="hidden" id="csrf_token_{{ product.id }}" name="csrf_token" value="{{ form.csrf_token._value() }}">
-                    <div class="mb-3">
-                        <label for="quantity{{ product.id }}" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
-                        <input type="number" class="form-control" id="quantity{{ product.id }}" name="quantity" min="1" value="1">
-                    </div>
-                    <div class="mb-3">
-                        <label for="custom_description{{ product.id }}" class="form-label">Custom Description:</label>
-                        <textarea class="form-control" id="custom_description{{ product.id }}" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
-                    </div>
-                    <button class="btn btn-success" type="submit">Add to Cart</button>
-                </form>
-            </div>
-        </div>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-light">
+        <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="lead">Do you want to add this item to your cart?</p>
+        <!-- Quantity and Custom Description Form -->
+        <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}">
+          {{ form.hidden_tag() }}
+          <input type="hidden" id="csrf_token_{{ product.id }}" name="csrf_token" value="{{ form.csrf_token._value() }}">
+          <div class="mb-3">
+            <label for="quantity{{ product.id }}" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
+            <input type="number" class="form-control" id="quantity{{ product.id }}" name="quantity" min="1" value="1">
+          </div>
+          <div class="mb-3">
+            <label for="custom_description{{ product.id }}" class="form-label">Custom Description:</label>
+            <textarea class="form-control" id="custom_description{{ product.id }}" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
+          </div>
+          <button class="btn btn-success" type="submit">Add to Cart</button>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 
 {% endfor %}
 </div>
-
-
 
 
 <script>
