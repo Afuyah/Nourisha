@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% block content %}
-<!-- Login Form -->
-<form id="loginForm" method="post" action="{{ url_for('auth.login') }}">
+<div class="container mt-4">"
+<form id="loginForm" method="post" action="{{ url_for('auth.login') }}" class="mb-5">
     {{ login_form.hidden_tag() }}
 
     <div class="mb-3">
@@ -14,8 +14,17 @@
         {{ login_form.password(class="form-control", placeholder="Enter your password") }}
     </div>
 
-    <button type="submit" class="btn btn-primary">Login</button>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+                                <a href="{{ url_for('auth.reset_password_request') }}" class="text-decoration-none">Forgot Password?</a>
+                                <button type="submit" class="btn btn-primary">Login</button>
+                            </div>
+                     
+                                                
+                        <div class="text-center mb-2">
+                            <p class="mb-0">Don't have an account? <a href="{{ url_for('auth.register') }}" class="btn btn-link">Register</a></p>
+                        </div>
 </form>
+</div>
 <!-- Bootstrap CSS -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
 <!-- Bootstrap Bundle with Popper -->
@@ -80,5 +89,6 @@
         text-decoration: underline;
         color: #0056b3;
     }
+    
 </style>
 {% endblock %}

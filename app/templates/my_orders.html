@@ -1,0 +1,70 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='styles/user_dashboard.css') }}"
+/>
+  <!-- Include the Sidebar -->
+  {% include 'sidebar.html' %}
+
+  <div class="container">
+      <h3 class="mt-4">My Orders</h3>
+      <div class="order-list mt-4">
+          {% for order in orders %}
+          <div class="order-card mb-4">
+              <div class="order-header">
+                  <span class="order-id">Order #{{ order.id }}</span>
+                  <span class="order-status {% if order.status == 'zz' %}zz{% elif order.status == 'confirmed' %}confirmed{% else %}cancelled{% endif %}">
+                      <i class="fas {% if order.status == 'zz' %}fa-hourglass-start{% elif order.status == 'confirmed' %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i> {{ order.status }}
+                  </span>
+              </div>
+              <div class="order-body">
+                  <div class="order-info">
+                      <span class="order-total">Total: Ksh. {{ order.total_price }}</span>
+                      <span class="order-date">Date: {{ order.order_date.strftime('%Y-%m-%d') }}</span>
+                  </div>
+              </div>
+              <div class="order-footer">
+                  <a href="{{ url_for('main.view_order', order_id=order.id) }}" class="btn-view-details">View Details</a>
+              </div>
+          </div>
+          {% endfor %}
+      </div>
+  </div>
+
+<style>
+    .order-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .order-card {
+        border: 1px solid #ddd;
+        padding: 15px;
+        border-radius: 5px;
+        background-color: #fff;
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .order-status {
+        font-weight: bold;
+    }
+
+    .order-info {
+        margin-top: 10px;
+    }
+
+    .btn-view-details {
+        text-decoration: none;
+        color: #007bff;
+        font-weight: bold;
+    }
+
+</style>
+{% endblock %}

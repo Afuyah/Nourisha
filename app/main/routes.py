@@ -485,6 +485,13 @@ def product_listing_by_category(category_id):
 
 
 
+@bp.route('/my-orders')
+@login_required
+def my_orders():
+    orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.order_date.desc()).all()
+    return render_template('my_orders.html', orders=orders)
+
+
 @bp.route('/view_order/<int:order_id>')
 @login_required
 def view_order(order_id):

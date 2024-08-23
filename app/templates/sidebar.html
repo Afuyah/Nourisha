@@ -1,0 +1,68 @@
+<!-- Navbar with Sidebar Toggle Button -->
+<nav class="navbar navbar-expand-md navbar-light">
+    <div class="container-fluid">
+        <button
+            class="btn btn-outline-light"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#sidebar"
+            aria-controls="sidebar"
+        >
+            <i class="fas fa-bars"></i>
+            <span class="text-light ms-2">Hi {{ current_user.username }}</span>
+        </button>
+        <!-- Dark Mode Toggle -->
+        <button class="btn btn-outline-light" onclick="toggleDarkMode()">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+</nav>
+<!-- _sidebar.html -->
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Menu</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="sidebar-brand">Nourisha Groceries</div>
+        <ul class="sidebar-nav">
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('auth.change_password') }}" class="text-primary">
+                    <i class="fas fa-user"></i> Change Password
+                </a>
+                <span class="tooltip">Manage your profile settings</span>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('main.my_orders') }}" class="text-primary">
+                    <i class="fas fa-clipboard-list"></i> Orders
+                </a>
+                <span class="tooltip">View your order history</span>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="#" class="text-primary">
+                    <i class="fas fa-envelope"></i> Messages
+                </a>
+                <span class="tooltip">Check your messages</span>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="#" class="text-primary">
+                    <i class="fas fa-star"></i> Reviews
+                </a>
+                <span class="tooltip">Read and write reviews</span>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="#" class="text-primary">
+                    <i class="fas fa-envelope-square"></i> Private Messages
+                </a>
+                <span class="tooltip">View private messages</span>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('main.logout') }}" class="text-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+                <span class="tooltip">Log out from your account</span>
+            </li>
+        </ul>
+    </div>
+</div>
