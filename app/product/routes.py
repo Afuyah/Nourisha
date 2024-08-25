@@ -47,6 +47,9 @@ def update_price():
     old_price = product.unit_price
     product.unit_price = new_price
 
+    # Recalculate the selling price based on the new unit price
+    product.calculate_selling_price()
+
     # Record price history
     if old_price != product.unit_price:
         price_history = PriceHistory(product_id=product.id, old_price=old_price, new_price=product.unit_price)
@@ -62,20 +65,38 @@ def update_discount():
     product_id = int(data.get('product_id'))
     discount_percentage = float(data.get('discount_percentage'))
     product = Product.query.get_or_404(product_id)
+
+    # Update the discount percentage
     product.discount_percentage = discount_percentage
+
+    # Recalculate the selling price
+    if product.unit_price > 0:
+        discount_amount = (discount_percentage / 100) * product.unit_price
+        product.selling_price = product.unit_price - discount_amount
+
+    # Commit the changes to the database
     db.session.commit()
+
     return jsonify({'success': True})
+
 
 @product_bp.route('/products/update/quantity', methods=['POST'])
 @admin_required
 def update_quantity():
     data = request.form
     product_id = int(data.get('product_id'))
-    quantity = int(data.get('quantity_in_stock'))
+    additional_quantity = int(data.get('quantity_in_stock'))
+    
+    # Fetch the product and update its quantity
     product = Product.query.get_or_404(product_id)
-    product.quantity_in_stock = quantity
+    product.quantity_in_stock += additional_quantity
+    
+    # Commit the changes to the database
     db.session.commit()
+    
+    # Return a JSON response indicating success
     return jsonify({'success': True})
+
 
 @product_bp.route('/products/update/country', methods=['POST'])
 @admin_required

@@ -158,76 +158,36 @@
 </div>
 
 <!-- Add to Cart Modal -->
-<div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-light">
-        <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p class="lead">Do you want to add this item to your cart?</p>
-        <!-- Quantity and Custom Description Form -->
-        <form method="post" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}">
-          {{ form.hidden_tag() }}
-          <input type="hidden" id="csrf_token_{{ product.id }}" name="csrf_token" value="{{ form.csrf_token._value() }}">
-          <div class="mb-3">
-            <label for="quantity{{ product.id }}" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
-            <input type="number" class="form-control" id="quantity{{ product.id }}" name="quantity" min="1" value="1">
+    <div class="modal fade" id="addToCartModal{{ product.id }}" tabindex="-1" aria-labelledby="addToCartModalLabel{{ product.id }}" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-light">
+            <h5 class="modal-title" id="addToCartModalLabel{{ product.id }}">{{ product.brand }}</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="mb-3">
-            <label for="custom_description{{ product.id }}" class="form-label">Custom Description:</label>
-            <textarea class="form-control" id="custom_description{{ product.id }}" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
+          <div class="modal-body">
+            <p class="lead">Do you want to add this item to your cart?</p>
+            <!-- Quantity and Custom Description Form -->
+            <form id="add-to-cart-form-{{ product.id }}" data-product-id="{{ product.id }}">
+              <input type="hidden" id="csrf_token_{{ product.id }}" name="csrf_token" value="{{ form.csrf_token._value() }}">
+              <div class="mb-3">
+                <label for="quantity{{ product.id }}" class="form-label">Quantity: In {{ product.unit_measurement }}</label>
+                <input type="number" class="form-control" id="quantity{{ product.id }}" name="quantity" min="1" value="1">
+              </div>
+              <div class="mb-3">
+                <label for="custom_description{{ product.id }}" class="form-label">Custom Description:</label>
+                <textarea class="form-control" id="custom_description{{ product.id }}" name="custom_description" placeholder="Enter your custom description..." rows="3" style="resize: vertical;"></textarea>
+              </div>
+              <button class="btn btn-success" type="submit">Add to Cart</button>
+            </form>
+            <div class="mt-3" id="cart-status-{{ product.id }}"></div>
           </div>
-          <button class="btn btn-success" type="submit">Add to Cart</button>
-        </form>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
 {% endfor %}
 </div>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('form[id^="addToCartForm"]').forEach(form => {
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            const productId = this.dataset.productId;
-
-            fetch(`/cart/add_to_cart/${productId}`, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                // Ensure the response is JSON
-                return response.json().catch(() => {
-                    throw new Error('Unexpected response format');
-                });
-            })
-            .then(data => {
-                if (data.show_modal) {
-                    // Show login modal if user is not authenticated
-                    new bootstrap.Modal(document.getElementById('loginModal')).show();
-                } else if (data.error) {
-                    alert(data.error);
-                } else {
-                    alert(data.message);
-                    // Optionally update cart item count in UI
-                    document.getElementById('cartItemCount').innerText = data.cartItemCount;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            });
-        });
-    });
-});
-</script>
 
 
 
@@ -241,100 +201,6 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 
 
-
-<script>
-   $(document).ready(function() {
-    // Function to check authentication and either show login modal or proceed with action
-    function checkAuthentication(action) {
-        $.ajax({
-            url: "{{ url_for('main.check_authentication') }}",
-            method: 'GET',
-            success: function(response) {
-                if (response.is_authenticated) {
-                    action();
-                } else {
-                    // Hide any open modals
-                    $('.modal').modal('hide');
-
-                    // Show login modal
-                    const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-                    loginModal.show();
-
-                    // Load the login form via AJAX
-                    $.ajax({
-                        url: "{{ url_for('auth.login') }}",
-                        method: 'GET',
-                        success: function(data) {
-                            $('#modalBody').html(data);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error loading login form:', error);
-                            $('#modalBody').html('<p>Error loading form. Please try again later.</p>');
-                        }
-                    });
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error checking authentication:', error);
-            }
-        });
-    }
-
-    // Handle cart icon click
-    $('#cartIcon').on('click', function(e) {
-        e.preventDefault(); // Prevent the default action
-
-        checkAuthentication(function() {
-            // Redirect to cart page if authenticated
-            window.location.href = "{{ url_for('cart.view_cart') }}";
-        });
-    });
-
-    // Handle add to cart button click
-    $(document).on('click', '[data-add-to-cart]', function(e) {
-        e.preventDefault(); // Prevent the default action
-
-        const productId = $(this).data('product-id');
-        const addToCartForm = $(`#addToCartModal${productId} form`);
-
-        checkAuthentication(function() {
-            // Proceed with the add-to-cart form submission if authenticated
-            addToCartForm.submit();
-        });
-    });
-
-    // Handle form submission inside the login modal
-    $(document).on('submit', '#loginForm', function(e) {
-        e.preventDefault(); // Prevent the default form submission
-
-        var form = $(this);
-        var action = form.attr('action');
-        var data = form.serialize();
-
-        $.ajax({
-            url: action,
-            method: 'POST',
-            data: data,
-            headers: {
-                'X-CSRFToken': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                if (response.redirect) {
-                    window.location.href = response.redirect; // Redirect after successful login
-                } else {
-                    // Display error messages
-                    $('#modalBody').html(response.html);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error during login:', error);
-                $('#modalBody').html('<p>Error during login. Please try again later.</p>');
-            }
-        });
-    });
-});
-
-</script>
 
 
 
@@ -566,378 +432,340 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script>
 
-
-
-
-
-    // Function to handle Add to Cart button click
-    function addToCartHandler(productId) {
-      // Check if the user is authenticated
-      if (!isUserAuthenticated()) {
-        // If not authenticated, show a message and redirect to the login page
-        alert('Please sign in to start shopping with us.');
-        window.location.href = '/login';  // Adjust the URL to your login page
-        return;
-      }
-
-      // If authenticated, open the Add to Cart modal
-      openAddToCartModal(productId);
-    }
-
-    // Function to check if the user is authenticated
-    function isUserAuthenticated() {
-      // Adjust this logic based on your authentication implementation
-      return {{ current_user.is_authenticated }};
-    }
-
-    // Function to open the Add to Cart modal
-    function openAddToCartModal(productId) {
-      // Use Bootstrap's modal function to open the modal
-      $('#addToCartModal' + productId).modal('show');
-
-      // Fetch and update the quantity when the modal is opened
-      updateQuantityOnModalOpen(productId);
-    }
-
-    // Function to fetch and update the quantity when the modal is opened
-    async function updateQuantityOnModalOpen(productId) {
-      try {
-        const response = await fetch(`/cart/api/get_quantity/${productId}`);
-        const data = await response.json();
-
-        if (data.status === 'success') {
-          // Update the quantity input in the modal
-          const quantityInput = document.getElementById('quantity' + productId);
-          quantityInput.value = data.data.quantity;
-        } else {
-          console.error('Error fetching product quantity:', data.message);
-        }
-      } catch (error) {
-        console.error('Error fetching product quantity:', error);
-      }
-    }
-
-     // Update cart count using AJAX
- $(document).ready(function () {
-  function updateCartCount() {
-    console.log('Updating cart count...'); // Debug statement
-    $.ajax({
-      url: 'cart/get_cart_count',
-      method: 'GET',
-      success: function (response) {
-        console.log('AJAX Response:', response); // Debug statement
-        if (response.status === 'success') {
-          console.log('Updating cart count:', response.cart_count); // Debug statement
-          // Update the badge with the actual cart count
-          const cartIcon = $('.floating-cart-icon');
-          const currentCount = parseInt(cartIcon.find('.badge').text(), 10);
-          const newCount = response.cart_count;
-
-          cartIcon.find('.badge').text(newCount);
-
-          // Toggle visibility of the entire cart icon based on the cart count
-          if (newCount > 0) {
-            cartIcon.removeClass('inactive');
-          } else {
-            cartIcon.addClass('inactive');
-          }
-
-          // Add shake class to the entire cart icon if the count has increased
-          if (newCount > currentCount) {
-            cartIcon.addClass('shake');
-
-            // Remove the shake class after a short delay (e.g., 1 second)
-            setTimeout(function () {
-              cartIcon.removeClass('shake');
-            }, 1000);
-          }
-        } else if (response.status === 'not_logged_in') {
-          console.log('User is not logged in, setting cart count to 0'); // Debug statement
-          const cartIcon = $('.floating-cart-icon');
-          cartIcon.find('.badge').text(0);
-          cartIcon.addClass('inactive');
-        } else {
-          console.error('Error fetching cart count:', response.message);
-        }
-      },
-      error: function (error) {
-        console.error('AJAX Error:', error);
-      },
-    });
+// Function to handle Add to Cart button click
+function addToCartHandler(productId) {
+  if (!isUserAuthenticated()) {
+    alert('Please sign in to start shopping with us.');
+    window.location.href = '/login'; // Adjust the URL to your login page
+    return;
   }
+  openAddToCartModal(productId);
+}
 
+// Function to check if the user is authenticated
+function isUserAuthenticated() {
+  return {{ current_user.is_authenticated }}; // Adjust this logic based on your authentication implementation
+}
+
+// Function to open the Add to Cart modal
+function openAddToCartModal(productId) {
+  $('#addToCartModal' + productId).modal('show');
+  updateQuantityOnModalOpen(productId);
+}
+
+// Function to fetch and update the quantity when the modal is opened
+async function updateQuantityOnModalOpen(productId) {
+  try {
+    const response = await fetch(`/cart/api/get_quantity/${productId}`);
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      const quantityInput = document.getElementById('quantity' + productId);
+      quantityInput.value = data.data.quantity;
+    } else {
+      console.error('Error fetching product quantity:', data.message);
+    }
+  } catch (error) {
+    console.error('Error fetching product quantity:', error);
+  }
+}
+
+// Function to update cart count using AJAX
+function updateCartCount() {
+  console.log('Updating cart count...');
+  $.ajax({
+    url: 'cart/get_cart_count',
+    method: 'GET',
+    success: function (response) {
+      console.log('AJAX Response:', response);
+      const cartIcon = $('.floating-cart-icon');
+      const currentCount = parseInt(cartIcon.find('.badge').text(), 10);
+      const newCount = response.cart_count;
+
+      cartIcon.find('.badge').text(newCount);
+
+      if (newCount > 0) {
+        cartIcon.removeClass('inactive');
+      } else {
+        cartIcon.addClass('inactive');
+      }
+
+      if (newCount > currentCount) {
+        cartIcon.addClass('shake');
+        setTimeout(() => cartIcon.removeClass('shake'), 1000);
+      }
+    },
+    error: function (error) {
+      console.error('AJAX Error:', error);
+    },
+  });
+}
+
+$(document).ready(function () {
   updateCartCount();
-
-  // Set an interval to periodically update the cart count (every 15 seconds as you mentioned)
-  setInterval(function () {
-    console.log('Periodic cart count update...'); // Debug statement
-    updateCartCount();
-  }, 15000);
-});
-
+  setInterval(updateCartCount, 15000);
 
   // Trigger the Add to Cart modal when clicking on the floating cart icon
   $('.floating-cart-icon').click(function () {
-    // Check if the user is authenticated
     if (!isUserAuthenticated()) {
-      // If not authenticated, show a message and redirect to the login page
       alert('Please sign in to start shopping with us.');
       window.location.href = '/login'; // Adjust the URL to your login page
       return;
     }
-
-    // If authenticated, open the Add to Cart modal for the first product
     const firstProductId = $('.product-card:first').data('product-id');
     openAddToCartModal(firstProductId);
   });
 
-  // Function to check if the user is authenticated
-  function isUserAuthenticated() {
-    // Adjust this logic based on your authentication implementation
-    return {{ current_user.is_authenticated }};
-  }
-
-  // Function to open the Add to Cart modal
-  function openAddToCartModal(productId) {
-    // Use Bootstrap's modal function to open the modal
-    $('#addToCartModal' + productId).modal('show');
-
-    // Fetch and update the quantity when the modal is opened
-    updateQuantityOnModalOpen(productId);
-  }
-
-  // Function to fetch and update the quantity when the modal is opened
-  async function updateQuantityOnModalOpen(productId) {
-    try {
-      const response = await fetch(`/cart/api/get_quantity/${productId}`);
-      const data = await response.json();
-
-      if (data.status === 'success') {
-        // Update the quantity input in the modal
-        const quantityInput = document.getElementById('quantity' + productId);
-        quantityInput.value = data.data.quantity;
-      } else {
-        console.error('Error fetching product quantity:', data.message);
-      }
-    } catch (error) {
-      console.error('Error fetching product quantity:', error);
-    }
-  }
-
-      function searchProducts() {
-          var query = document.getElementById("searchInput").value.trim();
-          if (query.length === 0) {
-              // Clear search results and display all products
-              document.getElementById("searchResults").innerHTML = "";
-              document.getElementById("productListing").style.display = "block";
-              return;
-          }
-          var xhr = new XMLHttpRequest();
-          xhr.open('GET', '/search?query=' + encodeURIComponent(query), true);
-          xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-          xhr.onreadystatechange = function() {
-              if (xhr.readyState === XMLHttpRequest.DONE) {
-                  if (xhr.status === 200) {
-                      // Update search results
-                      document.getElementById("searchResults").innerHTML = xhr.responseText;
-                      // Hide product listing when search results are displayed
-                      document.getElementById("productListing").style.display = "none";
-                  }
-              }
-          };
-          xhr.send();
-      }
-
-document.addEventListener("DOMContentLoaded", function () {
-    // Initialize event listeners for existing products
-    initializeEventListeners();
-
-    // Add to Cart interaction
-    document.querySelectorAll(".add-to-cart-btn").forEach(button => {
-        button.addEventListener("click", function (event) {
-            event.preventDefault();
-            const productId = button.getAttribute("data-product-id");
-            addToCart(productId);
-        });
-    });
-
-    // Search Products interaction
-    document.getElementById("searchInput").addEventListener("keyup", searchProducts);
+  // Search Products interaction
+  $('#searchInput').on('keyup', searchProducts);
+  
+  // Initialize event listeners for existing products
+  initializeEventListeners();
 });
+
+// Function to search products
+function searchProducts() {
+  const query = $('#searchInput').val().trim();
+  if (query.length === 0) {
+    $('#searchResults').empty();
+    $('#productListing').show();
+    return;
+  }
+  $.ajax({
+    url: `/search?query=${encodeURIComponent(query)}`,
+    method: 'GET',
+    success: function (response) {
+      $('#searchResults').html(response);
+      $('#productListing').hide();
+    },
+    error: function (xhr, status, error) {
+      console.error('Search Error:', error);
+    }
+  });
+}
 
 // Function to initialize event listeners for tracking
 function initializeEventListeners() {
-    // Quick View Button (Track as 'view')
-    document.querySelectorAll(".quick-view-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            const productId = button.getAttribute("data-product-id");
-            trackProductEvent(productId, "view");
-        });
-    });
+  $('.quick-view-btn').click(function () {
+    const productId = $(this).data('product-id');
+    trackProductEvent(productId, 'view');
+  });
 
-    // Product Image and Name (Track as 'click')
-    document.querySelectorAll(".product-image, .product-name").forEach(element => {
-        element.addEventListener("click", function () {
-            const productId = element.closest(".product-card").getAttribute("data-product-id");
-            trackProductEvent(productId, "click");
-        });
-    });
-
-   
+  $('.product-image, .product-name').click(function () {
+    const productId = $(this).closest('.product-card').data('product-id');
+    trackProductEvent(productId, 'click');
+  });
 }
-
 
 // Function to add product to cart
 async function addToCart(productId) {
-    try {
-        const response = await fetch(`/cart/api/add`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCSRFToken(),
-            },
-            body: JSON.stringify({ productId }),
-        });
+  try {
+    const response = await fetch('/cart/api/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({ productId }),
+    });
 
-        const data = await response.json();
+    const data = await response.json();
 
-        if (data.status === "success") {
-            toastr.success("Product added to cart");
-        } else {
-            toastr.error("Failed to add product to cart");
-            console.error("Error adding product to cart:", data.message);
-        }
-    } catch (error) {
-        toastr.error("An error occurred");
-        console.error("Fetch error:", error);
+    if (data.status === 'success') {
+      toastr.success('Product added to cart');
+    } else {
+      toastr.error('Failed to add product to cart');
+      console.error('Error adding product to cart:', data.message);
     }
+  } catch (error) {
+    toastr.error('An error occurred');
+    console.error('Fetch error:', error);
+  }
 }
 
 // Function to get CSRF token from meta tag
 function getCSRFToken() {
-    const metaTag = document.querySelector('meta[name="csrf-token"]');
-    return metaTag ? metaTag.content : "";
+  const metaTag = document.querySelector('meta[name="csrf-token"]');
+  return metaTag ? metaTag.content : '';
 }
 
+// Optional: Lazy load images
+document.addEventListener('DOMContentLoaded', () => {
+  const lazyImages = document.querySelectorAll('img.lazy');
 
-   document.addEventListener('DOMContentLoaded', () => {
-    const lazyImages = document.querySelectorAll('img.lazy');
-
-    if ('IntersectionObserver' in window) {
-        const lazyImageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const lazyImage = entry.target;
-                    lazyImage.src = lazyImage.dataset.src;
-                    lazyImage.classList.add('loaded');
-                    lazyImageObserver.unobserve(lazyImage);
-                }
-            });
-        });
-
-        lazyImages.forEach(lazyImage => {
-            lazyImageObserver.observe(lazyImage);
-        });
-    } else {
-        // Fallback for older browsers
-        const lazyLoad = () => {
-            lazyImages.forEach(lazyImage => {
-                if (lazyImage.getBoundingClientRect().top < window.innerHeight && lazyImage.getBoundingClientRect().bottom > 0) {
-                    lazyImage.src = lazyImage.dataset.src;
-                    lazyImage.classList.add('loaded');
-                }
-            });
-
-            if (lazyImages.length === 0) {
-                window.removeEventListener('scroll', lazyLoad);
-                window.removeEventListener('resize', lazyLoad);
-                window.removeEventListener('orientationchange', lazyLoad);
-            }
-        };
-
-        window.addEventListener('scroll', lazyLoad);
-        window.addEventListener('resize', lazyLoad);
-        window.addEventListener('orientationchange', lazyLoad);
-        lazyLoad();
-    }
-});
- 
-
-
-// Optional: Use Intersection Observer to lazy load images
-$(document).ready(function() {
-    let lazyImages = [].slice.call(document.querySelectorAll('img.lazy'));
-    let active = false;
-
-    const lazyLoad = function() {
-        if (active === false) {
-            active = true;
-
-            setTimeout(function() {
-                lazyImages.forEach(function(img) {
-                    if (img.getBoundingClientRect().top < window.innerHeight && img.getBoundingClientRect().bottom > 0) {
-                        img.src = img.dataset.src;
-                        img.classList.remove('lazy');
-                        lazyImages = lazyImages.filter(function(img) {
-                            return img.classList.contains('lazy');
-                        });
-
-                        if (lazyImages.length === 0) {
-                            document.removeEventListener('scroll', lazyLoad);
-                            window.removeEventListener('resize', lazyLoad);
-                            window.removeEventListener('orientationchange', lazyLoad);
-                        }
-                    }
-                });
-
-                active = false;
-            }, 200);
+  if ('IntersectionObserver' in window) {
+    const lazyImageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const lazyImage = entry.target;
+          lazyImage.src = lazyImage.dataset.src;
+          lazyImage.classList.add('loaded');
+          lazyImageObserver.unobserve(lazyImage);
         }
+      });
+    });
+
+    lazyImages.forEach(lazyImage => lazyImageObserver.observe(lazyImage));
+  } else {
+    const lazyLoad = () => {
+      lazyImages.forEach(lazyImage => {
+        if (lazyImage.getBoundingClientRect().top < window.innerHeight && lazyImage.getBoundingClientRect().bottom > 0) {
+          lazyImage.src = lazyImage.dataset.src;
+          lazyImage.classList.add('loaded');
+        }
+      });
+
+      if (lazyImages.length === 0) {
+        window.removeEventListener('scroll', lazyLoad);
+        window.removeEventListener('resize', lazyLoad);
+        window.removeEventListener('orientationchange', lazyLoad);
+      }
     };
 
-    document.addEventListener('scroll', lazyLoad);
+    window.addEventListener('scroll', lazyLoad);
     window.addEventListener('resize', lazyLoad);
     window.addEventListener('orientationchange', lazyLoad);
-
     lazyLoad();
+  }
 });
 
+// Handle form submission for adding to cart
 $(document).ready(function() {
-    // Function to update the cart badge with a shake animation
-    function updateCartBadge(count) {
-        $('#cart-badge').text(count);
-        $('#cart-badge').addClass('shake');
-        setTimeout(function() {
-            $('#cart-badge').removeClass('shake');
-        }, 1000);
+  $('form[data-ajax="true"]').submit(function(event) {
+    event.preventDefault();
+    const $form = $(this);
+    const formData = $form.serialize();
+
+    $.ajax({
+      type: 'POST',
+      url: $form.attr('action'),
+      data: formData,
+      success: function(response) {
+        $('#cart-badge').text(response.cartItemCount).addClass('shake');
+        setTimeout(() => $('#cart-badge').removeClass('shake'), 1000);
+        $('#addToCartModal' + response.productId).modal('hide');
+        
+        const toast = new bootstrap.Toast(document.getElementById('cartToast'));
+        toast.show();
+      },
+      error: function(xhr, status, error) {
+        alert('Error adding item to cart: ' + error);
+      }
+    });
+  });
+});
+
+
+$(document).ready(function() {
+    // Function to check authentication and either show the login modal or proceed with action
+    function checkAuthentication(action) {
+        $.ajax({
+            url: "{{ url_for('main.check_authentication') }}",
+            method: 'GET',
+            success: function(response) {
+                if (response.is_authenticated) {
+                    action(); // Execute the action if the user is authenticated
+                } else {
+                    // Hide any open modals
+                    $('.modal').modal('hide');
+
+                    // Show login modal
+                    const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                    loginModal.show();
+
+                    // Load the login form via AJAX
+                    $.ajax({
+                        url: "{{ url_for('auth.login') }}",
+                        method: 'GET',
+                        success: function(data) {
+                            $('#modalBody').html(data);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error loading login form:', error);
+                            $('#modalBody').html('<p>Error loading form. Please try again later.</p>');
+                        }
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error checking authentication:', error);
+            }
+        });
     }
 
-    // Handle form submission for adding to cart
-    $('form[data-ajax="true"]').submit(function(event) {
-        event.preventDefault(); // Prevent the default form submission
+    // Handle cart icon click
+    $('#cartIcon').on('click', function(e) {
+        e.preventDefault(); // Prevent the default action
+        checkAuthentication(function() {
+            window.location.href = "{{ url_for('cart.view_cart') }}"; // Redirect to cart page if authenticated
+        });
+    });
 
-        var $form = $(this);
-        var formData = $form.serialize(); // Serialize the form data
+    // Handle add to cart button click
+    $(document).on('click', '[data-add-to-cart]', function(e) {
+        e.preventDefault(); // Prevent the default action
+        const productId = $(this).data('product-id');
+        checkAuthentication(function() {
+            $(`#add-to-cart-form-${productId}`).submit(); // Submit add-to-cart form if authenticated
+        });
+    });
+
+    // Handle form submission inside the login modal
+    $(document).on('submit', '#loginForm', function(e) {
+        e.preventDefault(); // Prevent the default form submission
+        const form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            method: 'POST',
+            data: form.serialize(),
+            headers: {
+                'X-CSRFToken': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.redirect) {
+                    window.location.href = response.redirect; // Redirect after successful login
+                } else {
+                    $('#modalBody').html(response.html); // Display error messages
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error during login:', error);
+                $('#modalBody').html('<p>Error during login. Please try again later.</p>');
+            }
+        });
+    });
+
+    // Handle add-to-cart form submission
+    $('form[id^="add-to-cart-form-"]').on('submit', function(e) {
+        e.preventDefault(); // Prevent the default form submission
+        const form = $(this);
+        const productId = form.data('product-id');
 
         $.ajax({
             type: 'POST',
-            url: $form.attr('action'),
-            data: formData,
+            url: `/cart/add_to_cart/${productId}`,
+            data: form.serialize(), // Serialize form data
             success: function(response) {
-                updateCartBadge(response.cartItemCount); // Update cart item count
-                $('#addToCartModal' + response.productId).modal('hide'); // Hide the modal
-                
-                // Show success toast
-                var toast = new bootstrap.Toast(document.getElementById('cartToast'));
-                toast.show();
+                const statusMessage = response.status === 'success' ? 
+                    `<p class="text-success">${response.message}</p>` : 
+                    `<p class="text-danger">${response.message}</p>`;
+                $('#cart-status-' + productId).html(statusMessage);
+
+                // Close the modal if the item is successfully added to the cart
+                if (response.status === 'success') {
+                    setTimeout(function() {
+                        $(`#addToCartModal${productId}`).modal('hide');
+                    }, 1000); // Close after 1.5 seconds
+                }
             },
-            error: function(xhr, status, error) {
-                // Handle error response
-                alert('Error adding item to cart: ' + error);
+            error: function(xhr) {
+                $('#cart-status-' + productId).html(`<p class="text-danger">An error occurred: ${xhr.responseText}</p>`);
             }
         });
     });
 });
+
+    
 
     </script>
 

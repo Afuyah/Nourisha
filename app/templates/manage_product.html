@@ -6,17 +6,25 @@
     <h3 class="mb-4">Manage - {{ product.name }} Details</h3>
 
    
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h3 class="card-title">Product Details</h3>
-            <p><strong>Name:</strong> {{ product.name }}</p>
-            <p><strong>Brand:</strong> {{ product.brand }}</p>
-            <p><strong>Price:</strong> Ksh{{ product.unit_price }}</p>
-            <p><strong>Quantity in Stock:</strong> {{ product.quantity_in_stock }}</p>
-            <p><strong>Country of Origin:</strong> {{ product.country_of_origin }}</p>
-            <p><strong>Discount:</strong> {{ product.discount_percentage }}%</p>
-        </div>
+   <div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h3 class="card-title">Product Details</h3>
+        <p><strong>Name:</strong> {{ product.name }}</p>
+        <p><strong>Brand:</strong> {{ product.brand }}</p>
+        <p>
+            <strong>Price:</strong> 
+            <span class="text-muted">Ksh{{ product.unit_price }}</span>
+        </p>
+        <p>
+            <strong>Selling Price:</strong> 
+            <span class="text-success font-weight-bold">Ksh{{ product.selling_price }}</span>
+        </p>
+        <p><strong>Quantity in Stock:</strong> {{ product.quantity_in_stock }}</p>
+        <p><strong>Country of Origin:</strong> {{ product.country_of_origin }}</p>
+        <p><strong>Discount:</strong> {{ product.discount_percentage }}%</p>
     </div>
+</div>
+
 
      <div class="d-flex flex-wrap gap-3">
         <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#nameModal">Name</button>
@@ -164,7 +172,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="quantityModalLabel">Update Quantity</h5>
+                    <h5 class="modal-title" id="quantityModalLabel">Add Stock</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="updateQuantityForm">
@@ -172,8 +180,8 @@
                         <input type="hidden" name="product_id" value="{{ product.id }}">
                         {{ form.hidden_tag() }}
                         <div class="mb-3">
-                            <label for="quantityInStock" class="form-label">Quantity in Stock</label>
-                            <input type="number" class="form-control" id="quantityInStock" name="quantity_in_stock" value="{{ product.quantity_in_stock }}" required>
+                            <label for="quantityInStock" class="form-label">Add to Stock</label>
+                            <input type="number" class="form-control" id="quantityInStock" name="quantity_in_stock" value="" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -199,7 +207,7 @@
                         {{ form.hidden_tag() }}
                         <div class="mb-3">
                             <label for="countryOfOrigin" class="form-label">Country of Origin</label>
-                            <input type="text" class="form-control" id="countryOfOrigin" name="country_of_origin" value="{{ product.country_of_origin }}" required>
+                            <input type="text" class="form-control" id="countryOfOrigin" name="country_of_origin" value="{{ product.country_of_origin }}" >
                         </div>
                     </div>
                     <div class="modal-footer">

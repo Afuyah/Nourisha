@@ -178,7 +178,9 @@ class Product(db.Model):
     
     supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False, index=True)
     date_added = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    selling_price = db.Column(db.Float, nullable=True)
 
+    
     supplier = db.relationship('Supplier', back_populates='products', lazy='joined')
     category = db.relationship('ProductCategory', back_populates='products', lazy='joined')
     images = db.relationship('ProductImage', back_populates='product', lazy='dynamic')
@@ -191,7 +193,9 @@ class Product(db.Model):
 
     unit_of_measurement = db.relationship('UnitOfMeasurement', back_populates='products', lazy='joined')
 
-
+    def calculate_selling_price(self):
+        discount = self.unit_price * (self.discount_percentage / 100)
+        self.selling_price = self.unit_price - discount
 
 
 

@@ -8,53 +8,41 @@ from app.main.forms import CheckoutForm, LoginForm, userDeliveryInfoForm
 from app import db, mail
 from flask_mail import Message
 from app.main import bp
-from functools import wraps
-from sqlalchemy.orm import joinedload
 from app import login_required
-
 
 
 @cart_bp.route('/add_to_cart/<int:product_id>', methods=['POST'])
 @login_required
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
-
     quantity = int(request.form.get('quantity', 1))
     custom_description = request.form.get('custom_description', '')
 
     if quantity <= 0:
-        flash('Quantity must be greater than zero.', 'danger')
-        return redirect(url_for('main.product_details', product_id=product.id))
+        return jsonify({'status': 'error', 'message': 'Invalid Quantity.'}), 400
 
     if quantity > product.quantity_in_stock:
-        flash(
-            'Sorry, but we have only {} items available in stock.'.format(
-                product.quantity_in_stock), 'danger')
-        return redirect(url_for('main.product_details', product_id=product.id))
+        return jsonify({'status': 'error', 'message': f'Out of stock.'}), 400
 
-    cart_item = Cart.query.filter_by(user_id=current_user.id,
-                                      product_id=product.id).first()
-
+    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product.id).first()
     if cart_item:
         cart_item.quantity += quantity
         cart_item.custom_description = custom_description
     else:
-        cart_item = Cart(user_id=current_user.id,
-                          product_id=product.id,
-                          quantity=quantity,
-                          custom_description=custom_description)
+        cart_item = Cart(user_id=current_user.id, product_id=product.id, quantity=quantity, custom_description=custom_description)
         db.session.add(cart_item)
 
     product.quantity_in_stock -= quantity
-
     try:
         db.session.commit()
-        flash('Item added to cart successfully.', 'success')
+        return jsonify({'status': 'success', 'message': 'Item added to cart successfully.'})
+    except (IntegrityError, OperationalError) as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': f'Database error occurred: {str(e)}'}), 500
     except Exception as e:
         db.session.rollback()
-        flash(f'Error adding item to cart: {str(e)}', 'danger')
+        return jsonify({'status': 'error', 'message': f'An unexpected error occurred: {str(e)}'}), 500
 
-    return redirect(url_for('main.product_listing', product_id=product.id))
 
 
 
