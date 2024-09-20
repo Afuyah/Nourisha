@@ -1,9 +1,13 @@
+from os import name
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required
-from app.main.forms import AddProductForm
+from app.main.forms import AddProductForm,ProductImageForm, AddProductVarietyForm
 from app.product import product_bp
 from app import db, admin_required
-from app.main.models import PriceHistory, Product
+from app.main.models import PriceHistory, Product,ProductVariety
+import uuid
+
+
 
 @product_bp.route('/products', methods=['GET'])
 @admin_required
@@ -85,17 +89,19 @@ def update_discount():
 def update_quantity():
     data = request.form
     product_id = int(data.get('product_id'))
-    additional_quantity = int(data.get('quantity_in_stock'))
+    additional_quantity = int(data.get('quantity_in_stock', 0))  # Default to 0 if missing
+
+    if additional_quantity <= 0:
+        return jsonify({'error': 'Invalid quantity'}), 400
     
-    # Fetch the product and update its quantity
     product = Product.query.get_or_404(product_id)
+    if product.quantity_in_stock is None:
+        product.quantity_in_stock = 0
     product.quantity_in_stock += additional_quantity
-    
-    # Commit the changes to the database
+
     db.session.commit()
-    
-    # Return a JSON response indicating success
     return jsonify({'success': True})
+
 
 
 @product_bp.route('/products/update/country', methods=['POST'])
@@ -145,6 +151,46 @@ def update_product_nutrition():
         return jsonify(success=True)
     return jsonify(success=False)
 
+
+@product_bp.route('/add_variety', methods=['GET', 'POST'])
+@admin_required
+def add_variety():
+    form = AddProductVarietyForm()
+    # Populate the product field with choices
+    form.product.choices = [(p.id, p.name) for p in Product.query.all()]
+
+    if form.validate_on_submit():
+        try:
+            # Generate SKU for the selected product
+            selected_product = Product.query.get_or_404(form.product.data)
+            sku = generate_sku(selected_product.name)
+
+            # Create a new variety
+            variety = ProductVariety(
+                product_id=form.product.data,
+                name=form.name.data,
+                price=form.price.data,
+                quantity_in_stock=form.quantity_in_stock.data,
+                sku=sku
+            )
+
+            db.session.add(variety)
+            db.session.commit()
+
+            flash('Variety added successfully!', 'success')
+            return redirect(url_for('product.add_variety'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"An error occurred: {e}", 'danger')
+
+    return render_template('add_variety.html', form=form)
+
+
+def generate_sku(product_name):
+    base_sku = f"{product_name[:3].upper()}"
+    unique_id = str(uuid.uuid4().hex[:6].upper())
+    return f"{base_sku}-{unique_id}"
 
 
 

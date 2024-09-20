@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Add Product Variety</h1>
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('product.add_variety') }}">
+                        {{ form.hidden_tag() }}
+
+                        <!-- Product Dropdown -->
+                        <div class="mb-3">
+                            {{ form.product.label(class='form-label') }}
+                            {{ form.product(class='form-select' + (' is-invalid' if form.product.errors else '')) }}
+                            {% if form.product.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.product.errors[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Price Field -->
+                        <div class="mb-3">
+                            {{ form.name.label(class='form-label') }}
+                            {{ form.name(class='form-control' + (' is-invalid' if form.name.errors else ''), placeholder='Enter Varriety', required=true) }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.name.errors[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Price Field -->
+                        <div class="mb-3">
+                            {{ form.price.label(class='form-label') }}
+                            {{ form.price(class='form-control' + (' is-invalid' if form.price.errors else ''), placeholder='Enter Price', required=true) }}
+                            {% if form.price.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.price.errors[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Quantity in Stock Field -->
+                        <div class="mb-3">
+                            {{ form.quantity_in_stock.label(class='form-label') }}
+                            {{ form.quantity_in_stock(class='form-control' + (' is-invalid' if form.quantity_in_stock.errors else ''), placeholder='Enter Quantity in Stock', required=true) }}
+                            {% if form.quantity_in_stock.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.quantity_in_stock.errors[0] }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">Add Variety</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

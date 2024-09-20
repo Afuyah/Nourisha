@@ -1,3 +1,4 @@
+
 from time import time
 from datetime import datetime
 from flask import request, current_app
@@ -5,9 +6,12 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer as Serializer
 from app import db
-from sqlalchemy import event
+
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import Numeric
+
+from sqlalchemy import ForeignKeyConstraint
+
+
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -41,11 +45,11 @@ class User(db.Model, UserMixin):
     average_spending = db.Column(db.Float, default=0.0)
     purchase_frequency = db.Column(db.Integer, default=0)
     last_active = db.Column(db.DateTime, default=datetime.utcnow)
-
+    carts = db.relationship('Cart', back_populates='user', cascade='all, delete-orphan')
     purchases = db.relationship('Purchase', back_populates='user', lazy='dynamic')
     orders = db.relationship('Order', back_populates='user', lazy='dynamic')
     
-    search_queries = db.relationship('UserSearchQuery', back_populates='user', lazy='dynamic')
+    
     ratings = db.relationship('Rating', back_populates='user', lazy='dynamic')
     bought_items = db.relationship('OrderItem', back_populates='bought_by_admin', foreign_keys='OrderItem.bought_by_admin_id', lazy='dynamic')
     delivery_infos = db.relationship('UserDeliveryInfo', back_populates='user', lazy='dynamic')
@@ -161,41 +165,58 @@ class Supplier(db.Model):
 
 
 
+# Product Model
 class Product(db.Model):
+    __tablename__ = 'product'
+    
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, index=True)
     category_id = db.Column(db.Integer, db.ForeignKey('product_category.id'), nullable=False, index=True)
     brand = db.Column(db.String(50), nullable=True)
     unit_price = db.Column(db.Float, nullable=False)
     unit_measurement_id = db.Column(db.Integer, db.ForeignKey('unit_of_measurement.id'), nullable=True)
-
-    quantity_in_stock = db.Column(db.Integer, nullable=False)
+    quantity_in_stock = db.Column(db.Integer, default=0, nullable=False)
     quantity_sold = db.Column(db.Integer, default=0)
     discount_percentage = db.Column(db.Float, nullable=True)
     nutritional_information = db.Column(db.Text, nullable=True)
     country_of_origin = db.Column(db.String(50), nullable=True)
     average_rating = db.Column(db.Float, default=0.0)
-    
-    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False, index=True)
+    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False)
     date_added = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     selling_price = db.Column(db.Float, nullable=True)
 
-    
+    # Relationships
+    ratings = db.relationship('Rating', back_populates='product', lazy='dynamic')
     supplier = db.relationship('Supplier', back_populates='products', lazy='joined')
     category = db.relationship('ProductCategory', back_populates='products', lazy='joined')
-    images = db.relationship('ProductImage', back_populates='product', lazy='dynamic')
-    carts = db.relationship('Cart', back_populates='product', lazy='dynamic')
-    order_items = db.relationship('OrderItem', back_populates='product', lazy='dynamic')
-
-    
-    ratings = db.relationship('Rating', back_populates='product', lazy='dynamic')
-    promotions = db.relationship('Promotion', secondary='product_promotions', backref=db.backref('products', lazy='dynamic'))
-
     unit_of_measurement = db.relationship('UnitOfMeasurement', back_populates='products', lazy='joined')
-
+    varieties = db.relationship('ProductVariety', back_populates='product', cascade='all, delete-orphan')
+    order_items = db.relationship('OrderItem', back_populates='product', cascade='all, delete-orphan')
+    images = db.relationship('ProductImage', back_populates='product', lazy='dynamic')
     def calculate_selling_price(self):
         discount = self.unit_price * (self.discount_percentage / 100)
         self.selling_price = self.unit_price - discount
+
+
+
+
+class ProductVariety(db.Model):
+    __tablename__ = 'product_variety'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    name = db.Column(db.String(50), nullable=True)
+    price = db.Column(db.Float, nullable=False)
+    quantity_in_stock = db.Column(db.Integer, nullable=False)
+    sku = db.Column(db.String(100), nullable=False, unique=True, index=True)
+
+    # Relationships
+    product = db.relationship('Product', back_populates='varieties')
+    carts = db.relationship('Cart', back_populates='product_variety', lazy='dynamic')
+    order_items = db.relationship('OrderItem', back_populates='product_variety', lazy='dynamic')
+
+
+
 
 
 
@@ -206,22 +227,6 @@ class UnitOfMeasurement(db.Model):
     date_added = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
     products = db.relationship('Product', back_populates='unit_of_measurement', lazy='dynamic')
-
-
-
-
-
-
-class UserSearchQuery(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
-    query_text = db.Column(db.String(255), nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-
-    user = db.relationship('User', back_populates='search_queries', lazy='joined')
-
-
-
 
 
 
@@ -238,18 +243,20 @@ class ProductImage(db.Model):
 
 
 class Cart(db.Model):
+    __tablename__ = 'cart'
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False, index=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    product_variety_id = db.Column(db.Integer, db.ForeignKey('product_variety.id'), nullable=True)
     quantity = db.Column(db.Integer, nullable=False)
-    custom_description = db.Column(db.Text)
+    price = db.Column(db.Float, nullable=False) 
 
     # Relationships
-    product = db.relationship('Product', back_populates='carts', lazy='joined')
+    product = db.relationship('Product', backref='carts')  # Added relationship with Product
+    product_variety = db.relationship('ProductVariety', back_populates='carts')
+    user = db.relationship('User', back_populates='carts')
 
-    __table_args__ = (
-        db.Index('idx_cart_user_product', 'user_id', 'product_id'),
-    )
 
 
 class Order(db.Model):
@@ -305,8 +312,9 @@ class OrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False, index=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False, index=True)
+    product_variety_id = db.Column(db.Integer, db.ForeignKey('product_variety.id'), nullable=True, index=True)  # Add this field
     quantity = db.Column(db.Integer, nullable=False)
-    custom_description = db.Column(db.String(255), nullable=True)
+    
     unit_price = db.Column(db.Float, nullable=False)
     purchase_price = db.Column(db.Float, nullable=True)
     bought_by_admin_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True, index=True)
@@ -316,6 +324,7 @@ class OrderItem(db.Model):
     # Relationships
     order = db.relationship('Order', back_populates='order_items', lazy='joined')
     product = db.relationship('Product', back_populates='order_items', lazy='joined')
+    product_variety = db.relationship('ProductVariety', back_populates='order_items')
     bought_by_admin = db.relationship('User', back_populates='bought_items', foreign_keys=[bought_by_admin_id], lazy='joined')
     purchases = db.relationship('Purchase', back_populates='order_item', lazy='dynamic')
 
@@ -326,7 +335,6 @@ class OrderItem(db.Model):
     @hybrid_property
     def total_price(self):
         return self.quantity * self.unit_price
-
 
 
 class Purchase(db.Model):

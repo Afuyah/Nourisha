@@ -52,6 +52,24 @@ def admin_required(func):
         return func(*args, **kwargs)
     return decorated_function
 
+
+def cart_access_required(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # Return JSON response for AJAX requests
+                return jsonify({'redirect': url_for('auth.login'), 'show_modal': True})
+            else:
+                # Redirect for normal requests
+                session['next'] = request.url
+                flash('Please log in to access this feature.', 'warning')
+                return redirect(url_for('auth.login'))
+        return func(*args, **kwargs)
+    return decorated_function
+
+
+
 def user_logged_in_handler(sender, user):
     with app.app_context():
         app.logged_in_users.add(user.id)

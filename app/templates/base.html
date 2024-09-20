@@ -154,12 +154,13 @@
           </a>
           <div class="dropdown-menu" aria-labelledby="productsDropdown">
             <a class="dropdown-item" href="{{ url_for('main.add_product') }}">Add Products</a>
-            <a class="dropdown-item" href="{{ url_for('product.products') }}">Edit Product Info</a>
-            <a class="dropdown-item" href="{{ url_for('admin.product_categories') }}">Product Categories</a>
-            <a class="dropdown-item" href="{{ url_for('main.add_product_image') }}">Add Product Images</a>
-            <a class="dropdown-item" href="{{ url_for('main.add_supplier') }}">Product Suppliers</a>
-             <a class="dropdown-item" href="{{ url_for('product.products') }}">product management</a>
-            <a class="nav-link" href="{{ url_for('main.add_unit_of_measurement') }}"> Measurement Unit</a>
+            <a class="dropdown-item" href="{{ url_for('product.add_variety') }}">Add Varieties</a>
+            <a class="dropdown-item" href="{{ url_for('product.products') }}">Product Management</a>
+            <a class="dropdown-item" href="{{ url_for('admin.product_categories') }}"> Categories Management</a>
+            <a class="dropdown-item" href="{{ url_for('main.add_product_image') }}">Product Images management</a>
+            <a class="dropdown-item" href="{{ url_for('main.add_supplier') }}">Suppliers Management</a>
+            <a class="dropdown-item" href="{{ url_for('product.products') }}">View management</a>
+            <a class="nav-link" href="{{ url_for('main.add_unit_of_measurement') }}"> Measurement Units</a>
                         
           </div>
         </li>

@@ -76,16 +76,7 @@
                             {% endif %}
                         </div>
 
-                        <!-- Quantity in Stock -->
-                        <div class="mb-3">
-                            {{ form.quantity_in_stock.label(class='form-label') }}
-                            {{ form.quantity_in_stock(class='form-control', placeholder='First Stock Quantity', required=true) }}
-                            {% if form.quantity_in_stock.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.quantity_in_stock.errors[0] }}
-                            </div>
-                            {% endif %}
-                        </div>
+                       
 
                         <!-- Nutritional Information -->
                         <div class="mb-3">

@@ -8,23 +8,21 @@
     <div class="overlay"></div>
     <div class="container h-100">
         <div class="row h-100 align-items-center">
-            <div class="col-lg-6 text-lg-start text-center mt-5 mt-lg-0">
-                <h2 class="display-4 animate__animated animate__fadeInLeft">
-                    <b>Where Quality Meets Convenience</b>
-                </h2>
-                <p class="lead typed-text mt-2">
-                    <span id="typed-paragraph"></span>
+            <div class="col-lg-6 text-lg-start text-center">
+                <h1 class="hero-title">Crafting a New Era of Grocery Shopping</h1>
+                <p class="hero-subtitle">
+                    Quality, Freshness, Delivered Right to Your Door
                 </p>
-                <br/>
-                <a href="{{ url_for('main.product_listing') }}" class="btn btn-primary btn-lg mt-4 animate__animated animate__fadeInLeft d-none d-lg-inline-block">Shop Now</a>
+                <a href="{{ url_for('main.product_listing') }}" class="btn hero-btn">Explore Now</a>
             </div>
-            <div class="col-lg-6 d-lg-none text-center mt-4">
-                <a href="{{ url_for('main.product_listing') }}" class="btn btn-success btn-lg animate__animated animate__fadeInLeft">Shop Now</a>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="hero-image-wrapper">
+                    <img src="/static/erickhero.jpg" alt="Nourisha Product" class="hero-image animate__animated animate__fadeInRight">
+                </div>
             </div>
         </div>
     </div>
 </section>
-
 
 
 <!-- Featured Categories Section -->
@@ -93,143 +91,350 @@
 <!-- Services Section -->
 <section id="services" class="services py-5">
     <div class="container">
-        <h2 class="display-4 text-center mb-4 animate__animated animate__fadeInDown">Our Services</h2>
-        <div class="row d-none d-md-flex">
-            <div class="col-md-4">
-                <div class="card mb-4 animate__animated animate__fadeInLeft">
-                    <div class="card-body">
-                        <i class="fas fa-truck fa-3x mb-3"></i>
-                        <h5 class="card-title">Express Delivery</h5>
-                        <p class="card-text">Get your groceries delivered within hours, ensuring freshness and convenience.</p>
-                      
-                    </div>
-                </div>
+        <h2 class="section-title">Our Services</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <i class="fas fa-truck fa-3x icon"></i>
+                <h5 class="card-title">Express Delivery</h5>
+                <p class="card-text">Get your groceries delivered within hours, ensuring freshness and convenience.</p>
             </div>
-            <div class="col-md-4">
-                <div class="card mb-4 animate__animated animate__fadeInLeft">
-                    <div class="card-body">
-                        <i class="fas fa-shopping-basket fa-3x mb-3"></i>
-                        <h5 class="card-title">Wide Product Selection</h5>
-                        <p class="card-text">Choose from a wide range of fresh and high-quality groceries to meet your needs.</p>
-                       
-                    </div>
-                </div>
+            <div class="service-card">
+                <i class="fas fa-shopping-basket fa-3x icon"></i>
+                <h5 class="card-title">Wide Product Selection</h5>
+                <p class="card-text">Choose from a wide range of fresh and high-quality groceries to meet your needs.</p>
             </div>
-            <div class="col-md-4">
-                <div class="card mb-4 animate__animated animate__fadeInLeft">
-                    <div class="card-body">
-                        <i class="fas fa-users fa-3x mb-3"></i>
-                        <h5 class="card-title">Friendly Customer Support</h5>
-                        <p class="card-text">Our dedicated customer support team is here to assist you with any inquiries or concerns.</p>
-                       
-                    </div>
-                </div>
+            <div class="service-card">
+                <i class="fas fa-users fa-3x icon"></i>
+                <h5 class="card-title">Friendly Customer Support</h5>
+                <p class="card-text">Our dedicated customer support team is here to assist you with any inquiries or concerns.</p>
             </div>
         </div>
-        <!-- For small screens -->
-        <div class="d-md-none">
-            <div id="smallScreenService" class="d-block">
-                <div class="card mb-4 animate__animated animate__fadeInLeft">
-                    <div class="card-body">
-                        <i class="fas fa-truck fa-3x mb-3"></i>
-                        <h5 class="card-title">Express Delivery</h5>
-                        <p class="card-text">Get your groceries delivered within hours, ensuring freshness and convenience.</p>
-                        
-                    </div>
-                </div>
-            </div>
-            <div id="moreServices" class="d-none">
-                <div class="card mb-4 animate__animated animate__fadeInLeft">
-                    <div class="card-body">
-                        <i class="fas fa-shopping-basket fa-3x mb-3"></i>
-                        <h5 class="card-title">Wide Product Selection</h5>
-                        <p class="card-text">Choose from a wide range of fresh and high-quality groceries to meet your needs.</p>
-                       
-                    </div>
-                </div>
-                <div class="card mb-4 animate__animated animate__fadeInLeft">
-                    <div class="card-body">
-                        <i class="fas fa-users fa-3x mb-3"></i>
-                        <h5 class="card-title">Friendly Customer Support</h5>
-                        <p class="card-text">Our dedicated customer support team is here to assist you with any inquiries or concerns.</p>
-                        
-                    </div>
-                </div>
-            </div>
-            <button id="moreButton" class="btn btn-primary">More services</button>
+        <!-- Button to show more services on small screens -->
+        <div class="more-services-container">
+            <button id="moreButton" class="btn btn-primary">More Services</button>
         </div>
     </div>
 </section>
+<style>
+/* General Services Styles */
+.services {
+    background-color: #f8f9fa;
+    padding: 60px 0;
+}
 
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 40px;
+    text-align: center;
+    color: #333;
+    animation: fadeInDown 1s ease-out;
+}
 
+.services-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
 
+.service-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    width: 300px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeInLeft 1s ease-out;
+}
 
+.service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+}
 
+.icon {
+    color: #ff7a59;
+    margin-bottom: 15px;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.card-text {
+    font-size: 1rem;
+    color: #666;
+}
+
+/* More Services Button */
+.more-services-container {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.btn-primary {
+    background-color: #ff7a59;
+    border: none;
+    color: #ffffff;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #e65c50;
+    transform: scale(1.05);
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .services-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .service-card {
+        width: 90%;
+    }
+}
+
+    
+ </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const moreButton = document.getElementById('moreButton');
+    const serviceCards = document.querySelectorAll('.service-card');
+
+    moreButton.addEventListener('click', () => {
+        serviceCards.forEach(card => {
+            if (card.style.display === 'none' || !card.style.display) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        moreButton.textContent = moreButton.textContent === 'More Services' ? 'Show Less' : 'More Services';
+    });
+});
+
+    
+</script>
 
 <!-- Special Offers Section -->
 <section id="special-offers" class="special-offers py-5">
     <div class="container">
-        <h2 class="display-4 text-center mb-5 animate__animated animate__fadeInDown">Special Offers</h2>
+        <!-- Section Title -->
+        <h2 class="section-title text-center mb-5">Today's Special Offer</h2>
         
-        <!-- Grid Layout for Medium to Large Devices -->
-        <div class="row row-cols-1 row-cols-md-1 g-4 d-none d-md-flex">
-            {% for offer in offers %}
-            <div class="col">
-                <div class="card h-100 border-0 shadow-sm animate__animated animate__fadeInUp">
-                    <img src="{{ url_for('static', filename='uploads/' ~ offer.image) }}" class="card-img-top" alt="{{ offer.title }}">
-                    <div class="card-body">
-                        <h5 class="card-title text-center">{{ offer.title }}</h5>
-                        <p class="card-text">{{ offer.description }}</p>
-                        <p class="card-text"><small class="text-muted">Valid from {{ offer.start_date.strftime('%b %d, %Y') }} to {{ offer.end_date.strftime('%b %d, %Y') }}</small></p>
-                        <div class="text-center">
-                            <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#offerModal{{ offer.id }}">View Details</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Spotlight Offer Card -->
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                {% if current_offer %}
+                <div class="offer-card spotlight shadow-lg animate__animated animate__fadeIn">
+                    <!-- Offer Image -->
+                    <div class="offer-image" style="background-image: url('{{ url_for('static', filename='uploads/' ~ current_offer.image) }}');"></div>
+                    
+                    <!-- Offer Content -->
+                    <div class="offer-content p-4">
+                        <h3 class="offer-title text-center">{{ current_offer.title }}</h3>
+                        <p class="offer-description text-center">{{ current_offer.description }}</p>
+                        <p class="offer-dates text-center text-muted">Valid from {{ current_offer.start_date.strftime('%b %d, %Y') }} to {{ current_offer.end_date.strftime('%b %d, %Y') }}</p>
 
-            <!-- Modal for Offer Details -->
-            <div class="modal fade" id="offerModal{{ offer.id }}" tabindex="-1" aria-labelledby="offerModalLabel{{ offer.id }}" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="offerModalLabel{{ offer.id }}">{{ offer.title }}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <img src="{{ url_for('static', filename='uploads/' ~ offer.image) }}" class="img-fluid mb-3" alt="{{ offer.title }}">
-                            <p>{{ offer.description }}</p>
-                            <p><small class="text-muted">Valid from {{ offer.start_date.strftime('%b %d, %Y') }} to {{ offer.end_date.strftime('%b %d, %Y') }}</small></p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <a href="#" class="btn btn-success">Shop Now</a>
+                        <!-- Call to Action Button -->
+                        <div class="text-center">
+                            <a href="#" class="btn btn-success btn-lg offer-btn">Shop Now</a>
                         </div>
                     </div>
                 </div>
+                {% else %}
+                <p class="text-center">No special offer available at the moment.</p>
+                {% endif %}
             </div>
-            {% endfor %}
         </div>
 
-        <!-- Carousel for Small Devices -->
-        <div id="specialOffersCarousel" class="carousel slide d-md-none" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                {% for offer in offers %}
-                <div class="carousel-item {% if loop.first %}active{% endif %}">
-                    <img src="{{ url_for('static', filename='uploads/' ~ offer.image) }}" class="d-block w-100" alt="{{ offer.title }}">
-                    <div class="carousel-caption d-block">
-                        <h5>{{ offer.title }}</h5>
-                        <p>{{ offer.description }}</p>
-                        <p><small class="text-muted">Valid from {{ offer.start_date.strftime('%b %d, %Y') }} to {{ offer.end_date.strftime('%b %d, %Y') }}</small></p>
-                        <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#offerModal{{ offer.id }}">View Details</a>
+        <!-- Explore More Offers Button -->
+        {% if other_offers and other_offers|length > 0 %}
+        <div class="text-center mt-5">
+            <button class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#moreOffersCollapse" aria-expanded="false" aria-controls="moreOffersCollapse">
+                View More Special Offers
+            </button>
+        </div>
+
+        <!-- Collapsible Section for Additional Offers -->
+        <div class="collapse mt-4" id="moreOffersCollapse">
+            <div class="row g-4">
+                {% for offer in other_offers %}
+                <div class="col-md-4">
+                    <div class="offer-card small-offer shadow-sm">
+                        <!-- Small Offer Image -->
+                        <div class="offer-image-small" style="background-image: url('{{ url_for('static', filename='uploads/' ~ offer.image) }}');"></div>
+
+                        <!-- Offer Content -->
+                        <div class="offer-content p-3">
+                            <h4 class="offer-title">{{ offer.title }}</h4>
+                            <p class="offer-dates text-muted">Valid from {{ offer.start_date.strftime('%b %d, %Y') }} to {{ offer.end_date.strftime('%b %d, %Y') }}</p>
+                            <div class="text-center">
+                                <a href="#" class="btn btn-outline-success offer-btn">Shop Now</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-
         </div>
+        {% else %}
+        
+        {% endif %}
     </div>
 </section>
+
+
+
+
+
+
+
+<style>
+
+/* Section Styling */
+.special-offers {
+    background-color: #f8f9fa;
+    padding: 60px 0;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 50px;
+    animation: fadeIn 0.8s ease-out;
+}
+
+/* Offer Cards for Desktop */
+.offer-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.4s ease, box-shadow 0.3s ease;
+}
+
+.offer-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.offer-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    transition: all 0.4s ease;
+}
+
+.offer-content {
+    padding: 20px;
+    text-align: center;
+}
+
+.offer-title {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.offer-description {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+.offer-dates {
+    font-size: 0.9rem;
+    color: #999;
+}
+
+.offer-btn {
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease;
+}
+
+.offer-btn:hover {
+    background-color: #28a745;
+    color: #fff;
+}
+
+/* Carousel for Mobile */
+.carousel-offer-card {
+    height: 60vh;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.carousel-caption {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 15px;
+    border-radius: 0 0 10px 10px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    filter: invert(1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+</style>
+
+
+
 
 
     <!-- About Us Section -->

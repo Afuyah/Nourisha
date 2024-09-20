@@ -1,32 +1,42 @@
+<!-- HTML Template -->
 {% extends 'base.html' %}
 
 {% block content %}
-
 <div class="container mt-4">
     <h3 class="mb-4">Manage - {{ product.name }} Details</h3>
 
-   
-   <div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <h3 class="card-title">Product Details</h3>
-        <p><strong>Name:</strong> {{ product.name }}</p>
-        <p><strong>Brand:</strong> {{ product.brand }}</p>
-        <p>
-            <strong>Price:</strong> 
-            <span class="text-muted">Ksh{{ product.unit_price }}</span>
-        </p>
-        <p>
-            <strong>Selling Price:</strong> 
-            <span class="text-success font-weight-bold">Ksh{{ product.selling_price }}</span>
-        </p>
-        <p><strong>Quantity in Stock:</strong> {{ product.quantity_in_stock }}</p>
-        <p><strong>Country of Origin:</strong> {{ product.country_of_origin }}</p>
-        <p><strong>Discount:</strong> {{ product.discount_percentage }}%</p>
+    <!-- Product Details Section -->
+    <div class="container py-5">
+        <div class="row align-items-center justify-content-between">
+            <div class="col-md-4 text-center mb-3">
+               
+                <h2>{{ product.brand }}</h2>
+                <p><span class="text-muted">Ksh{{ product.unit_price }}</span></p>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-auto text-success font-weight-bold mb-2">
+                        <strong>Selling Price:</strong> Ksh{{ product.selling_price }}
+                    </div>
+                    <div class="col-auto mb-2">
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ product.discount_percentage }}%" aria-valuenow="{{ product.discount_percentage }}" aria-valuemin="0" aria-valuemax="100">{{ product.discount_percentage }}%</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <p><strong>Quantity in Stock:</strong> {{ product.quantity_in_stock }}</p>
+                        <p><strong>Country of Origin:</strong> {{ product.country_of_origin }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
 
-     <div class="d-flex flex-wrap gap-3">
+    <!-- Buttons to edit different fields -->
+    <div class="d-flex flex-wrap gap-3">
         <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#nameModal">Name</button>
         <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#brandModal">Display Name</button>
         <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#nutritionModal">Nutritional Info</button>
@@ -36,7 +46,7 @@
         <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#countryModal">Country Of Origin</button>
     </div>
 
-<!-- Modal for editing name -->
+    <!-- Modal for editing name -->
     <div class="modal fade" id="nameModal" tabindex="-1" aria-labelledby="nameModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -59,7 +69,8 @@
                     </div>
                 </form>
             </div>
-      </div>    </div>
+        </div>
+    </div>
 
     <!-- Modal for editing brand -->
     <div class="modal fade" id="brandModal" tabindex="-1" aria-labelledby="brandModalLabel" aria-hidden="true">
@@ -113,7 +124,6 @@
         </div>
     </div>
 
-    
     <!-- Modal for updating price -->
     <div class="modal fade" id="priceModal" tabindex="-1" aria-labelledby="priceModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -132,7 +142,6 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Save changes</button>
                     </div>
@@ -218,90 +227,108 @@
             </div>
         </div>
     </div>
-<!-- Success Modal -->
-<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="successModalLabel">Success</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="d-flex align-items-center">
-          <div class="text-center me-3">
-            <i class="bi bi-check-circle-fill text-success" style="font-size: 2.5rem;"></i>
-          </div>
-          <div>
-            <p class="mb-0" id="successMessage">Your changes have been saved successfully!</p>
-          </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Success</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center">
+                        <div class="text-center me-3">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0" id="successMessage">Your changes have been saved successfully!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
-      </div>
     </div>
-  </div>
-</div>
-<style>
-    #successModal .modal-header {
-        border-bottom: none;
-    }
 
-    #successModal .modal-footer {
-        border-top: none;
-    }
-
-    #successModal .btn-success {
-        width: 100%;
-        padding: 10px;
-        font-weight: bold;
-    }
-
-    .card-body {
-            padding: 1.5rem;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #004085;
-        }
-        .modal-content {
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .modal-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .modal-footer {
-            background-color: #f8f9fa;
-            border-top: 1px solid #dee2e6;
-        }
-        .form-control {
-            border-radius: 5px;
-            border: 1px solid #ced4da;
-        }
-        .form-control:focus {
-            border-color: #007bff;
-            box-shadow: none;
-        }
-        .modal.fade .modal-dialog {
-            transition: transform 0.3s ease-out;
-        }
-        .modal.fade.show .modal-dialog {
-            transform: translateY(0);
-        }  
-
-</style>
-
+   
     
-</div>
 
+<style>
+/* Global styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
 
+.container {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px;
+}
 
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: #fff;
+  padding: 10px 16px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #004085;
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.form-control {
+  margin-bottom: 1rem;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+}
+
+.modal-body {
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+/* Success modal styles */
+#successModal .modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+#successModal .modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+}
+
+.modal-body {
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+</style>
 
 <!-- Scripts to handle form submissions -->
 <script>

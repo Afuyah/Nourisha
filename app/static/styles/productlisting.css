@@ -1,0 +1,261 @@
+   /* WhatsApp Section Styles */
+.whatsapp-section {
+  text-align: center;
+  padding: 20px;
+  background-color: #25D366; /* WhatsApp green color */
+  border-radius: 10px;
+  color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for a soft effect */
+}
+
+.whatsapp-link {
+  color: #fff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: bold; /* Make text bold for emphasis */
+}
+
+.whatsapp-link i {
+  margin-right: 10px;
+  font-size: 1.8rem; /* Slightly larger icon */
+}
+
+/* Add responsiveness */
+@media (max-width: 768px) {
+  .whatsapp-section {
+    font-size: 1.2rem;
+    padding: 15px;
+  }
+
+  .whatsapp-link i {
+    font-size: 1.5rem;
+  }
+}
+
+
+
+
+/* Floating Cart Icon */
+.floating-cart-icon {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+.floating-cart-icon a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #007bff; /* Use your preferred color */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.floating-cart-icon a:hover {
+    background-color: green; /* Darker shade of the primary color */
+}
+
+.cart-icon {
+    width: 30px;
+    height: auto;
+    margin-right: 5px;
+}
+
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 20px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 50%;
+}
+
+/* Badge colors */
+.badge.bg-danger {
+    background-color: #dc3545; /* Bootstrap's danger color */
+    color: #fff;
+}
+
+/* Badge animation */
+.badge.shake {
+    animation: shake 0.5s ease-in-out infinite;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25%, 75% {
+        transform: translateX(-10px);
+    }
+    50% {
+        transform: translateX(10px);
+    }
+}
+
+.shake {
+    animation: shake 1s ease-in-out;
+}
+
+
+
+
+    /* Basic reset */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* Container for the product listing */
+    .product-listing {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    /* Product card styling */
+    .product-card {
+        flex: 1 1 300px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .product-card:hover {
+        transform: scale(1.05);
+    }
+
+    .product-card img {
+        width: 100%;
+        height: auto;
+    }
+
+    .product-card-content {
+        padding: 15px;
+    }
+
+    .product-card-title {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+    }
+
+    .product-card-price {
+        color: #28a745;
+        font-size: 1.1em;
+        margin-bottom: 10px;
+    }
+
+    .product-card-description {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .add-to-cart-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border-radius: 5px;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .add-to-cart-btn:hover {
+        background-color: #0056b3;
+    }
+
+    /* Category navigation */
+    .category-nav {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .category-nav a {
+        padding: 10px 20px;
+        background-color: #f8f9fa;
+        color: #333;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .category-nav a:hover {
+        background-color: #e2e6ea;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .product-card {
+            flex: 1 1 100%;
+        }
+
+        .category-nav {
+            flex-direction: column;
+        }
+    }
+
+
+    /* Basic styles for product listing and cards */
+    .product-listing {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .product-card {
+
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .product-card:hover {
+        transform: scale(1.05);
+    }
+
+    .product-image {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .lazy {
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .lazy.loaded {
+        opacity: 1;
+    }
+
+    .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .magnifier:hover .product-overlay {
+        opacity: 1;
+    }

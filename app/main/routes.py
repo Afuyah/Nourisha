@@ -4,7 +4,7 @@ from flask_login import current_user, login_user, logout_user
 
 from app.main import bp
 from app.main.forms import AddProductCategoryForm, AddProductForm, ProductImageForm, AddProductForm, AddRoleForm, AddSupplierForm,RecommendationForm,LoginForm, UnitOfMeasurementForm
-from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage, UnitOfMeasurement
+from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCategory, Product, Order, OrderItem, Offer, AboutUs ,BlogPost, ContactMessage, UnitOfMeasurement, ProductVariety
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
@@ -18,11 +18,11 @@ from flask_mail import Message
 from functools import wraps
 from dateutil import parser
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
-from sqlalchemy.orm.exc import NoResultFound
+
 import re
 import os
 import random 
-
+import uuid
 
 @bp.route('/refresh_csrf_token', methods=['GET'])
 def refresh_csrf_token():
@@ -340,6 +340,14 @@ def add_product():
         return redirect(url_for('main.add_product'))
 
     return render_template('add_product.html', form=form, image_form=image_form)
+
+
+
+
+def generate_sku(product_id, size_name, color_name, weight):
+    base_sku = f"{product_id}-{size_name[:2].upper() if size_name else ''}{color_name[:2].upper() if color_name else ''}{weight.upper() if weight else ''}"
+    unique_id = uuid.uuid4().hex[:6].upper()  # Shortened UUID for SKU uniqueness
+    return f"{base_sku}-{unique_id}"
 
 
 @bp.route('/add_unit_of_measurement', methods=['GET', 'POST'])

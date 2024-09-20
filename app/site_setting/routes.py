@@ -8,6 +8,9 @@ from app.main.forms import OfferForm, AboutUsForm, BlogPostForm, PromotionForm, 
 
 site_bp = Blueprint('site', __name__)
 
+
+
+
 @site_bp.route('/offers', methods=['GET', 'POST'])
 @admin_required
 def offers():
@@ -35,6 +38,7 @@ def offers():
 
     offers = Offer.query.all()
     return render_template('offers.html', form=form, offers=offers)
+
 
 @site_bp.route('/edit_offer/<int:offer_id>', methods=['GET', 'POST'])
 @admin_required
@@ -77,13 +81,20 @@ def delete_offer(offer_id):
     flash('Offer deleted successfully!', 'success')
     return redirect(url_for('site.offers'))
 
-@site_bp.route('/home', methods=['GET', 'POST'])
-@admin_required
+
+@site_bp.route('/home', methods=['GET'])
 def client_offers():
-    offers = Offer.query.filter_by(active=True).all()
-    return render_template('home.html', offers=offers)
-
-
+    # Fetch the current active offer
+    current_offer = Offer.query.filter_by(active=True).first()
+    
+    # Fetch other offers that are not currently active
+    other_offers = Offer.query.filter_by(active=False).all()
+    
+    # Debugging: Print to verify data
+    print("Current Offer:", current_offer)
+    print("Other Offers:", other_offers)
+    
+    return render_template('home.html', current_offer=current_offer, other_offers=other_offers)
 
 
 @site_bp.route('/about-us', methods=['GET', 'POST'])

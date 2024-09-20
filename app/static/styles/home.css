@@ -135,31 +135,24 @@
         margin: 6px 0;
     }
 
-  /* Hero Section Styling */
-.hero h2.display-4 {
-    font-size: 2.5rem;
-    color: #ffffff;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    margin-bottom: 20px;
-}
 
-.hero p.lead.typed-text {
-    font-size: 1.5rem;
-    color: #ffffff;
-    font-family: "Courier New", Courier, monospace;
-    font-weight: 400;
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 10px 20px;
-    border-radius: 5px;
-    display: inline-block;
-    text-align: left;
-}
 
-.full-height {
-    height: 100vh;
-    background: url('/static/cover_1.jpeg') no-repeat center center/cover;
+
+
+
+
+/* Hero Section Styling */
+.hero {
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/static/cover_1.jpeg') no-repeat center center/cover;
+    height: 100vh;
+    color: #f4f4f4;
+    font-family: 'Montserrat', sans-serif;
+    text-align: left;
+    overflow: hidden;
 }
 
 .hero .overlay {
@@ -168,50 +161,119 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4));
+    background: rgba(0, 0, 0, 0.55);
     z-index: 1;
 }
 
 .hero .container {
     position: relative;
     z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     height: 100%;
 }
 
-.hero .btn {
-    border-radius: 25px;
-    padding: 10px 30px;
+.hero .hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(50px);
+    animation: fadeInUp 1s forwards;
+}
+
+.hero .hero-subtitle {
+    font-size: 1.4rem;
+    font-weight: 300;
+    color: #f8f8f8;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateY(50px);
+    animation: fadeInUp 1.5s forwards;
+}
+
+.hero .hero-btn {
+    background-color: #ff6f61;
+    color: #fff;
     font-size: 1.2rem;
-    text-align: center;
+    padding: 14px 40px;
+    border-radius: 40px;
+    text-decoration: none;
     display: inline-block;
-    margin: 10px auto; /* Center the button within its container */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0;
+    transform: translateY(50px);
+    animation: fadeInUp 2s forwards;
 }
-/* Styles for small devices */
-@media (max-width: 576px) {
-    .hero h2.display-4 {
-        font-size: 2rem;
-        color: #ffffff;
-    }
 
-    .hero p.lead.typed-text {
+.hero .hero-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+.hero .hero-image-wrapper {
+    position: relative;
+    max-width: 100%;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(50px);
+    animation: fadeInUp 2.5s forwards;
+}
+
+.hero .hero-image {
+    max-width: 90%;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Animation for elements fading in */
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .hero .hero-title {
+        font-size: 2.8rem;
+    }
+    .hero .hero-subtitle {
         font-size: 1.2rem;
-        padding: 8px 16px;
-    }
-
-    .full-height {
-        height: 90vh;
-        background-size: cover;
-    }000.02
-
-   .hero .btn {
-        width: 80%; /* Make the button span 80% of the container width */
-        font-size: 1rem; 
-        padding: 10px 0; /* Adjust padding for a better fit */
-        left: 50%;
-        transform: translateX(-50%); /* Center the button horizontally */
-        display: block; /* Ensure the button takes up the full width of its container */
     }
 }
+
+@media (max-width: 576px) {
+    .hero .hero-title {
+        font-size: 2.2rem;
+    }
+    .hero .hero-subtitle {
+        font-size: 1rem;
+    }
+    .hero .hero-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 /* Card Hover Animations */
 .featured-categories .card {
     display: block;
