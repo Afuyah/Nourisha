@@ -44,10 +44,11 @@
         </thead>
         <tbody>
             {% for location in locations %}
-            {% for arealine in location.arealines %}
+            {% set arealines_list = location.arealines.all() %}  {# Convert arealines to a list #}
+            {% for arealine in arealines_list %}
             <tr>
                 {% if loop.first %}
-                <td rowspan="{{ location.arealines|length }}">
+                <td rowspan="{{ arealines_list|length }}">
                     {{ location.name }}
                 </td>
                 {% endif %}
@@ -60,28 +61,32 @@
 </div>
 
 <script>
+    // Fetch available locations via AJAX
     fetch('/admin/get_locations')
         .then(response => response.json())
         .then(data => {
-            // Handle the response data (array of locations)
-            console.log(data.locations);
+            // Handle the response data
+            console.log(data.locations); // You can populate a location list here if needed.
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error fetching locations:', error);
         });
 
-    // Fetch arealines based on selected location
+    // Fetch arealines based on the selected location
     document.getElementById('locationDropdown').addEventListener('change', function() {
         const locationId = this.value;
-        fetch('/admin/get_arealines/' + locationId)
-            .then(response => response.json())
-            .then(data => {
-                // Handle the response data (array of arealines)
-                console.log(data.arealines);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+        if (locationId) {
+            fetch('/admin/get_arealines/' + locationId)
+                .then(response => response.json())
+                .then(data => {
+                    // Log or dynamically handle arealines data
+                    console.log(data.arealines); 
+                    // You can dynamically populate arealines fields or perform actions here
+                })
+                .catch(error => {
+                    console.error('Error fetching arealines:', error);
+                });
+        }
     });
 </script>
 

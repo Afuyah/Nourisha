@@ -8,8 +8,7 @@ from app.main.models import User, Role, Cart, Supplier, ProductImage, ProductCat
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.feature_extraction.text import TfidfVectorizer
+
 from sqlalchemy.orm.exc import NoResultFound
 from app.cart.routes import cart_bp
 from .send_email import send_confirmation_email

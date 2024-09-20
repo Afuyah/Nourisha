@@ -448,6 +448,34 @@ body {
     });
 
 
+    
+function updateCartCount() {
+    $.ajax({
+        url: '/cart/get_cart_count',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.status === 'success') {
+                // Update the cart count in the floating cart icon
+                $('#cart-count').text(response.cart_count);
+            } else {
+                console.error('Failed to retrieve cart count.');
+            }
+        },
+        error: function(error) {
+            console.error('Error fetching cart count:', error);
+        }
+    });
+}
+
+// Call the function when the page loads
+$(document).ready(function() {
+    updateCartCount();
+});
+
+// Optionally, call the function after an item is added to the cart
+// You can trigger this function in your 'Add to Cart' success callback
+
 </script>
 
     

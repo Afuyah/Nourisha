@@ -337,7 +337,7 @@ def products_by_category(category_id):
     products = Product.query.filter_by(category=category).all()
     return render_template('products_by_category.html', category=category, products=products)
 
-
+# Add Location Route
 @admin_bp.route('/add_location', methods=['GET', 'POST'])
 @admin_required
 def add_location():
@@ -349,6 +349,10 @@ def add_location():
         # Fetch locations for dropdowns in AddArealineForm
         locations = Location.query.all()
 
+        # Convert arealines query into list in the view to avoid issues
+        for location in locations:
+            location.arealines_list = list(location.arealines)
+
         # Set choices for location field in AddArealineForm
         form_arealine.location.choices = [(location.id, location.name) for location in locations]
 
@@ -359,7 +363,6 @@ def add_location():
             if existing_location:
                 flash('Location already exists!', 'error')
             else:
-                # Process Add Location Form
                 location = Location(name=form_location.location_name.data)
                 db.session.add(location)
                 db.session.commit()
@@ -372,7 +375,6 @@ def add_location():
             if existing_arealine:
                 flash('Arealine already exists!', 'error')
             else:
-                # Process Add Arealine Form
                 arealine = Arealine(name=form_arealine.name.data,
                                     location_id=form_arealine.location.data)
                 db.session.add(arealine)
@@ -390,30 +392,34 @@ def add_location():
 
 
 
-
+# Endpoint to Fetch Locations
 @admin_bp.route('/get_locations', methods=['GET'])
-@login_required  
+@login_required
 def get_locations():
-    locations = Location.query.all()
-    locations_data = [{'id': location.id, 'name': location.name} for location in locations]
-    return jsonify({'locations': locations_data})
+    try:
+        locations = Location.query.all()
+        locations_data = [{'id': location.id, 'name': location.name} for location in locations]
+        return jsonify({'locations': locations_data})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Error fetching locations: {str(e)}'}), 500
 
 
-
-@admin_bp.route('/get_arealines/<location_id>', methods=['GET'])
+# Endpoint to Fetch Arealines for a Specific Location
+@admin_bp.route('/get_arealines/<int:location_id>', methods=['GET'])
 @login_required
 def get_arealines(location_id):
-    location = Location.query.get(location_id)
+    try:
+        location = Location.query.get(location_id)
 
-    if not location:
-        return jsonify({'error': 'Invalid location ID'}), 400
+        if not location:
+            return jsonify({'status': 'error', 'message': 'Invalid location ID'}), 400
 
-    arealines = [{'id': arealine.id, 'name': arealine.name} for arealine in location.arealines]
+        # Use .all() to explicitly load the arealines if lazy-loaded
+        arealines = [{'id': arealine.id, 'name': arealine.name} for arealine in location.arealines.all()]
 
-    return jsonify({'arealines': arealines})
-
-
-
+        return jsonify({'arealines': arealines})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Error fetching arealines: {str(e)}'}), 500
 
 @admin_bp.route('/view_order_details/<int:order_id>')
 @admin_required

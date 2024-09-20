@@ -113,14 +113,20 @@ def calculate_total_amount():
 def get_cart_count():
     try:
         if not current_user.is_authenticated:
-            # Return 0 for guest users
-            return jsonify({'status': 'not_logged_in', 'cart_count': 0}), 200
+            # Handle guest users, assuming you track the cart in session
+            cart = session.get('cart', [])
+            cart_count = sum(item['quantity'] for item in cart)
+            return jsonify({'status': 'success', 'cart_count': cart_count}), 200
 
-        cart_count = Cart.query.filter_by(user_id=current_user.id).count()
+        # For logged-in users, sum the quantity of items in the cart
+        cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+        cart_count = sum(item.quantity for item in cart_items)
+        
         return jsonify({'status': 'success', 'cart_count': cart_count}), 200
     except Exception as e:
         app.logger.error('Error fetching cart count: %s', str(e))
         return jsonify({'status': 'error', 'message': 'Internal Server Error'}), 500
+
 
 # Route to get product quantity as JSON
 @cart_bp.route('/api/get_quantity/<int:product_id>', methods=['GET'])
