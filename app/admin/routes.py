@@ -1088,7 +1088,7 @@ def generate_invoice_pdf(order, fulfilled_items, subtotal, shipping_fee, total_p
 
     buffer.seek(0)
     return buffer
-    return buffer
+   
     
 
 

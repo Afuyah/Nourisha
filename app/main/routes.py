@@ -404,16 +404,20 @@ def add_product_image():
         image3 = form.image3.data
 
         try:
-            # Save cover image
-            cover_filename = save_image(cover_image)
-            cover_image_entry = ProductImage(product_id=product_id, cover_image=cover_filename)
+            # Create the folder if it does not exist
+            upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
+
+            # Save cover image (with validation)
+            cover_filename = save_image(cover_image, upload_folder)
+            cover_image_entry = ProductImage(product_id=product_id, image_path=cover_filename, is_cover=True)
             db.session.add(cover_image_entry)
 
-            # Save additional images
+            # Save additional images (with validation)
             for image_data in [image1, image2, image3]:
                 if image_data:
-                    filename = save_image(image_data)
-                    image_entry = ProductImage(product_id=product_id, cover_image=filename)
+                    filename = save_image(image_data, upload_folder)
+                    image_entry = ProductImage(product_id=product_id, image_path=filename, is_cover=False)
                     db.session.add(image_entry)
 
             db.session.commit()
@@ -421,23 +425,50 @@ def add_product_image():
         except Exception as e:
             db.session.rollback()
             flash(f'An error occurred while uploading images: {str(e)}', 'danger')
-        
+
         return redirect(url_for('main.add_product_image'))
 
     return render_template('add_product_image.html', form=form)
 
-def save_image(image_data):
+def save_image(image_data, upload_folder):
+    # Validate the image type and size
+    validate_image(image_data)
+
     # Generate a unique filename
     filename = generate_unique_filename(image_data.filename)
-    file_path = os.path.join('app', 'static', 'uploads', filename)
+    file_path = os.path.join(upload_folder, filename)
+    
+    # Save the image
     image_data.save(file_path)
     return filename
 
+def validate_image(image_data):
+    # Check the file extension
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+    extension = os.path.splitext(image_data.filename)[1].lower().replace('.', '')
+    if extension not in allowed_extensions:
+        raise ValueError(f"File type not allowed: {extension}")
+
+    # Validate image size (e.g., max 5MB)
+    if len(image_data.read()) > 5 * 1024 * 1024:  # 5MB limit
+        raise ValueError("Image exceeds size limit of 5MB")
+    image_data.seek(0)  # Reset file pointer after reading
+
+    # Check image validity using Pillow
+    try:
+        image = Image.open(image_data)
+        image.verify()  # Check if it's a valid image
+    except Exception:
+        raise ValueError("Invalid image file")
+
 def generate_unique_filename(original_filename):
-    filename, extension = os.path.splitext(original_filename)
+    filename, extension = os.path.splitext(secure_filename(original_filename))
     timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-    unique_filename = f"{secure_filename(filename)}_{timestamp}{extension}"
+    unique_filename = f"{filename}_{timestamp}{extension}"
     return unique_filename
+
+
+
 
 
 @bp.route('/product_details/<int:product_id>')
