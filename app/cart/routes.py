@@ -12,7 +12,6 @@ from app import login_required, cart_access_required
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import OperationalError
 
-
 @cart_bp.route('/add_to_cart/<int:product_id>', methods=['POST'])
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
@@ -20,6 +19,7 @@ def add_to_cart(product_id):
     variety_id = request.form.get('variety_id')
 
     if quantity <= 0:
+        flash('Invalid Quantity.', 'error')
         return jsonify({'status': 'error', 'message': 'Invalid Quantity.'}), 400
 
     # Determine price and check stock based on selected variety
@@ -29,11 +29,14 @@ def add_to_cart(product_id):
         if variety and variety.product_id == product.id:
             selected_price = variety.price
             if quantity > variety.quantity_in_stock:
+                flash('Out of stock for selected variety.', 'error')
                 return jsonify({'status': 'error', 'message': 'Out of stock for selected variety.'}), 400
         else:
+            flash('Invalid variety selected.', 'error')
             return jsonify({'status': 'error', 'message': 'Invalid variety selected.'}), 400
     else:
         if quantity > product.quantity_in_stock:
+            flash('Out of stock.', 'error')
             return jsonify({'status': 'error', 'message': 'Out of stock.'}), 400
 
     # Handling guest users
@@ -65,24 +68,27 @@ def add_to_cart(product_id):
         variety.quantity_in_stock -= quantity
         if variety.quantity_in_stock < 0:
             db.session.rollback()
+            flash('Insufficient stock for the selected variety.', 'error')
             return jsonify({'status': 'error', 'message': 'Insufficient stock for the selected variety.'}), 400
     else:
         product.quantity_in_stock -= quantity
         if product.quantity_in_stock < 0:
             db.session.rollback()
+            flash('Insufficient stock for the product.', 'error')
             return jsonify({'status': 'error', 'message': 'Insufficient stock for the product.'}), 400
 
     try:
         db.session.commit()
+        flash('Item added to cart successfully.', 'success')
         return jsonify({'status': 'success', 'message': 'Item added to cart successfully.'})
     except (IntegrityError, OperationalError) as e:
         db.session.rollback()
+        flash(f'Database error occurred: {str(e)}', 'error')
         return jsonify({'status': 'error', 'message': f'Database error occurred: {str(e)}'}), 500
     except Exception as e:
         db.session.rollback()
+        flash(f'An unexpected error occurred: {str(e)}', 'error')
         return jsonify({'status': 'error', 'message': f'An unexpected error occurred: {str(e)}'}), 500
-
-
 @cart_bp.route('/view_cart')
 @login_required
 def view_cart():

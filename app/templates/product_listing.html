@@ -6,8 +6,8 @@
 <div class="container mt-5 mb-5">
 
     <!-- WhatsApp Section -->
-    <div class="whatsapp-section mb-4">
-        <a href="https://wa.me/c/254707632230" target="_blank" class="whatsapp-link">
+    <div class="whatsapp-section mb-4 text-center">
+        <a href="https://wa.me/c/254707632230" target="_blank" class="whatsapp-link btn btn-outline-success">
             <i class="fab fa-whatsapp"></i> WhatsApp Us
         </a>
     </div>
@@ -17,9 +17,9 @@
         <div class="carousel-inner">
             <div class="carousel-item active">
                 <div class="d-flex flex-wrap justify-content-center">
-                    <a href="{{ url_for('main.product_listing') }}" class="btn btn-outline-success m-2 category-btn">All</a>
+                    <a href="{{ url_for('main.product_listing') }}" class="btn btn-outline-success m-2">All</a>
                     {% for category in categories %}
-                    <a href="{{ url_for('main.product_listing_by_category', category_id=category.id) }}" class="btn btn-outline-success m-2 category-btn">{{ category.name }}</a>
+                    <a href="{{ url_for('main.product_listing_by_category', category_id=category.id) }}" class="btn btn-outline-success m-2">{{ category.name }}</a>
                     {% endfor %}
                 </div>
             </div>
@@ -31,11 +31,11 @@
             <div id="cartToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="toast-header">
                     <strong class="me-auto">Cart</strong>
-                    <small>Just now</small>
+                    <small class="text-muted">Just now</small>
                     <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
                 <div class="toast-body">
-                    Added to cart successfully!
+                    <span id="toast-message">Added to cart successfully!</span>
                 </div>
             </div>
         </div>
@@ -47,16 +47,12 @@
             <div class="card product-card border-0 shadow-sm rounded-3">
                 <div class="magnifier position-relative overflow-hidden">
                     {% set images_list = product.images | list %}
-                    {% if images_list and images_list | length > 0 %}
-                    <img data-src="{{ url_for('static', filename='uploads/' + images_list[0].cover_image) }}" loading="lazy" class="card-img-top product-image lazy" alt="{{ product.name }}">
-                    {% else %}
-                    <img data-src="{{ url_for('static', filename='alt_img.png') }}" loading="lazy" class="card-img-top product-image lazy" alt="Placeholder Image">
-                    {% endif %}
+                    <img data-src="{{ url_for('static', filename='uploads/' + (images_list[0].cover_image if images_list else 'alt_img.png')) }}" loading="lazy" class="card-img-top product-image lazy" alt="{{ product.name }}">
                 </div>
                 <div class="card-body text-center">
-                    <h5 class="card-title text-primary mb-1 product-name">{{ product.brand }}</h5>
+                    <h5 class="card-title text-primary mb-1">{{ product.brand }}</h5>
                     <p class="card-text text-muted fs-6 mb-2">{{ product.description | truncate(80) }}</p>
-                    <p class="card-text fw-bold" id="price-{{ product.id }}">Ksh <span class="current-price">{{ product.unit_price }}</span> / {{ product.unit_measurement }}</p>
+                    <p class="card-text fw-bold">Ksh <span class="current-price">{{ product.unit_price }}</span> / {{ product.unit_measurement }}</p>
                     
                     <!-- Add to Cart Form -->
                     <form class="add-to-cart-form" method="POST" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}">
@@ -73,7 +69,7 @@
 
                         <div class="d-flex justify-content-center mb-3">
                             <button class="btn btn-outline-danger quantity-btn" type="button" data-action="decrease">-</button>
-                            <input type="number" class="form-control quantity-input text-center mx-2" name="quantity" value="1" min="1" max="{{ product.quantity_in_stock }}">
+                            <input type="number" class="form-control quantity-input text-center mx-2" name="quantity" value="1" min="1" max="{{ product.quantity_in_stock }}" required>
                             <button class="btn btn-outline-success quantity-btn" type="button" data-action="increase">+</button>
                         </div>
 
@@ -85,7 +81,8 @@
         {% endfor %}
     </div>
 
-    <!-- JavaScript for Quantity Control and Price Update -->
+    <!-- JavaScript for Quantity Control, Price Update, and AJAX Submission -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
       document.querySelectorAll('.variety-select').forEach(select => {
           select.addEventListener('change', function() {
@@ -112,9 +109,43 @@
               quantityInput.value = currentValue;
           });
       });
+
+      document.querySelectorAll('.add-to-cart-form').forEach(form => {
+          form.addEventListener('submit', function(event) {
+              event.preventDefault(); // Prevent default form submission
+              const formData = new FormData(form);
+              
+              // Show a loading indicator
+              const addToCartButton = form.querySelector('.add-to-cart');
+              addToCartButton.disabled = true;
+              addToCartButton.innerHTML = 'Adding...';
+
+              $.ajax({
+                  url: form.action,
+                  method: 'POST',
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  success: function(response) {
+                      $('#toast-message').text(response.message); // Update toast message
+                      const toast = new bootstrap.Toast(document.getElementById('cartToast'));
+                      toast.show(); // Show the toast
+                  },
+                  error: function(xhr) {
+                      $('#toast-message').text(xhr.responseJSON.message); // Show error message
+                      const toast = new bootstrap.Toast(document.getElementById('cartToast'));
+                      toast.show(); // Show the toast
+                  },
+                  complete: function() {
+                      // Reset button state
+                      addToCartButton.disabled = false;
+                      addToCartButton.innerHTML = 'Add to Cart';
+                  }
+              });
+          });
+      });
     </script>
 
-     
 </div>
 
 {% endblock %}
