@@ -11,7 +11,6 @@ from app.main import bp
 from app import login_required, cart_access_required
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import OperationalError
-
 @cart_bp.route('/add_to_cart/<int:product_id>', methods=['POST'])
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
@@ -19,76 +18,62 @@ def add_to_cart(product_id):
     variety_id = request.form.get('variety_id')
 
     if quantity <= 0:
-        flash('Invalid Quantity.', 'error')
         return jsonify({'status': 'error', 'message': 'Invalid Quantity.'}), 400
 
-    # Determine price and check stock based on selected variety
     selected_price = product.unit_price
     if variety_id:
         variety = ProductVariety.query.get(variety_id)
-        if variety and variety.product_id == product.id:
-            selected_price = variety.price
-            if quantity > variety.quantity_in_stock:
-                flash('Out of stock for selected variety.', 'error')
-                return jsonify({'status': 'error', 'message': 'Out of stock for selected variety.'}), 400
-        else:
-            flash('Invalid variety selected.', 'error')
+        if not variety or variety.product_id != product.id:
             return jsonify({'status': 'error', 'message': 'Invalid variety selected.'}), 400
+        selected_price = variety.price
+        if quantity > variety.quantity_in_stock:
+            return jsonify({'status': 'error', 'message': 'Out of stock for selected variety.'}), 400
     else:
         if quantity > product.quantity_in_stock:
-            flash('Out of stock.', 'error')
             return jsonify({'status': 'error', 'message': 'Out of stock.'}), 400
 
-    # Handling guest users
-    if current_user.is_authenticated:
-        cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product.id, product_variety_id=variety_id).first()
-        if cart_item:
-            cart_item.quantity += quantity
-            cart_item.price = selected_price  # Update price if needed
-        else:
-            cart_item = Cart(user_id=current_user.id, product_id=product.id, product_variety_id=variety_id, quantity=quantity, price=selected_price)
-            db.session.add(cart_item)
-    else:
-        # Manage guest cart in session
-        if 'cart' not in session:
-            session['cart'] = {}
-
-        key = f"{product.id}_{variety_id}"  # Create a unique key for variety
-        if key in session['cart']:
-            session['cart'][key]['quantity'] += quantity
-            session['cart'][key]['price'] = selected_price  # Update price if needed
-        else:
-            session['cart'][key] = {
-                'quantity': quantity,
-                'price': selected_price  # Store price for later use
-            }
-
-    # Update product or variety stock
-    if variety_id:
-        variety.quantity_in_stock -= quantity
-        if variety.quantity_in_stock < 0:
-            db.session.rollback()
-            flash('Insufficient stock for the selected variety.', 'error')
-            return jsonify({'status': 'error', 'message': 'Insufficient stock for the selected variety.'}), 400
-    else:
-        product.quantity_in_stock -= quantity
-        if product.quantity_in_stock < 0:
-            db.session.rollback()
-            flash('Insufficient stock for the product.', 'error')
-            return jsonify({'status': 'error', 'message': 'Insufficient stock for the product.'}), 400
-
     try:
+        if current_user.is_authenticated:
+            cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product.id, product_variety_id=variety_id).first()
+            if cart_item:
+                cart_item.quantity += quantity
+            else:
+                cart_item = Cart(user_id=current_user.id, product_id=product.id, product_variety_id=variety_id, quantity=quantity, price=selected_price)
+                db.session.add(cart_item)
+        else:
+            # Handle guest cart
+            if 'cart' not in session:
+                session['cart'] = {}
+
+            key = f"{product.id}_{variety_id or ''}"
+            if key in session['cart']:
+                session['cart'][key]['quantity'] += quantity
+            else:
+                session['cart'][key] = {'quantity': quantity, 'price': selected_price}
+
+        # Update stock
+        if variety_id:
+            variety.quantity_in_stock -= quantity
+            if variety.quantity_in_stock < 0:
+                db.session.rollback()
+                return jsonify({'status': 'error', 'message': 'Insufficient stock for the selected variety.'}), 400
+        else:
+            product.quantity_in_stock -= quantity
+            if product.quantity_in_stock < 0:
+                db.session.rollback()
+                return jsonify({'status': 'error', 'message': 'Insufficient stock for the product.'}), 400
+
         db.session.commit()
-        flash('Item added to cart successfully.', 'success')
         return jsonify({'status': 'success', 'message': 'Item added to cart successfully.'})
     except (IntegrityError, OperationalError) as e:
         db.session.rollback()
-        flash(f'Database error occurred: {str(e)}', 'error')
-        return jsonify({'status': 'error', 'message': f'Database error occurred: {str(e)}'}), 500
+        return jsonify({'status': 'error', 'message': f'Database error: {str(e)}'}), 500
     except Exception as e:
         db.session.rollback()
-        flash(f'An unexpected error occurred: {str(e)}', 'error')
-        return jsonify({'status': 'error', 'message': f'An unexpected error occurred: {str(e)}'}), 500
+        return jsonify({'status': 'error', 'message': f'Unexpected error: {str(e)}'}), 500
+
+
+
 @cart_bp.route('/view_cart')
 @login_required
 def view_cart():
@@ -113,18 +98,16 @@ def calculate_total_amount():
 
 
 
-
-# Route to get the cart count as JSON
 @cart_bp.route('/get_cart_count', methods=['GET'])
 def get_cart_count():
     try:
+        # Handle guest users
         if not current_user.is_authenticated:
-            # Handle guest users, assuming you track the cart in session
-            cart = session.get('cart', [])
-            cart_count = sum(item['quantity'] for item in cart)
+            cart = session.get('cart', {})
+            cart_count = sum(item['quantity'] for item in cart.values())
             return jsonify({'status': 'success', 'cart_count': cart_count}), 200
 
-        # For logged-in users, sum the quantity of items in the cart
+        # Handle authenticated users
         cart_items = Cart.query.filter_by(user_id=current_user.id).all()
         cart_count = sum(item.quantity for item in cart_items)
         

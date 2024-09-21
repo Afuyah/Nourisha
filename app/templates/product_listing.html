@@ -84,66 +84,83 @@
     <!-- JavaScript for Quantity Control, Price Update, and AJAX Submission -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      document.querySelectorAll('.variety-select').forEach(select => {
-          select.addEventListener('change', function() {
-              const selectedOption = this.options[this.selectedIndex];
-              const priceDisplay = this.closest('.add-to-cart-form').querySelector('.current-price');
-              const selectedPrice = selectedOption.dataset.price;
+      $(document).ready(function() {
+    // Handle variety selection and update price and max quantity
+    $('.variety-select').on('change', function() {
+        const selectedOption = $(this).find(':selected');
+        const priceDisplay = $(this).closest('.add-to-cart-form').find('.current-price');
+        const quantityInput = $(this).closest('.add-to-cart-form').find('.quantity-input');
+        const addToCartButton = $(this).closest('.add-to-cart-form').find('.add-to-cart');
+        
+        const selectedPrice = selectedOption.data('price');
+        const maxQuantity = selectedOption.data('max-quantity'); // Assuming the max quantity is provided
 
-              priceDisplay.textContent = selectedPrice;
-          });
-      });
+        // Update price
+        priceDisplay.text(selectedPrice);
+        
+        // Update quantity max
+        quantityInput.attr('max', maxQuantity);
+        addToCartButton.prop('disabled', (maxQuantity == 0)); // Disable add to cart if no stock
 
-      document.querySelectorAll('.quantity-btn').forEach(button => {
-          button.addEventListener('click', function() {
-              const action = this.getAttribute('data-action');
-              const quantityInput = this.closest('.add-to-cart-form').querySelector('.quantity-input');
-              let currentValue = parseInt(quantityInput.value);
+        // Show out-of-stock message if needed
+        if (maxQuantity == 0) {
+            $(this).closest('.product-card').find('.out-of-stock-message').text('Out of stock').show();
+        } else {
+            $(this).closest('.product-card').find('.out-of-stock-message').hide();
+        }
+    });
 
-              if (action === 'increase') {
-                  currentValue++;
-              } else if (action === 'decrease' && currentValue > 1) {
-                  currentValue--;
-              }
+    // Handle quantity changes
+    $('.quantity-btn').on('click', function() {
+        const action = $(this).data('action');
+        const quantityInput = $(this).closest('.add-to-cart-form').find('.quantity-input');
+        let currentValue = parseInt(quantityInput.val());
 
-              quantityInput.value = currentValue;
-          });
-      });
+        if (action === 'increase') {
+            const maxQuantity = parseInt(quantityInput.attr('max'));
+            if (currentValue < maxQuantity) {
+                currentValue++;
+            }
+        } else if (action === 'decrease' && currentValue > 1) {
+            currentValue--;
+        }
 
-      document.querySelectorAll('.add-to-cart-form').forEach(form => {
-          form.addEventListener('submit', function(event) {
-              event.preventDefault(); // Prevent default form submission
-              const formData = new FormData(form);
-              
-              // Show a loading indicator
-              const addToCartButton = form.querySelector('.add-to-cart');
-              addToCartButton.disabled = true;
-              addToCartButton.innerHTML = 'Adding...';
+        quantityInput.val(currentValue);
+    });
 
-              $.ajax({
-                  url: form.action,
-                  method: 'POST',
-                  data: formData,
-                  processData: false,
-                  contentType: false,
-                  success: function(response) {
-                      $('#toast-message').text(response.message); // Update toast message
-                      const toast = new bootstrap.Toast(document.getElementById('cartToast'));
-                      toast.show(); // Show the toast
-                  },
-                  error: function(xhr) {
-                      $('#toast-message').text(xhr.responseJSON.message); // Show error message
-                      const toast = new bootstrap.Toast(document.getElementById('cartToast'));
-                      toast.show(); // Show the toast
-                  },
-                  complete: function() {
-                      // Reset button state
-                      addToCartButton.disabled = false;
-                      addToCartButton.innerHTML = 'Add to Cart';
-                  }
-              });
-          });
-      });
+    // Handle add-to-cart submission
+    $('.add-to-cart-form').on('submit', function(event) {
+        event.preventDefault();
+        const form = $(this);
+        const formData = new FormData(this);
+        const addToCartButton = form.find('.add-to-cart');
+
+        // Disable button during submission
+        addToCartButton.prop('disabled', true).text('Adding...');
+
+        $.ajax({
+            url: form.attr('action'),
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                $('#toast-message').text(response.message);
+                const toast = new bootstrap.Toast($('#cartToast'));
+                toast.show();
+            },
+            error: function(xhr) {
+                $('#toast-message').text(xhr.responseJSON.message);
+                const toast = new bootstrap.Toast($('#cartToast'));
+                toast.show();
+            },
+            complete: function() {
+                addToCartButton.prop('disabled', false).text('Add to Cart');
+            }
+        });
+    });
+});
+
     </script>
 
 </div>
